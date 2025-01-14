@@ -37,7 +37,7 @@ export default async function Page({ params }: Props) {
         {/* Translated title */}
         <h2
           id="title_translated"
-          className="font-semibold text-lg text-muted-foreground leading-snug mt-2"
+          className="font-semibold text-lg text-muted-foreground leading-snug mt-3"
         >
           {thesis?.language.name === TURKISH
             ? thesis.titleForeign || noTranslatedTitle
