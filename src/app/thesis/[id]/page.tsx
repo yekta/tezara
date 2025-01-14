@@ -75,7 +75,7 @@ export default async function Page({ params }: Props) {
           <Divider />
           <p id="thesis_type" className="leading-snug">
             <span className="font-medium text-muted-foreground">
-              Tez Tipi:{" "}
+              Tez Türü:{" "}
             </span>
             <span className="font-bold" id="advisors_names">
               {thesis.type}
