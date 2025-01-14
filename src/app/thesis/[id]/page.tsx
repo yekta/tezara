@@ -6,9 +6,23 @@ import { notFound } from "next/navigation";
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
+  const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
+
+  if (!thesis) {
+    return {
+      title: `Tez Bulunamadı | ${siteTitle}`,
+      description: `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`,
+    };
+  }
   return {
-    title: `Tez ${id} | ${siteTitle}`,
-    description: `${id} numaralı tezi ${siteTitle} üzerinde incele.`,
+    title: `${
+      thesis.titleTurkish || thesis.titleForeign || `Tez ${thesis.id}`
+    } | ${siteTitle}`,
+    description: truncateDescription(
+      thesis.abstractTurkish ||
+        thesis.abstractForeign ||
+        "Bu tezin özeti bulunamadı."
+    ),
   };
 }
 
@@ -18,71 +32,151 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
-  const result = await apiServerStatic.main.getThesis({ id: Number(id) });
-  if (!result) {
+  const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
+  if (!thesis) {
     return notFound();
   }
+
   const noAbstractText = "Özet yok.";
   const noTranslatedAbstractText = "Özet çevirisi yok.";
+  const noAdvisorText = "Danışman bulunamadı.";
+  const noDepartment = "Ana bilim dalı belirtilmemiş.";
+  const noBranch = "Bilim dalı belirtilmemiş.";
+
   return (
     <div className="w-full flex flex-col items-center text-lg">
       <div className="w-full max-w-2xl flex flex-col px-5 pt-4 pb-16">
+        {/* Title */}
         <h1 id="title" className="font-bold text-2xl leading-tight">
-          {result?.language.name === "Türkçe"
-            ? result.titleTurkish
-            : result.titleForeign}
+          {thesis?.language.name === "Türkçe"
+            ? thesis.titleTurkish
+            : thesis.titleForeign}
         </h1>
+        {/* Translated title */}
         <h2
           id="title_translated"
           className="font-semibold text-lg text-muted-foreground leading-snug mt-2"
         >
-          {result?.language.name === "Türkçe"
-            ? result.titleForeign
-            : result.titleTurkish}
+          {thesis?.language.name === "Türkçe"
+            ? thesis.titleForeign
+            : thesis.titleTurkish}
         </h2>
-        <div className="w-full mt-6 mb-3 h-px rounded-full bg-border" />
-        <p id="author" className="leading-snug">
-          <span className="font-medium text-muted-foreground">Yazar: </span>
-          <span className="font-bold" id="author_name">
-            {result.author.name}
-          </span>
-        </p>
-        <div className="w-full my-3 h-px rounded-full bg-border" />
-        <p id="advisors" className="leading-snug">
-          <span className="font-medium text-muted-foreground">
-            Danışmanlar:{" "}
-          </span>
-          <span className="font-bold" id="advisors_names">
-            {result.thesisAdvisors.length < 1
-              ? "Bulunamadı"
-              : result.thesisAdvisors
-                  .map((advisor) => advisor.advisor.name)
-                  .join(", ")}
-          </span>
-        </p>
-        <div className="w-full my-3 h-px rounded-full bg-border" />
-        <p id="year" className="leading-snug">
-          <span className="font-medium text-muted-foreground">Yıl: </span>
-          <span className="font-bold">{result.year}</span>
-        </p>
-        <div className="w-full my-3 h-px rounded-full bg-border" />
+        {/* Details */}
+        <div id="details" className="w-full flex flex-col text-sm mt-6">
+          <Divider />
+          <p id="thesis_id" className="leading-snug">
+            <span className="font-medium text-muted-foreground">Tez No: </span>
+            <span className="font-bold" id="author_name">
+              {thesis.id}
+            </span>
+          </p>
+          <Divider />
+          <p id="author" className="leading-snug">
+            <span className="font-medium text-muted-foreground">Yazar: </span>
+            <span className="font-bold" id="author_name">
+              {thesis.author.name}
+            </span>
+          </p>
+          <Divider />
+          <p id="advisors" className="leading-snug">
+            <span className="font-medium text-muted-foreground">
+              Danışmanlar:{" "}
+            </span>
+            <span className="font-bold" id="advisors_names">
+              {thesis.thesisAdvisors.length < 1
+                ? noAdvisorText
+                : thesis.thesisAdvisors
+                    .map((advisor) => advisor.advisor.name)
+                    .join(", ")}
+            </span>
+          </p>
+          <Divider />
+          <p id="thesis_type" className="leading-snug">
+            <span className="font-medium text-muted-foreground">
+              Tez Tipi:{" "}
+            </span>
+            <span className="font-bold" id="advisors_names">
+              {thesis.type}
+            </span>
+          </p>
+          <Divider />
+          <p id="year" className="leading-snug">
+            <span className="font-medium text-muted-foreground">Yıl: </span>
+            <span className="font-bold">{thesis.year}</span>
+          </p>
+          <Divider />
+          <p id="language" className="leading-snug">
+            <span className="font-medium text-muted-foreground">Dil: </span>
+            <span className="font-bold">{thesis.language.name}</span>
+          </p>
+          <Divider />
+          <p id="university" className="leading-snug">
+            <span className="font-medium text-muted-foreground">
+              Üniversite:{" "}
+            </span>
+            <span className="font-bold">{thesis.university.name}</span>
+          </p>
+          <Divider />
+          <p id="institute" className="leading-snug">
+            <span className="font-medium text-muted-foreground">Enstitü: </span>
+            <span className="font-bold">{thesis.institute.name}</span>
+          </p>
+          <Divider />
+          <p id="department" className="leading-snug">
+            <span className="font-medium text-muted-foreground">
+              Ana Bilim Dalı:{" "}
+            </span>
+            <span className="font-bold">
+              {thesis.department?.name || noDepartment}
+            </span>
+          </p>
+          <Divider />
+          <p id="branch" className="leading-snug">
+            <span className="font-medium text-muted-foreground">
+              Bilim Dalı:{" "}
+            </span>
+            <span className="font-bold">{thesis.branch?.name || noBranch}</span>
+          </p>
+          <Divider />
+          <p id="page_count" className="leading-snug">
+            <span className="font-medium text-muted-foreground">
+              Sayfa Sayısı:{" "}
+            </span>
+            <span className="font-bold">{thesis.pageCount}</span>
+          </p>
+          <Divider />
+        </div>
+        {/* Abstract */}
         <div id="abstract_section" className="mt-6">
           <p className="font-bold">Özet</p>
           <p id="abstract" className="mt-1">
-            {result?.language.name === "Türkçe"
-              ? result.abstractTurkish || noAbstractText
-              : result.abstractForeign || noAbstractText}
+            {thesis?.language.name === "Türkçe"
+              ? thesis.abstractTurkish || noAbstractText
+              : thesis.abstractForeign || noAbstractText}
           </p>
         </div>
+        {/* Translated abstract */}
         <div id="abstract_translated_section" className="mt-6">
           <p className="font-bold">Özet (Çeviri)</p>
           <p id="abstract_translated" className="mt-1">
-            {result?.language.name === "Türkçe"
-              ? result.abstractForeign || noTranslatedAbstractText
-              : result.abstractTurkish || noTranslatedAbstractText}
+            {thesis?.language.name === "Türkçe"
+              ? thesis.abstractForeign || noTranslatedAbstractText
+              : thesis.abstractTurkish || noTranslatedAbstractText}
           </p>
         </div>
       </div>
     </div>
   );
+}
+
+function Divider() {
+  return <div className="w-full my-2 h-px rounded-full bg-border" />;
+}
+
+const maxDescriptionLength = 160;
+
+function truncateDescription(description: string) {
+  return description.length > maxDescriptionLength
+    ? description.slice(0, maxDescriptionLength) + "..."
+    : description;
 }
