@@ -55,7 +55,7 @@ const PaginationLink = ({
 }: PaginationLinkProps) => {
   const Component = isButton ? "button" : Link;
   return (
-    // @ts-ignore
+    // @ts-expect-error - The the is not matching between button and Link
     <Component
       aria-current={isActive ? "page" : undefined}
       className={cn(

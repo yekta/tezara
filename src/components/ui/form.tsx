@@ -187,7 +187,7 @@ FormMessage.displayName = "FormMessage";
 const FormHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, children, ...props }, ref) => {
+>(({ className, children }, ref) => {
   return (
     <div
       ref={ref}

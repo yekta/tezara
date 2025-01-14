@@ -1,4 +1,10 @@
-import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  index,
+  integer,
+  pgTable,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 const timestamps = {
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -9,16 +15,16 @@ const timestamps = {
   deletedAt: timestamp("deleted_at"),
 };
 
-export const dashboardsTable = pgTable(
+export const thesesTable = pgTable(
   "theses",
   {
-    id: uuid("id").primaryKey(),
+    id: integer("id").primaryKey(),
     title: varchar("title").notNull(),
     ...timestamps,
   },
   (table) => ({
-    createdAtIdx: index("dashboards_created_at_idx").on(table.createdAt),
-    updatedAtIdx: index("dashboards_updated_at_idx").on(table.updatedAt),
-    deletedAtIdx: index("dashboards_deleted_at_idx").on(table.deletedAt),
+    createdAtIdx: index("theses_created_at_idx").on(table.createdAt),
+    updatedAtIdx: index("theses_updated_at_idx").on(table.updatedAt),
+    deletedAtIdx: index("theses_deleted_at_idx").on(table.deletedAt),
   })
 );

@@ -21,7 +21,7 @@ const DropdownMenuGroup = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Group> & {
     inset?: boolean;
   }
->(({ className, inset, children, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <DropdownMenuPrimitive.Group
     ref={ref}
     className={cn("p-1", className)}
