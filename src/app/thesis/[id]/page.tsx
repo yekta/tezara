@@ -3,6 +3,8 @@ import { apiServerStatic } from "@/server/trpc/setup/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+const TURKISH = "Türkçe";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
@@ -48,7 +50,7 @@ export default async function Page({ params }: Props) {
       <div className="w-full max-w-2xl flex flex-col px-5 pt-4 pb-16">
         {/* Title */}
         <h1 id="title" className="font-bold text-2xl leading-tight">
-          {thesis?.language.name === "Türkçe"
+          {thesis?.language.name === TURKISH
             ? thesis.titleTurkish
             : thesis.titleForeign}
         </h1>
@@ -57,7 +59,7 @@ export default async function Page({ params }: Props) {
           id="title_translated"
           className="font-semibold text-lg text-muted-foreground leading-snug mt-2"
         >
-          {thesis?.language.name === "Türkçe"
+          {thesis?.language.name === TURKISH
             ? thesis.titleForeign
             : thesis.titleTurkish}
         </h2>
@@ -150,7 +152,7 @@ export default async function Page({ params }: Props) {
         <div id="abstract_section" className="mt-6">
           <p className="font-bold">Özet</p>
           <p id="abstract" className="mt-1">
-            {thesis?.language.name === "Türkçe"
+            {thesis?.language.name === TURKISH
               ? thesis.abstractTurkish || noAbstractText
               : thesis.abstractForeign || noAbstractText}
           </p>
@@ -159,7 +161,7 @@ export default async function Page({ params }: Props) {
         <div id="abstract_translated_section" className="mt-6">
           <p className="font-bold">Özet (Çeviri)</p>
           <p id="abstract_translated" className="mt-1">
-            {thesis?.language.name === "Türkçe"
+            {thesis?.language.name === TURKISH
               ? thesis.abstractForeign || noTranslatedAbstractText
               : thesis.abstractTurkish || noTranslatedAbstractText}
           </p>
