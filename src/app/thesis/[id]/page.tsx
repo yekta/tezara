@@ -1,33 +1,9 @@
-import { siteTitle } from "@/lib/constants";
+import { getPreviewUrl, siteTitle } from "@/lib/constants";
 import { apiServerStatic } from "@/server/trpc/setup/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 const TURKISH = "Türkçe";
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-
-  const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
-
-  if (!thesis) {
-    return {
-      title: `Tez Bulunamadı | ${siteTitle}`,
-      description: `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`,
-    };
-  }
-
-  return {
-    title: `${
-      thesis.titleTurkish || thesis.titleForeign || `Tez ${thesis.id}`
-    } | ${siteTitle}`,
-    description: truncateDescription(
-      thesis.abstractTurkish ||
-        thesis.abstractForeign ||
-        "Bu tezin özeti bulunamadı."
-    ),
-  };
-}
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -41,10 +17,12 @@ export default async function Page({ params }: Props) {
   }
 
   const noAbstractText = "Özet yok.";
-  const noTranslatedAbstractText = "Özet çevirisi yok.";
-  const noAdvisorText = "Danışman bulunamadı.";
+  const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
+  const noAdvisorText = "Danışman mevcut değil.";
   const noDepartment = "Ana bilim dalı belirtilmemiş.";
   const noBranch = "Bilim dalı belirtilmemiş.";
+  const noTitle = "Başlık mevcut değil.";
+  const noTranslatedTitle = "Başlık çevirisi mevcut değil.";
 
   return (
     <div className="w-full flex flex-col items-center text-lg">
@@ -53,7 +31,7 @@ export default async function Page({ params }: Props) {
         <h1 id="title" className="font-bold text-2xl leading-tight">
           {thesis?.language.name === TURKISH
             ? thesis.titleTurkish
-            : thesis.titleForeign}
+            : thesis.titleForeign || noTitle}
         </h1>
         {/* Translated title */}
         <h2
@@ -61,8 +39,8 @@ export default async function Page({ params }: Props) {
           className="font-semibold text-lg text-muted-foreground leading-snug mt-2"
         >
           {thesis?.language.name === TURKISH
-            ? thesis.titleForeign
-            : thesis.titleTurkish}
+            ? thesis.titleForeign || noTranslatedTitle
+            : thesis.titleTurkish || noTranslatedTitle}
         </h2>
         {/* Details */}
         <div id="details" className="w-full flex flex-col text-sm mt-6">
@@ -170,6 +148,61 @@ export default async function Page({ params }: Props) {
       </div>
     </div>
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+
+  const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
+  const notFoundTitle = `Tez Bulunamadı | ${siteTitle}`;
+  const notFoundDescription = `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`;
+
+  if (!thesis) {
+    return {
+      title: `Tez Bulunamadı | ${siteTitle}`,
+      description: `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`,
+      twitter: {
+        title: notFoundTitle,
+        description: notFoundDescription,
+        card: "summary_large_image",
+        images: [
+          {
+            url: getPreviewUrl("home"),
+            width: 1200,
+            height: 630,
+            alt: siteTitle,
+          },
+        ],
+      },
+    };
+  }
+
+  const title = `${
+    thesis.titleTurkish || thesis.titleForeign || `Tez ${thesis.id}`
+  } | ${siteTitle}`;
+  const description = truncateDescription(
+    thesis.abstractTurkish ||
+      thesis.abstractForeign ||
+      "Bu tezin özeti bulunamadı."
+  );
+
+  return {
+    title,
+    description,
+    twitter: {
+      title,
+      description,
+      card: "summary_large_image",
+      images: [
+        {
+          url: getPreviewUrl("home"),
+          width: 1200,
+          height: 630,
+          alt: siteTitle,
+        },
+      ],
+    },
+  };
 }
 
 function Divider() {
