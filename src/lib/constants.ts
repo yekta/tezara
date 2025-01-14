@@ -1,9 +1,9 @@
 import { env } from "@/lib/env";
 
 export const siteTitle = "Tezara";
-export const siteTagline = "Tez metaveri analizi";
+export const siteTagline = "Tez Metaveri Analizi";
 export const siteDescription =
-  "Tezara, YÖK'ün Ulusal Tez Merkezi'ne girilen tezlerin metaveri analizlerini yapmanızı sağlar.";
+  "Tezara, YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden metaveri analizi yapmanızı sağlar. Yazar, başlık, özet, danışman, yıl, üniversite ve dil gibi verilere ulaşabilir, bu verileri tablo ya da grafiğe dönüştürebilirsiniz.";
 
 export const previewImages = {
   path: "previews",
