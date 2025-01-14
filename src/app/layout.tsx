@@ -17,6 +17,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
+import Footer from "@/components/navigation/footer";
+import Navbar from "@/components/navigation/navbar";
 
 const sans = localFont({
   src: "./fonts/DMSansVF.woff2",
@@ -77,7 +79,12 @@ export default async function RootLayout({
             shadow={false}
             height={2}
           />
-          <div className="w-full flex flex-col min-h-[100svh]">{children}</div>
+          <div className="w-full flex flex-col min-h-[100svh]">
+            <Navbar />
+            <div className="pointer-events-none h-14 w-full" />
+            <div className="w-full flex flex-col flex-1">{children}</div>
+            <Footer />
+          </div>
           <Toaster
             position="top-right"
             icons={{

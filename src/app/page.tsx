@@ -8,9 +8,6 @@ export default async function Home() {
           <h1 className="text-4xl md:text-5xl font-bold text-center leading-none">
             Tezara
           </h1>
-          <div className="w-full flex items-center justify-center mt-4">
-            <ThemeButton />
-          </div>
         </div>
       </div>
     </div>
