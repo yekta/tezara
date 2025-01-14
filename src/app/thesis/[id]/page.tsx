@@ -46,25 +46,25 @@ export default async function Page({ params }: Props) {
         {/* Details */}
         <div id="details" className="w-full flex flex-col text-sm mt-6">
           <Divider />
-          <p id="thesis_id" className="leading-snug">
+          <p id="thesis_id_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">Tez No: </span>
-            <span className="font-bold" id="author_name">
+            <span className="font-bold" id="thesis_id">
               {thesis.id}
             </span>
           </p>
           <Divider />
-          <p id="author" className="leading-snug">
+          <p id="author_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">Yazar: </span>
             <span className="font-bold" id="author_name">
               {thesis.author.name}
             </span>
           </p>
           <Divider />
-          <p id="advisors" className="leading-snug">
+          <p id="advisor_names_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">
               Danışmanlar:{" "}
             </span>
-            <span className="font-bold" id="advisors_names">
+            <span className="font-bold" id="advisor_names">
               {thesis.thesisAdvisors.length < 1
                 ? noAdvisorText
                 : thesis.thesisAdvisors
@@ -73,58 +73,70 @@ export default async function Page({ params }: Props) {
             </span>
           </p>
           <Divider />
-          <p id="thesis_type" className="leading-snug">
+          <p id="thesis_type_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">
               Tez Türü:{" "}
             </span>
-            <span className="font-bold" id="advisors_names">
+            <span className="font-bold" id="thesis_type">
               {thesis.type}
             </span>
           </p>
           <Divider />
-          <p id="year" className="leading-snug">
+          <p id="year_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">Yıl: </span>
-            <span className="font-bold">{thesis.year}</span>
+            <span className="font-bold" id="year">
+              {thesis.year}
+            </span>
           </p>
           <Divider />
-          <p id="language" className="leading-snug">
+          <p id="language_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">Dil: </span>
-            <span className="font-bold">{thesis.language.name}</span>
+            <span className="font-bold" id="language_name">
+              {thesis.language.name}
+            </span>
           </p>
           <Divider />
-          <p id="university" className="leading-snug">
+          <p id="university_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">
               Üniversite:{" "}
             </span>
-            <span className="font-bold">{thesis.university.name}</span>
+            <span className="font-bold" id="university_name">
+              {thesis.university.name}
+            </span>
           </p>
           <Divider />
-          <p id="institute" className="leading-snug">
+          <p id="institute_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">Enstitü: </span>
-            <span className="font-bold">{thesis.institute.name}</span>
+            <span className="font-bold" id="institute_name">
+              {thesis.institute.name}
+            </span>
           </p>
           <Divider />
-          <p id="department" className="leading-snug">
+          <p id="department_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">
               Ana Bilim Dalı:{" "}
             </span>
-            <span className="font-bold">
+            <span className="font-bold" id="department_name">
               {thesis.department?.name || noDepartment}
             </span>
           </p>
           <Divider />
-          <p id="branch" className="leading-snug">
+          <p id="branch_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">
               Bilim Dalı:{" "}
             </span>
-            <span className="font-bold">{thesis.branch?.name || noBranch}</span>
+            <span className="font-bold" id="branch_name">
+              {thesis.branch?.name || noBranch}
+            </span>
           </p>
           <Divider />
-          <p id="page_count" className="leading-snug">
+          <p id="page_count_section" className="leading-snug">
             <span className="font-medium text-muted-foreground">
               Sayfa Sayısı:{" "}
             </span>
-            <span className="font-bold">{thesis.pageCount}</span>
+            <span className="font-bold" id="page_count">
+              {thesis.pageCount}
+            </span>
           </p>
           <Divider />
         </div>
