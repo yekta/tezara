@@ -1,4 +1,5 @@
 import { getPreviewUrl, siteTitle } from "@/lib/constants";
+import { getTwitterMeta } from "@/lib/helpers";
 import { apiServerStatic } from "@/server/trpc/setup/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -159,21 +160,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!thesis) {
     return {
-      title: `Tez Bulunamadı | ${siteTitle}`,
-      description: `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`,
-      twitter: {
+      title: notFoundTitle,
+      description: notFoundDescription,
+      twitter: getTwitterMeta({
         title: notFoundTitle,
         description: notFoundDescription,
-        card: "summary_large_image",
-        images: [
-          {
-            url: getPreviewUrl("home"),
-            width: 1200,
-            height: 630,
-            alt: siteTitle,
-          },
-        ],
-      },
+      }),
     };
   }
 
@@ -189,19 +181,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    twitter: {
+    twitter: getTwitterMeta({
       title,
       description,
-      card: "summary_large_image",
-      images: [
-        {
-          url: getPreviewUrl("home"),
-          width: 1200,
-          height: 630,
-          alt: siteTitle,
-        },
-      ],
-    },
+    }),
   };
 }
 
