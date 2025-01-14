@@ -1,5 +1,3 @@
-import ThemeButton from "@/components/theme-button";
-
 export default async function Home() {
   return (
     <div className="w-full flex-1 flex flex-col items-center">
