@@ -1,4 +1,4 @@
-import { getPreviewUrl, siteTitle } from "@/lib/constants";
+import { getPreviewUrl } from "@/lib/constants";
 import type { Metadata } from "next";
 
 export function getTwitterMeta({

@@ -1,4 +1,4 @@
-import { getPreviewUrl, siteTitle } from "@/lib/constants";
+import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { apiServerStatic } from "@/server/trpc/setup/server";
 import { Metadata } from "next";
