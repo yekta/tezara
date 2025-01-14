@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -10,7 +11,7 @@ export default function NotFound() {
             Bulunamadı.
           </p>
           <Button asChild className="mt-5 max-w-full">
-            <a href="/">Eve Dön</a>
+            <Link href="/">Eve Dön</Link>
           </Button>
         </div>
       </div>
