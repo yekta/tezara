@@ -16,6 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`,
     };
   }
+
   return {
     title: `${
       thesis.titleTurkish || thesis.titleForeign || `Tez ${thesis.id}`
