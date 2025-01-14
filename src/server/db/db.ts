@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import { env } from "@/lib/env";
 import { PgTransaction } from "drizzle-orm/pg-core";
 import { ExtractTablesWithRelations } from "drizzle-orm";
+import * as schema from "./schema";
 
 const databaseUrlRaw = env.DATABASE_URL;
 if (!databaseUrlRaw) {
@@ -16,7 +17,7 @@ const pool = new Pool({
   connectionString: databaseUrl,
   idleTimeoutMillis: 5 * 60 * 1000,
 });
-export const db = drizzle({ client: pool });
+export const db = drizzle({ client: pool, schema: { ...schema } });
 
 export type TDbTransaction = PgTransaction<
   NodePgQueryResultHKT,

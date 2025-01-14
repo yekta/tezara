@@ -7,6 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 const timestamps = {
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -251,5 +252,108 @@ export const thesisSubjectsTable = pgTable(
     createdAtIdx: index("thesis_subjects_created_at_idx").on(table.createdAt),
     updatedAtIdx: index("thesis_subjects_updated_at_idx").on(table.updatedAt),
     deletedAtIdx: index("thesis_subjects_deleted_at_idx").on(table.deletedAt),
+  })
+);
+
+// Author relations
+export const authorsRelations = relations(authorsTable, ({ many }) => ({
+  theses: many(thesesTable),
+}));
+
+// Advisor relations
+export const advisorsRelations = relations(advisorsTable, ({ many }) => ({
+  thesisAdvisors: many(thesisAdvisorsTable),
+}));
+
+// University relations
+export const universitiesRelations = relations(
+  universitiesTable,
+  ({ many }) => ({
+    theses: many(thesesTable),
+  })
+);
+
+// Department relations
+export const departmentsRelations = relations(departmentsTable, ({ many }) => ({
+  theses: many(thesesTable),
+}));
+
+// Institute relations
+export const institutesRelations = relations(institutesTable, ({ many }) => ({
+  theses: many(thesesTable),
+}));
+
+// Branch relations
+export const branchesRelations = relations(branchesTable, ({ many }) => ({
+  theses: many(thesesTable),
+}));
+
+// Subject relations
+export const subjectsRelations = relations(subjectsTable, ({ many }) => ({
+  thesisSubjects: many(thesisSubjectsTable),
+}));
+
+// Language relations
+export const languagesRelations = relations(languagesTable, ({ many }) => ({
+  theses: many(thesesTable),
+}));
+
+// Thesis relations
+export const thesesRelations = relations(thesesTable, ({ one, many }) => ({
+  author: one(authorsTable, {
+    fields: [thesesTable.authorId],
+    references: [authorsTable.id],
+  }),
+  language: one(languagesTable, {
+    fields: [thesesTable.languageId],
+    references: [languagesTable.id],
+  }),
+  university: one(universitiesTable, {
+    fields: [thesesTable.universityId],
+    references: [universitiesTable.id],
+  }),
+  institute: one(institutesTable, {
+    fields: [thesesTable.instituteId],
+    references: [institutesTable.id],
+  }),
+  department: one(departmentsTable, {
+    fields: [thesesTable.departmentId],
+    references: [departmentsTable.id],
+  }),
+  branch: one(branchesTable, {
+    fields: [thesesTable.branchId],
+    references: [branchesTable.id],
+  }),
+  thesisAdvisors: many(thesisAdvisorsTable),
+  thesisSubjects: many(thesisSubjectsTable),
+}));
+
+// Thesis Advisors relations (junction table)
+export const thesisAdvisorsRelations = relations(
+  thesisAdvisorsTable,
+  ({ one }) => ({
+    thesis: one(thesesTable, {
+      fields: [thesisAdvisorsTable.thesisId],
+      references: [thesesTable.id],
+    }),
+    advisor: one(advisorsTable, {
+      fields: [thesisAdvisorsTable.advisorId],
+      references: [advisorsTable.id],
+    }),
+  })
+);
+
+// Thesis Subjects relations (junction table)
+export const thesisSubjectsRelations = relations(
+  thesisSubjectsTable,
+  ({ one }) => ({
+    thesis: one(thesesTable, {
+      fields: [thesisSubjectsTable.thesisId],
+      references: [thesesTable.id],
+    }),
+    subject: one(subjectsTable, {
+      fields: [thesisSubjectsTable.subjectId],
+      references: [subjectsTable.id],
+    }),
   })
 );

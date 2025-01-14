@@ -1,9 +1,16 @@
+import { getThesis } from "@/server/db/repo/thesis";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/setup/trpc";
+import { z } from "zod";
 
 export const mainRouter = createTRPCRouter({
-  getHello: publicProcedure.query(async function ({}) {
-    return {
-      hello: "world",
-    };
-  }),
+  getThesis: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
+    .query(async function ({ input: { id } }) {
+      const result = await getThesis({ id });
+      return result;
+    }),
 });
