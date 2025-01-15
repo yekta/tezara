@@ -1,28 +1,27 @@
 "use client";
 
 import FileExtensionIcon from "@/components/icons/file-extension";
+import LanguageIcon from "@/components/icons/language";
+import ThesisTypeIcon, {
+  getThesisTypeColorClassName,
+} from "@/components/icons/thesis-type";
 import { useSearchResults } from "@/components/search/search-results-provider";
 import {
   Button,
   LinkButton,
   minButtonSizeEnforcerClassName,
 } from "@/components/ui/button";
+import { cn } from "@/components/ui/utils";
+import { Parser } from "@json2csv/plainjs";
 import {
   CalendarIcon,
   LandmarkIcon,
   LoaderIcon,
   SearchIcon,
   TriangleAlertIcon,
-  XIcon,
 } from "lucide-react";
-import { useState } from "react";
-import { Parser } from "@json2csv/plainjs";
-import ThesisTypeIcon, {
-  getThesisTypeColorClassName,
-} from "@/components/icons/thesis-type";
-import { cn } from "@/components/ui/utils";
-import LanguageIcon from "@/components/icons/language";
 import Link from "next/link";
+import { useState } from "react";
 
 type Props = {
   className?: string;
