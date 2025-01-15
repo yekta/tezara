@@ -14,6 +14,7 @@ import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderIcon, SearchIcon, XIcon } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -27,6 +28,14 @@ type Props = {
 };
 
 export default function SearchBox({ className, variant }: Props) {
+  return (
+    <Suspense>
+      <SearchBoxLocal className={className} variant={variant} />
+    </Suspense>
+  );
+}
+
+function SearchBoxLocal({ className, variant }: Props) {
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
