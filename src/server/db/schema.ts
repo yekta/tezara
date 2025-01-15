@@ -255,6 +255,23 @@ export const thesisSubjectsTable = pgTable(
   })
 );
 
+export const thesisTypesTable = pgTable(
+  "thesis_types",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name").notNull().unique(),
+    ...timestamps,
+  },
+  (table) => ({
+    nameIdx: index("thesis_types_name_idx").on(table.name),
+    createdAtIdx: index("thesis_types_created_at_idx").on(table.createdAt),
+    updatedAtIdx: index("thesis_types_updated_at_idx").on(table.updatedAt),
+    deletedAtIfdx: index("thesis_types_deleted_at_idx").on(table.deletedAt),
+  })
+);
+
 // Author relations
 export const authorsRelations = relations(authorsTable, ({ many }) => ({
   theses: many(thesesTable),

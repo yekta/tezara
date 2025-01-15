@@ -22,6 +22,13 @@
       "when": 1736878787243,
       "tag": "0002_pretty_mad_thinker",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1736937798745,
+      "tag": "0003_yellow_silver_samurai",
+      "breakpoints": true
     }
   ]
 }
