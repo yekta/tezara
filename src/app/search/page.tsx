@@ -1,9 +1,15 @@
 import SearchResultsProvider from "@/components/providers/search-results-provider";
 import SearchBox from "@/components/search/search-input";
+import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import SearchResults from "@/components/search/search-results";
 import { Suspense } from "react";
 
-export default async function Page() {
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function Page({ searchParams }: Props) {
+  await searchPageSearchParamsCache.parse(searchParams);
   return (
     <Suspense>
       <SearchResultsProvider>
