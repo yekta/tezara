@@ -20,18 +20,18 @@ type TVariant =
 
 export function getThesisTypeColorClassName(variant: TVariant) {
   if (variant === "Yüksek Lisans") {
-    return "text-chart-1 bg-chart-1/10 border-chart-1/20";
+    return "text-chart-1 bg-chart-1/10 border-chart-1/16";
   }
   if (variant === "Doktora") {
-    return "text-chart-2 bg-chart-2/10 border-chart-2/20";
+    return "text-chart-2 bg-chart-2/10 border-chart-2/16";
   }
   if (variant === "Tıpta Uzmanlık") {
-    return "text-chart-3 bg-chart-3/10 border-chart-3/20";
+    return "text-chart-3 bg-chart-3/10 border-chart-3/16";
   }
   if (variant === "Sanatta Yeterlik") {
-    return "text-chart-4 bg-chart-4/10 border-chart-4/20";
+    return "text-chart-4 bg-chart-4/10 border-chart-4/16";
   }
-  return "text-foreground bg-foreground/8 border-foreground/16";
+  return "text-foreground bg-foreground/8 border-foreground/12";
 }
 
 export default function ThesisTypeIcon({

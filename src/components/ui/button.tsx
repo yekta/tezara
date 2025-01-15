@@ -5,6 +5,9 @@ import * as React from "react";
 
 import { cn } from "@/components/ui/utils";
 
+export const minButtonSizeEnforcerClassName =
+  "before:w-full before:h-full before:min-w-[44px] before:min-h-[44px] before:z-[-1] before:bg-transparent before:absolute before:-translate-y-1/2 before:top-1/2 before:-translate-x-1/2 before:left-1/2";
+
 const buttonVariants = cva(
   "relative text-center leading-tight max-w-full inline-flex items-center select-none z-0 touch-manipulation justify-center gap-2 rounded-full font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
@@ -22,6 +25,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground not-touch:hover:bg-secondary/85 active:bg-secondary/85",
         ghost:
           "not-touch:hover:bg-border not-touch:hover:text-foreground active:bg-border active:text-foreground",
+        "destructive-ghost":
+          "text-destructive not-touch:hover:bg-destructive/20 not-touch:hover:text-destructive active:bg-destructive/20 active:text-destructive",
         link: "text-primary underline-offset-4 not-touch:hover:underline active:underline",
         google:
           "bg-google text-google-foreground not-touch:hover:bg-google/85 active:bg-google/85",
@@ -50,8 +55,7 @@ const buttonVariants = cva(
         false: "disabled:opacity-100",
       },
       forceMinSize: {
-        default:
-          "before:w-full before:h-full before:min-w-[44px] before:min-h-[44px] before:z-[-1] before:bg-transparent before:absolute before:-translate-y-1/2 before:top-1/2 before:-translate-x-1/2 before:left-1/2",
+        default: minButtonSizeEnforcerClassName,
         false: "",
       },
       focusVariant: {

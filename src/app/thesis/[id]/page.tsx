@@ -59,7 +59,7 @@ export default async function Page({ params }: Props) {
           </LinkButton>
         ) : (
           <Button size="sm" variant="destructive" disabled>
-            <FileExtensionIcon className="size-5 -ml-1.5" variant="pdf" />
+            <FileExtensionIcon className="size-5 -ml-1.5" variant="no-pdf" />
             <p className="shrink min-w-0">PDF Yok</p>
           </Button>
         )}

@@ -4,7 +4,7 @@ import { ComponentProps } from "react";
 
 const defaultClassName = "size-5 shrink-0";
 
-type TVariant = "pdf" | "csv" | "json";
+type TVariant = "pdf" | "no-pdf" | "csv" | "json";
 
 export default function FileExtensionIcon({
   className,
@@ -74,6 +74,46 @@ export default function FileExtensionIcon({
           strokeLinejoin="round"
           strokeWidth="1.5"
           d="M3 12a3.33 3.33 0 0 1 3.33-3.33c.67 0 1.45.11 2.1-.06a1.67 1.67 0 0 0 1.18-1.18c.17-.65.06-1.43.06-2.1A3.33 3.33 0 0 1 13 2"
+        />
+      </svg>
+    );
+  }
+  if (variant === "no-pdf") {
+    return (
+      <svg
+        className={cn(defaultClassName, className)}
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M7 18V15.5M7 15.5V14C7 13.529 7 13.293 7.154 13.146C7.308 13 7.555 13 8.05 13H8.75C9.475 13 10.063 13.56 10.063 14.25C10.063 14.94 9.475 15.5 8.75 15.5H7ZM21 13H19.688C18.863 13 18.45 13 18.194 13.244C17.938 13.488 17.938 13.881 17.938 14.667V15.5M17.938 15.5V18M17.938 15.5H20.125M15.75 15.5C15.75 16.88 14.575 18 13.125 18C12.798 18 12.635 18 12.512 17.933C12.221 17.773 12.25 17.448 12.25 17.167V13.833C12.25 13.552 12.22 13.227 12.512 13.067C12.634 13 12.798 13 13.125 13C14.575 13 15.75 14.12 15.75 15.5Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M15 22H10.727C7.467 22 5.835 22 4.703 21.202C4.38085 20.9761 4.0929 20.705 3.848 20.397C3 19.331 3 17.797 3 14.727V12.182C3 9.21899 3 7.73699 3.469 6.55399C4.223 4.65099 5.817 3.15099 7.839 2.44099C8.98125 2.03993 10.3857 2.00361 13 2.00032"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M3 12C3 11.116 3.35115 10.2683 3.97621 9.64321C4.60127 9.01815 5.44903 8.667 6.333 8.667C6.999 8.667 7.784 8.783 8.431 8.61C8.71371 8.53392 8.97145 8.38485 9.17838 8.17774C9.38531 7.97064 9.53416 7.71277 9.61 7.43C9.783 6.783 9.667 5.998 9.667 5.332C9.66726 4.44821 10.0185 3.6007 10.6436 2.97586C11.2686 2.35102 12.1162 2 13 2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M16 7L18.5 4.5M21 2L18.5 4.5M16 2L18.5 4.5M21 7L18.5 4.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
         />
       </svg>
     );

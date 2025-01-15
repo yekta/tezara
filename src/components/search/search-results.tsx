@@ -2,7 +2,11 @@
 
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { useSearchResults } from "@/components/search/search-results-provider";
-import { Button, LinkButton } from "@/components/ui/button";
+import {
+  Button,
+  LinkButton,
+  minButtonSizeEnforcerClassName,
+} from "@/components/ui/button";
 import {
   CalendarIcon,
   LandmarkIcon,
@@ -239,24 +243,20 @@ export default function SearchResults({}: Props) {
                     <LinkButton
                       target="_blank"
                       href={result.pdfUrl}
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="icon"
-                      className="rounded-lg text-destructive"
+                      className="rounded-lg"
                     >
                       <FileExtensionIcon variant="pdf" className="size-7" />
                     </LinkButton>
                   ) : (
                     <Button
-                      size="icon"
-                      className="rounded-lg text-destructive"
-                      disabled
                       variant="ghost"
+                      size="icon"
+                      className="rounded-lg"
+                      disabled
                     >
-                      <FileExtensionIcon variant="pdf" className="size-7" />
-                      <XIcon
-                        strokeWidth={3}
-                        className="size-3.75 absolute right-0.5 top-0.5 bg-background rounded-full"
-                      />
+                      <FileExtensionIcon variant="no-pdf" className="size-7" />
                     </Button>
                   )}
                 </div>
@@ -296,7 +296,7 @@ export default function SearchResults({}: Props) {
                     </div>
                     <div
                       className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground"
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground"
                       )}
                     >
                       <LanguageIcon
@@ -309,7 +309,7 @@ export default function SearchResults({}: Props) {
                     </div>
                     <div
                       className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground"
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground"
                       )}
                     >
                       <CalendarIcon className="size-3.5 -ml-0.75 -my-2" />
@@ -320,9 +320,10 @@ export default function SearchResults({}: Props) {
                     <Link
                       href={`/university/${result.universityName}`}
                       className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground",
+                        "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
                         "not-touch:hover:bg-foreground/16 active:bg-foreground/16",
-                        "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                        minButtonSizeEnforcerClassName
                       )}
                     >
                       <LandmarkIcon className="size-3.5 -ml-0.75 -my-2" />
