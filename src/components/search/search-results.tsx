@@ -14,7 +14,7 @@ export default function SearchResults({}: Props) {
   return (
     <div className="w-full flex flex-col">
       {data && data.length > 0 && (
-        <div className="w-full flex flex-wrap items-start mt-6 gap-2">
+        <div className="w-full flex flex-wrap items-start mt-6 gap-1.5">
           <Button size="sm" variant="success">
             <FileExtensionIcon className="size-5 -ml-1.5" variant="csv" />
             <p className="shrink min-w-0">Tablo Olarak İndir</p>

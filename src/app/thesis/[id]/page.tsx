@@ -46,7 +46,7 @@ export default async function Page({ params }: Props) {
             ? thesis.titleForeign || noTranslatedTitle
             : thesis.titleTurkish || noTranslatedTitle}
         </h2>
-        <div className="mt-6 flex flex-wrap items-start justify-start gap-2">
+        <div className="mt-6 flex flex-wrap items-start justify-start gap-1.5">
           {thesis.pdfUrl ? (
             <LinkButton
               href={thesis.pdfUrl}
