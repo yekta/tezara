@@ -36,9 +36,9 @@ const buttonVariants = cva(
           "bg-email text-email-foreground not-touch:hover:bg-email/85 active:bg-email/85",
       },
       size: {
-        default: "px-4 py-2.75",
-        sm: "px-3 py-1.5 text-sm",
-        lg: "px-8 py-2.5",
+        default: "px-5 py-2.75",
+        sm: "px-4 py-1.5 text-sm",
+        lg: "px-9 py-2.5",
         icon: "size-9",
       },
       state: {
