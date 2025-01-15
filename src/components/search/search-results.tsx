@@ -239,7 +239,7 @@ export default function SearchResults({}: Props) {
                     >
                       <ThesisTypeIcon
                         variant={result.thesisTypeName}
-                        className="size-4 -ml-0.5 -my-1"
+                        className="size-3.5 -ml-0.5 -my-1"
                       />
                       <p className="text-sm leading-tight font-semibold">
                         {result.thesisTypeName}
