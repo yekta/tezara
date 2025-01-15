@@ -7,7 +7,7 @@ export const siteDescription =
 
 export const previewImages = {
   path: "previews",
-  version: "v2",
+  version: "v3",
 };
 
 export const getPreviewUrl = (slug: string) =>
