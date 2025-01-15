@@ -6,6 +6,10 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
 import { useState } from "react";
 import { Parser } from "@json2csv/plainjs";
+import ThesisTypeIcon, {
+  getThesisTypeColorClassName,
+} from "@/components/icons/thesis-type";
+import { cn } from "@/components/ui/utils";
 
 type Props = {
   className?: string;
@@ -148,7 +152,7 @@ export default function SearchResults({}: Props) {
               )}
             </div>
             <p className="shrink min-w-0 relative">
-              {isPendingCsvDownload ? "İndiriliyor" : "Tablo Olarak İndir"}
+              {isPendingCsvDownload ? "İndiriliyor..." : "Tablo Olarak İndir"}
             </p>
           </Button>
           <Button
@@ -172,7 +176,7 @@ export default function SearchResults({}: Props) {
               )}
             </div>
             <p className="shrink min-w-0 relative">
-              {isPendingJsonDownload ? "İndiriliyor" : "JSON Olarak İndir"}
+              {isPendingJsonDownload ? "İndiriliyor..." : "JSON Olarak İndir"}
             </p>
           </Button>
         </div>
@@ -182,7 +186,7 @@ export default function SearchResults({}: Props) {
           <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
             <LoaderIcon className="size-7 animate-spin" />
             <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
-              Yükleniyor...
+              Aranıyor...
             </p>
           </div>
         )}
@@ -223,9 +227,25 @@ export default function SearchResults({}: Props) {
                   <p className="text-base font-semibold leading-snug">
                     {result.titleTurkish}
                   </p>
-                  <p className="text-base mt-1 leading-snug">
+                  <p className="text-base mt-0.5 leading-snug">
                     {result.authorName}
                   </p>
+                  <div className="w-full flex flex-wrap mt-2">
+                    <div
+                      className={cn(
+                        "rounded-full border flex items-center gap-1 px-2 py-0.5",
+                        getThesisTypeColorClassName(result.thesisTypeName)
+                      )}
+                    >
+                      <ThesisTypeIcon
+                        variant={result.thesisTypeName}
+                        className="size-4 -ml-0.5 -my-1"
+                      />
+                      <p className="text-sm leading-tight font-semibold">
+                        {result.thesisTypeName}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
