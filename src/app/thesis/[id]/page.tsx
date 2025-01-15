@@ -1,3 +1,5 @@
+import FileExtensionIcon from "@/components/icons/file-extension";
+import { Button, LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { apiServerStatic } from "@/server/trpc/setup/server";
@@ -43,6 +45,32 @@ export default async function Page({ params }: Props) {
             ? thesis.titleForeign || noTranslatedTitle
             : thesis.titleTurkish || noTranslatedTitle}
         </h2>
+        <div className="mt-6 flex flex-wrap items-start justify-start gap-2">
+          {thesis.pdfUrl ? (
+            <LinkButton
+              href={thesis.pdfUrl}
+              target="_blank"
+              size="sm"
+              variant="destructive"
+            >
+              <FileExtensionIcon className="size-5 -ml-1.5" variant="pdf" />
+              <p className="shrink min-w-0">PDF İndir</p>
+            </LinkButton>
+          ) : (
+            <Button size="sm" variant="destructive" disabled>
+              <FileExtensionIcon className="size-5 -ml-1.5" variant="pdf" />
+              <p className="shrink min-w-0">PDF Yok</p>
+            </Button>
+          )}
+          <Button size="sm" variant="success" disabled>
+            <FileExtensionIcon className="size-5 -ml-1.5" variant="csv" />
+            <p className="shrink min-w-0">CSV İndir</p>
+          </Button>
+          <Button size="sm" disabled>
+            <FileExtensionIcon className="size-5 -ml-1.5" variant="json" />
+            <p className="shrink min-w-0">JSON İndir</p>
+          </Button>
+        </div>
         {/* Details */}
         <div id="details" className="w-full flex flex-col text-sm mt-6">
           <Divider />
