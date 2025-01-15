@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
+import { api } from "@/server/trpc/setup/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderIcon, SearchIcon, XIcon } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
@@ -19,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const SearchThesesSchema = z.object({
-  query: z.string().nonempty(),
+  query: z.string(),
 });
 
 type Props = {
@@ -27,15 +28,15 @@ type Props = {
   variant: "home" | "search";
 };
 
-export default function SearchBox({ className, variant }: Props) {
+export default function SearchInput({ className, variant }: Props) {
   return (
     <Suspense>
-      <SearchBoxLocal className={className} variant={variant} />
+      <_SearchInput className={className} variant={variant} />
     </Suspense>
   );
 }
 
-function SearchBoxLocal({ className, variant }: Props) {
+function _SearchInput({ className, variant }: Props) {
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const form = useForm<z.infer<typeof SearchThesesSchema>>({

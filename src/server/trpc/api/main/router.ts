@@ -1,4 +1,5 @@
-import { getThesis } from "@/server/db/repo/thesis";
+import { SearchThesesSchema } from "@/components/search/types";
+import { getThesis, searchTheses } from "@/server/db/repo/thesis";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/setup/trpc";
 import { z } from "zod";
 
@@ -11,6 +12,12 @@ export const mainRouter = createTRPCRouter({
     )
     .query(async function ({ input: { id } }) {
       const result = await getThesis({ id });
+      return result;
+    }),
+  searchTheses: publicProcedure
+    .input(SearchThesesSchema)
+    .query(async function ({ input }) {
+      const result = await searchTheses(input);
       return result;
     }),
 });

@@ -1,5 +1,5 @@
 import Logo from "@/components/logo/logo";
-import SearchBox from "@/components/search-box";
+import SearchBox from "@/components/search/search-input";
 
 export default async function Home() {
   return (
