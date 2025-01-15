@@ -6,7 +6,7 @@ export default async function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "w-full flex items-center justify-center text-center",
+        "w-full flex items-center justify-center text-center absolute left-0 bottom-0",
         className
       )}
     >

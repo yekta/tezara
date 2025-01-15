@@ -2,8 +2,9 @@
 
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { useSearchResults } from "@/components/search/search-results-provider";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   className?: string;
@@ -28,7 +29,7 @@ export default function SearchResults({}: Props) {
       <div className="w-full flex flex-col">
         {isPending && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
-            <LoaderIcon className="size-6 animate-spin" />
+            <LoaderIcon className="size-7 animate-spin" />
             <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
               Yükleniyor...
             </p>
@@ -36,7 +37,7 @@ export default function SearchResults({}: Props) {
         )}
         {isLoadingError && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-destructive text-sm">
-            <TriangleAlertIcon className="size-6" />
+            <TriangleAlertIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
               Birşeyler ters gitti
             </p>
@@ -44,27 +45,29 @@ export default function SearchResults({}: Props) {
         )}
         {data && data.length === 0 && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
-            <SearchIcon className="size-6" />
+            <SearchIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
               Sonuç bulunamadı
             </p>
           </div>
         )}
         {data && data.length > 0 && (
-          <div className="w-full flex flex-col overflow-auto mt-6">
+          <div className="w-full flex flex-col mt-6">
             {data.map((result) => (
               <div
                 key={result.id}
                 className="py-3 first-of-type:border-t border-b flex flex-row items-start gap-4"
               >
-                <div className="flex flex-col shrink-0 min-w-12 text-xs font-mono">
-                  <p className="flex-1 min-w-0 font-medium font-sans text-muted-foreground">
+                <LinkButton
+                  variant="ghost"
+                  href={`/thesis/${result.id}`}
+                  className="flex -mt-0.5 flex-col shrink-0 min-w-12 text-xs font-mono justify-start items-start gap-0.5 px-1.5 py-1 rounded-md"
+                >
+                  <p className="flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
                     Tez No
                   </p>
-                  <p className="flex-1 min-w-0 font-semibold mt-0.5">
-                    {result.id}
-                  </p>
-                </div>
+                  <p className="flex-1 min-w-0 font-bold">{result.id}</p>
+                </LinkButton>
                 <div className="flex-1 min-w-0 flex flex-col">
                   <p className="text-base font-semibold leading-snug">
                     {result.titleTurkish}
