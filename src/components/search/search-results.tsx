@@ -72,6 +72,8 @@ export default function SearchResults({}: Props) {
       // Convert CSV to a Blob
       const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
+      setIsPendingDownload(false);
+
       // Create a temporary anchor element
       const downloadLink = document.createElement("a");
       downloadLink.href = URL.createObjectURL(csvBlob);
@@ -86,7 +88,6 @@ export default function SearchResults({}: Props) {
       URL.revokeObjectURL(downloadLink.href);
     } catch (error) {
       console.log(error);
-    } finally {
       setIsPendingDownload(false);
     }
   }
@@ -100,6 +101,8 @@ export default function SearchResults({}: Props) {
       const jsonBlob = new Blob([JSON.stringify(formatted, null, 2)], {
         type: "application/json",
       });
+
+      setIsPendingJsonDownload(false);
 
       // Create a temporary anchor element
       const downloadLink = document.createElement("a");
@@ -115,7 +118,6 @@ export default function SearchResults({}: Props) {
       URL.revokeObjectURL(downloadLink.href);
     } catch (error) {
       console.log(error);
-    } finally {
       setIsPendingJsonDownload(false);
     }
   }
