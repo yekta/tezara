@@ -31,7 +31,7 @@ export const useAsyncRouterPush = () => {
 
   const asyncPush = async (path: string) => {
     return new Promise<void>((resolve) => {
-      startTransition(() => {
+      startTransition(async () => {
         router.push(path);
       });
 

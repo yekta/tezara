@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormField,
@@ -9,14 +10,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SearchIcon, XIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { parseAsString, useQueryState } from "nuqs";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoaderIcon, SearchIcon, XIcon } from "lucide-react";
+import { parseAsString, useQueryState } from "nuqs";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const SearchThesesSchema = z.object({
   query: z.string().nonempty(),
@@ -71,11 +70,13 @@ export default function SearchBox({ className, variant }: Props) {
               <div className="w-full relative">
                 <SearchIcon className="size-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
-                  className="w-full pl-10 bg-background-hover"
+                  disabled={isPendingAsyncPush}
+                  className="w-full pl-10 pr-12 bg-background-hover"
                   placeholder="Tez, yazar, veya danışman ara..."
                   {...field}
                 />
-                {queryInput !== undefined &&
+                {!isPendingAsyncPush &&
+                  queryInput !== undefined &&
                   queryInput !== "" &&
                   queryInput !== null && (
                     <Button
@@ -89,6 +90,11 @@ export default function SearchBox({ className, variant }: Props) {
                       <XIcon className="size-5" />
                     </Button>
                   )}
+                {isPendingAsyncPush && (
+                  <div className="size-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
+                    <LoaderIcon className="size-full animate-spin" />
+                  </div>
+                )}
               </div>
             </FormItem>
           )}
