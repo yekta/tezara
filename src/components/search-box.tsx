@@ -77,10 +77,10 @@ function SearchBoxLocal({ className, variant }: Props) {
                 <FormLabel>Ara</FormLabel>
               </FormHeader>
               <div className="w-full relative">
-                <SearchIcon className="size-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
+                <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
                   disabled={isPendingAsyncPush}
-                  className="w-full pl-10 pr-12 bg-background-hover"
+                  className="w-full pl-8.5 pr-12 bg-background-hover"
                   placeholder="Tez, yazar, veya danışman ara..."
                   {...field}
                 />
