@@ -31,7 +31,7 @@ export function getThesisTypeColorClassName(variant: TVariant) {
   if (variant === "Sanatta Yeterlik") {
     return "text-chart-4 bg-chart-4/10 border-chart-4/20";
   }
-  return "text-foreground bg-foreground/10 border-foreground/20";
+  return "text-foreground bg-foreground/8 border-foreground/16";
 }
 
 export default function ThesisTypeIcon({

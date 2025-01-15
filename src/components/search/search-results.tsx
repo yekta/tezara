@@ -3,13 +3,21 @@
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { useSearchResults } from "@/components/search/search-results-provider";
 import { Button, LinkButton } from "@/components/ui/button";
-import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  LandmarkIcon,
+  LoaderIcon,
+  SearchIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { Parser } from "@json2csv/plainjs";
 import ThesisTypeIcon, {
   getThesisTypeColorClassName,
 } from "@/components/icons/thesis-type";
 import { cn } from "@/components/ui/utils";
+import LanguageIcon from "@/components/icons/language";
+import Link from "next/link";
 
 type Props = {
   className?: string;
@@ -17,6 +25,7 @@ type Props = {
 
 const TURKISH = "Türkçe";
 const emptyFieldText = "Yok";
+const noTitle = "Başlık Yok";
 
 export default function SearchResults({}: Props) {
   const { data, isPending, isLoadingError, bulkDownload } = useSearchResults();
@@ -211,7 +220,7 @@ export default function SearchResults({}: Props) {
             {data.map((result) => (
               <div
                 key={result.id}
-                className="py-3 first-of-type:border-t border-b flex flex-row items-start gap-4"
+                className="pt-3 pb-4 first-of-type:border-t border-b flex flex-row items-start gap-4"
               >
                 <LinkButton
                   variant="ghost"
@@ -224,25 +233,61 @@ export default function SearchResults({}: Props) {
                   <p className="flex-1 min-w-0 font-bold">{result.id}</p>
                 </LinkButton>
                 <div className="flex-1 min-w-0 flex flex-col">
-                  <p className="text-base font-semibold leading-snug">
-                    {result.titleTurkish}
-                  </p>
-                  <p className="text-base mt-0.5 leading-snug">
-                    {result.authorName}
-                  </p>
-                  <div className="w-full flex flex-wrap mt-2">
+                  <Link
+                    href={`/thesis/${result.id}`}
+                    className="text-base font-semibold leading-snug not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
+                  >
+                    {result.languageName === TURKISH
+                      ? result.titleTurkish || noTitle
+                      : result.titleForeign || noTitle}
+                  </Link>
+                  <p className="text-base leading-snug">{result.authorName}</p>
+                  <div className="w-full flex flex-wrap mt-2 gap-1.5">
                     <div
                       className={cn(
-                        "rounded-full border flex items-center gap-1 px-2 py-0.5",
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1",
                         getThesisTypeColorClassName(result.thesisTypeName)
                       )}
                     >
                       <ThesisTypeIcon
                         variant={result.thesisTypeName}
-                        className="size-3.5 -ml-0.5 -my-1"
+                        className="size-3.5 -ml-0.5 -my-2"
                       />
-                      <p className="text-sm leading-tight font-semibold">
+                      <p className="shrink min-w-0 text-sm leading-none font-medium">
                         {result.thesisTypeName}
+                      </p>
+                    </div>
+                    <div
+                      className={cn(
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground"
+                      )}
+                    >
+                      <LanguageIcon
+                        variant={result.languageName}
+                        className="size-3.5 -ml-0.75 -my-2 rounded-full overflow-hidden"
+                      />
+                      <p className="shrink min-w-0 text-sm leading-none font-medium">
+                        {result.languageName}
+                      </p>
+                    </div>
+                    <div
+                      className={cn(
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="size-3.5 -ml-0.75 -my-2" />
+                      <p className="shrink min-w-0 text-sm leading-none font-medium">
+                        {result.year}
+                      </p>
+                    </div>
+                    <div
+                      className={cn(
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground"
+                      )}
+                    >
+                      <LandmarkIcon className="size-3.5 -ml-0.75 -my-2" />
+                      <p className="shrink min-w-0 text-sm leading-none font-medium">
+                        {result.universityName}
                       </p>
                     </div>
                   </div>

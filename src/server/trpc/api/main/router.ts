@@ -1,5 +1,5 @@
 import { SearchThesesSchema } from "@/components/search/types";
-import { getThesis, searchTheses } from "@/server/db/repo/theses";
+import { getThesis, searchTheses } from "@/server/db/repo/thesis";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/setup/trpc";
 import { z } from "zod";
 
