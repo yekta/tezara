@@ -177,7 +177,7 @@ export const thesesTable = pgTable(
       .references(() => institutesTable.id),
     departmentId: uuid("department_id").references(() => departmentsTable.id),
     branchId: uuid("branch_id").references(() => branchesTable.id),
-    type: varchar("type").notNull(),
+    thesisTypeId: uuid("thesis_type_id").references(() => thesisTypesTable.id),
     detailId1: varchar("detail_id_1").notNull(),
     detailId2: varchar("detail_id_2").notNull(),
     pageCount: integer("page_count").notNull(),
@@ -208,7 +208,7 @@ export const thesesTable = pgTable(
     instituteIdIdx: index("theses_institute_id_idx").on(table.instituteId),
     departmentIdIdx: index("theses_department_id_idx").on(table.departmentId),
     branchIdIdx: index("theses_branch_id_idx").on(table.branchId),
-    typeIdx: index("theses_type_idx").on(table.type),
+    thesisTypeIdIdx: index("theses_thesis_type_id_idx").on(table.thesisTypeId),
     createdAtIdx: index("theses_created_at_idx").on(table.createdAt),
     updatedAtIdx: index("theses_updated_at_idx").on(table.updatedAt),
     deletedAtIdx: index("theses_deleted_at_idx").on(table.deletedAt),
@@ -277,6 +277,11 @@ export const authorsRelations = relations(authorsTable, ({ many }) => ({
   theses: many(thesesTable),
 }));
 
+// Thesis Type relations
+export const thesisTypesRelations = relations(thesisTypesTable, ({ many }) => ({
+  theses: many(thesesTable),
+}));
+
 // Advisor relations
 export const advisorsRelations = relations(advisorsTable, ({ many }) => ({
   thesisAdvisors: many(thesisAdvisorsTable),
@@ -320,6 +325,10 @@ export const thesesRelations = relations(thesesTable, ({ one, many }) => ({
   author: one(authorsTable, {
     fields: [thesesTable.authorId],
     references: [authorsTable.id],
+  }),
+  thesisType: one(thesisTypesTable, {
+    fields: [thesesTable.thesisTypeId],
+    references: [thesisTypesTable.id],
   }),
   language: one(languagesTable, {
     fields: [thesesTable.languageId],

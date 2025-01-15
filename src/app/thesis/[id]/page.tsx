@@ -26,6 +26,7 @@ export default async function Page({ params }: Props) {
   const noBranch = "Bilim dalı belirtilmemiş.";
   const noTitle = "Başlık mevcut değil.";
   const noTranslatedTitle = "Başlık çevirisi mevcut değil.";
+  const noThesisType = "Tez türü belirtilmemiş.";
 
   return (
     <div className="w-full flex flex-col items-center text-lg">
@@ -64,7 +65,7 @@ export default async function Page({ params }: Props) {
           )}
           <Button size="sm" variant="success" disabled>
             <FileExtensionIcon className="size-5 -ml-1.5" variant="csv" />
-            <p className="shrink min-w-0">CSV İndir</p>
+            <p className="shrink min-w-0">Tablo İndir</p>
           </Button>
           <Button size="sm" disabled>
             <FileExtensionIcon className="size-5 -ml-1.5" variant="json" />
@@ -106,7 +107,7 @@ export default async function Page({ params }: Props) {
               Tez Türü:{" "}
             </span>
             <span className="font-bold" id="thesis_type">
-              {thesis.type}
+              {thesis.thesisType?.name || noThesisType}
             </span>
           </p>
           <Divider />

@@ -7,9 +7,10 @@ import {
   institutesTable,
   languagesTable,
   thesesTable,
+  thesisTypesTable,
   universitiesTable,
 } from "@/server/db/schema";
-import { desc, eq, ilike, or, sql } from "drizzle-orm";
+import { desc, eq, ilike, or, SQL, sql } from "drizzle-orm";
 
 const rowLimit = 100;
 
@@ -25,7 +26,6 @@ export async function getThesis({ id }: { id: number }) {
       detailId1: true,
       detailId2: true,
       pdfUrl: true,
-      type: true,
       year: true,
     },
     with: {
@@ -54,6 +54,12 @@ export async function getThesis({ id }: { id: number }) {
         },
       },
       institute: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
+      thesisType: {
         columns: {
           id: true,
           name: true,
@@ -96,6 +102,26 @@ export async function getThesis({ id }: { id: number }) {
 export async function searchTheses(input: TSearchThesesSchema) {
   const { query } = input;
 
+  let queryFilters: SQL[] = [];
+
+  if (query) {
+    queryFilters.push(
+      // (1) Full-text search on Turkish title
+      sql`to_tsvector('turkish', ${thesesTable.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
+      // (2) Full-text search on English title
+      sql`to_tsvector('english', ${thesesTable.titleForeign}) @@ phraseto_tsquery('english', ${query})`,
+      // (3) ILIKE match on the author’s name
+      ilike(authorsTable.name, `%${query}%`),
+      // (4) ILIKE match on any advisor’s name (sub-select)
+      sql`"theses"."id" IN (
+        SELECT ta."thesis_id"
+        FROM "thesis_advisors" ta
+        JOIN "advisors" adv ON ta."advisor_id" = adv."id"
+        WHERE adv."name" ILIKE ${"%" + query + "%"}
+      )`
+    );
+  }
+
   const result = await db
     .select({
       // === Main Thesis Columns ===
@@ -108,7 +134,6 @@ export async function searchTheses(input: TSearchThesesSchema) {
       detailId1: thesesTable.detailId1,
       detailId2: thesesTable.detailId2,
       pdfUrl: thesesTable.pdfUrl,
-      type: thesesTable.type,
       year: thesesTable.year,
 
       // === Related Entities (1-to-1 or many-to-1) ===
@@ -129,6 +154,9 @@ export async function searchTheses(input: TSearchThesesSchema) {
 
       departmentId: departmentsTable.id,
       departmentName: departmentsTable.name,
+
+      thesisTypeId: thesisTypesTable.id,
+      thesisTypeName: thesisTypesTable.name,
 
       // === Advisors (JSON Aggregation) ===
       advisors: sql<{ id: string; name: string }[]>`(
@@ -158,27 +186,11 @@ export async function searchTheses(input: TSearchThesesSchema) {
       departmentsTable,
       eq(thesesTable.departmentId, departmentsTable.id)
     )
-
-    .where(
-      or(
-        // (1) Full-text search on Turkish title
-        sql`to_tsvector('turkish', ${thesesTable.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
-
-        // (2) Full-text search on English title
-        sql`to_tsvector('english', ${thesesTable.titleForeign}) @@ phraseto_tsquery('english', ${query})`,
-
-        // (3) ILIKE match on the author’s name
-        ilike(authorsTable.name, `%${query}%`),
-
-        // (4) ILIKE match on any advisor’s name (sub-select)
-        sql`"theses"."id" IN (
-          SELECT ta."thesis_id"
-          FROM "thesis_advisors" ta
-          JOIN "advisors" adv ON ta."advisor_id" = adv."id"
-          WHERE adv."name" ILIKE ${"%" + query + "%"}
-        )`
-      )
+    .leftJoin(
+      thesisTypesTable,
+      eq(thesesTable.thesisTypeId, thesisTypesTable.id)
     )
+    .where(or(...queryFilters))
     .orderBy(desc(thesesTable.id))
     .limit(rowLimit);
 

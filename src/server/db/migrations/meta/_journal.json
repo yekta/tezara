@@ -29,6 +29,20 @@
       "when": 1736937798745,
       "tag": "0003_yellow_silver_samurai",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1736938210817,
+      "tag": "0004_cynical_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1736938614009,
+      "tag": "0005_true_master_mold",
+      "breakpoints": true
     }
   ]
 }
