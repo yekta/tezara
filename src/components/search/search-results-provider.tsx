@@ -6,6 +6,12 @@ import { usePathname } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import React, { createContext, ReactNode, useContext } from "react";
 
+type TSearchResultsContext = AppRouterQueryResult<
+  AppRouterOutputs["main"]["searchTheses"]
+> & {
+  bulkDownload: () => Promise<AppRouterOutputs["main"]["searchTheses"]>;
+};
+
 const SearchResultsContext = createContext<TSearchResultsContext | null>(null);
 
 export const SearchResultsProvider: React.FC<{
@@ -23,13 +29,25 @@ export const SearchResultsProvider: React.FC<{
     {
       initialData,
       enabled: isSearchResultsPath,
+      staleTime: 60 * 1000,
     }
   );
+  const utils = api.useUtils();
 
   return (
     <SearchResultsContext.Provider
       value={{
         ...searchThesesQuery,
+        bulkDownload: () =>
+          utils.main.searchTheses.fetch(
+            {
+              query,
+              bulk: true,
+            },
+            {
+              staleTime: 60 * 1000,
+            }
+          ),
       }}
     >
       {children}
@@ -48,7 +66,3 @@ export const useSearchResults = () => {
 };
 
 export default SearchResultsProvider;
-
-type TSearchResultsContext = AppRouterQueryResult<
-  AppRouterOutputs["main"]["searchTheses"]
-> & {};

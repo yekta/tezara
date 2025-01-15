@@ -114,6 +114,9 @@ const config: Config = {
         250: "250ms",
         2000: "2000ms",
         5000: "5000ms",
+        30000: "30000ms",
+        45000: "45000ms",
+        60000: "60000ms",
       },
       fontSize: {
         xxs: ["0.625rem", "1rem"],
@@ -203,6 +206,7 @@ const config: Config = {
       skeleton: "skeleton 1.25s ease-in-out infinite",
       "pulse-scale": "pulse-scale 1s ease-in-out infinite",
       spin: "spin 1s linear infinite",
+      "loading-bar": "loading-bar 30s linear infinite",
     },
     keyframes: {
       skeleton: {
@@ -214,6 +218,14 @@ const config: Config = {
         },
         "100%": {
           opacity: "20%",
+        },
+      },
+      "loading-bar": {
+        "0%": {
+          transform: "scaleX(0%)",
+        },
+        "100%": {
+          transform: "scaleX(100%)",
         },
       },
       "pulse-scale": {

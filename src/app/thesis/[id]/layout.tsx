@@ -16,14 +16,14 @@ export default async function Layout({ params, children }: Props) {
       <Sidebar
         currentThesisId={Number(id)}
         side="start"
-        className="pr-4 lg:pr-6 -mt-1 hidden md:flex"
+        className="pr-4 lg:pr-6 pt-0.5 hidden md:flex"
       />
       {children}
       {/* Md right */}
       <Sidebar
         currentThesisId={Number(id)}
         side="end"
-        className="pl-4 md:pl-6 -mt-1 hidden md:flex"
+        className="pl-4 md:pl-6 pt-0.5 hidden md:flex"
       />
       <NavigationSection id={id} className="md:hidden pt-6" />
     </div>

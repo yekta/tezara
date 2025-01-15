@@ -16,6 +16,7 @@ export type TQueryOn = z.infer<typeof QueryOnEnum>;
 export const queryOnValues: TQueryOn[] = QueryOnEnum.options;
 
 export const SearchThesesSchema = z.object({
+  bulk: z.boolean().optional(),
   query: z.string(),
   queryOn: z.array(QueryOnEnum).optional(),
   yearLte: z.number().optional(),

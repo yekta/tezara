@@ -4,25 +4,174 @@ import FileExtensionIcon from "@/components/icons/file-extension";
 import { useSearchResults } from "@/components/search/search-results-provider";
 import { Button, LinkButton } from "@/components/ui/button";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
-import Link from "next/link";
+import { useState } from "react";
+import { Parser } from "@json2csv/plainjs";
 
 type Props = {
   className?: string;
 };
 
+const TURKISH = "Türkçe";
+const emptyFieldText = "Yok";
+
 export default function SearchResults({}: Props) {
-  const { data, isPending, isLoadingError } = useSearchResults();
+  const { data, isPending, isLoadingError, bulkDownload } = useSearchResults();
+  const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
+  const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
+  const isPendingDownload = isPendingCsvDownload || isPendingJsonDownload;
+
+  function formatter(data: Awaited<ReturnType<typeof bulkDownload>>) {
+    const formattedData: Record<string, any>[] = [];
+    for (let i = 0; i < data.length; i++) {
+      const result = data[i];
+      formattedData.push({
+        "Tez No": result.id,
+        "Başlık (Orijinal)":
+          result.languageName === TURKISH
+            ? result.titleTurkish || emptyFieldText
+            : result.titleForeign || emptyFieldText,
+        "Başlık (Çeviri)":
+          result.languageName === TURKISH
+            ? result.titleForeign || emptyFieldText
+            : result.titleTurkish || emptyFieldText,
+        "Özet (Orijinal)":
+          result.languageName === TURKISH
+            ? result.abstractTurkish || emptyFieldText
+            : result.abstractForeign || emptyFieldText,
+        "Özet (Çeviri)":
+          result.languageName === TURKISH
+            ? result.abstractForeign || emptyFieldText
+            : result.abstractTurkish || emptyFieldText,
+        Yazar: result.authorName || emptyFieldText,
+        Üniversite: result.universityName || emptyFieldText,
+        Enstitü: result.instituteName || emptyFieldText,
+        "Ana Bilim Dalı": result.departmentName || emptyFieldText,
+        "Bilim Dalı": result.branchName || emptyFieldText,
+        "Tez Türü": result.thesisTypeName || emptyFieldText,
+        Danışmanlar:
+          result.advisors.length > 0
+            ? result.advisors.map((advisor) => advisor.name).join(", ")
+            : emptyFieldText,
+        Yıl: result.year || emptyFieldText,
+        "Safya Sayısı": result.pageCount || emptyFieldText,
+        Dil: result.languageName || emptyFieldText,
+        "PDF Linki": result.pdfUrl || emptyFieldText,
+      });
+    }
+    return formattedData;
+  }
+
+  async function downloadCsv() {
+    setIsPendingDownload(true);
+    try {
+      const res = await bulkDownload();
+      const formatted = formatter(res);
+      const parser = new Parser();
+      const csv = parser.parse(formatted);
+
+      // Convert CSV to a Blob
+      const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+      // Create a temporary anchor element
+      const downloadLink = document.createElement("a");
+      downloadLink.href = URL.createObjectURL(csvBlob);
+      downloadLink.download = `search-results-${Date.now()}.csv`;
+
+      // Trigger the download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      // Clean up
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(downloadLink.href);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsPendingDownload(false);
+    }
+  }
+
+  async function downloadJson() {
+    setIsPendingJsonDownload(true);
+    try {
+      const res = await bulkDownload();
+      const formatted = formatter(res);
+      // Convert the formatted JSON to a Blob
+      const jsonBlob = new Blob([JSON.stringify(formatted, null, 2)], {
+        type: "application/json",
+      });
+
+      // Create a temporary anchor element
+      const downloadLink = document.createElement("a");
+      downloadLink.href = URL.createObjectURL(jsonBlob);
+      downloadLink.download = `search-results-${Date.now()}.json`; // File name
+
+      // Trigger the download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      // Clean up
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(downloadLink.href);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsPendingJsonDownload(false);
+    }
+  }
+
   return (
     <div className="w-full flex flex-col">
       {data && data.length > 0 && (
         <div className="w-full flex flex-wrap items-start mt-6 gap-1.5">
-          <Button size="sm" variant="success">
-            <FileExtensionIcon className="size-5 -ml-1.5" variant="csv" />
-            <p className="shrink min-w-0">Tablo Olarak İndir</p>
+          <Button
+            onClick={() => downloadCsv()}
+            disabled={isPendingCsvDownload || isPendingDownload}
+            size="sm"
+            variant="success"
+            fadeOnDisabled={isPendingCsvDownload ? false : true}
+            className={
+              isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
+            }
+          >
+            {isPendingCsvDownload && (
+              <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
+            )}
+            <div className="size-5 -ml-1.5 relative">
+              {!isPendingCsvDownload && (
+                <FileExtensionIcon className="size-full" variant="csv" />
+              )}
+              {isPendingCsvDownload && (
+                <LoaderIcon className="size-full animate-spin" />
+              )}
+            </div>
+            <p className="shrink min-w-0 relative">
+              {isPendingCsvDownload ? "İndiriliyor" : "Tablo Olarak İndir"}
+            </p>
           </Button>
-          <Button size="sm">
-            <FileExtensionIcon className="size-5 -ml-1.5" variant="json" />
-            <p className="shrink min-w-0">JSON Olarak İndir</p>
+          <Button
+            onClick={() => downloadJson()}
+            disabled={isPendingJsonDownload || isPendingDownload}
+            size="sm"
+            fadeOnDisabled={isPendingJsonDownload ? false : true}
+            className={
+              isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
+            }
+          >
+            {isPendingJsonDownload && (
+              <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
+            )}
+            <div className="size-5 -ml-1.5 relative">
+              {!isPendingJsonDownload && (
+                <FileExtensionIcon className="size-full" variant="json" />
+              )}
+              {isPendingJsonDownload && (
+                <LoaderIcon className="size-full animate-spin" />
+              )}
+            </div>
+            <p className="shrink min-w-0 relative">
+              {isPendingJsonDownload ? "İndiriliyor" : "JSON Olarak İndir"}
+            </p>
           </Button>
         </div>
       )}

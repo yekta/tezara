@@ -8,7 +8,7 @@ export default function NotFound() {
   const id = pathname.split("/").pop();
 
   return (
-    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col items-center flex-1 md:pt-4 pb-32">
+    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col items-center flex-1 md:pt-2 pb-32">
       {/* Title */}
       <h1
         id="title"

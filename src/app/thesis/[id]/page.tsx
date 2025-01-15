@@ -31,7 +31,7 @@ export default async function Page({ params }: Props) {
   const noThesisType = "Tez türü belirtilmemiş.";
 
   return (
-    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-4 pb-32">
+    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-32">
       {/* Title */}
       <h1 id="title" className="font-bold text-2xl text-balance leading-tight">
         {thesis?.language.name === TURKISH

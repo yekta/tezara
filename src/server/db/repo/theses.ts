@@ -13,6 +13,7 @@ import {
 import { desc, eq, ilike, or, SQL, sql } from "drizzle-orm";
 
 const rowLimit = 100;
+const bulkRowLimit = 10000;
 
 export async function getThesis({ id }: { id: number }) {
   const result = await db.query.thesesTable.findFirst({
@@ -100,7 +101,7 @@ export async function getThesis({ id }: { id: number }) {
 }
 
 export async function searchTheses(input: TSearchThesesSchema) {
-  const { query } = input;
+  const { query, bulk } = input;
 
   const queryFilters: SQL[] = [];
 
@@ -192,7 +193,7 @@ export async function searchTheses(input: TSearchThesesSchema) {
     )
     .where(or(...queryFilters))
     .orderBy(desc(thesesTable.id))
-    .limit(rowLimit);
+    .limit(bulk ? bulkRowLimit : rowLimit);
 
   return result;
 }
