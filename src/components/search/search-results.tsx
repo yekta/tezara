@@ -191,18 +191,18 @@ export default function SearchResults({}: Props) {
         </div>
       )}
       <div className="w-full flex flex-col">
-        {isPending && (
+        {!data && isPending && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
             <LoaderIcon className="size-7 animate-spin" />
-            <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
+            <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Aranıyor...
             </p>
           </div>
         )}
-        {isLoadingError && (
+        {!data && !isPending && isLoadingError && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />
-            <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
+            <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Birşeyler ters gitti
             </p>
           </div>
@@ -210,7 +210,7 @@ export default function SearchResults({}: Props) {
         {data && data.length === 0 && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
             <SearchIcon className="size-7" />
-            <p className="w-full text-balance text-center mt-1.5 font-medium leading-tight">
+            <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Sonuç bulunamadı
             </p>
           </div>

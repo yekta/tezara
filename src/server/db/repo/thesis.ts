@@ -12,7 +12,7 @@ import {
 } from "@/server/db/schema";
 import { desc, eq, ilike, or, SQL, sql } from "drizzle-orm";
 
-const rowLimit = 100;
+const rowLimit = 200;
 const bulkRowLimit = 10000;
 
 export async function getThesis({ id }: { id: number }) {
