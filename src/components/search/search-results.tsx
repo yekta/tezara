@@ -9,6 +9,7 @@ import {
   LoaderIcon,
   SearchIcon,
   TriangleAlertIcon,
+  XIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Parser } from "@json2csv/plainjs";
@@ -26,6 +27,7 @@ type Props = {
 const TURKISH = "Türkçe";
 const emptyFieldText = "Yok";
 const noTitle = "Başlık Yok";
+const noTranslatedTitle = "Çeviri Yok";
 
 export default function SearchResults({}: Props) {
   const { data, isPending, isLoadingError, bulkDownload } = useSearchResults();
@@ -222,27 +224,62 @@ export default function SearchResults({}: Props) {
                 key={result.id}
                 className="pt-3 pb-4 first-of-type:border-t border-b flex flex-row items-start gap-4"
               >
-                <LinkButton
-                  variant="ghost"
-                  href={`/thesis/${result.id}`}
-                  className="flex -mt-0.5 flex-col shrink-0 min-w-12 text-xs font-mono justify-start items-start gap-0.5 px-1.5 py-1 rounded-md"
-                >
-                  <p className="flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
-                    Tez No
-                  </p>
-                  <p className="flex-1 min-w-0 font-bold">{result.id}</p>
-                </LinkButton>
+                <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
+                  <LinkButton
+                    variant="ghost"
+                    href={`/thesis/${result.id}`}
+                    className="flex shrink flex-col text-xs font-mono justify-start items-start gap-0.5 px-1.5 py-1 rounded-md"
+                  >
+                    <p className="flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
+                      Tez No
+                    </p>
+                    <p className="flex-1 min-w-0 font-bold">{result.id}</p>
+                  </LinkButton>
+                  {result.pdfUrl ? (
+                    <LinkButton
+                      target="_blank"
+                      href={result.pdfUrl}
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-lg text-destructive"
+                    >
+                      <FileExtensionIcon variant="pdf" className="size-7" />
+                    </LinkButton>
+                  ) : (
+                    <Button
+                      size="icon"
+                      className="rounded-lg text-destructive"
+                      disabled
+                      variant="ghost"
+                    >
+                      <FileExtensionIcon variant="pdf" className="size-7" />
+                      <XIcon
+                        strokeWidth={3}
+                        className="size-3.75 absolute right-0.5 top-0.5 bg-background rounded-full"
+                      />
+                    </Button>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0 flex flex-col">
                   <Link
                     href={`/thesis/${result.id}`}
-                    className="text-base font-semibold leading-snug not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
+                    className="text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
                   >
                     {result.languageName === TURKISH
                       ? result.titleTurkish || noTitle
                       : result.titleForeign || noTitle}
                   </Link>
-                  <p className="text-base leading-snug">{result.authorName}</p>
-                  <div className="w-full flex flex-wrap mt-2 gap-1.5">
+                  <p className="mt-1 text-sm leading-tight font-medium text-muted-foreground">
+                    {result.languageName === TURKISH
+                      ? result.titleForeign || noTranslatedTitle
+                      : result.titleTurkish || noTranslatedTitle}
+                  </p>
+                  <div className="w-full flex mt-2">
+                    <p className="shrink min-w-0 text-base leading-snug">
+                      {result.authorName}
+                    </p>
+                  </div>
+                  <div className="w-full flex flex-wrap mt-3 gap-1.5">
                     <div
                       className={cn(
                         "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1",
@@ -280,16 +317,19 @@ export default function SearchResults({}: Props) {
                         {result.year}
                       </p>
                     </div>
-                    <div
+                    <Link
+                      href={`/university/${result.universityName}`}
                       className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground"
+                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/16 text-foreground",
+                        "not-touch:hover:bg-foreground/16 active:bg-foreground/16",
+                        "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       )}
                     >
                       <LandmarkIcon className="size-3.5 -ml-0.75 -my-2" />
                       <p className="shrink min-w-0 text-sm leading-none font-medium">
                         {result.universityName}
                       </p>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </div>

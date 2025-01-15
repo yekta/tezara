@@ -77,12 +77,12 @@ export default function LanguageIcon({
       >
         <defs>
           <clipPath id="sa-a">
-            <path fill-opacity=".7" d="M124 0h496v496H124z" />
+            <path fillOpacity=".7" d="M124 0h496v496H124z" />
           </clipPath>
         </defs>
         <g
           fillRule="evenodd"
-          clip-path="url(#sa-a)"
+          clipPath="url(#sa-a)"
           transform="translate(-128)scale(1.0321)"
         >
           <path fill="#165d31" d="M0 0h744v496H0z" />

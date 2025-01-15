@@ -1,7 +1,6 @@
 import Logo from "@/components/logo/logo";
 import SearchBox from "@/components/search/search-input";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
-import { Suspense } from "react";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -16,9 +15,7 @@ export default async function Home({ searchParams }: Props) {
           <div className="w-full flex items-center justify-center px-4">
             <Logo variant="full" className="w-32 max-w-full h-auto" />
           </div>
-          <Suspense>
-            <SearchBox className="mt-6" variant="home" />
-          </Suspense>
+          <SearchBox className="mt-6" variant="home" />
         </div>
       </div>
     </div>
