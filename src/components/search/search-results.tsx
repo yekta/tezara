@@ -51,15 +51,28 @@ export default function SearchResults({}: Props) {
           </div>
         )}
         {data && data.length > 0 && (
-          <div className="w-full flex flex-col overflow-auto py-3">
+          <div className="w-full flex flex-col overflow-auto mt-6">
             {data.map((result) => (
-              <div key={result.id} className="py-3 border-b flex flex-col">
-                <p className="text-base font-semibold leading-snug">
-                  {result.titleTurkish}
-                </p>
-                <p className="text-base mt-1 leading-snug">
-                  {result.authorName}
-                </p>
+              <div
+                key={result.id}
+                className="py-3 first-of-type:border-t border-b flex flex-row items-start gap-4"
+              >
+                <div className="flex flex-col shrink-0 min-w-12 text-xs font-mono">
+                  <p className="flex-1 min-w-0 font-medium font-sans text-muted-foreground">
+                    Tez No
+                  </p>
+                  <p className="flex-1 min-w-0 font-semibold mt-0.5">
+                    {result.id}
+                  </p>
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col">
+                  <p className="text-base font-semibold leading-snug">
+                    {result.titleTurkish}
+                  </p>
+                  <p className="text-base mt-1 leading-snug">
+                    {result.authorName}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
