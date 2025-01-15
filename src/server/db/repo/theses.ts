@@ -102,7 +102,7 @@ export async function getThesis({ id }: { id: number }) {
 export async function searchTheses(input: TSearchThesesSchema) {
   const { query } = input;
 
-  let queryFilters: SQL[] = [];
+  const queryFilters: SQL[] = [];
 
   if (query) {
     queryFilters.push(
