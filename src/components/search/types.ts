@@ -17,7 +17,7 @@ export const queryOnValues: TQueryOn[] = QueryOnEnum.options;
 
 export const SearchThesesSchema = z.object({
   query: z.string(),
-  queryOn: QueryOnEnum,
+  queryOn: z.array(QueryOnEnum).optional(),
   yearLte: z.number().optional(),
   yearGte: z.number().optional(),
   languages: z.array(z.string()).optional(),

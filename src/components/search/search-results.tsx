@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchResults } from "@/components/providers/search-results-provider";
+import { useSearchResults } from "@/components/search/search-results-provider";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
 
 type Props = {
@@ -42,9 +42,7 @@ export default function SearchResults({}: Props) {
               <p className="text-base font-semibold leading-snug">
                 {result.titleTurkish}
               </p>
-              <p className="text-base mt-1 leading-snug">
-                {result.author.name}
-              </p>
+              <p className="text-base mt-1 leading-snug">{result.authorName}</p>
             </div>
           ))}
         </div>

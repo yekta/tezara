@@ -1,4 +1,4 @@
-import SearchResultsProvider from "@/components/providers/search-results-provider";
+import SearchResultsProvider from "@/components/search/search-results-provider";
 import SearchBox from "@/components/search/search-input";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import SearchResults from "@/components/search/search-results";

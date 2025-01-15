@@ -19,7 +19,6 @@ export const SearchResultsProvider: React.FC<{
   const searchThesesQuery = api.main.searchTheses.useQuery(
     {
       query,
-      queryOn: "title",
     },
     {
       initialData,
