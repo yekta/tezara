@@ -9,8 +9,9 @@ export default async function Navbar({}: { className?: string }) {
       <div className="flex flex-1 min-w-0 items-center justify-start gap-1.25 md:gap-1.5">
         <NavigationMenuItem asChild>
           <LinkButton
-            className="border-none p-1.75"
-            variant="outline"
+            className="p-1.75 size-auto rounded-lg"
+            size="icon"
+            variant="ghost"
             aria-label="Home"
             href="/"
           >

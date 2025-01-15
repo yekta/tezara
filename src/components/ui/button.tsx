@@ -39,7 +39,7 @@ const buttonVariants = cva(
         default: "px-5 py-2.75",
         sm: "px-4 py-2 text-sm",
         lg: "px-9 py-2.5",
-        icon: "size-9",
+        icon: "size-9 shrink-0",
       },
       state: {
         default: "",
