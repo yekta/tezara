@@ -1,3 +1,4 @@
+import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { Button, LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
@@ -29,7 +30,7 @@ export default async function Page({ params }: Props) {
   const noThesisType = "Tez türü belirtilmemiş.";
 
   return (
-    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-32">
+    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20">
       {/* Title */}
       <h1 id="title" className="font-bold text-2xl text-balance leading-tight">
         {thesis?.language.name === TURKISH
@@ -184,6 +185,10 @@ export default async function Page({ params }: Props) {
             : thesis.abstractTurkish || noTranslatedAbstractText}
         </p>
       </div>
+      <NavigationSection
+        id={thesis.id.toString()}
+        className="md:hidden pb-4 mt-8"
+      />
     </div>
   );
 }
