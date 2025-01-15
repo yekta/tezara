@@ -7,7 +7,7 @@ type Props = {
   className?: string;
 };
 
-export default function SearchResults({ className }: Props) {
+export default function SearchResults({}: Props) {
   const { data, isPending, isLoadingError } = useSearchResults();
   return (
     <div className="w-full flex flex-col">

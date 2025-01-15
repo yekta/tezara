@@ -85,19 +85,7 @@ export async function getThesis({ id }: { id: number }) {
 }
 
 export async function searchTheses(input: TSearchThesesSchema) {
-  const {
-    query,
-    authors,
-    branches,
-    languages,
-    universities,
-    institutes,
-    departments,
-    advisors,
-    thesisTypes,
-    yearLte,
-    yearGte,
-  } = input;
+  const { query } = input;
 
   const result = await db.query.thesesTable.findMany({
     columns: {
@@ -174,7 +162,7 @@ export async function searchTheses(input: TSearchThesesSchema) {
       },
     },
     where(fields, { or }) {
-      let filters = or(
+      const filters = or(
         sql`to_tsvector('turkish', ${fields.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
         sql`to_tsvector('english', ${fields.titleForeign}) @@ phraseto_tsquery('english', ${query})`
       );
