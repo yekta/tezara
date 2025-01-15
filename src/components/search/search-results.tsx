@@ -21,7 +21,7 @@ export default function SearchResults({}: Props) {
   const isPendingDownload = isPendingCsvDownload || isPendingJsonDownload;
 
   function formatter(data: Awaited<ReturnType<typeof bulkDownload>>) {
-    const formattedData: Record<string, any>[] = [];
+    const formattedData: Record<string, string | number>[] = [];
     for (let i = 0; i < data.length; i++) {
       const result = data[i];
       formattedData.push({

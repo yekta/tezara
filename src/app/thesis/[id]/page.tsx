@@ -1,10 +1,8 @@
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { Button, LinkButton } from "@/components/ui/button";
-import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { apiServerStatic } from "@/server/trpc/setup/server";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
