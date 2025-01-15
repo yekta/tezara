@@ -22,7 +22,7 @@ Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
 Notlar:
 
-- Bu proje, [Dr. Öğr. Üyesi Kemal Demir](https://ubs.yalova.edu.tr/ABPDS/AcademicInformation/BilgiGoruntulemev2/Index?pid=U2bdP510gBlFktL3iVOXsQ!xGGx!!xGGx!) hocanın "İnsan Kaynakları Yönetimi ve Uygulamaları" dersinin final ödevini yaparken 3500 tezi filterelip indirmem gerekmesi sebebiyle geliştirilmiştir.
+- Bu proje, [Dr. Öğr. Üyesi Kemal Demir](https://ubs.yalova.edu.tr/ABPDS/AcademicInformation/BilgiGoruntulemev2/Index?pid=U2bdP510gBlFktL3iVOXsQ!xGGx!!xGGx!) hocanın "İnsan Kaynakları Yönetimi ve Uygulamaları" dersinin final ödevini yaparken 3500 tezi filtreleyip indirmem gerekmesi sebebiyle geliştirilmiştir.
 
 - Proje'nin YÖK ile herhangi bir bağlantısı yoktur.
 
