@@ -26,7 +26,7 @@ The differences between Tezara and YÖK's system are as follows (🟢 = Done, �
 - 🟢 You can download search results, including abstracts, in bulk as a CSV table and JSON (without the restriction of 2000 thesis in YÖK's system).
 - 🟢 You can access the metadata page of each thesis at `tezara.org/thesis/{Thesis No}`. For example: [tezara.org/thesis/146683](https://tezara.org/thesis/146683)
 - 🟢 Unlike YÖK's system, all functions of Tezara can be easily used on mobile devices.
-- 🟡 You can access the pages where each university's own theses and statistics are at `tezara.org/university/{University Name}`. For example: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
+- 🟡 You can access each university's own page with their theses and statistics at `tezara.org/university/{University Name}`. For example: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
 - 🟡 You can search in natural language without manually using the filtering features. For example: "Master's theses made between 2020 and 2015, and including sociology in the name". You can see an example of this by visiting this link: [Tezara natural search mode](https://tezara.org/search?q=2020%20ve%202015%20y%C4%B1llar%C4%B1%20aras%C4%B1nda%20yap%C4%B1lm%C4%B1%C5%9F,%20ad%C4%B1nda%20sosyoloji%20ge%C3%A7en%20y%C3%BCksek%20lisans%20tezleri&fcall=true)
 
 Notes:
