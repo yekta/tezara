@@ -285,12 +285,9 @@ export default function SearchInput({
                 <div className="size-5 -ml-1 transform transition">
                   <BroomIcon className="size-full" />
                 </div>
-                <p className="shrink min-w-0">
-                  Temizle
-                  <span className="text-warning/75 font-medium text-sm">
-                    {" "}
-                    ({totalSelectedCount})
-                  </span>
+                <p className="shrink min-w-0">Temizle</p>
+                <p className="shrink-0 -ml-0.25 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                  {totalSelectedCount}
                 </p>
               </Button>
             )}
@@ -307,15 +304,17 @@ export default function SearchInput({
                       className="w-full"
                       Icon={LandmarkIcon}
                       commandButtonText={
-                        <>
-                          Üniversite
+                        <div className="flex-1 min-w-0 flex items-center">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden">
+                            Üniversite
+                          </p>
                           {selectedUniversities &&
                             selectedUniversities.length > 0 && (
-                              <span className="text-muted-foreground font-medium">
-                                {` (${selectedUniversities.length})`}
-                              </span>
+                              <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                                {selectedUniversities.length}
+                              </p>
                             )}
-                        </>
+                        </div>
                       }
                       commandInputPlaceholder="Üniversite ara..."
                       commandEmptyText="Eşleşen yok"
@@ -343,15 +342,17 @@ export default function SearchInput({
                       Icon={ScrollTextIcon}
                       IconSetForItem={ThesisTypeIcon}
                       commandButtonText={
-                        <>
-                          Tez Türü
+                        <div className="flex-1 min-w-0 flex items-center">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden">
+                            Tez Türü
+                          </p>
                           {selectedThesisTypes &&
                             selectedThesisTypes.length > 0 && (
-                              <span className="text-muted-foreground font-medium">
-                                {` (${selectedThesisTypes.length})`}
-                              </span>
+                              <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                                {selectedThesisTypes.length}
+                              </p>
                             )}
-                        </>
+                        </div>
                       }
                       commandInputPlaceholder="Tez ürü ara..."
                       commandEmptyText="Eşleşen yok"
@@ -380,15 +381,17 @@ export default function SearchInput({
                       IconSetForItem={LanguageIcon}
                       iconSetForItemClassName="rounded-full"
                       commandButtonText={
-                        <>
-                          Dil
+                        <div className="flex-1 min-w-0 flex items-center">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden">
+                            Dil
+                          </p>
                           {selectedLanguages &&
                             selectedLanguages.length > 0 && (
-                              <span className="text-muted-foreground font-medium">
-                                {` (${selectedLanguages.length})`}
-                              </span>
+                              <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                                {selectedLanguages.length}
+                              </p>
                             )}
-                        </>
+                        </div>
                       }
                       commandInputPlaceholder="Dil ara..."
                       commandEmptyText="Eşleşen yok"
