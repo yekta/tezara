@@ -51,7 +51,7 @@ export default function SearchInput({ className, variant }: Props) {
   useEffect(() => {
     if (variant !== "home") return;
     setQuery(queryInput);
-  }, [queryInput]);
+  }, [queryInput, variant, setQuery]);
 
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
