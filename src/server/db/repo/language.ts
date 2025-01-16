@@ -1,7 +1,7 @@
 import { db } from "@/server/db/db";
 
-export async function getThesisTypes() {
-  const result = await db.query.thesisTypesTable.findMany({
+export async function getLanguages() {
+  const result = await db.query.languagesTable.findMany({
     columns: {
       id: true,
       name: true,

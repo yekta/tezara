@@ -10,7 +10,7 @@ import {
   thesisTypesTable,
   universitiesTable,
 } from "@/server/db/schema";
-import { desc, eq, ilike, or, SQL, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, SQL, sql } from "drizzle-orm";
 
 const rowLimit = 200;
 const bulkRowLimit = 10000;
@@ -101,9 +101,12 @@ export async function getThesis({ id }: { id: number }) {
 }
 
 export async function searchTheses(input: TSearchThesesSchema) {
-  const { query, bulk } = input;
+  const { query, bulk, universities, languages, thesisTypes } = input;
 
   let queryFilters: SQL<unknown> | undefined = undefined;
+  let universityFilters: SQL<unknown> | undefined = undefined;
+  let languageFilters: SQL<unknown> | undefined = undefined;
+  let thesisTypeFilters: SQL<unknown> | undefined = undefined;
 
   if (query) {
     queryFilters = or(
@@ -116,6 +119,26 @@ export async function searchTheses(input: TSearchThesesSchema) {
         JOIN "advisors" adv ON ta."advisor_id" = adv."id"
         WHERE adv."name" ILIKE ${"%" + query + "%"}
       )`
+    );
+  }
+
+  if (universities && universities.length) {
+    universityFilters = or(
+      ...universities.map((university) =>
+        eq(universitiesTable.name, university)
+      )
+    );
+  }
+
+  if (languages && languages.length) {
+    languageFilters = or(
+      ...languages.map((language) => eq(languagesTable.name, language))
+    );
+  }
+
+  if (thesisTypes && thesisTypes.length) {
+    thesisTypeFilters = or(
+      ...thesisTypes.map((thesisType) => eq(thesisTypesTable.name, thesisType))
     );
   }
 
@@ -187,7 +210,9 @@ export async function searchTheses(input: TSearchThesesSchema) {
       thesisTypesTable,
       eq(thesesTable.thesisTypeId, thesisTypesTable.id)
     )
-    .where(queryFilters)
+    .where(
+      and(queryFilters, universityFilters, languageFilters, thesisTypeFilters)
+    )
     .orderBy(desc(thesesTable.id))
     .limit(bulk ? bulkRowLimit : rowLimit);
 

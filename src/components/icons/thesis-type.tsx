@@ -4,6 +4,7 @@ import {
   GraduationCapIcon,
   PenToolIcon,
   SyringeIcon,
+  TestTubeDiagonalIcon,
   TrophyIcon,
 } from "lucide-react";
 import { ComponentProps } from "react";
@@ -15,6 +16,8 @@ type TVariant =
   | "Doktora"
   | "Tıpta Uzmanlık"
   | "Sanatta Yeterlik"
+  | "Diş Hekimliği Uzmanlık"
+  | "Tıpta Yan Dal Uzmanlık"
   | string
   | null;
 
@@ -49,6 +52,28 @@ export default function ThesisTypeIcon({
   }
   if (variant === "Sanatta Yeterlik") {
     return <BrushIcon className={cn(defaultClassName, className)} />;
+  }
+  if (variant === "Diş Hekimliği Uzmanlık") {
+    return (
+      <svg
+        className={cn(defaultClassName, className)}
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="2"
+          d="M12 4.38S13 3 16 3s5 2.5 5 5-1 4-2 7-1.5 6-3 6-1.5-6.5-4-6.5S9 21 8 21s-2-3-3-6-2-3-2-6 2.5-5.5 5.5-5.5S13 5 14 7"
+        />
+      </svg>
+    );
+  }
+  if (variant === "Tıpta Yan Dal Uzmanlık") {
+    return <TestTubeDiagonalIcon className={cn(defaultClassName, className)} />;
   }
   return <PenToolIcon className={cn(defaultClassName, className)} />;
 }

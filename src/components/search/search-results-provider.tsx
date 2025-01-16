@@ -3,7 +3,7 @@
 import { AppRouterOutputs, AppRouterQueryResult } from "@/server/trpc/api/root";
 import { api } from "@/server/trpc/setup/react";
 import { usePathname } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import React, { createContext, ReactNode, useContext } from "react";
 
 type TSearchResultsContext = AppRouterQueryResult<
@@ -22,9 +22,26 @@ export const SearchResultsProvider: React.FC<{
   const isSearchResultsPath = pathname.startsWith("/search");
 
   const [query] = useQueryState("q", parseAsString.withDefault(""));
+  const [languages] = useQueryState(
+    "languages",
+    parseAsArrayOf(parseAsString).withDefault([])
+  );
+  const [universities] = useQueryState(
+    "universities",
+    parseAsArrayOf(parseAsString).withDefault([])
+  );
+  const [thesisTypes] = useQueryState(
+    "thesis-types",
+    parseAsArrayOf(parseAsString).withDefault([])
+  );
+
   const searchThesesQuery = api.main.searchTheses.useQuery(
     {
       query,
+      languages: languages && languages.length ? languages : undefined,
+      universities:
+        universities && universities.length ? universities : undefined,
+      thesisTypes: thesisTypes && thesisTypes.length ? thesisTypes : undefined,
     },
     {
       initialData,

@@ -144,10 +144,12 @@ export const languagesTable = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name").notNull().unique(),
+    xOrder: integer("x_order"),
     ...timestamps,
   },
   (table) => ({
     nameIdx: index("languages_name_idx").on(table.name),
+    xOrderIdx: index("languages_x_order_idx").on(table.xOrder),
     createdAtIdx: index("languages_created_at_idx").on(table.createdAt),
     updatedAtIdx: index("languages_updated_at_idx").on(table.updatedAt),
     deletedAtIdx: index("languages_deleted_at_idx").on(table.deletedAt),
@@ -262,10 +264,12 @@ export const thesisTypesTable = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name").notNull().unique(),
+    xOrder: integer("x_order"),
     ...timestamps,
   },
   (table) => ({
     nameIdx: index("thesis_types_name_idx").on(table.name),
+    xOrderIdx: index("thesis_types_x_order_idx").on(table.xOrder),
     createdAtIdx: index("thesis_types_created_at_idx").on(table.createdAt),
     updatedAtIdx: index("thesis_types_updated_at_idx").on(table.updatedAt),
     deletedAtIfdx: index("thesis_types_deleted_at_idx").on(table.deletedAt),
