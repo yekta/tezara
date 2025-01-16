@@ -12,3 +12,5 @@ export const previewImages = {
 
 export const getPreviewUrl = (slug: string) =>
   `${env.NEXT_PUBLIC_SITE_URL}/${previewImages.path}/${previewImages.version}/${slug}.png`;
+
+export const TURKISH = "Türkçe";

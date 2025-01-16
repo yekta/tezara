@@ -1,13 +1,11 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { Button, LinkButton } from "@/components/ui/button";
-import { siteTitle } from "@/lib/constants";
+import { siteTitle, TURKISH } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { apiServerStatic } from "@/server/trpc/setup/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-
-const TURKISH = "Türkçe";
 
 type Props = {
   params: Promise<{ id: string }>;

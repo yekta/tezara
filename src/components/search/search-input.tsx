@@ -14,6 +14,7 @@ import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderIcon, SearchIcon, XIcon } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -36,6 +37,11 @@ export default function SearchInput({ className, variant }: Props) {
     },
   });
   const queryInput = form.watch("query");
+
+  useEffect(() => {
+    if (variant !== "home") return;
+    setQuery(queryInput);
+  }, [queryInput]);
 
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
@@ -70,6 +76,7 @@ export default function SearchInput({ className, variant }: Props) {
               <div className="w-full relative">
                 <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
+                  type="search"
                   disabled={isPendingAsyncPush}
                   className="w-full pl-8.5 pr-12 bg-background-hover"
                   placeholder="Tez, yazar, veya danışman ara..."
