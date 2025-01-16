@@ -108,20 +108,6 @@ export async function searchTheses(input: TSearchThesesSchema) {
   let languageFilters: SQL<unknown> | undefined = undefined;
   let thesisTypeFilters: SQL<unknown> | undefined = undefined;
 
-  if (query) {
-    queryFilters = or(
-      sql`to_tsvector('turkish', ${thesesTable.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
-      sql`to_tsvector('english', ${thesesTable.titleForeign}) @@ phraseto_tsquery('english', ${query})`,
-      ilike(authorsTable.name, `%${query}%`),
-      sql`"theses"."id" IN (
-        SELECT ta."thesis_id"
-        FROM "thesis_advisors" ta
-        JOIN "advisors" adv ON ta."advisor_id" = adv."id"
-        WHERE adv."name" ILIKE ${"%" + query + "%"}
-      )`
-    );
-  }
-
   if (universities && universities.length) {
     universityFilters = or(
       ...universities.map((university) =>
@@ -139,6 +125,20 @@ export async function searchTheses(input: TSearchThesesSchema) {
   if (thesisTypes && thesisTypes.length) {
     thesisTypeFilters = or(
       ...thesisTypes.map((thesisType) => eq(thesisTypesTable.name, thesisType))
+    );
+  }
+
+  if (query) {
+    queryFilters = or(
+      sql`to_tsvector('turkish', ${thesesTable.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
+      sql`to_tsvector('english', ${thesesTable.titleForeign}) @@ phraseto_tsquery('english', ${query})`,
+      ilike(authorsTable.name, `%${query}%`),
+      sql`"theses"."id" IN (
+        SELECT ta."thesis_id"
+        FROM "thesis_advisors" ta
+        JOIN "advisors" adv ON ta."advisor_id" = adv."id"
+        WHERE adv."name" ILIKE ${"%" + query + "%"}
+      )`
     );
   }
 
