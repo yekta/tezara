@@ -103,17 +103,13 @@ export async function getThesis({ id }: { id: number }) {
 export async function searchTheses(input: TSearchThesesSchema) {
   const { query, bulk } = input;
 
-  const queryFilters: SQL[] = [];
+  let queryFilters: SQL<unknown> | undefined = undefined;
 
   if (query) {
-    queryFilters.push(
-      // (1) Full-text search on Turkish title
+    queryFilters = or(
       sql`to_tsvector('turkish', ${thesesTable.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
-      // (2) Full-text search on English title
       sql`to_tsvector('english', ${thesesTable.titleForeign}) @@ phraseto_tsquery('english', ${query})`,
-      // (3) ILIKE match on the author’s name
       ilike(authorsTable.name, `%${query}%`),
-      // (4) ILIKE match on any advisor’s name (sub-select)
       sql`"theses"."id" IN (
         SELECT ta."thesis_id"
         FROM "thesis_advisors" ta
@@ -191,7 +187,7 @@ export async function searchTheses(input: TSearchThesesSchema) {
       thesisTypesTable,
       eq(thesesTable.thesisTypeId, thesisTypesTable.id)
     )
-    .where(queryFilters.length > 0 ? or(...queryFilters) : undefined)
+    .where(queryFilters)
     .orderBy(desc(thesesTable.id))
     .limit(bulk ? bulkRowLimit : rowLimit);
 
