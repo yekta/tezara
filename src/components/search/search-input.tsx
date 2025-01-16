@@ -12,8 +12,14 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderIcon, SearchIcon, XIcon } from "lucide-react";
-import { parseAsString, useQueryState } from "nuqs";
+import {
+  ChevronUpIcon,
+  LoaderIcon,
+  SearchIcon,
+  SettingsIcon,
+  XIcon,
+} from "lucide-react";
+import { parseAsBoolean, parseAsString, useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,6 +43,10 @@ export default function SearchInput({ className, variant }: Props) {
     },
   });
   const queryInput = form.watch("query");
+  const [advancedSearch, setAdvancedSearch] = useQueryState(
+    "advanced",
+    parseAsBoolean.withDefault(false)
+  );
 
   useEffect(() => {
     if (variant !== "home") return;
@@ -77,6 +87,7 @@ export default function SearchInput({ className, variant }: Props) {
                 <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
                   type="search"
+                  enterKeyHint="search"
                   disabled={isPendingAsyncPush}
                   className="w-full pl-8.5 pr-12 bg-background-hover"
                   placeholder="Tez, yazar, veya danışman ara..."
@@ -106,6 +117,43 @@ export default function SearchInput({ className, variant }: Props) {
             </FormItem>
           )}
         />
+
+        <div
+          data-advanced={advancedSearch ? true : undefined}
+          className="w-full flex flex-col items-center mt-2 group"
+        >
+          <div className="max-w-full flex justify-center">
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-muted-foreground font-semibold"
+              onClick={() => setAdvancedSearch((a) => !a)}
+            >
+              <div className="size-5 -ml-1 transform transition group-data-[advanced]:rotate-90">
+                {advancedSearch ? (
+                  <ChevronUpIcon className="size-full -rotate-90" />
+                ) : (
+                  <SettingsIcon className="size-full" />
+                )}
+              </div>
+              <p className="shrink min-w-0">Gelişmiş Arama</p>
+            </Button>
+          </div>
+          {advancedSearch && (
+            <div className="w-full max-w-3xl flex justify-center flex-wrap py-2 gap-3">
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+              <p>Seçenek Eklenecek</p>
+            </div>
+          )}
+        </div>
       </form>
     </Form>
   );
