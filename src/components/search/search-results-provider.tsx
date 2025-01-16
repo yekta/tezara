@@ -1,6 +1,10 @@
 "use client";
 
-import { AppRouterOutputs, AppRouterQueryResult } from "@/server/trpc/api/root";
+import {
+  AppRouterInputs,
+  AppRouterOutputs,
+  AppRouterQueryResult,
+} from "@/server/trpc/api/root";
 import { api } from "@/server/trpc/setup/react";
 import { usePathname } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
@@ -35,13 +39,17 @@ export const SearchResultsProvider: React.FC<{
     parseAsArrayOf(parseAsString).withDefault([])
   );
 
+  const params: AppRouterInputs["main"]["searchTheses"] = {
+    query,
+    languages: languages && languages.length ? languages : undefined,
+    universities:
+      universities && universities.length ? universities : undefined,
+    thesisTypes: thesisTypes && thesisTypes.length ? thesisTypes : undefined,
+  };
+
   const searchThesesQuery = api.main.searchTheses.useQuery(
     {
-      query,
-      languages: languages && languages.length ? languages : undefined,
-      universities:
-        universities && universities.length ? universities : undefined,
-      thesisTypes: thesisTypes && thesisTypes.length ? thesisTypes : undefined,
+      ...params,
     },
     {
       initialData,
@@ -58,7 +66,7 @@ export const SearchResultsProvider: React.FC<{
         bulkDownload: () =>
           utils.main.searchTheses.fetch(
             {
-              query,
+              ...params,
               bulk: true,
             },
             {
