@@ -211,7 +211,7 @@ export async function searchTheses(input: TSearchThesesSchema) {
       eq(thesesTable.thesisTypeId, thesisTypesTable.id)
     )
     .where(
-      and(queryFilters, universityFilters, languageFilters, thesisTypeFilters)
+      and(universityFilters, languageFilters, thesisTypeFilters, queryFilters)
     )
     .orderBy(desc(thesesTable.id))
     .limit(bulk ? bulkRowLimit : rowLimit);
