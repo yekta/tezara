@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  AppRouterInputs,
-  AppRouterOutputs,
-  AppRouterQueryResult,
-} from "@/server/trpc/api/root";
+import { AppRouterOutputs, AppRouterQueryResult } from "@/server/trpc/api/root";
 import { api } from "@/server/trpc/setup/react";
 import { usePathname } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
@@ -16,12 +12,14 @@ type TSearchResultsContext = AppRouterQueryResult<
   bulkDownload: () => Promise<AppRouterOutputs["main"]["searchTheses"]>;
 };
 
+const STALE_TIME = 60 * 1000;
 const SearchResultsContext = createContext<TSearchResultsContext | null>(null);
 
 export const SearchResultsProvider: React.FC<{
   children: ReactNode;
   initialData?: AppRouterOutputs["main"]["searchTheses"];
 }> = ({ children, initialData }) => {
+  const utils = api.useUtils();
   const pathname = usePathname();
   const isSearchResultsPath = pathname.startsWith("/search");
 
@@ -39,40 +37,42 @@ export const SearchResultsProvider: React.FC<{
     parseAsArrayOf(parseAsString).withDefault([])
   );
 
-  const params: AppRouterInputs["main"]["searchTheses"] = {
-    query,
-    languages: languages && languages.length ? languages : undefined,
-    universities:
-      universities && universities.length ? universities : undefined,
-    thesisTypes: thesisTypes && thesisTypes.length ? thesisTypes : undefined,
-  };
-
   const searchThesesQuery = api.main.searchTheses.useQuery(
     {
-      ...params,
+      query,
+      languages: languages && languages.length ? languages : undefined,
+      universities:
+        universities && universities.length ? universities : undefined,
+      thesisTypes: thesisTypes && thesisTypes.length ? thesisTypes : undefined,
     },
     {
       initialData,
       enabled: isSearchResultsPath,
-      staleTime: 60 * 1000,
+      staleTime: STALE_TIME,
     }
   );
-  const utils = api.useUtils();
+  const bulkDownload: TSearchResultsContext["bulkDownload"] = async () => {
+    return utils.main.searchTheses.fetch(
+      {
+        bulk: true,
+        query,
+        languages: languages && languages.length ? languages : undefined,
+        universities:
+          universities && universities.length ? universities : undefined,
+        thesisTypes:
+          thesisTypes && thesisTypes.length ? thesisTypes : undefined,
+      },
+      {
+        staleTime: STALE_TIME,
+      }
+    );
+  };
 
   return (
     <SearchResultsContext.Provider
       value={{
         ...searchThesesQuery,
-        bulkDownload: () =>
-          utils.main.searchTheses.fetch(
-            {
-              ...params,
-              bulk: true,
-            },
-            {
-              staleTime: 60 * 1000,
-            }
-          ),
+        bulkDownload,
       }}
     >
       {children}
