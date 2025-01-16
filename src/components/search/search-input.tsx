@@ -299,7 +299,7 @@ export default function SearchInput({
                 <FormField
                   control={form.control}
                   name="universities"
-                  render={({ field }) => (
+                  render={({}) => (
                     <MultiSelectFormItem
                       className="w-full"
                       Icon={LandmarkIcon}
@@ -336,7 +336,7 @@ export default function SearchInput({
                 <FormField
                   control={form.control}
                   name="thesisTypes"
-                  render={({ field }) => (
+                  render={({}) => (
                     <MultiSelectFormItem
                       className="w-full"
                       Icon={ScrollTextIcon}
@@ -374,7 +374,7 @@ export default function SearchInput({
                 <FormField
                   control={form.control}
                   name="languages"
-                  render={({ field }) => (
+                  render={({}) => (
                     <MultiSelectFormItem
                       className="w-full"
                       Icon={GlobeIcon}

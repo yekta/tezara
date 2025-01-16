@@ -60,9 +60,13 @@ export default function MultiSelectFormItem({
             >
               <div className="flex shrink min-w-0 items-center gap-1.5">
                 {Icon && <Icon className="size-4 shrink-0 -ml-0.5" />}
-                <p className="shrink min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
-                  {commandButtonText}
-                </p>
+                {typeof commandButtonText === "string" ? (
+                  <p className="shrink min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                    {commandButtonText}
+                  </p>
+                ) : (
+                  commandButtonText
+                )}
               </div>
               <ChevronDownIcon className="size-4 shrink-0 opacity-50 -mr-1" />
             </Button>
