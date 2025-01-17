@@ -208,16 +208,13 @@ export default function SearchInput({
               <FormHeader className="sr-only">
                 <FormLabel>Ara</FormLabel>
               </FormHeader>
-              <div
-                data-has-filter={hasFilters ? true : undefined}
-                className="w-full relative group/input"
-              >
+              <div className="w-full relative group/input">
                 <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
                   type="search"
                   enterKeyHint="search"
                   disabled={isPendingAsyncPush}
-                  className="w-full pl-8.5 pr-12 group-data-[has-filter]/input:pr-18 bg-background-hover"
+                  className="w-full pl-8.5 pr-12 bg-background-hover"
                   placeholder="Tez, yazar, veya danışman ara..."
                   {...field}
                 />
@@ -229,22 +226,13 @@ export default function SearchInput({
                       size="icon"
                       aria-label="Aramayı temizle"
                       variant="ghost"
-                      className="absolute size-8 text-muted-foreground right-1.5 top-1/2 transform -translate-y-1/2 group-data-[has-filter]/input:right-9.5"
+                      className="absolute size-9 text-muted-foreground right-1 top-1/2 transform -translate-y-1/2"
                       type="button"
                       onClick={clearQueryInput}
                     >
                       <XIcon className="size-5" />
                     </Button>
                   )}
-                {hasFilters && !isPendingAsyncPush && (
-                  <Button
-                    aria-label="Ara"
-                    size="icon"
-                    className="absolute size-8 right-1.5 top-1/2 transform -translate-y-1/2"
-                  >
-                    <ArrowUpIcon className="size-6" />
-                  </Button>
-                )}
                 {isPendingAsyncPush && (
                   <div className="size-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
                     <LoaderIcon className="size-full animate-spin" />
@@ -259,38 +247,41 @@ export default function SearchInput({
           data-advanced={advancedSearch ? true : undefined}
           className="w-full flex flex-col items-center group pt-3"
         >
-          <div className="max-w-full flex justify-center">
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-muted-foreground font-semibold py-2 px-3.5"
-              onClick={() => setAdvancedSearch((a) => !a)}
-            >
-              <div className="size-5 -ml-1 transform transition group-data-[advanced]:rotate-90">
-                {advancedSearch ? (
-                  <ChevronUpIcon className="size-full -rotate-90" />
-                ) : (
-                  <SettingsIcon className="size-full" />
-                )}
-              </div>
-              <p className="shrink min-w-0">Filtrele</p>
-            </Button>
-            {hasFilters && (
+          <div className="max-w-full flex flex-wrap justify-center gap-2">
+            <Button className="py-2 px-6">Ara</Button>
+            <div className="shrink min-w-0 flex flex-wrap">
               <Button
                 type="button"
-                variant="warning-ghost"
-                className="font-semibold py-2 px-3.5"
-                onClick={() => clearAllFilters()}
+                variant="ghost"
+                className="text-muted-foreground font-semibold py-2 px-3.5"
+                onClick={() => setAdvancedSearch((a) => !a)}
               >
-                <div className="size-5 -ml-1 transform transition">
-                  <BroomIcon className="size-full" />
+                <div className="size-5 -ml-1 transform transition group-data-[advanced]:rotate-90">
+                  {advancedSearch ? (
+                    <ChevronUpIcon className="size-full -rotate-90" />
+                  ) : (
+                    <SettingsIcon className="size-full" />
+                  )}
                 </div>
-                <p className="shrink min-w-0">Temizle</p>
-                <p className="shrink-0 -ml-0.25 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                  {totalSelectedCount}
-                </p>
+                <p className="shrink min-w-0">Filtrele</p>
               </Button>
-            )}
+              {hasFilters && (
+                <Button
+                  type="button"
+                  variant="warning-ghost"
+                  className="font-semibold py-2 px-3.5"
+                  onClick={() => clearAllFilters()}
+                >
+                  <div className="size-5 -ml-1 transform transition">
+                    <BroomIcon className="size-full" />
+                  </div>
+                  <p className="shrink min-w-0">Temizle</p>
+                  <p className="shrink-0 -ml-0.25 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                    {totalSelectedCount}
+                  </p>
+                </Button>
+              )}
+            </div>
           </div>
           {/* Advanced settings */}
           {advancedSearch && (
