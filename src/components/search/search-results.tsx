@@ -177,7 +177,7 @@ export default function SearchResults({}: Props) {
             {data.map((result) => (
               <div
                 key={result.id}
-                className="pt-3 pb-4 first-of-type:border-t border-b flex flex-row items-start gap-4"
+                className="pt-3.5 pb-4.5 first-of-type:border-t border-b flex flex-row items-start gap-4"
               >
                 <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
                   <LinkButton
