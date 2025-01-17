@@ -138,27 +138,33 @@ export default function SearchInput({
   useEffect(() => {
     if (variant !== "home") return;
     setQuery(queryInput);
-  }, [queryInput, variant, setQuery]);
+    console.log("qwe");
+  }, [queryInput, variant, setQuery, query]);
 
   useEffect(() => {
     if (variant !== "home") return;
+    if (languagesQP.join(",") === selectedLanguages.join(",")) return;
     setLanguagesQP(selectedLanguages);
-  }, [selectedLanguages, variant, setLanguagesQP]);
+  }, [selectedLanguages, variant, setLanguagesQP, languagesQP]);
 
   useEffect(() => {
     if (variant !== "home") return;
+    if (universitiesQP.join(",") === selectedUniversities.join(",")) return;
     setUniversitiesQP(selectedUniversities);
-  }, [selectedUniversities, variant, setUniversitiesQP]);
+  }, [selectedUniversities, variant, setUniversitiesQP, universitiesQP]);
 
   useEffect(() => {
     if (variant !== "home") return;
+    if (thesisTypesQP.join(",") === selectedThesisTypes.join(",")) return;
     setThesisTypesQP(selectedThesisTypes);
-  }, [selectedThesisTypes, variant, setThesisTypesQP]);
+  }, [selectedThesisTypes, variant, setThesisTypesQP, thesisTypesQP]);
 
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
       const paramStr = searchParams.toString();
-      await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
+      setTimeout(async () => {
+        await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
+      });
       return;
     }
     if (variant === "search") {
