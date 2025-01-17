@@ -1,7 +1,7 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { Button, LinkButton } from "@/components/ui/button";
-import { siteTitle, TURKISH } from "@/lib/constants";
+import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { apiServerStatic } from "@/server/trpc/setup/server";
 import { Metadata } from "next";
@@ -29,6 +29,7 @@ export default async function Page({ params }: Props) {
   const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
   const noAdvisorText = "Danışman mevcut değil.";
   const noDepartment = "Ana bilim dalı belirtilmemiş.";
+  const noInstitute = "Enstitü belirtilmemiş.";
   const noBranch = "Bilim dalı belirtilmemiş.";
   const noTitle = "Başlık mevcut değil.";
   const noTranslatedTitle = "Başlık çevirisi mevcut değil.";
@@ -38,18 +39,14 @@ export default async function Page({ params }: Props) {
     <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32">
       {/* Title */}
       <h1 id="title" className="font-bold text-2xl text-balance leading-tight">
-        {thesis?.language.name === TURKISH
-          ? thesis.titleTurkish
-          : thesis.titleForeign || noTitle}
+        {thesis?.titleOriginal || noTitle}
       </h1>
       {/* Translated title */}
       <h2
         id="title_translated"
         className="font-semibold text-lg text-balance text-muted-foreground leading-snug mt-3"
       >
-        {thesis?.language.name === TURKISH
-          ? thesis.titleForeign || noTranslatedTitle
-          : thesis.titleTurkish || noTranslatedTitle}
+        {thesis?.titleTranslated || noTranslatedTitle}
       </h2>
       <div className="mt-6 flex flex-wrap items-start justify-start gap-1.5">
         {thesis.pdfUrl ? (
@@ -140,7 +137,7 @@ export default async function Page({ params }: Props) {
         <p id="institute_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Enstitü: </span>
           <span className="font-bold" id="institute_name">
-            {thesis.institute.name}
+            {thesis.institute?.name || noInstitute}
           </span>
         </p>
         <Divider />
@@ -176,18 +173,14 @@ export default async function Page({ params }: Props) {
       <div id="abstract_section" className="mt-6">
         <p className="font-bold">Özet</p>
         <p id="abstract" className="mt-1">
-          {thesis?.language.name === TURKISH
-            ? thesis.abstractTurkish || noAbstractText
-            : thesis.abstractForeign || noAbstractText}
+          {thesis.abstractOriginal || noAbstractText}
         </p>
       </div>
       {/* Translated abstract */}
       <div id="abstract_translated_section" className="mt-6">
         <p className="font-bold">Özet (Çeviri)</p>
         <p id="abstract_translated" className="mt-1">
-          {thesis?.language.name === TURKISH
-            ? thesis.abstractForeign || noTranslatedAbstractText
-            : thesis.abstractTurkish || noTranslatedAbstractText}
+          {thesis.abstractTranslated || noTranslatedAbstractText}
         </p>
       </div>
       <NavigationSection id={thesis.id} className="md:hidden pb-4 mt-8" />
@@ -221,11 +214,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = `${
-    thesis.titleTurkish || thesis.titleForeign || `Tez ${thesis.id}`
+    thesis.titleOriginal || thesis.titleTranslated || `Tez ${thesis.id}`
   } | ${siteTitle}`;
   const description = truncateDescription(
-    thesis.abstractTurkish ||
-      thesis.abstractForeign ||
+    thesis.abstractOriginal ||
+      thesis.abstractTranslated ||
       "Bu tezin özeti bulunamadı."
   );
 

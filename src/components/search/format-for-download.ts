@@ -1,4 +1,3 @@
-import { TURKISH } from "@/lib/constants";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 
 const emptyFieldText = "[[Yok]]";
@@ -11,22 +10,10 @@ export function formatForDownload(
     const result = data[i];
     formattedData.push({
       "Tez No": result.id,
-      "Başlık (Orijinal)":
-        result.languageName === TURKISH
-          ? result.titleTurkish || emptyFieldText
-          : result.titleForeign || emptyFieldText,
-      "Başlık (Çeviri)":
-        result.languageName === TURKISH
-          ? result.titleForeign || emptyFieldText
-          : result.titleTurkish || emptyFieldText,
-      "Özet (Orijinal)":
-        result.languageName === TURKISH
-          ? result.abstractTurkish || emptyFieldText
-          : result.abstractForeign || emptyFieldText,
-      "Özet (Çeviri)":
-        result.languageName === TURKISH
-          ? result.abstractForeign || emptyFieldText
-          : result.abstractTurkish || emptyFieldText,
+      "Başlık (Orijinal)": result.titleOriginal || emptyFieldText,
+      "Başlık (Çeviri)": result.titleTranslated || emptyFieldText,
+      "Özet (Orijinal)": result.abstractOriginal || emptyFieldText,
+      "Özet (Çeviri)": result.abstractTranslated || emptyFieldText,
       Yazar: result.authorName || emptyFieldText,
       Üniversite: result.universityName || emptyFieldText,
       Enstitü: result.instituteName || emptyFieldText,

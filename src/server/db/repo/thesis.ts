@@ -19,11 +19,11 @@ export async function getThesis({ id }: { id: number }) {
   const result = await db.query.thesesTable.findFirst({
     columns: {
       id: true,
-      titleTurkish: true,
-      titleForeign: true,
+      titleOriginal: true,
+      titleTranslated: true,
       pageCount: true,
-      abstractForeign: true,
-      abstractTurkish: true,
+      abstractOriginal: true,
+      abstractTranslated: true,
       detailId1: true,
       detailId2: true,
       pdfUrl: true,
@@ -83,7 +83,18 @@ export async function getThesis({ id }: { id: number }) {
           },
         },
       },
-      thesisSubjects: {
+      thesisSubjectsTurkish: {
+        columns: {},
+        with: {
+          subject: {
+            columns: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      thesisSubjectsEnglish: {
         columns: {},
         with: {
           subject: {
@@ -130,8 +141,8 @@ export async function searchTheses(input: TSearchThesesSchema) {
 
   if (query) {
     queryFilters = or(
-      sql`to_tsvector('turkish', ${thesesTable.titleTurkish}) @@ phraseto_tsquery('turkish', ${query})`,
-      sql`to_tsvector('english', ${thesesTable.titleForeign}) @@ phraseto_tsquery('english', ${query})`,
+      sql`to_tsvector('turkish', ${thesesTable.titleOriginal}) @@ phraseto_tsquery('turkish', ${query})`,
+      sql`to_tsvector('english', ${thesesTable.titleTranslated}) @@ phraseto_tsquery('english', ${query})`,
       ilike(authorsTable.name, `%${query}%`),
       sql`"theses"."id" IN (
         SELECT ta."thesis_id"
@@ -146,11 +157,11 @@ export async function searchTheses(input: TSearchThesesSchema) {
     .select({
       // === Main Thesis Columns ===
       id: thesesTable.id,
-      titleTurkish: thesesTable.titleTurkish,
-      titleForeign: thesesTable.titleForeign,
+      titleOriginal: thesesTable.titleOriginal,
+      titleTranslated: thesesTable.titleTranslated,
       pageCount: thesesTable.pageCount,
-      abstractForeign: thesesTable.abstractForeign,
-      abstractTurkish: thesesTable.abstractTurkish,
+      abstractOriginal: thesesTable.abstractOriginal,
+      abstractTranslated: thesesTable.abstractTranslated,
       detailId1: thesesTable.detailId1,
       detailId2: thesesTable.detailId2,
       pdfUrl: thesesTable.pdfUrl,

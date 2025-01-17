@@ -120,8 +120,8 @@ export const branchesTable = pgTable(
   })
 );
 
-export const subjectsTable = pgTable(
-  "subjects",
+export const subjectsTurkishTable = pgTable(
+  "subjects_turkish",
   {
     id: uuid("id")
       .primaryKey()
@@ -130,10 +130,61 @@ export const subjectsTable = pgTable(
     ...timestamps,
   },
   (table) => ({
-    nameIdx: index("subjects_name_idx").on(table.name),
-    createdAtIdx: index("subjects_created_at_idx").on(table.createdAt),
-    updatedAtIdx: index("subjects_updated_at_idx").on(table.updatedAt),
-    deletedAtIdx: index("subjects_deleted_at_idx").on(table.deletedAt),
+    nameIdx: index("subjects_turkish_name_idx").on(table.name),
+    createdAtIdx: index("subjects_turkish_created_at_idx").on(table.createdAt),
+    updatedAtIdx: index("subjects_turkish_updated_at_idx").on(table.updatedAt),
+    deletedAtIdx: index("subjects_turkish_deleted_at_idx").on(table.deletedAt),
+  })
+);
+
+export const subjectsEnglishTable = pgTable(
+  "subjects_english",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name").notNull().unique(),
+    ...timestamps,
+  },
+  (table) => ({
+    nameIdx: index("subjects_english_name_idx").on(table.name),
+    createdAtIdx: index("subjects_english_created_at_idx").on(table.createdAt),
+    updatedAtIdx: index("subjects_english_updated_at_idx").on(table.updatedAt),
+    deletedAtIdx: index("subjects_english_deleted_at_idx").on(table.deletedAt),
+  })
+);
+
+export const keywordsTurkishTable = pgTable(
+  "keywords_turkish",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name").notNull().unique(),
+    ...timestamps,
+  },
+  (table) => ({
+    nameIdx: index("keywords_turkish_name_idx").on(table.name),
+    createdAtIdx: index("keywords_turkish_created_at_idx").on(table.createdAt),
+    updatedAtIdx: index("keywords_turkish_updated_at_idx").on(table.updatedAt),
+    deletedAtIdx: index("keywords_turkish_deleted_at_idx").on(table.deletedAt),
+  })
+);
+
+export const keywordsEnglishTable = pgTable(
+  "keywords_english",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name").notNull().unique(),
+    ...timestamps,
+  },
+  (table) => ({
+    nameIdx: index("keywords_english_name_idx").on(table.name),
+    createdAtIdx: index("keywords_english_created_at_idx").on(table.createdAt),
+    updatedAtIdx: index("keywords_english_updated_at_idx").on(table.updatedAt),
+    deletedAtIdx: index("keywords_english_deleted_at_idx").on(table.deletedAt),
   })
 );
 
@@ -166,17 +217,15 @@ export const thesesTable = pgTable(
     languageId: uuid("language_id")
       .notNull()
       .references(() => languagesTable.id),
-    titleTurkish: varchar("title_turkish"),
-    titleForeign: varchar("title_foreign"),
-    abstractTurkish: varchar("abstract_turkish"),
-    abstractForeign: varchar("abstract_foreign"),
+    titleOriginal: varchar("title_original"),
+    titleTranslated: varchar("title_translated"),
+    abstractOriginal: varchar("abstract_original"),
+    abstractTranslated: varchar("abstract_translated"),
     year: integer("year").notNull(),
     universityId: uuid("university_id")
       .notNull()
       .references(() => universitiesTable.id),
-    instituteId: uuid("institute_id")
-      .notNull()
-      .references(() => institutesTable.id),
+    instituteId: uuid("institute_id").references(() => institutesTable.id),
     departmentId: uuid("department_id").references(() => departmentsTable.id),
     branchId: uuid("branch_id").references(() => branchesTable.id),
     thesisTypeId: uuid("thesis_type_id").references(() => thesisTypesTable.id),
@@ -189,21 +238,21 @@ export const thesesTable = pgTable(
   (table) => ({
     authorIdIdx: index("theses_author_id_idx").on(table.authorId),
     languageIdIdx: index("theses_language_id_idx").on(table.languageId),
-    titleTurkishFtsIdx: index("theses_title_turkish_fts_idx").using(
+    titleOriginalFtsIdx: index("theses_title_original_fts_idx").using(
       "gin",
-      sql`to_tsvector('simple', ${table.titleTurkish})`
+      sql`to_tsvector('simple', ${table.titleOriginal})`
     ),
-    titleForeignFtsIdx: index("theses_title_foreign_fts_idx").using(
+    titleTranslatedFtsIdx: index("theses_title_translated_fts_idx").using(
       "gin",
-      sql`to_tsvector('simple', ${table.titleForeign})`
+      sql`to_tsvector('simple', ${table.titleTranslated})`
     ),
-    abstractTurkishFtsIdx: index("theses_abstract_turkish_fts_idx").using(
+    abstractOriginalFtsIdx: index("theses_abstract_original_fts_idx").using(
       "gin",
-      sql`to_tsvector('simple', ${table.abstractTurkish})`
+      sql`to_tsvector('simple', ${table.abstractOriginal})`
     ),
-    abstractForeignFtsIdx: index("theses_abstract_foreign_fts_idx").using(
+    abstractTranslatedFtsIdx: index("theses_abstract_translated_fts_idx").using(
       "gin",
-      sql`to_tsvector('simple', ${table.abstractForeign})`
+      sql`to_tsvector('simple', ${table.abstractTranslated})`
     ),
     yearIdx: index("theses_year_idx").on(table.year),
     universityIdIdx: index("theses_university_id_idx").on(table.universityId),
@@ -237,23 +286,123 @@ export const thesisAdvisorsTable = pgTable(
   })
 );
 
-export const thesisSubjectsTable = pgTable(
-  "thesis_subjects",
+export const thesisSubjectsTurkishTable = pgTable(
+  "thesis_subjects_turkish",
   {
     thesisId: integer("thesis_id")
       .notNull()
       .references(() => thesesTable.id),
     subjectId: uuid("subject_id")
       .notNull()
-      .references(() => subjectsTable.id),
+      .references(() => subjectsTurkishTable.id),
     ...timestamps,
   },
   (table) => ({
-    thesisIdIdx: index("thesis_subjects_thesis_id_idx").on(table.thesisId),
-    subjectIdIdx: index("thesis_subjects_subject_id_idx").on(table.subjectId),
-    createdAtIdx: index("thesis_subjects_created_at_idx").on(table.createdAt),
-    updatedAtIdx: index("thesis_subjects_updated_at_idx").on(table.updatedAt),
-    deletedAtIdx: index("thesis_subjects_deleted_at_idx").on(table.deletedAt),
+    thesisIdIdx: index("thesis_subjects_turkish_thesis_id_idx").on(
+      table.thesisId
+    ),
+    subjectIdIdx: index("thesis_subjects_turkish_subject_id_idx").on(
+      table.subjectId
+    ),
+    createdAtIdx: index("thesis_subjects_turkish_created_at_idx").on(
+      table.createdAt
+    ),
+    updatedAtIdx: index("thesis_subjects_turkish_updated_at_idx").on(
+      table.updatedAt
+    ),
+    deletedAtIdx: index("thesis_subjects_turkish_deleted_at_idx").on(
+      table.deletedAt
+    ),
+  })
+);
+
+export const thesisSubjectsEnglishTable = pgTable(
+  "thesis_subjects_english",
+  {
+    thesisId: integer("thesis_id")
+      .notNull()
+      .references(() => thesesTable.id),
+    subjectId: uuid("subject_id")
+      .notNull()
+      .references(() => subjectsEnglishTable.id),
+    ...timestamps,
+  },
+  (table) => ({
+    thesisIdIdx: index("thesis_subjects_english_thesis_id_idx").on(
+      table.thesisId
+    ),
+    subjectIdIdx: index("thesis_subjects_english_subject_id_idx").on(
+      table.subjectId
+    ),
+    createdAtIdx: index("thesis_subjects_english_created_at_idx").on(
+      table.createdAt
+    ),
+    updatedAtIdx: index("thesis_subjects_english_updated_at_idx").on(
+      table.updatedAt
+    ),
+    deletedAtIdx: index("thesis_subjects_english_deleted_at_idx").on(
+      table.deletedAt
+    ),
+  })
+);
+
+export const thesisKeywordsTurkishTable = pgTable(
+  "thesis_keywords_turkish",
+  {
+    thesisId: integer("thesis_id")
+      .notNull()
+      .references(() => thesesTable.id),
+    keywordId: uuid("keyword_id")
+      .notNull()
+      .references(() => keywordsTurkishTable.id),
+    ...timestamps,
+  },
+  (table) => ({
+    thesisIdIdx: index("thesis_keywords_turkish_thesis_id_idx").on(
+      table.thesisId
+    ),
+    keywordIdIdx: index("thesis_keywords_turkish_keyword_id_idx").on(
+      table.keywordId
+    ),
+    createdAtIdx: index("thesis_keywords_turkish_created_at_idx").on(
+      table.createdAt
+    ),
+    updatedAtIdx: index("thesis_keywords_turkish_updated_at_idx").on(
+      table.updatedAt
+    ),
+    deletedAtIdx: index("thesis_keywords_turkish_deleted_at_idx").on(
+      table.deletedAt
+    ),
+  })
+);
+
+export const thesisKeywordsEnglishTable = pgTable(
+  "thesis_keywords_english",
+  {
+    thesisId: integer("thesis_id")
+      .notNull()
+      .references(() => thesesTable.id),
+    keywordId: uuid("keyword_id")
+      .notNull()
+      .references(() => keywordsEnglishTable.id),
+    ...timestamps,
+  },
+  (table) => ({
+    thesisIdIdx: index("thesis_keywords_english_thesis_id_idx").on(
+      table.thesisId
+    ),
+    keywordIdIdx: index("thesis_keywords_english_keyword_id_idx").on(
+      table.keywordId
+    ),
+    createdAtIdx: index("thesis_keywords_english_created_at_idx").on(
+      table.createdAt
+    ),
+    updatedAtIdx: index("thesis_keywords_english_updated_at_idx").on(
+      table.updatedAt
+    ),
+    deletedAtIdx: index("thesis_keywords_english_deleted_at_idx").on(
+      table.deletedAt
+    ),
   })
 );
 
@@ -272,9 +421,13 @@ export const thesisTypesTable = pgTable(
     xOrderIdx: index("thesis_types_x_order_idx").on(table.xOrder),
     createdAtIdx: index("thesis_types_created_at_idx").on(table.createdAt),
     updatedAtIdx: index("thesis_types_updated_at_idx").on(table.updatedAt),
-    deletedAtIfdx: index("thesis_types_deleted_at_idx").on(table.deletedAt),
+    deletedAtIdx: index("thesis_types_deleted_at_idx").on(table.deletedAt),
   })
 );
+
+////////////////////////////////////////////////////////////
+//// RELATIONS /////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 // Author relations
 export const authorsRelations = relations(authorsTable, ({ many }) => ({
@@ -315,9 +468,32 @@ export const branchesRelations = relations(branchesTable, ({ many }) => ({
 }));
 
 // Subject relations
-export const subjectsRelations = relations(subjectsTable, ({ many }) => ({
-  thesisSubjects: many(thesisSubjectsTable),
-}));
+export const subjectsTurkishRelations = relations(
+  subjectsTurkishTable,
+  ({ many }) => ({
+    thesisSubjects: many(thesisSubjectsTurkishTable),
+  })
+);
+export const subjectsEnglishRelations = relations(
+  subjectsEnglishTable,
+  ({ many }) => ({
+    thesisSubjects: many(thesisSubjectsEnglishTable),
+  })
+);
+
+// Keyword relations
+export const keywordsTurkishRelations = relations(
+  keywordsTurkishTable,
+  ({ many }) => ({
+    thesisKeywords: many(thesisKeywordsTurkishTable),
+  })
+);
+export const keywordsEnglishRelations = relations(
+  keywordsEnglishTable,
+  ({ many }) => ({
+    thesisKeywords: many(thesisKeywordsEnglishTable),
+  })
+);
 
 // Language relations
 export const languagesRelations = relations(languagesTable, ({ many }) => ({
@@ -355,7 +531,8 @@ export const thesesRelations = relations(thesesTable, ({ one, many }) => ({
     references: [branchesTable.id],
   }),
   thesisAdvisors: many(thesisAdvisorsTable),
-  thesisSubjects: many(thesisSubjectsTable),
+  thesisSubjectsTurkish: many(thesisSubjectsTurkishTable),
+  thesisSubjectsEnglish: many(thesisSubjectsEnglishTable),
 }));
 
 // Thesis Advisors relations (junction table)
@@ -374,16 +551,57 @@ export const thesisAdvisorsRelations = relations(
 );
 
 // Thesis Subjects relations (junction table)
-export const thesisSubjectsRelations = relations(
-  thesisSubjectsTable,
+export const thesisSubjectsTurkishRelations = relations(
+  thesisSubjectsTurkishTable,
   ({ one }) => ({
     thesis: one(thesesTable, {
-      fields: [thesisSubjectsTable.thesisId],
+      fields: [thesisSubjectsTurkishTable.thesisId],
       references: [thesesTable.id],
     }),
-    subject: one(subjectsTable, {
-      fields: [thesisSubjectsTable.subjectId],
-      references: [subjectsTable.id],
+    subject: one(subjectsTurkishTable, {
+      fields: [thesisSubjectsTurkishTable.subjectId],
+      references: [subjectsTurkishTable.id],
+    }),
+  })
+);
+export const thesisSubjectsEnglishRelations = relations(
+  thesisSubjectsEnglishTable,
+  ({ one }) => ({
+    thesis: one(thesesTable, {
+      fields: [thesisSubjectsEnglishTable.thesisId],
+      references: [thesesTable.id],
+    }),
+    subject: one(subjectsEnglishTable, {
+      fields: [thesisSubjectsEnglishTable.subjectId],
+      references: [subjectsEnglishTable.id],
+    }),
+  })
+);
+
+// Thesis Keywords relations (junction table)
+export const thesisKeywordsTurkishRelations = relations(
+  thesisKeywordsTurkishTable,
+  ({ one }) => ({
+    thesis: one(thesesTable, {
+      fields: [thesisKeywordsTurkishTable.thesisId],
+      references: [thesesTable.id],
+    }),
+    keyword: one(keywordsTurkishTable, {
+      fields: [thesisKeywordsTurkishTable.keywordId],
+      references: [keywordsTurkishTable.id],
+    }),
+  })
+);
+export const thesisKeywordsEnglishRelations = relations(
+  thesisKeywordsEnglishTable,
+  ({ one }) => ({
+    thesis: one(thesesTable, {
+      fields: [thesisKeywordsEnglishTable.thesisId],
+      references: [thesesTable.id],
+    }),
+    keyword: one(keywordsEnglishTable, {
+      fields: [thesisKeywordsEnglishTable.keywordId],
+      references: [keywordsEnglishTable.id],
     }),
   })
 );

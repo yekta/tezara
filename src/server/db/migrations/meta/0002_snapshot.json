@@ -1,6 +1,6 @@
 {
-  "id": "c18689bf-446d-45a5-a97a-6d14d8fa9c87",
-  "prevId": "de2dcd77-117c-459d-b9b4-fdeb23bd1195",
+  "id": "e4cba212-1ea0-47ec-b414-a0faaee69492",
+  "prevId": "bf5365e8-e4a1-4525-8808-49ecce9b2716",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -574,8 +574,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.languages": {
-      "name": "languages",
+    "public.keywords_english": {
+      "name": "keywords_english",
       "schema": "",
       "columns": {
         "id": {
@@ -612,11 +612,260 @@
         }
       },
       "indexes": {
+        "keywords_english_name_idx": {
+          "name": "keywords_english_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "keywords_english_created_at_idx": {
+          "name": "keywords_english_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "keywords_english_updated_at_idx": {
+          "name": "keywords_english_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "keywords_english_deleted_at_idx": {
+          "name": "keywords_english_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "keywords_english_name_unique": {
+          "name": "keywords_english_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.keywords_turkish": {
+      "name": "keywords_turkish",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "keywords_turkish_name_idx": {
+          "name": "keywords_turkish_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "keywords_turkish_created_at_idx": {
+          "name": "keywords_turkish_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "keywords_turkish_updated_at_idx": {
+          "name": "keywords_turkish_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "keywords_turkish_deleted_at_idx": {
+          "name": "keywords_turkish_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "keywords_turkish_name_unique": {
+          "name": "keywords_turkish_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.languages": {
+      "name": "languages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "x_order": {
+          "name": "x_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
         "languages_name_idx": {
           "name": "languages_name_idx",
           "columns": [
             {
               "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "languages_x_order_idx": {
+          "name": "languages_x_order_idx",
+          "columns": [
+            {
+              "expression": "x_order",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -688,8 +937,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.subjects": {
-      "name": "subjects",
+    "public.subjects_english": {
+      "name": "subjects_english",
       "schema": "",
       "columns": {
         "id": {
@@ -726,8 +975,8 @@
         }
       },
       "indexes": {
-        "subjects_name_idx": {
-          "name": "subjects_name_idx",
+        "subjects_english_name_idx": {
+          "name": "subjects_english_name_idx",
           "columns": [
             {
               "expression": "name",
@@ -741,8 +990,8 @@
           "method": "btree",
           "with": {}
         },
-        "subjects_created_at_idx": {
-          "name": "subjects_created_at_idx",
+        "subjects_english_created_at_idx": {
+          "name": "subjects_english_created_at_idx",
           "columns": [
             {
               "expression": "created_at",
@@ -756,8 +1005,8 @@
           "method": "btree",
           "with": {}
         },
-        "subjects_updated_at_idx": {
-          "name": "subjects_updated_at_idx",
+        "subjects_english_updated_at_idx": {
+          "name": "subjects_english_updated_at_idx",
           "columns": [
             {
               "expression": "updated_at",
@@ -771,8 +1020,8 @@
           "method": "btree",
           "with": {}
         },
-        "subjects_deleted_at_idx": {
-          "name": "subjects_deleted_at_idx",
+        "subjects_english_deleted_at_idx": {
+          "name": "subjects_english_deleted_at_idx",
           "columns": [
             {
               "expression": "deleted_at",
@@ -790,8 +1039,122 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "subjects_name_unique": {
-          "name": "subjects_name_unique",
+        "subjects_english_name_unique": {
+          "name": "subjects_english_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.subjects_turkish": {
+      "name": "subjects_turkish",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "subjects_turkish_name_idx": {
+          "name": "subjects_turkish_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "subjects_turkish_created_at_idx": {
+          "name": "subjects_turkish_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "subjects_turkish_updated_at_idx": {
+          "name": "subjects_turkish_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "subjects_turkish_deleted_at_idx": {
+          "name": "subjects_turkish_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "subjects_turkish_name_unique": {
+          "name": "subjects_turkish_name_unique",
           "nullsNotDistinct": false,
           "columns": [
             "name"
@@ -824,26 +1187,26 @@
           "primaryKey": false,
           "notNull": true
         },
-        "title_turkish": {
-          "name": "title_turkish",
+        "title_original": {
+          "name": "title_original",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "title_foreign": {
-          "name": "title_foreign",
+        "title_translated": {
+          "name": "title_translated",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "abstract_turkish": {
-          "name": "abstract_turkish",
+        "abstract_original": {
+          "name": "abstract_original",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "abstract_foreign": {
-          "name": "abstract_foreign",
+        "abstract_translated": {
+          "name": "abstract_translated",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -864,7 +1227,7 @@
           "name": "institute_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "department_id": {
           "name": "department_id",
@@ -878,11 +1241,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "type": {
-          "name": "type",
-          "type": "varchar",
+        "thesis_type_id": {
+          "name": "thesis_type_id",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "detail_id_1": {
           "name": "detail_id_1",
@@ -960,11 +1323,11 @@
           "method": "btree",
           "with": {}
         },
-        "theses_title_turkish_fts_idx": {
-          "name": "theses_title_turkish_fts_idx",
+        "theses_title_original_fts_idx": {
+          "name": "theses_title_original_fts_idx",
           "columns": [
             {
-              "expression": "to_tsvector('simple', \"title_turkish\")",
+              "expression": "to_tsvector('simple', \"title_original\")",
               "asc": true,
               "isExpression": true,
               "nulls": "last"
@@ -975,11 +1338,11 @@
           "method": "gin",
           "with": {}
         },
-        "theses_title_foreign_fts_idx": {
-          "name": "theses_title_foreign_fts_idx",
+        "theses_title_translated_fts_idx": {
+          "name": "theses_title_translated_fts_idx",
           "columns": [
             {
-              "expression": "to_tsvector('simple', \"title_foreign\")",
+              "expression": "to_tsvector('simple', \"title_translated\")",
               "asc": true,
               "isExpression": true,
               "nulls": "last"
@@ -990,11 +1353,11 @@
           "method": "gin",
           "with": {}
         },
-        "theses_abstract_turkish_fts_idx": {
-          "name": "theses_abstract_turkish_fts_idx",
+        "theses_abstract_original_fts_idx": {
+          "name": "theses_abstract_original_fts_idx",
           "columns": [
             {
-              "expression": "to_tsvector('simple', \"abstract_turkish\")",
+              "expression": "to_tsvector('simple', \"abstract_original\")",
               "asc": true,
               "isExpression": true,
               "nulls": "last"
@@ -1005,11 +1368,11 @@
           "method": "gin",
           "with": {}
         },
-        "theses_abstract_foreign_fts_idx": {
-          "name": "theses_abstract_foreign_fts_idx",
+        "theses_abstract_translated_fts_idx": {
+          "name": "theses_abstract_translated_fts_idx",
           "columns": [
             {
-              "expression": "to_tsvector('simple', \"abstract_foreign\")",
+              "expression": "to_tsvector('simple', \"abstract_translated\")",
               "asc": true,
               "isExpression": true,
               "nulls": "last"
@@ -1095,11 +1458,11 @@
           "method": "btree",
           "with": {}
         },
-        "theses_type_idx": {
-          "name": "theses_type_idx",
+        "theses_thesis_type_id_idx": {
+          "name": "theses_thesis_type_id_idx",
           "columns": [
             {
-              "expression": "type",
+              "expression": "thesis_type_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1228,6 +1591,19 @@
           "tableTo": "branches",
           "columnsFrom": [
             "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "theses_thesis_type_id_thesis_types_id_fk": {
+          "name": "theses_thesis_type_id_thesis_types_id_fk",
+          "tableFrom": "theses",
+          "tableTo": "thesis_types",
+          "columnsFrom": [
+            "thesis_type_id"
           ],
           "columnsTo": [
             "id"
@@ -1390,8 +1766,304 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.thesis_subjects": {
-      "name": "thesis_subjects",
+    "public.thesis_keywords_english": {
+      "name": "thesis_keywords_english",
+      "schema": "",
+      "columns": {
+        "thesis_id": {
+          "name": "thesis_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "keyword_id": {
+          "name": "keyword_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "thesis_keywords_english_thesis_id_idx": {
+          "name": "thesis_keywords_english_thesis_id_idx",
+          "columns": [
+            {
+              "expression": "thesis_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_english_keyword_id_idx": {
+          "name": "thesis_keywords_english_keyword_id_idx",
+          "columns": [
+            {
+              "expression": "keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_english_created_at_idx": {
+          "name": "thesis_keywords_english_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_english_updated_at_idx": {
+          "name": "thesis_keywords_english_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_english_deleted_at_idx": {
+          "name": "thesis_keywords_english_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "thesis_keywords_english_thesis_id_theses_id_fk": {
+          "name": "thesis_keywords_english_thesis_id_theses_id_fk",
+          "tableFrom": "thesis_keywords_english",
+          "tableTo": "theses",
+          "columnsFrom": [
+            "thesis_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "thesis_keywords_english_keyword_id_keywords_english_id_fk": {
+          "name": "thesis_keywords_english_keyword_id_keywords_english_id_fk",
+          "tableFrom": "thesis_keywords_english",
+          "tableTo": "keywords_english",
+          "columnsFrom": [
+            "keyword_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.thesis_keywords_turkish": {
+      "name": "thesis_keywords_turkish",
+      "schema": "",
+      "columns": {
+        "thesis_id": {
+          "name": "thesis_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "keyword_id": {
+          "name": "keyword_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "thesis_keywords_turkish_thesis_id_idx": {
+          "name": "thesis_keywords_turkish_thesis_id_idx",
+          "columns": [
+            {
+              "expression": "thesis_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_turkish_keyword_id_idx": {
+          "name": "thesis_keywords_turkish_keyword_id_idx",
+          "columns": [
+            {
+              "expression": "keyword_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_turkish_created_at_idx": {
+          "name": "thesis_keywords_turkish_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_turkish_updated_at_idx": {
+          "name": "thesis_keywords_turkish_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_keywords_turkish_deleted_at_idx": {
+          "name": "thesis_keywords_turkish_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "thesis_keywords_turkish_thesis_id_theses_id_fk": {
+          "name": "thesis_keywords_turkish_thesis_id_theses_id_fk",
+          "tableFrom": "thesis_keywords_turkish",
+          "tableTo": "theses",
+          "columnsFrom": [
+            "thesis_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "thesis_keywords_turkish_keyword_id_keywords_turkish_id_fk": {
+          "name": "thesis_keywords_turkish_keyword_id_keywords_turkish_id_fk",
+          "tableFrom": "thesis_keywords_turkish",
+          "tableTo": "keywords_turkish",
+          "columnsFrom": [
+            "keyword_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.thesis_subjects_english": {
+      "name": "thesis_subjects_english",
       "schema": "",
       "columns": {
         "thesis_id": {
@@ -1428,8 +2100,8 @@
         }
       },
       "indexes": {
-        "thesis_subjects_thesis_id_idx": {
-          "name": "thesis_subjects_thesis_id_idx",
+        "thesis_subjects_english_thesis_id_idx": {
+          "name": "thesis_subjects_english_thesis_id_idx",
           "columns": [
             {
               "expression": "thesis_id",
@@ -1443,8 +2115,8 @@
           "method": "btree",
           "with": {}
         },
-        "thesis_subjects_subject_id_idx": {
-          "name": "thesis_subjects_subject_id_idx",
+        "thesis_subjects_english_subject_id_idx": {
+          "name": "thesis_subjects_english_subject_id_idx",
           "columns": [
             {
               "expression": "subject_id",
@@ -1458,8 +2130,8 @@
           "method": "btree",
           "with": {}
         },
-        "thesis_subjects_created_at_idx": {
-          "name": "thesis_subjects_created_at_idx",
+        "thesis_subjects_english_created_at_idx": {
+          "name": "thesis_subjects_english_created_at_idx",
           "columns": [
             {
               "expression": "created_at",
@@ -1473,8 +2145,8 @@
           "method": "btree",
           "with": {}
         },
-        "thesis_subjects_updated_at_idx": {
-          "name": "thesis_subjects_updated_at_idx",
+        "thesis_subjects_english_updated_at_idx": {
+          "name": "thesis_subjects_english_updated_at_idx",
           "columns": [
             {
               "expression": "updated_at",
@@ -1488,8 +2160,8 @@
           "method": "btree",
           "with": {}
         },
-        "thesis_subjects_deleted_at_idx": {
-          "name": "thesis_subjects_deleted_at_idx",
+        "thesis_subjects_english_deleted_at_idx": {
+          "name": "thesis_subjects_english_deleted_at_idx",
           "columns": [
             {
               "expression": "deleted_at",
@@ -1505,9 +2177,9 @@
         }
       },
       "foreignKeys": {
-        "thesis_subjects_thesis_id_theses_id_fk": {
-          "name": "thesis_subjects_thesis_id_theses_id_fk",
-          "tableFrom": "thesis_subjects",
+        "thesis_subjects_english_thesis_id_theses_id_fk": {
+          "name": "thesis_subjects_english_thesis_id_theses_id_fk",
+          "tableFrom": "thesis_subjects_english",
           "tableTo": "theses",
           "columnsFrom": [
             "thesis_id"
@@ -1518,10 +2190,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "thesis_subjects_subject_id_subjects_id_fk": {
-          "name": "thesis_subjects_subject_id_subjects_id_fk",
-          "tableFrom": "thesis_subjects",
-          "tableTo": "subjects",
+        "thesis_subjects_english_subject_id_subjects_turkish_id_fk": {
+          "name": "thesis_subjects_english_subject_id_subjects_turkish_id_fk",
+          "tableFrom": "thesis_subjects_english",
+          "tableTo": "subjects_turkish",
           "columnsFrom": [
             "subject_id"
           ],
@@ -1534,6 +2206,289 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.thesis_subjects_turkish": {
+      "name": "thesis_subjects_turkish",
+      "schema": "",
+      "columns": {
+        "thesis_id": {
+          "name": "thesis_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "thesis_subjects_turkish_thesis_id_idx": {
+          "name": "thesis_subjects_turkish_thesis_id_idx",
+          "columns": [
+            {
+              "expression": "thesis_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_subjects_turkish_subject_id_idx": {
+          "name": "thesis_subjects_turkish_subject_id_idx",
+          "columns": [
+            {
+              "expression": "subject_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_subjects_turkish_created_at_idx": {
+          "name": "thesis_subjects_turkish_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_subjects_turkish_updated_at_idx": {
+          "name": "thesis_subjects_turkish_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_subjects_turkish_deleted_at_idx": {
+          "name": "thesis_subjects_turkish_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "thesis_subjects_turkish_thesis_id_theses_id_fk": {
+          "name": "thesis_subjects_turkish_thesis_id_theses_id_fk",
+          "tableFrom": "thesis_subjects_turkish",
+          "tableTo": "theses",
+          "columnsFrom": [
+            "thesis_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "thesis_subjects_turkish_subject_id_subjects_turkish_id_fk": {
+          "name": "thesis_subjects_turkish_subject_id_subjects_turkish_id_fk",
+          "tableFrom": "thesis_subjects_turkish",
+          "tableTo": "subjects_turkish",
+          "columnsFrom": [
+            "subject_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.thesis_types": {
+      "name": "thesis_types",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "x_order": {
+          "name": "x_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "thesis_types_name_idx": {
+          "name": "thesis_types_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_types_x_order_idx": {
+          "name": "thesis_types_x_order_idx",
+          "columns": [
+            {
+              "expression": "x_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_types_created_at_idx": {
+          "name": "thesis_types_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_types_updated_at_idx": {
+          "name": "thesis_types_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "thesis_types_deleted_at_idx": {
+          "name": "thesis_types_deleted_at_idx",
+          "columns": [
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "thesis_types_name_unique": {
+          "name": "thesis_types_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

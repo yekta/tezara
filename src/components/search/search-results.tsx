@@ -13,7 +13,6 @@ import {
   minButtonSizeEnforcerClassName,
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
-import { TURKISH } from "@/lib/constants";
 import { Parser } from "@json2csv/plainjs";
 import {
   CalendarIcon,
@@ -217,14 +216,10 @@ export default function SearchResults({}: Props) {
                     href={`/thesis/${result.id}`}
                     className="text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
                   >
-                    {result.languageName === TURKISH
-                      ? result.titleTurkish || noTitle
-                      : result.titleForeign || noTitle}
+                    {result.titleOriginal || noTitle}
                   </Link>
                   <p className="mt-1 text-sm leading-tight font-medium text-muted-foreground">
-                    {result.languageName === TURKISH
-                      ? result.titleForeign || noTranslatedTitle
-                      : result.titleTurkish || noTranslatedTitle}
+                    {result.titleTranslated || noTranslatedTitle}
                   </p>
                   <div className="w-full flex mt-2">
                     <p className="shrink min-w-0 text-base leading-snug">

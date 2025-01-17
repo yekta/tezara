@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS "advisors" (
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "advisors_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "authors" (
@@ -11,7 +12,8 @@ CREATE TABLE IF NOT EXISTS "authors" (
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "authors_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "branches" (
@@ -19,7 +21,8 @@ CREATE TABLE IF NOT EXISTS "branches" (
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "branches_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "departments" (
@@ -27,7 +30,8 @@ CREATE TABLE IF NOT EXISTS "departments" (
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "departments_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "institutes" (
@@ -35,15 +39,27 @@ CREATE TABLE IF NOT EXISTS "institutes" (
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "institutes_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "languages" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
+	"x_order" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "languages_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "subjects" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"name" varchar NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp,
+	CONSTRAINT "subjects_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "theses" (
@@ -59,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "theses" (
 	"institute_id" uuid NOT NULL,
 	"department_id" uuid,
 	"branch_id" uuid,
-	"type" varchar NOT NULL,
+	"thesis_type_id" uuid,
 	"detail_id_1" varchar NOT NULL,
 	"detail_id_2" varchar NOT NULL,
 	"page_count" integer NOT NULL,
@@ -77,12 +93,31 @@ CREATE TABLE IF NOT EXISTS "thesis_advisors" (
 	"deleted_at" timestamp
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "thesis_subjects" (
+	"thesis_id" integer NOT NULL,
+	"subject_id" uuid NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "thesis_types" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"name" varchar NOT NULL,
+	"x_order" integer,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp,
+	CONSTRAINT "thesis_types_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "universities" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "universities_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -122,6 +157,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "theses" ADD CONSTRAINT "theses_thesis_type_id_thesis_types_id_fk" FOREIGN KEY ("thesis_type_id") REFERENCES "public"."thesis_types"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "thesis_advisors" ADD CONSTRAINT "thesis_advisors_thesis_id_theses_id_fk" FOREIGN KEY ("thesis_id") REFERENCES "public"."theses"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -129,6 +170,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "thesis_advisors" ADD CONSTRAINT "thesis_advisors_advisor_id_advisors_id_fk" FOREIGN KEY ("advisor_id") REFERENCES "public"."advisors"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "thesis_subjects" ADD CONSTRAINT "thesis_subjects_thesis_id_theses_id_fk" FOREIGN KEY ("thesis_id") REFERENCES "public"."theses"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "thesis_subjects" ADD CONSTRAINT "thesis_subjects_subject_id_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."subjects"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -154,9 +207,14 @@ CREATE INDEX IF NOT EXISTS "institutes_created_at_idx" ON "institutes" USING btr
 CREATE INDEX IF NOT EXISTS "institutes_updated_at_idx" ON "institutes" USING btree ("updated_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "institutes_deleted_at_idx" ON "institutes" USING btree ("deleted_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "languages_name_idx" ON "languages" USING btree ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "languages_x_order_idx" ON "languages" USING btree ("x_order");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "languages_created_at_idx" ON "languages" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "languages_updated_at_idx" ON "languages" USING btree ("updated_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "languages_deleted_at_idx" ON "languages" USING btree ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subjects_name_idx" ON "subjects" USING btree ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subjects_created_at_idx" ON "subjects" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subjects_updated_at_idx" ON "subjects" USING btree ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subjects_deleted_at_idx" ON "subjects" USING btree ("deleted_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_author_id_idx" ON "theses" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_language_id_idx" ON "theses" USING btree ("language_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_title_turkish_fts_idx" ON "theses" USING gin (to_tsvector('simple', "title_turkish"));--> statement-breakpoint
@@ -168,7 +226,7 @@ CREATE INDEX IF NOT EXISTS "theses_university_id_idx" ON "theses" USING btree ("
 CREATE INDEX IF NOT EXISTS "theses_institute_id_idx" ON "theses" USING btree ("institute_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_department_id_idx" ON "theses" USING btree ("department_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_branch_id_idx" ON "theses" USING btree ("branch_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "theses_type_idx" ON "theses" USING btree ("type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "theses_thesis_type_id_idx" ON "theses" USING btree ("thesis_type_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_created_at_idx" ON "theses" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_updated_at_idx" ON "theses" USING btree ("updated_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "theses_deleted_at_idx" ON "theses" USING btree ("deleted_at");--> statement-breakpoint
@@ -177,6 +235,16 @@ CREATE INDEX IF NOT EXISTS "thesis_advisors_advisor_id_idx" ON "thesis_advisors"
 CREATE INDEX IF NOT EXISTS "thesis_advisors_created_at_idx" ON "thesis_advisors" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "thesis_advisors_updated_at_idx" ON "thesis_advisors" USING btree ("updated_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "thesis_advisors_deleted_at_idx" ON "thesis_advisors" USING btree ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_subjects_thesis_id_idx" ON "thesis_subjects" USING btree ("thesis_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_subjects_subject_id_idx" ON "thesis_subjects" USING btree ("subject_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_subjects_created_at_idx" ON "thesis_subjects" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_subjects_updated_at_idx" ON "thesis_subjects" USING btree ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_subjects_deleted_at_idx" ON "thesis_subjects" USING btree ("deleted_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_types_name_idx" ON "thesis_types" USING btree ("name");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_types_x_order_idx" ON "thesis_types" USING btree ("x_order");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_types_created_at_idx" ON "thesis_types" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_types_updated_at_idx" ON "thesis_types" USING btree ("updated_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "thesis_types_deleted_at_idx" ON "thesis_types" USING btree ("deleted_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "universities_name_idx" ON "universities" USING btree ("name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "universities_created_at_idx" ON "universities" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "universities_updated_at_idx" ON "universities" USING btree ("updated_at");--> statement-breakpoint
