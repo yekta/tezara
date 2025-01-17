@@ -7,9 +7,12 @@ export default function NavigationSection({
   id,
 }: {
   className?: string;
-  id: string;
+  id: number;
 }) {
-  const idNumber = Number(id);
+  const idNumber = parseInt(Number(id).toString());
+  const currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
+  const buttonDisabled = currentThesisId <= 1;
+
   return (
     <div
       className={cn(
@@ -17,7 +20,7 @@ export default function NavigationSection({
         className
       )}
     >
-      {idNumber <= 1 ? (
+      {buttonDisabled ? (
         <Button
           disabled
           size="sm"
@@ -29,7 +32,7 @@ export default function NavigationSection({
         </Button>
       ) : (
         <LinkButton
-          href={`/thesis/${idNumber - 1}`}
+          href={`/thesis/${currentThesisId - 1}`}
           size="sm"
           variant="ghost"
           className="text-muted-foreground -ml-3 min-w-0 shrink"
@@ -39,7 +42,7 @@ export default function NavigationSection({
         </LinkButton>
       )}
       <LinkButton
-        href={`/thesis/${idNumber - 1}`}
+        href={`/thesis/${currentThesisId + 1}`}
         size="sm"
         variant="ghost"
         className="text-muted-foreground -mr-3 min-w-0 shrink"

@@ -2,6 +2,7 @@ import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { notFound } from "next/navigation";
 
 type Props = {
   children: React.ReactNode;
@@ -10,19 +11,21 @@ type Props = {
 
 export default async function Layout({ params, children }: Props) {
   const { id } = await params;
+  const idNumber = parseInt(Number(id).toString());
+
   return (
     <div className="w-full flex-1 relative flex flex-col md:flex-row md:justify-center text-lg px-5 md:px-3 lg:px-5">
-      <NavigationSection id={id} className="md:hidden pb-4" />
+      <NavigationSection id={idNumber} className="md:hidden pb-4" />
       {/* Md left */}
       <Sidebar
-        currentThesisId={Number(id)}
+        currentThesisId={idNumber}
         side="start"
         className="pr-4 lg:pr-6 pt-0.5 hidden md:flex"
       />
       {children}
       {/* Md right */}
       <Sidebar
-        currentThesisId={Number(id)}
+        currentThesisId={idNumber}
         side="end"
         className="pl-4 md:pl-6 pt-0.5 hidden md:flex"
       />
@@ -39,7 +42,10 @@ function Sidebar({
   currentThesisId: number;
   side: "start" | "end";
 }) {
-  const buttonDisabled = side === "start" ? currentThesisId <= 1 : false;
+  const idNumber = parseInt(Number(currentThesisId).toString());
+  const _currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
+  const buttonDisabled = side === "start" ? _currentThesisId <= 1 : false;
+
   return (
     <div
       data-side={side}
@@ -65,8 +71,8 @@ function Sidebar({
         <LinkButton
           href={
             side === "start"
-              ? `/thesis/${currentThesisId - 1}`
-              : `/thesis/${currentThesisId + 1}`
+              ? `/thesis/${_currentThesisId - 1}`
+              : `/thesis/${_currentThesisId + 1}`
           }
           size="sm"
           variant="ghost"

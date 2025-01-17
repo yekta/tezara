@@ -13,14 +13,14 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
-  const idNumber = Number(id);
+  const idNumber = parseInt(Number(id).toString());
   const isIdValid = !isNaN(idNumber) && idNumber >= 0;
 
   if (!isIdValid) {
     return notFound();
   }
 
-  const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
+  const thesis = await apiServerStatic.main.getThesis({ id: idNumber });
   if (!thesis) {
     return notFound();
   }
@@ -190,30 +190,34 @@ export default async function Page({ params }: Props) {
             : thesis.abstractTurkish || noTranslatedAbstractText}
         </p>
       </div>
-      <NavigationSection
-        id={thesis.id.toString()}
-        className="md:hidden pb-4 mt-8"
-      />
+      <NavigationSection id={thesis.id} className="md:hidden pb-4 mt-8" />
     </div>
   );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-
-  const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
   const notFoundTitle = `Tez Bulunamadı | ${siteTitle}`;
   const notFoundDescription = `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`;
-
-  if (!thesis) {
-    return {
+  const notFoundMeta: Metadata = {
+    title: notFoundTitle,
+    description: notFoundDescription,
+    twitter: getTwitterMeta({
       title: notFoundTitle,
       description: notFoundDescription,
-      twitter: getTwitterMeta({
-        title: notFoundTitle,
-        description: notFoundDescription,
-      }),
-    };
+    }),
+  };
+
+  const idNumber = parseInt(Number(id).toString());
+  const isIdValid = !isNaN(idNumber) && idNumber >= 0;
+  if (!isIdValid) {
+    return notFoundMeta;
+  }
+
+  const thesis = await apiServerStatic.main.getThesis({ id: idNumber });
+
+  if (!thesis) {
+    return notFoundMeta;
   }
 
   const title = `${
