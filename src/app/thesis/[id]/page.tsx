@@ -13,6 +13,13 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
+  const idNumber = Number(id);
+  const isIdValid = !isNaN(idNumber) && idNumber >= 0;
+
+  if (!isIdValid) {
+    return notFound();
+  }
+
   const thesis = await apiServerStatic.main.getThesis({ id: Number(id) });
   if (!thesis) {
     return notFound();

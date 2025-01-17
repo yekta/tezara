@@ -1,5 +1,5 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
-import { LinkButton } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
@@ -39,6 +39,7 @@ function Sidebar({
   currentThesisId: number;
   side: "start" | "end";
 }) {
+  const buttonDisabled = side === "start" ? currentThesisId <= 1 : false;
   return (
     <div
       data-side={side}
@@ -47,22 +48,37 @@ function Sidebar({
         className
       )}
     >
-      <LinkButton
-        href={
-          side === "start"
-            ? `/thesis/${currentThesisId - 1}`
-            : `/thesis/${currentThesisId + 1}`
-        }
-        size="sm"
-        variant="ghost"
-        className="text-muted-foreground min-w-0 shrink"
-      >
-        {side === "start" && <ArrowLeftIcon className="size-5 -ml-1.5" />}
-        <p className="shrink min-w-0">
-          {side === "start" ? "Önceki Tez" : "Sonraki Tez"}
-        </p>
-        {side === "end" && <ArrowRightIcon className="size-5 -mr-1.5" />}
-      </LinkButton>
+      {buttonDisabled ? (
+        <Button
+          disabled
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground min-w-0 shrink"
+        >
+          {side === "start" && <ArrowLeftIcon className="size-5 -ml-1.5" />}
+          <p className="shrink min-w-0">
+            {side === "start" ? "Önceki Tez" : "Sonraki Tez"}
+          </p>
+          {side === "end" && <ArrowRightIcon className="size-5 -mr-1.5" />}
+        </Button>
+      ) : (
+        <LinkButton
+          href={
+            side === "start"
+              ? `/thesis/${currentThesisId - 1}`
+              : `/thesis/${currentThesisId + 1}`
+          }
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground min-w-0 shrink"
+        >
+          {side === "start" && <ArrowLeftIcon className="size-5 -ml-1.5" />}
+          <p className="shrink min-w-0">
+            {side === "start" ? "Önceki Tez" : "Sonraki Tez"}
+          </p>
+          {side === "end" && <ArrowRightIcon className="size-5 -mr-1.5" />}
+        </LinkButton>
+      )}
     </div>
   );
 }
