@@ -2,7 +2,6 @@ import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
-import { notFound } from "next/navigation";
 
 type Props = {
   children: React.ReactNode;

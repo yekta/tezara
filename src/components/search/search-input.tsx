@@ -18,7 +18,6 @@ import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ArrowUpIcon,
   ChevronUpIcon,
   GlobeIcon,
   LandmarkIcon,
@@ -196,8 +195,12 @@ export default function SearchInput({
   return (
     <Form {...form}>
       <form
+        data-pending={isPendingAsyncPush ? true : undefined}
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn("w-full flex flex-col items-center", className)}
+        className={cn(
+          "w-full group/form flex flex-col items-center",
+          className
+        )}
       >
         {/* Main search box */}
         <FormField
@@ -248,7 +251,16 @@ export default function SearchInput({
           className="w-full flex flex-col items-center group pt-3"
         >
           <div className="max-w-full flex flex-wrap justify-center gap-2">
-            <Button className="py-2 px-6">Ara</Button>
+            <Button disabled={isPendingAsyncPush} className="py-2 px-6">
+              <p className="min-w-0 shrink group-data-[pending]/form:opacity-0">
+                Ara
+              </p>
+              {isPendingAsyncPush && (
+                <div className="size-5 absolute left-1/2 top-1/2 transform -translate-y-1/2 -translate-x-1/2">
+                  <LoaderIcon className="size-full animate-spin" />
+                </div>
+              )}
+            </Button>
             <div className="shrink min-w-0 flex flex-wrap">
               <Button
                 type="button"
