@@ -140,15 +140,16 @@ export async function searchTheses(input: TSearchThesesSchema) {
   }
 
   if (query) {
+    const lowercaseQuery = query.toLowerCase();
     queryFilters = or(
       sql`to_tsvector('turkish', ${thesesTable.titleOriginal}) @@ phraseto_tsquery('turkish', ${query})`,
       sql`to_tsvector('english', ${thesesTable.titleTranslated}) @@ phraseto_tsquery('english', ${query})`,
-      ilike(authorsTable.name, `%${query}%`),
+      ilike(sql`lower(${authorsTable.name})`, `%${lowercaseQuery}%`),
       sql`"theses"."id" IN (
         SELECT ta."thesis_id"
         FROM "thesis_advisors" ta
         JOIN "advisors" adv ON ta."advisor_id" = adv."id"
-        WHERE adv."name" ILIKE ${"%" + query + "%"}
+        WHERE lower(adv."name") ILIKE ${"%" + lowercaseQuery + "%"}
       )`
     );
   }
