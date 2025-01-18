@@ -28,3 +28,18 @@ export type TExtention = {
 };
 
 export type TThesisExtended = TThesis & TExtention;
+
+export type TThesisType = {
+  id: string;
+  name: string;
+};
+
+export type TUniversity = {
+  id: string;
+  name: string;
+};
+
+export type TLanguage = {
+  id: string;
+  name: string;
+};
