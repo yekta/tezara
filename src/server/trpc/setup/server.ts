@@ -21,7 +21,7 @@ const createContext = cache(async () => {
   });
 });
 
-const getQueryClient = cache(createQueryClient);
+export const getQueryClientServer = cache(createQueryClient);
 const caller = createCaller(createContext);
 
 const createContextStatic = cache(async () => {
@@ -34,7 +34,7 @@ const createContextStatic = cache(async () => {
 const callerStatic = createCaller(createContextStatic);
 
 export const { trpc: apiServer, HydrateClient } =
-  createHydrationHelpers<AppRouter>(caller, getQueryClient);
+  createHydrationHelpers<AppRouter>(caller, getQueryClientServer);
 
 export const { trpc: apiServerStatic, HydrateClient: HydrateClientStatic } =
-  createHydrationHelpers<AppRouter>(callerStatic, getQueryClient);
+  createHydrationHelpers<AppRouter>(callerStatic, getQueryClientServer);

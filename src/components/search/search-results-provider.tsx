@@ -1,6 +1,8 @@
 "use client";
 
-import { LIMIT_DEFAULT, OFFSET_DEFAULT } from "@/components/search/constants";
+import { LIMIT_BULK, LIMIT_DEFAULT } from "@/components/search/constants";
+import { searchLikePageParams } from "@/components/search/constants-client";
+import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";
 import {
@@ -9,12 +11,7 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import {
-  parseAsArrayOf,
-  parseAsInteger,
-  parseAsString,
-  useQueryState,
-} from "nuqs";
+import { useQueryState } from "nuqs";
 import React, { createContext, ReactNode, useContext } from "react";
 
 type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
@@ -23,37 +20,37 @@ type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
 
 const LONG_STALE_TIME = 60 * 1000;
 const SearchResultsContext = createContext<TSearchResultsContext | null>(null);
-const BULK_LIMIT = 20000;
 
 export const SearchResultsProvider: React.FC<{
   children: ReactNode;
-  initialData?: TSearchThesesResult;
-}> = ({ children, initialData }) => {
+}> = ({ children }) => {
   const queryClient = useQueryClient();
   const pathname = usePathname();
   const isSearchResultsPath = pathname.startsWith("/search");
 
-  const [query] = useQueryState("q", parseAsString.withDefault(""));
+  const [query] = useQueryState("q", searchLikePageParams.q);
   const [languages] = useQueryState(
     "languages",
-    parseAsArrayOf(parseAsString).withDefault([])
+    searchLikePageParams["languages"]
   );
   const [universities] = useQueryState(
     "universities",
-    parseAsArrayOf(parseAsString).withDefault([])
+    searchLikePageParams["universities"]
   );
   const [thesisTypes] = useQueryState(
-    "thesis-types",
-    parseAsArrayOf(parseAsString).withDefault([])
+    "thesis_types",
+    searchLikePageParams["thesis_types"]
   );
-  const [offset] = useQueryState(
-    "offset",
-    parseAsInteger.withDefault(OFFSET_DEFAULT)
-  );
-  const [limit] = useQueryState(
-    "limit",
-    parseAsInteger.withDefault(LIMIT_DEFAULT)
-  );
+  const [offset] = useQueryState("offset", searchLikePageParams["offset"]);
+
+  const queryKey = getSearchThesesQueryKey({
+    query,
+    languages,
+    universities,
+    thesisTypes,
+    limit: LIMIT_DEFAULT,
+    offset,
+  });
 
   const searchThesesQuery = useQuery({
     queryFn: () =>
@@ -63,18 +60,10 @@ export const SearchResultsProvider: React.FC<{
         universities,
         thesisTypes,
         client: meili,
-        limit,
+        limit: LIMIT_DEFAULT,
         offset,
       }),
-    queryKey: getSearchThesesQueryKey({
-      query,
-      languages,
-      universities,
-      thesisTypes,
-      limit,
-      offset,
-    }),
-    initialData: initialData,
+    queryKey,
     enabled: isSearchResultsPath,
   });
 
@@ -87,7 +76,7 @@ export const SearchResultsProvider: React.FC<{
           universities,
           thesisTypes,
           client: meili,
-          limit: BULK_LIMIT,
+          limit: LIMIT_BULK,
           offset,
         }),
       queryKey: getSearchThesesQueryKey({
@@ -95,7 +84,7 @@ export const SearchResultsProvider: React.FC<{
         languages,
         universities,
         thesisTypes,
-        limit: BULK_LIMIT,
+        limit: LIMIT_BULK,
         offset,
       }),
       staleTime: LONG_STALE_TIME,
@@ -123,30 +112,5 @@ export const useSearchResults = () => {
   }
   return context;
 };
-
-function getSearchThesesQueryKey({
-  query,
-  languages,
-  universities,
-  thesisTypes,
-  limit,
-  offset,
-}: {
-  query: string;
-  languages?: string[];
-  universities?: string[];
-  thesisTypes?: string[];
-  limit?: number;
-  offset?: number;
-}) {
-  return [
-    query,
-    languages && languages.length ? languages : undefined,
-    universities && universities.length ? universities : undefined,
-    thesisTypes && thesisTypes.length ? thesisTypes : undefined,
-    limit ? limit : undefined,
-    offset ? offset : undefined,
-  ];
-}
 
 export default SearchResultsProvider;

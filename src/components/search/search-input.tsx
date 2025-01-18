@@ -4,7 +4,7 @@ import BroomIcon from "@/components/icons/broom";
 import LanguageIcon from "@/components/icons/language";
 import ThesisTypeIcon from "@/components/icons/thesis-type";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
-import { LIMIT_DEFAULT, OFFSET_DEFAULT } from "@/components/search/constants";
+import { searchLikePageParams } from "@/components/search/constants-client";
 import MultiSelectFormItem from "@/components/search/multi-select-form-item";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,13 +33,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsInteger,
-  parseAsString,
-  useQueryState,
-} from "nuqs";
+import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -50,7 +44,6 @@ const SearchThesesSchema = z.object({
   universities: z.array(z.string()),
   thesisTypes: z.array(z.string()),
   offset: z.number(),
-  limit: z.number(),
 });
 
 type Props = {
@@ -94,34 +87,29 @@ export default function SearchInput({
   );
   const searchParams = useSearchParams();
 
-  const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
+  const [query, setQuery] = useQueryState("q", searchLikePageParams.q);
   const [languagesQP, setLanguagesQP] = useQueryState(
     "languages",
-    parseAsArrayOf(parseAsString).withDefault([])
+    searchLikePageParams["languages"]
   );
   const [universitiesQP, setUniversitiesQP] = useQueryState(
     "universities",
-    parseAsArrayOf(parseAsString).withDefault([])
+    searchLikePageParams["universities"]
   );
   const [thesisTypesQP, setThesisTypesQP] = useQueryState(
-    "thesis-types",
-    parseAsArrayOf(parseAsString).withDefault([])
+    "thesis_types",
+    searchLikePageParams["thesis_types"]
   );
   const [advancedSearch, setAdvancedSearch] = useQueryState(
     "advanced",
-    parseAsBoolean.withDefault(false)
+    searchLikePageParams["advanced"]
   );
   const [offsetQP, setOffsetQP] = useQueryState(
     "offset",
-    parseAsInteger.withDefault(OFFSET_DEFAULT)
-  );
-  const [limitQP, setLimitQP] = useQueryState(
-    "limit",
-    parseAsInteger.withDefault(LIMIT_DEFAULT)
+    searchLikePageParams["offset"]
   );
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
-  const queryInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
     resolver: zodResolver(SearchThesesSchema),
     defaultValues: {
@@ -130,16 +118,13 @@ export default function SearchInput({
       universities: universitiesQP,
       thesisTypes: thesisTypesQP,
       offset: offsetQP,
-      limit: limitQP,
     },
   });
-  const { ref } = form.register("query");
 
   const queryInput = form.watch("query");
   const selectedLanguages = form.watch("languages");
   const selectedUniversities = form.watch("universities");
   const selectedThesisTypes = form.watch("thesisTypes");
-  const limit = form.watch("limit");
   const offset = form.watch("offset");
 
   const totalSelectedCount = useMemo(() => {
@@ -192,11 +177,6 @@ export default function SearchInput({
     setOffsetQP(offset);
   }, [offset, offsetQP, setOffsetQP]);
 
-  useEffect(() => {
-    if (limitQP === limit) return;
-    setLimitQP(limit);
-  }, [limit, limitQP, setLimitQP]);
-
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
       const paramStr = searchParams.toString();
@@ -209,7 +189,6 @@ export default function SearchInput({
       setUniversitiesQP(data.universities);
       setThesisTypesQP(data.thesisTypes);
       setOffsetQP(data.offset);
-      setLimitQP(data.limit);
       return;
     }
   }
@@ -242,10 +221,11 @@ export default function SearchInput({
   useEffect(() => {
     setTimeout(() => {
       if (isTouchScreen) return;
-      if (!queryInputRef.current) return;
-      const len = queryInputRef.current.value.length;
-      queryInputRef.current.focus();
-      queryInputRef.current.setSelectionRange(len, len);
+      document.getElementById("main-search-input")?.focus();
+      const input = document.getElementById(
+        "main-search-input"
+      ) as HTMLInputElement | null;
+      input?.setSelectionRange(input.value.length, input.value.length);
     });
   }, [isTouchScreen, formRef]);
 
@@ -271,16 +251,13 @@ export default function SearchInput({
               <div className="w-full relative group/input">
                 <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
+                  id="main-search-input"
                   type="search"
                   enterKeyHint="search"
                   disabled={isPendingAsyncPush}
                   className="w-full pl-8.5 pr-12 bg-background-hover"
                   placeholder="Tez, yazar, veya danışman ara..."
                   {...field}
-                  ref={(e) => {
-                    ref(e);
-                    queryInputRef.current = e;
-                  }}
                 />
                 {!isPendingAsyncPush &&
                   queryInput !== undefined &&

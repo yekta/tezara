@@ -182,7 +182,7 @@ export default function SearchResults({}: Props) {
       )}
       <div className="w-full flex flex-col">
         {!data && !isPending && isLoadingError && (
-          <div className="w-full flex flex-col items-center justify-center text-destructive text-sm">
+          <div className="w-full py-1 flex flex-col items-center justify-center text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Birşeyler ters gitti
@@ -190,7 +190,7 @@ export default function SearchResults({}: Props) {
           </div>
         )}
         {data && data.hits && data.hits.length === 0 && (
-          <div className="w-full flex flex-col items-center justify-center text-muted-foreground text-sm">
+          <div className="w-full py-1 flex flex-col items-center justify-center text-muted-foreground text-sm">
             <SearchIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Eşleşen yok

@@ -1,3 +1,4 @@
+import { OFFSET_DEFAULT } from "@/components/search/constants";
 import { TThesisExtended } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
@@ -24,7 +25,7 @@ export async function searchTheses({
   universities,
   sort,
   limit,
-  offset,
+  offset = OFFSET_DEFAULT,
 }: {
   client: MeiliSearch;
   query: string;
