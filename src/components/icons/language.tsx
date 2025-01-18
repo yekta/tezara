@@ -1,5 +1,6 @@
 import { cn } from "@/components/ui/utils";
 import { GlobeIcon } from "lucide-react";
+import Image from "next/image";
 import { ComponentProps } from "react";
 
 const defaultClassName = "size-5 shrink-0";
@@ -50,8 +51,11 @@ export default function LanguageIcon({
 }: ComponentProps<"svg"> & { variant: TVariant }) {
   if (supported.includes(variant))
     return (
-      <img
+      <Image
+        width={512}
+        height={512}
         className={cn(defaultClassName, className)}
+        alt={variant || "Dil İkonu"}
         src={`/flags/${variant}.svg`}
       />
     );
