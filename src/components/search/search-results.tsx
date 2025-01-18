@@ -145,7 +145,7 @@ export default function SearchResults({}: Props) {
                 )}
               </div>
               <p className="shrink min-w-0 relative group-data-[pending]/header:text-transparent">
-                {isPendingCsvDownload ? "İndiriliyor..." : "Tablo Olarak İndir"}
+                {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
               </p>
             </Button>
             <Button
@@ -174,7 +174,7 @@ export default function SearchResults({}: Props) {
                 )}
               </div>
               <p className="shrink min-w-0 relative group-data-[pending]/header:text-transparent">
-                {isPendingJsonDownload ? "İndiriliyor..." : "JSON Olarak İndir"}
+                {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
               </p>
             </Button>
           </div>
