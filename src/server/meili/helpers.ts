@@ -26,7 +26,7 @@ export function boostedStringSort<T extends Record<string, unknown>>({
       const hIdxA = hinder.indexOf(String(a[field]));
       const hIdxB = hinder.indexOf(String(b[field]));
       if (hIdxA !== -1 && hIdxB !== -1) {
-        return hIdxB - hIdxA;
+        return hIdxA - hIdxB;
       }
       if (hIdxA !== undefined && hIdxA !== -1) {
         return 1;
