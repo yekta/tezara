@@ -1,35 +1,17 @@
 "use client";
 
 import FileExtensionIcon from "@/components/icons/file-extension";
-import LanguageIcon from "@/components/icons/language";
-import ThesisTypeIcon, {
-  getThesisTypeColorClassName,
-} from "@/components/icons/thesis-type";
 import { formatForDownload } from "@/components/search/format-for-download";
 import { useSearchResults } from "@/components/search/search-results-provider";
-import {
-  Button,
-  LinkButton,
-  minButtonSizeEnforcerClassName,
-} from "@/components/ui/button";
-import { cn } from "@/components/ui/utils";
+import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
+import { Button } from "@/components/ui/button";
 import { Parser } from "@json2csv/plainjs";
-import {
-  CalendarIcon,
-  LandmarkIcon,
-  LoaderIcon,
-  SearchIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
-import Link from "next/link";
+import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
   className?: string;
 };
-
-const noTitle = "Başlık Yok";
-const noTranslatedTitle = "Çeviri Yok";
 
 export default function SearchResults({}: Props) {
   const { data, isPending, isLoadingError, bulkDownload } = useSearchResults();
@@ -41,7 +23,7 @@ export default function SearchResults({}: Props) {
     setIsPendingDownload(true);
     try {
       const res = await bulkDownload();
-      const formatted = formatForDownload(res);
+      const formatted = formatForDownload(res.hits);
       const parser = new Parser();
       const csv = parser.parse(formatted);
 
@@ -62,7 +44,7 @@ export default function SearchResults({}: Props) {
     setIsPendingJsonDownload(true);
     try {
       const res = await bulkDownload();
-      const formatted = formatForDownload(res);
+      const formatted = formatForDownload(res.hits);
       // Convert the formatted JSON to a Blob
       const jsonBlob = new Blob([JSON.stringify(formatted, null, 2)], {
         type: "application/json",
@@ -93,69 +75,105 @@ export default function SearchResults({}: Props) {
   }
 
   return (
-    <div className="w-full flex flex-col">
-      {data && data.length > 0 && (
-        <div className="w-full flex flex-wrap items-start mt-6 gap-1.5">
-          <Button
-            onClick={() => downloadCsv()}
-            disabled={isPendingCsvDownload || isPendingDownload}
-            size="sm"
-            variant="success"
-            fadeOnDisabled={isPendingCsvDownload ? false : true}
-            className={
-              isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
-            }
+    <div className="w-full flex flex-col pt-6">
+      {((!data && isPending) ||
+        (data && data.hits && data.hits.length > 0)) && (
+        <div
+          data-pending={isPending ? true : undefined}
+          className="w-full flex flex-col items-start group/header"
+        >
+          <p
+            className="max-w-full font-semibold text-sm text-muted-foreground px-1 text-balance
+            group-data-[pending]/header:text-transparent
+            group-data-[pending]/header:animate-skeleton
+            group-data-[pending]/header:bg-muted-foreground
+            group-data-[pending]/header:rounded-sm
+            "
           >
-            {isPendingCsvDownload && (
-              <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
+            {!data ? (
+              "1000"
+            ) : (
+              <span className="text-foreground">
+                {data.estimatedTotalHits.toLocaleString()}
+              </span>
             )}
-            <div className="size-5 -ml-1.5 relative">
-              {!isPendingCsvDownload && (
-                <FileExtensionIcon className="size-full" variant="csv" />
-              )}
+            <span> sonuç. </span>
+            {!data ? (
+              "100"
+            ) : (
+              <span className="text-foreground">
+                {data.hits.length.toLocaleString()}
+              </span>
+            )}
+            <span className="pr-[0.65ch]"> tanesi gösteriliyor.</span>
+            <span className="text-foreground bg-foreground/10 group-data-[pending]/header:text-transparent px-1.5 rounded-full">
+              {!data ? "0.001" : data.processingTimeMs / 1000} sn.
+            </span>
+          </p>
+          <div className="w-full flex flex-wrap items-start gap-1.5 mt-3">
+            <Button
+              onClick={() => downloadCsv()}
+              disabled={!data || isPendingCsvDownload || isPendingDownload}
+              size="sm"
+              variant="success"
+              fadeOnDisabled={
+                !data ? false : isPendingCsvDownload ? false : true
+              }
+              className={`${
+                isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
+              } group-data-[pending]/header:animate-skeleton`}
+            >
               {isPendingCsvDownload && (
-                <LoaderIcon className="size-full animate-spin" />
+                <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
               )}
-            </div>
-            <p className="shrink min-w-0 relative">
-              {isPendingCsvDownload ? "İndiriliyor..." : "Tablo Olarak İndir"}
-            </p>
-          </Button>
-          <Button
-            onClick={() => downloadJson()}
-            disabled={isPendingJsonDownload || isPendingDownload}
-            size="sm"
-            fadeOnDisabled={isPendingJsonDownload ? false : true}
-            className={
-              isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
-            }
-          >
-            {isPendingJsonDownload && (
-              <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
-            )}
-            <div className="size-5 -ml-1.5 relative">
-              {!isPendingJsonDownload && (
-                <FileExtensionIcon className="size-full" variant="json" />
-              )}
+              <div className="size-5 -ml-1.5 relative">
+                {!isPendingCsvDownload && (
+                  <FileExtensionIcon
+                    className="size-full group-data-[pending]/header:opacity-0"
+                    variant="csv"
+                  />
+                )}
+                {isPendingCsvDownload && (
+                  <LoaderIcon className="size-full animate-spin" />
+                )}
+              </div>
+              <p className="shrink min-w-0 relative group-data-[pending]/header:text-transparent">
+                {isPendingCsvDownload ? "İndiriliyor..." : "Tablo Olarak İndir"}
+              </p>
+            </Button>
+            <Button
+              onClick={() => downloadJson()}
+              disabled={!data || isPendingJsonDownload || isPendingDownload}
+              size="sm"
+              fadeOnDisabled={
+                !data ? false : isPendingJsonDownload ? false : true
+              }
+              className={`${
+                isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
+              } group-data-[pending]/header:animate-skeleton`}
+            >
               {isPendingJsonDownload && (
-                <LoaderIcon className="size-full animate-spin" />
+                <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
               )}
-            </div>
-            <p className="shrink min-w-0 relative">
-              {isPendingJsonDownload ? "İndiriliyor..." : "JSON Olarak İndir"}
-            </p>
-          </Button>
+              <div className="size-5 -ml-1.5 relative">
+                {!isPendingJsonDownload && (
+                  <FileExtensionIcon
+                    className="size-full group-data-[pending]/header:opacity-0"
+                    variant="json"
+                  />
+                )}
+                {isPendingJsonDownload && (
+                  <LoaderIcon className="size-full animate-spin" />
+                )}
+              </div>
+              <p className="shrink min-w-0 relative group-data-[pending]/header:text-transparent">
+                {isPendingJsonDownload ? "İndiriliyor..." : "JSON Olarak İndir"}
+              </p>
+            </Button>
+          </div>
         </div>
       )}
       <div className="w-full flex flex-col">
-        {!data && isPending && (
-          <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
-            <LoaderIcon className="size-7 animate-spin" />
-            <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
-              Aranıyor...
-            </p>
-          </div>
-        )}
         {!data && !isPending && isLoadingError && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />
@@ -164,7 +182,7 @@ export default function SearchResults({}: Props) {
             </p>
           </div>
         )}
-        {data && data.length === 0 && (
+        {data && data.hits && data.hits.length === 0 && (
           <div className="w-full flex flex-col items-center justify-center py-8 text-muted-foreground text-sm">
             <SearchIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
@@ -172,116 +190,21 @@ export default function SearchResults({}: Props) {
             </p>
           </div>
         )}
-        {data && data.length > 0 && (
-          <div className="w-full flex flex-col mt-6">
-            {data.map((result) => (
-              <div
-                key={result.id}
-                className="pt-3.5 pb-4.5 first-of-type:border-t border-b flex flex-row items-start gap-4"
-              >
-                <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
-                  <LinkButton
-                    variant="ghost"
-                    href={`/thesis/${result.id}`}
-                    className="flex shrink flex-col text-xs font-mono justify-start items-start gap-0.5 px-1.5 py-1 rounded-md"
-                  >
-                    <p className="flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
-                      Tez No
-                    </p>
-                    <p className="flex-1 min-w-0 font-bold">{result.id}</p>
-                  </LinkButton>
-                  {result.pdfUrl ? (
-                    <LinkButton
-                      target="_blank"
-                      href={result.pdfUrl}
-                      variant="destructive-ghost"
-                      size="icon"
-                      className="rounded-lg"
-                    >
-                      <FileExtensionIcon variant="pdf" className="size-7" />
-                    </LinkButton>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-lg"
-                      disabled
-                    >
-                      <FileExtensionIcon variant="no-pdf" className="size-7" />
-                    </Button>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <Link
-                    href={`/thesis/${result.id}`}
-                    className="text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
-                  >
-                    {result.titleOriginal || noTitle}
-                  </Link>
-                  <p className="mt-1 text-sm leading-tight font-medium text-muted-foreground">
-                    {result.titleTranslated || noTranslatedTitle}
-                  </p>
-                  <div className="w-full flex mt-2">
-                    <p className="shrink min-w-0 text-base leading-snug">
-                      {result.authorName}
-                    </p>
-                  </div>
-                  <div className="w-full flex flex-wrap mt-3 gap-1.5">
-                    <div
-                      className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1",
-                        getThesisTypeColorClassName(result.thesisTypeName)
-                      )}
-                    >
-                      <ThesisTypeIcon
-                        variant={result.thesisTypeName}
-                        className="size-3.5 -ml-0.5 -my-2"
-                      />
-                      <p className="shrink min-w-0 text-sm leading-none font-medium">
-                        {result.thesisTypeName}
-                      </p>
-                    </div>
-                    <div
-                      className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground"
-                      )}
-                    >
-                      <LanguageIcon
-                        variant={result.languageName}
-                        className="size-3.5 -ml-0.75 -my-2 rounded-full overflow-hidden"
-                      />
-                      <p className="shrink min-w-0 text-sm leading-none font-medium">
-                        {result.languageName}
-                      </p>
-                    </div>
-                    <div
-                      className={cn(
-                        "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="size-3.5 -ml-0.75 -my-2" />
-                      <p className="shrink min-w-0 text-sm leading-none font-medium">
-                        {result.year}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/university/${result.universityName}`}
-                      className={cn(
-                        "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-                        "not-touch:hover:bg-foreground/16 active:bg-foreground/16",
-                        "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                        minButtonSizeEnforcerClassName
-                      )}
-                    >
-                      <LandmarkIcon className="size-3.5 -ml-0.75 -my-2" />
-                      <p className="shrink min-w-0 text-sm leading-none font-medium">
-                        {result.universityName}
-                      </p>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {((!data && isPending) ||
+          (data && data.hits && data.hits.length > 0)) && (
+          <div className="w-full flex flex-col pt-4.5">
+            <div className="w-full flex flex-col">
+              {data
+                ? data.hits.map((i, index) => (
+                    <ThesisSearchResultRow
+                      key={`${i.id}-${index}`}
+                      thesis={i}
+                    />
+                  ))
+                : Array.from({ length: 20 }).map((i, index) => (
+                    <ThesisSearchResultRow key={index} isPlaceholder />
+                  ))}
+            </div>
           </div>
         )}
       </div>

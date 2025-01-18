@@ -18,6 +18,7 @@ import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDebounce } from "@uidotdev/usehooks";
 import {
   ChevronUpIcon,
   GlobeIcon,
@@ -85,8 +86,8 @@ export default function SearchInput({
       })),
     [thesisTypes]
   );
-
   const searchParams = useSearchParams();
+
   const [query, setQuery] = useQueryState("q", parseAsString.withDefault(""));
   const [languagesQP, setLanguagesQP] = useQueryState(
     "languages",
@@ -136,26 +137,31 @@ export default function SearchInput({
     );
   }, [selectedUniversities, selectedLanguages, selectedThesisTypes]);
 
+  const debouncedQueryInput = useDebounce(queryInput, 200);
+
   useEffect(() => {
+    if (queryInput === query) return;
     if (variant !== "home") return;
     setQuery(queryInput);
-    console.log("qwe");
   }, [queryInput, variant, setQuery, query]);
 
   useEffect(() => {
-    if (variant !== "home") return;
+    if (debouncedQueryInput === query) return;
+    if (variant !== "search") return;
+    setQuery(debouncedQueryInput);
+  }, [debouncedQueryInput, variant, setQuery, query]);
+
+  useEffect(() => {
     if (languagesQP.join(",") === selectedLanguages.join(",")) return;
     setLanguagesQP(selectedLanguages);
   }, [selectedLanguages, variant, setLanguagesQP, languagesQP]);
 
   useEffect(() => {
-    if (variant !== "home") return;
     if (universitiesQP.join(",") === selectedUniversities.join(",")) return;
     setUniversitiesQP(selectedUniversities);
   }, [selectedUniversities, variant, setUniversitiesQP, universitiesQP]);
 
   useEffect(() => {
-    if (variant !== "home") return;
     if (thesisTypesQP.join(",") === selectedThesisTypes.join(",")) return;
     setThesisTypesQP(selectedThesisTypes);
   }, [selectedThesisTypes, variant, setThesisTypesQP, thesisTypesQP]);
@@ -206,7 +212,7 @@ export default function SearchInput({
     setTimeout(() => {
       if (isTouchScreen) return;
       const query = formRef.current?.getValues("query");
-      if (!query) return;
+      if (query) return;
       formRef.current.setFocus("query");
     });
   }, [isTouchScreen, formRef]);
