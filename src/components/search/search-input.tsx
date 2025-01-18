@@ -3,6 +3,7 @@
 import BroomIcon from "@/components/icons/broom";
 import LanguageIcon from "@/components/icons/language";
 import ThesisTypeIcon from "@/components/icons/thesis-type";
+import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
 import MultiSelectFormItem from "@/components/search/multi-select-form-item";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +35,7 @@ import {
   parseAsString,
   useQueryState,
 } from "nuqs";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -197,6 +198,18 @@ export default function SearchInput({
       form.setValue("thesisTypes", []);
     }
   }
+
+  const isTouchScreen = useIsTouchscreen();
+  const formRef = useRef(form);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (isTouchScreen) return;
+      const query = formRef.current?.getValues("query");
+      if (!query) return;
+      formRef.current.setFocus("query");
+    });
+  }, [isTouchScreen, formRef]);
 
   return (
     <Form {...form}>

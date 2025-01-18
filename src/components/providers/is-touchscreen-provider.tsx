@@ -10,7 +10,11 @@ function detectTouchDevice() {
   );
 }
 
-export function useIsTouchDevice() {
+const IsTouchscreenContext = createContext(false);
+
+export const IsTouchscreenProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isTouchDevice, setIsTouchDevice] = useState(false); // Default to false
 
   useEffect(() => {
@@ -45,15 +49,6 @@ export function useIsTouchDevice() {
     };
   }, []);
 
-  return isTouchDevice;
-}
-
-const IsTouchscreenContext = createContext(false);
-
-export const IsTouchscreenProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const isTouchDevice = useIsTouchDevice();
   return (
     <IsTouchscreenContext.Provider value={isTouchDevice}>
       {children}
