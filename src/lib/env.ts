@@ -8,6 +8,8 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    MEILI_ADMIN_KEY: z.string(),
+    MEILI_URL_INTERNAL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -19,6 +21,8 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
+    NEXT_PUBLIC_MEILI_URL: z.string().url(),
+    NEXT_PUBLIC_MEILI_CLIENT_KEY: z.string(),
     NEXT_PUBLIC_SITE_URL: z.string(),
   },
 
@@ -28,8 +32,12 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
-    NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_MEILI_URL: process.env.NEXT_PUBLIC_MEILI_URL,
+    NEXT_PUBLIC_MEILI_CLIENT_KEY: process.env.NEXT_PUBLIC_MEILI_CLIENT_KEY,
+    MEILI_ADMIN_KEY: process.env.MEILI_ADMIN_KEY,
+    MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
+    NODE_ENV: process.env.NODE_ENV,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
