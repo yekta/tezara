@@ -48,7 +48,7 @@ export async function searchTheses({
     universityFilter = `(${entries.join(" OR ")})`;
   }
   if (thesisTypes && thesisTypes.length > 0) {
-    const entries = thesisTypes.map((t) => `type = "${t}"`);
+    const entries = thesisTypes.map((t) => `thesis_type = "${t}"`);
     thesisTypeFilter = `(${entries.join(" OR ")})`;
   }
 
