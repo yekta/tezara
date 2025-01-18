@@ -2,7 +2,10 @@ import SearchBox from "@/components/search/search-input";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
-import { apiServer } from "@/server/trpc/setup/server";
+import { meili } from "@/server/meili/constants-client";
+import { getLanguages } from "@/server/meili/repo/language";
+import { getThesisTypes } from "@/server/meili/repo/thesis-type";
+import { getUniversities } from "@/server/meili/repo/university";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -11,9 +14,9 @@ type Props = {
 export default async function Page({ searchParams }: Props) {
   await searchPageSearchParamsCache.parse(searchParams);
   const [languages, universities, thesisTypes] = await Promise.all([
-    apiServer.main.getLanguages({}),
-    apiServer.main.getUniversities({}),
-    apiServer.main.getThesisTypes({}),
+    getLanguages({ client: meili }),
+    getUniversities({ client: meili }),
+    getThesisTypes({ client: meili }),
   ]);
 
   return (
@@ -22,9 +25,9 @@ export default async function Page({ searchParams }: Props) {
         <div className="w-full flex flex-col items-center">
           <SearchResultsProvider>
             <SearchBox
-              languages={languages}
-              universities={universities}
-              thesisTypes={thesisTypes}
+              languages={languages.hits}
+              universities={universities.hits}
+              thesisTypes={thesisTypes.hits}
               variant="search"
             />
             <SearchResults />

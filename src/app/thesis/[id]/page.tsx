@@ -3,7 +3,8 @@ import FileExtensionIcon from "@/components/icons/file-extension";
 import { Button, LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
-import { apiServerStatic } from "@/server/trpc/setup/server";
+import { meiliAdmin } from "@/server/meili/constants-server";
+import { getThesis } from "@/server/meili/repo/thesis";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -20,7 +21,7 @@ export default async function Page({ params }: Props) {
     return notFound();
   }
 
-  const thesis = await apiServerStatic.main.getThesis({ id: idNumber });
+  const thesis = await getThesis({ id: idNumber, client: meiliAdmin });
   if (!thesis) {
     return notFound();
   }
@@ -39,19 +40,19 @@ export default async function Page({ params }: Props) {
     <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32">
       {/* Title */}
       <h1 id="title" className="font-bold text-2xl text-balance leading-tight">
-        {thesis?.titleOriginal || noTitle}
+        {thesis?.title_original || noTitle}
       </h1>
       {/* Translated title */}
       <h2
         id="title_translated"
         className="font-semibold text-lg text-balance text-muted-foreground leading-snug mt-3"
       >
-        {thesis?.titleTranslated || noTranslatedTitle}
+        {thesis?.title_translated || noTranslatedTitle}
       </h2>
       <div className="mt-6 flex flex-wrap items-start justify-start gap-1.5">
-        {thesis.pdfUrl ? (
+        {thesis.pdf_url ? (
           <LinkButton
-            href={thesis.pdfUrl}
+            href={thesis.pdf_url}
             target="_blank"
             size="sm"
             variant="destructive"
@@ -87,7 +88,7 @@ export default async function Page({ params }: Props) {
         <p id="author_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Yazar: </span>
           <span className="font-bold" id="author_name">
-            {thesis.author.name}
+            {thesis.author}
           </span>
         </p>
         <Divider />
@@ -96,18 +97,16 @@ export default async function Page({ params }: Props) {
             Danışmanlar:{" "}
           </span>
           <span className="font-bold" id="advisor_names">
-            {thesis.thesisAdvisors.length < 1
+            {!thesis.advisors || thesis.advisors.length < 1
               ? noAdvisorText
-              : thesis.thesisAdvisors
-                  .map((advisor) => advisor.advisor.name)
-                  .join(", ")}
+              : thesis.advisors.map((advisor) => advisor).join(", ")}
           </span>
         </p>
         <Divider />
         <p id="thesis_type_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Tez Türü: </span>
           <span className="font-bold" id="thesis_type">
-            {thesis.thesisType?.name || noThesisType}
+            {thesis.thesis_type || noThesisType}
           </span>
         </p>
         <Divider />
@@ -121,7 +120,7 @@ export default async function Page({ params }: Props) {
         <p id="language_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Dil: </span>
           <span className="font-bold" id="language_name">
-            {thesis.language.name}
+            {thesis.language}
           </span>
         </p>
         <Divider />
@@ -130,14 +129,14 @@ export default async function Page({ params }: Props) {
             Üniversite:{" "}
           </span>
           <span className="font-bold" id="university_name">
-            {thesis.university.name}
+            {thesis.university}
           </span>
         </p>
         <Divider />
         <p id="institute_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Enstitü: </span>
           <span className="font-bold" id="institute_name">
-            {thesis.institute?.name || noInstitute}
+            {thesis.institute || noInstitute}
           </span>
         </p>
         <Divider />
@@ -146,7 +145,7 @@ export default async function Page({ params }: Props) {
             Ana Bilim Dalı:{" "}
           </span>
           <span className="font-bold" id="department_name">
-            {thesis.department?.name || noDepartment}
+            {thesis.department || noDepartment}
           </span>
         </p>
         <Divider />
@@ -155,7 +154,7 @@ export default async function Page({ params }: Props) {
             Bilim Dalı:{" "}
           </span>
           <span className="font-bold" id="branch_name">
-            {thesis.branch?.name || noBranch}
+            {thesis.branch || noBranch}
           </span>
         </p>
         <Divider />
@@ -164,7 +163,7 @@ export default async function Page({ params }: Props) {
             Sayfa Sayısı:{" "}
           </span>
           <span className="font-bold" id="page_count">
-            {thesis.pageCount}
+            {thesis.pages}
           </span>
         </p>
         <Divider />
@@ -173,14 +172,14 @@ export default async function Page({ params }: Props) {
       <div id="abstract_section" className="mt-6">
         <p className="font-bold">Özet</p>
         <p id="abstract" className="mt-1">
-          {thesis.abstractOriginal || noAbstractText}
+          {thesis.abstract_original || noAbstractText}
         </p>
       </div>
       {/* Translated abstract */}
       <div id="abstract_translated_section" className="mt-6">
         <p className="font-bold">Özet (Çeviri)</p>
         <p id="abstract_translated" className="mt-1">
-          {thesis.abstractTranslated || noTranslatedAbstractText}
+          {thesis.abstract_translated || noTranslatedAbstractText}
         </p>
       </div>
       <NavigationSection id={thesis.id} className="md:hidden pb-4 mt-8" />
@@ -207,18 +206,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return notFoundMeta;
   }
 
-  const thesis = await apiServerStatic.main.getThesis({ id: idNumber });
+  const thesis = await getThesis({ id: idNumber, client: meiliAdmin });
 
   if (!thesis) {
     return notFoundMeta;
   }
 
   const title = `${
-    thesis.titleOriginal || thesis.titleTranslated || `Tez ${thesis.id}`
+    thesis.title_original || thesis.title_translated || `Tez ${thesis.id}`
   } | ${siteTitle}`;
   const description = truncateDescription(
-    thesis.abstractOriginal ||
-      thesis.abstractTranslated ||
+    thesis.abstract_original ||
+      thesis.abstract_translated ||
       "Bu tezin özeti bulunamadı."
   );
 

@@ -16,7 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
-import { AppRouterOutputs } from "@/server/trpc/api/root";
+import { TGetLanguagesResult } from "@/server/meili/repo/language";
+import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
+import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@uidotdev/usehooks";
 import {
@@ -50,9 +52,9 @@ const SearchThesesSchema = z.object({
 type Props = {
   className?: string;
   variant: "home" | "search";
-  languages: AppRouterOutputs["main"]["getLanguages"];
-  universities: AppRouterOutputs["main"]["getUniversities"];
-  thesisTypes: AppRouterOutputs["main"]["getThesisTypes"];
+  languages: TGetLanguagesResult["hits"];
+  universities: TGetUniversitiesResult["hits"];
+  thesisTypes: TGetThesisTypesResult["hits"];
 };
 
 export default function SearchInput({
