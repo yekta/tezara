@@ -17,7 +17,7 @@ export async function getThesisTypes({ client }: { client: MeiliSearch }) {
       boost: [
         "Yüksek Lisans",
         "Doktora",
-        "Sanatta Yeterlilik",
+        "Sanatta Yeterlik",
         "Tıpta Uzmanlık",
         "Tıpta Yan Dal Uzmanlık",
       ],
