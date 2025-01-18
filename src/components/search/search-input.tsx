@@ -137,7 +137,7 @@ export default function SearchInput({
     );
   }, [selectedUniversities, selectedLanguages, selectedThesisTypes]);
 
-  const debouncedQueryInput = useDebounce(queryInput, 200);
+  const debouncedQueryInput = useDebounce(queryInput, 150);
 
   useEffect(() => {
     if (queryInput === query) return;
