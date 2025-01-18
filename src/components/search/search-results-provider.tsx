@@ -20,7 +20,7 @@ type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
   bulkDownload: () => Promise<TSearchThesesResult>;
 };
 
-const STALE_TIME = 60 * 1000;
+const LONG_STALE_TIME = 60 * 1000;
 const SearchResultsContext = createContext<TSearchResultsContext | null>(null);
 const BULK_LIMIT = 20000;
 
@@ -69,7 +69,6 @@ export const SearchResultsProvider: React.FC<{
     }),
     initialData: initialData,
     enabled: isSearchResultsPath,
-    staleTime: STALE_TIME,
   });
 
   const bulkDownload: TSearchResultsContext["bulkDownload"] = async () => {
@@ -92,7 +91,7 @@ export const SearchResultsProvider: React.FC<{
         limit: BULK_LIMIT,
         offset: 0,
       }),
-      staleTime: STALE_TIME,
+      staleTime: LONG_STALE_TIME,
     });
   };
 

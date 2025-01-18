@@ -22,6 +22,7 @@ export async function searchTheses({
   languages,
   thesisTypes,
   universities,
+  sort,
   limit,
   offset,
 }: {
@@ -30,6 +31,7 @@ export async function searchTheses({
   languages?: string[];
   thesisTypes?: string[];
   universities?: string[];
+  sort?: string[];
   limit?: number;
   offset?: number;
 }) {
@@ -70,10 +72,14 @@ export async function searchTheses({
     filter += thesisTypeFilter;
   }
 
+  const _sort =
+    sort && sort.length > 0 ? sort : !query ? ["id:desc"] : undefined;
+
   const result = await index.search(query, {
     filter: filter ?? undefined,
     limit,
     offset,
+    sort: _sort,
   });
   return result;
 }
