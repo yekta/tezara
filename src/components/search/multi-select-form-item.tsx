@@ -73,7 +73,7 @@ export default function MultiSelectFormItem({
           </FormControl>
         </PopoverTrigger>
         <PopoverContent className="p-0">
-          <Command className="max-h-[min(20rem,var(--radix-popper-available-height))]">
+          <Command className="max-h-[min(25rem,var(--radix-popper-available-height))]">
             <CommandInput
               onValueChange={() => {
                 clearTimeout(scrollId.current);
@@ -95,7 +95,7 @@ export default function MultiSelectFormItem({
                       value={item.label}
                       key={item.value}
                       onSelect={onSelect}
-                      className="flex justify-between gap-2"
+                      className="flex justify-between gap-2 py-2"
                     >
                       <div className="flex shrink min-w-0 items-center gap-2">
                         {IconSetForItem && (

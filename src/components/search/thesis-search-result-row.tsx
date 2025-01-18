@@ -3,6 +3,7 @@ import LanguageIcon from "@/components/icons/language";
 import ThesisTypeIcon, {
   getThesisTypeColorClassName,
 } from "@/components/icons/thesis-type";
+import { cleanAdvisors } from "@/components/search/helpers";
 import {
   Button,
   LinkButton,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { TThesisExtended } from "@/server/meili/types";
-import { CalendarIcon, LandmarkIcon } from "lucide-react";
+import { CalendarIcon, LandmarkIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 
 type Props =
@@ -22,13 +23,9 @@ type Props =
       thesis?: null;
       isPlaceholder: true;
     };
-/* | {
-      thesis: null;
-      isPlaceholder: true;
-    }; */
 
 const noTitle = "Başlık Yok";
-const noTranslatedTitle = "Çeviri Yok";
+const noTranslatedTitle = "Başlık çevirisi yok";
 const noAuthor = "Yazar Bilgisi Yok";
 
 export default function ThesisSearchResultRow({
@@ -138,7 +135,7 @@ export default function ThesisSearchResultRow({
             {!isPlaceholder && (
               <ThesisTypeIcon
                 variant={thesis.thesis_type}
-                className="size-3.5 -ml-0.5 -my-2"
+                className="size-3.5 -ml-0.5 -my-2 shrink-0"
               />
             )}
             <p
@@ -157,7 +154,7 @@ export default function ThesisSearchResultRow({
             {!isPlaceholder && (
               <LanguageIcon
                 variant={thesis.language}
-                className="size-3.5 -ml-0.75 -my-2 rounded-full overflow-hidden"
+                className="size-3.5 -ml-0.75 -my-2 rounded-full overflow-hidden shrink-0"
               />
             )}
             <p
@@ -174,7 +171,7 @@ export default function ThesisSearchResultRow({
             )}
           >
             {!isPlaceholder && (
-              <CalendarIcon className="size-3.5 -ml-0.75 -my-2" />
+              <CalendarIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
             )}
             <p
               className="shrink min-w-0 text-sm leading-none font-medium
@@ -208,11 +205,32 @@ export default function ThesisSearchResultRow({
                 minButtonSizeEnforcerClassName
               )}
             >
-              <LandmarkIcon className="size-3.5 -ml-0.75 -my-2" />
+              <LandmarkIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
               <p className="shrink min-w-0 text-sm leading-none font-medium">
                 {thesis.university}
               </p>
             </Link>
+          )}
+          {cleanAdvisors(thesis?.advisors || ["Yükleniyor..."]).map(
+            (advisor, index) => (
+              <div
+                key={`${advisor}-${index}`}
+                className={cn(
+                  "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
+                  "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground"
+                )}
+              >
+                {!isPlaceholder && (
+                  <UserIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
+                )}
+                <p
+                  className="shrink min-w-0 text-sm leading-none font-medium
+                group-data-[placeholder]/row:text-transparent"
+                >
+                  {advisor}
+                </p>
+              </div>
+            )
           )}
         </div>
       </div>

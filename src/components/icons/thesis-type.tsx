@@ -3,6 +3,7 @@ import {
   BrushIcon,
   GraduationCapIcon,
   PenToolIcon,
+  PillIcon,
   SyringeIcon,
   TestTubeDiagonalIcon,
   TrophyIcon,
@@ -33,6 +34,9 @@ export function getThesisTypeColorClassName(variant: TVariant) {
   }
   if (variant === "Sanatta Yeterlik") {
     return "text-chart-4 bg-chart-4/10 border-chart-4/16";
+  }
+  if (variant === "Diş Hekimliği Uzmanlık") {
+    return "text-chart-5 bg-chart-5/10 border-chart-5/16";
   }
   return "text-foreground bg-foreground/8 border-foreground/12";
 }
@@ -74,6 +78,9 @@ export default function ThesisTypeIcon({
   }
   if (variant === "Tıpta Yan Dal Uzmanlık") {
     return <TestTubeDiagonalIcon className={cn(defaultClassName, className)} />;
+  }
+  if (variant === "Eczacılıkta Uzmanlık") {
+    return <PillIcon className={cn(defaultClassName, className)} />;
   }
   return <PenToolIcon className={cn(defaultClassName, className)} />;
 }

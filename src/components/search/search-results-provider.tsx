@@ -1,5 +1,6 @@
 "use client";
 
+import { LIMIT_DEFAULT, OFFSET_DEFAULT } from "@/components/search/constants";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";
 import {
@@ -45,8 +46,14 @@ export const SearchResultsProvider: React.FC<{
     "thesis-types",
     parseAsArrayOf(parseAsString).withDefault([])
   );
-  const [offset] = useQueryState("offset", parseAsInteger.withDefault(0));
-  const [limit] = useQueryState("limit", parseAsInteger.withDefault(50));
+  const [offset] = useQueryState(
+    "offset",
+    parseAsInteger.withDefault(OFFSET_DEFAULT)
+  );
+  const [limit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(LIMIT_DEFAULT)
+  );
 
   const searchThesesQuery = useQuery({
     queryFn: () =>
@@ -81,7 +88,7 @@ export const SearchResultsProvider: React.FC<{
           thesisTypes,
           client: meili,
           limit: BULK_LIMIT,
-          offset: 0,
+          offset,
         }),
       queryKey: getSearchThesesQueryKey({
         query,
@@ -89,7 +96,7 @@ export const SearchResultsProvider: React.FC<{
         universities,
         thesisTypes,
         limit: BULK_LIMIT,
-        offset: 0,
+        offset,
       }),
       staleTime: LONG_STALE_TIME,
     });
