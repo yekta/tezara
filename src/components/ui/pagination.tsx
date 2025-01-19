@@ -86,7 +86,7 @@ const PaginationPrevious = ({
     className={cn("rounded-lg", className)}
     {...props}
   >
-    <span className="sr-only">Önceki</span>
+    <span className="sr-only">{variant === "first" ? "İlk" : "Önceki"}</span>
     {variant === "first" ? (
       <ChevronsLeftIcon className="size-5" />
     ) : (
@@ -109,7 +109,9 @@ const PaginationNext = ({
     className={cn("rounded-lg", className)}
     {...props}
   >
-    <span className="sr-only">Sonraki</span>
+    <span className="sr-only">
+      {variant === "last" ? "Sonuncu" : "Sonraki"}
+    </span>
     {variant === "last" ? (
       <ChevronsRightIcon className="size-5" />
     ) : (
