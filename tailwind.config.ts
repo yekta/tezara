@@ -209,7 +209,7 @@ const config: Config = {
       skeleton: "skeleton 1.25s ease-in-out infinite",
       "pulse-scale": "pulse-scale 1s ease-in-out infinite",
       spin: "spin 1s linear infinite",
-      "loading-bar": "loading-bar 30s linear infinite",
+      "loading-bar": "loading-bar 45s linear infinite",
     },
     keyframes: {
       skeleton: {
