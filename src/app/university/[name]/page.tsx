@@ -22,10 +22,83 @@ export default async function Page({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
 
+  const {
+    thesesCount,
+    languages,
+    subjects,
+    keywords,
+    minYear,
+    maxYear,
+    thesesCountsByYearsChartData,
+    popularSubjectsChartData,
+    thesisTypes,
+  } = await getData({
+    name: parsedName,
+  });
+
+  return (
+    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
+      {/* Title */}
+      <div className="w-full flex flex-col px-4">
+        <h1 className="w-full font-bold text-2xl text-balance leading-tight">
+          <span className="pr-1">{parsedName} </span>
+          <span className="bg-foreground/10 border border-foreground/20 -mt-1 rounded-full font-medium text-sm px-2 py-0.25">
+            {minYear}-{maxYear}
+          </span>
+        </h1>
+        <div className="w-full flex flex-wrap items-center mt-1.5">
+          <Stat value={thesesCount} label="Tez" Icon={ScrollTextIcon} />
+          <span className="text-foreground/30 px-[0.75ch]">|</span>
+          <Stat value={languages.size} label="Dil" Icon={GlobeIcon} />
+          <span className="text-foreground/30 px-[0.75ch]">|</span>
+          <Stat value={subjects.size} label="Konu" Icon={FolderClosedIcon} />
+          <span className="text-foreground/30 px-[0.75ch]">|</span>
+          <Stat
+            value={keywords.size}
+            label="Anahtar Kelime"
+            Icon={KeyRoundIcon}
+          />
+        </div>
+      </div>
+      <ThesesCountsByYearsChart
+        className="mt-6"
+        chartData={thesesCountsByYearsChartData}
+        dataKeys={thesisTypes}
+      />
+      <PopularSubjectsChart
+        className="mt-6"
+        chartData={popularSubjectsChartData}
+        dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
+      />
+    </div>
+  );
+}
+
+function Stat({
+  value,
+  label,
+  Icon,
+}: {
+  value: number;
+  label: string;
+  Icon: FC<{ className?: string }>;
+}) {
+  return (
+    <div className="flex items-center gap-1 text-base leading-tight">
+      <Icon className="inline size-4 text-foreground shrink-0" />
+      <p className="font-semibold text-foreground shrink min-w-0">
+        {value.toLocaleString()}
+      </p>{" "}
+      {label}
+    </div>
+  );
+}
+
+async function getData({ name }: { name: string }) {
   const res = await searchTheses({
     client: meiliAdmin,
     hitsPerPage: 100_000,
-    universities: [parsedName],
+    universities: [name],
     page: 1,
     languages: undefined,
     query: undefined,
@@ -38,8 +111,6 @@ export default async function Page({ params }: Props) {
       "language",
       "thesis_type",
       "keywords_turkish",
-      "keywords_english",
-      "subjects_english",
       "subjects_turkish",
     ],
   });
@@ -52,11 +123,6 @@ export default async function Page({ params }: Props) {
   res.hits.forEach((hit) => {
     if (hit.keywords_turkish) {
       hit.keywords_turkish.forEach((keyword) => {
-        keywords.add(keyword);
-      });
-    }
-    if (hit.keywords_english) {
-      hit.keywords_english.forEach((keyword) => {
         keywords.add(keyword);
       });
     }
@@ -115,62 +181,17 @@ export default async function Page({ params }: Props) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  return (
-    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
-      {/* Title */}
-      <div className="w-full flex flex-col px-4">
-        <h1 className="w-full font-bold text-2xl text-balance leading-tight flex items-center gap-1">
-          <span className="pr-1">{parsedName} </span>
-          <span className="bg-foreground/10 border border-foreground/20 rounded-full font-medium text-sm px-2 py-0.25">
-            {minYear}-{maxYear}
-          </span>
-        </h1>
-        <div className="w-full flex flex-wrap items-center mt-1.5">
-          <Stat value={res.hits.length} label="Tez" Icon={ScrollTextIcon} />
-          <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <Stat value={languages.size} label="Dil" Icon={GlobeIcon} />
-          <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <Stat value={subjects.size} label="Konu" Icon={FolderClosedIcon} />
-          <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <Stat
-            value={keywords.size}
-            label="Anahtar Kelime"
-            Icon={KeyRoundIcon}
-          />
-        </div>
-      </div>
-      <ThesesCountsByYearsChart
-        className="mt-6"
-        chartData={thesesCountsByYearsChartData}
-        dataKeys={thesisTypes}
-      />
-      <PopularSubjectsChart
-        className="mt-6"
-        chartData={popularSubjectsChartData}
-        dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
-      />
-    </div>
-  );
-}
-
-function Stat({
-  value,
-  label,
-  Icon,
-}: {
-  value: number;
-  label: string;
-  Icon: FC<{ className?: string }>;
-}) {
-  return (
-    <div className="flex items-center gap-1 text-base leading-tight">
-      <Icon className="inline size-4 text-foreground shrink-0" />
-      <p className="font-semibold text-foreground shrink min-w-0">
-        {value.toLocaleString()}
-      </p>{" "}
-      {label}
-    </div>
-  );
+  return {
+    keywords,
+    languages,
+    subjects,
+    thesesCountsByYearsChartData,
+    popularSubjectsChartData,
+    minYear,
+    maxYear,
+    thesisTypes,
+    thesesCount: res.hits.length,
+  };
 }
 
 export async function generateStaticParams() {
@@ -197,10 +218,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${parsedName} | ${siteTitle}`;
-  const description = truncateDescription(
-    `${parsedName} öğrencileri tarafından yapılmış tezleri incele.`
-  );
+  const { keywords, subjects, languages, minYear, maxYear, thesesCount } =
+    await getData({ name: parsedName });
+  const title = `${parsedName} Tez İstatistikleri | ${siteTitle}`;
+  const description = `${parsedName} bünyesinde ${minYear}-${maxYear} yılları arasında ${subjects.size} farklı konuda toplam ${thesesCount} tez üretilmiş. ${languages.size} farklı dil ve ${keywords.size} farklı anahtar kelime kullanılmış.`;
 
   return {
     title,
@@ -210,12 +231,4 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
     }),
   };
-}
-
-const maxDescriptionLength = 160;
-
-function truncateDescription(description: string) {
-  return description.length > maxDescriptionLength
-    ? description.slice(0, maxDescriptionLength) + "..."
-    : description;
 }
