@@ -151,7 +151,16 @@ export default function SearchResults({}: Props) {
     );
     Component.displayName = "PaginationBar";
     return Component;
-  }, [hasPrev, goToNextPage, goToPrevPage, currentPage, hasNext]);
+  }, [
+    hasPrev,
+    goToNextPage,
+    goToPrevPage,
+    currentPage,
+    hasNext,
+    firstPage,
+    lastPage,
+    goToPage,
+  ]);
 
   const metricsPendingClassName =
     "group-data-[pending]/header:text-transparent group-data-[pending]/header:animate-skeleton group-data-[pending]/header:bg-foreground group-data-[pending]/header:rounded-sm";
