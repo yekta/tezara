@@ -103,29 +103,26 @@ export const SearchResultsProvider: React.FC<{
   });
 
   const bulkDownload: TSearchResultsContext["bulkDownload"] = async () => {
+    const params: Parameters<typeof getSearchThesesQueryKey>[0] = {
+      query,
+      languages,
+      universities,
+      thesisTypes,
+      yearGte: yearGteQP,
+      yearLte: yearLteQP,
+      hitsPerPage: HITS_PER_PAGE_BULK,
+      page: PAGE_DEFAULT,
+    };
+
     return queryClient.fetchQuery({
       queryFn: () =>
         searchTheses({
-          query,
-          languages,
-          universities,
-          thesisTypes,
-          yearGte: yearGteQP,
-          yearLte: yearLteQP,
+          ...params,
           sort: undefined,
-          hitsPerPage: HITS_PER_PAGE_BULK,
-          page: PAGE_DEFAULT,
           client: meili,
         }),
       queryKey: getSearchThesesQueryKey({
-        query,
-        languages,
-        universities,
-        thesisTypes,
-        yearGte: yearGteQP,
-        yearLte: yearLteQP,
-        hitsPerPage: HITS_PER_PAGE_DEFAULT,
-        page: PAGE_DEFAULT,
+        ...params,
       }),
       staleTime: LONG_STALE_TIME,
     });
