@@ -1,6 +1,7 @@
 import PopularSubjectsChart from "@/app/university/[name]/_components/popular-subjects-chart";
 import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
+import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
@@ -32,12 +33,13 @@ export default async function Page({ params }: Props) {
     thesesCountsByYearsChartData,
     popularSubjectsChartData,
     thesisTypes,
+    lastThesesRes,
   } = await cachedGetPageData({
     name: parsedName,
   });
 
   return (
-    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
+    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:px-8 pb-32">
       {/* Title */}
       <div className="w-full flex flex-col px-4">
         <div className="w-full flex items-center flex-wrap gap-1.5">
@@ -65,10 +67,23 @@ export default async function Page({ params }: Props) {
         dataKeys={thesisTypes}
       />
       <PopularSubjectsChart
-        className="mt-6"
+        className="mt-8"
         chartData={popularSubjectsChartData}
         dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
       />
+      <div className="w-full flex flex-col mt-8">
+        <h2 className="font-bold px-4 text-xl">Son 10 Tez</h2>
+        <div className="w-full flex flex-col px-3 mt-3">
+          {lastThesesRes.map((t) => (
+            <ThesisSearchResultRow
+              className="first-of-type:border-t last-of-type:border-b"
+              key={t.id}
+              thesis={t}
+              disableUniversityLink
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

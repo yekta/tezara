@@ -15,14 +15,16 @@ import { CalendarIcon, LandmarkIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 
 type Props =
-  | {
-      thesis: TThesisExtended;
-      isPlaceholder?: false;
-    }
-  | {
-      thesis?: null;
-      isPlaceholder: true;
-    };
+  | (
+      | {
+          thesis: TThesisExtended;
+          isPlaceholder?: false;
+        }
+      | {
+          thesis?: null;
+          isPlaceholder: true;
+        }
+    ) & { className?: string; disableUniversityLink?: boolean };
 
 const noTitle = "Başlık Yok";
 const noTranslatedTitle = "Başlık çevirisi yok";
@@ -31,11 +33,16 @@ const noAuthor = "Yazar Bilgisi Yok";
 export default function ThesisSearchResultRow({
   thesis,
   isPlaceholder,
+  className,
+  disableUniversityLink,
 }: Props) {
   return (
     <div
       data-placeholder={isPlaceholder ? true : undefined}
-      className="pt-3.5 pb-4.5 last-of-type:border-b-0 border-b border-foreground/10 flex flex-row items-start gap-4 group/row"
+      className={cn(
+        "pt-3.5 pb-4.5 last-of-type:border-b-0 border-b border-foreground/10 flex flex-row items-start gap-4 group/row",
+        className
+      )}
     >
       <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
         {isPlaceholder ? (
@@ -195,6 +202,16 @@ export default function ThesisSearchResultRow({
                 Yükleniyor...
               </p>
             </div>
+          ) : disableUniversityLink ? (
+            <div
+              className="px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center 
+              gap-1 bg-foreground/8 border-foreground/12 text-foreground"
+            >
+              <LandmarkIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
+              <p className="shrink min-w-0 text-sm leading-none font-medium">
+                {thesis.university}
+              </p>
+            </div>
           ) : (
             <Link
               href={`/university/${thesis.university}`}
@@ -225,7 +242,7 @@ export default function ThesisSearchResultRow({
                 )}
                 <p
                   className="shrink min-w-0 text-sm leading-none font-medium
-                group-data-[placeholder]/row:text-transparent"
+                  group-data-[placeholder]/row:text-transparent"
                 >
                   {advisor}
                 </p>

@@ -7,32 +7,46 @@ export const cachedGetPageData = cache(({ name }: { name: string }) =>
 );
 
 async function getPageData({ name }: { name: string }) {
-  const res = await searchTheses({
-    client: meiliAdmin,
-    hitsPerPage: 100_000,
-    universities: [name],
-    page: 1,
-    languages: undefined,
-    query: undefined,
-    sort: undefined,
-    thesisTypes: undefined,
-    yearGte: undefined,
-    yearLte: undefined,
-    attributesToRetrieve: [
-      "year",
-      "language",
-      "thesis_type",
-      "keywords_turkish",
-      "subjects_turkish",
-    ],
-  });
+  const [mainRes, lastThesesRes] = await Promise.all([
+    searchTheses({
+      client: meiliAdmin,
+      hitsPerPage: 100_000,
+      universities: [name],
+      page: 1,
+      languages: undefined,
+      query: undefined,
+      sort: undefined,
+      thesisTypes: undefined,
+      yearGte: undefined,
+      yearLte: undefined,
+      attributesToRetrieve: [
+        "year",
+        "language",
+        "thesis_type",
+        "keywords_turkish",
+        "subjects_turkish",
+      ],
+    }),
+    searchTheses({
+      client: meiliAdmin,
+      hitsPerPage: 10,
+      universities: [name],
+      page: 1,
+      languages: undefined,
+      query: undefined,
+      sort: ["year:desc", "id:desc"],
+      thesisTypes: undefined,
+      yearGte: undefined,
+      yearLte: undefined,
+    }),
+  ]);
 
   const keywords = new Set<string>();
   const languages = new Set<string>();
   const subjects = new Map<string, number>();
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
-  res.hits.forEach((hit) => {
+  mainRes.hits.forEach((hit) => {
     if (hit.keywords_turkish) {
       hit.keywords_turkish.forEach((keyword) => {
         keywords.add(keyword);
@@ -102,6 +116,7 @@ async function getPageData({ name }: { name: string }) {
     minYear,
     maxYear,
     thesisTypes,
-    thesesCount: res.hits.length,
+    thesesCount: mainRes.hits.length,
+    lastThesesRes: lastThesesRes.hits,
   };
 }
