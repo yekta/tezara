@@ -16,7 +16,7 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
@@ -34,6 +34,9 @@ const mono = localFont({
 
 const title = `${siteTitle} | ${siteTagline}`;
 
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
 export const metadata: Metadata = {
   title,
   description: siteDescription,
