@@ -48,6 +48,7 @@ import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const SearchThesesSchema = z.object({
   query: z.string(),
@@ -185,6 +186,10 @@ export default function SearchBox({
 
   const debouncedQueryInput = useDebounce(queryInput, 150);
 
+  useHotkeys("mod+k", () => {
+    focusToMainInput();
+  });
+
   useEffect(() => {
     if (queryInput === query) return;
     if (variant !== "home") return;
@@ -264,13 +269,17 @@ export default function SearchBox({
   useEffect(() => {
     setTimeout(() => {
       if (isTouchScreen) return;
-      document.getElementById("main-search-input")?.focus();
-      const input = document.getElementById(
-        "main-search-input"
-      ) as HTMLInputElement | null;
-      input?.setSelectionRange(input.value.length, input.value.length);
+      focusToMainInput();
     });
   }, [isTouchScreen, formRef]);
+
+  function focusToMainInput() {
+    document.getElementById("main-search-input")?.focus();
+    const input = document.getElementById(
+      "main-search-input"
+    ) as HTMLInputElement | null;
+    input?.setSelectionRange(input.value.length, input.value.length);
+  }
 
   return (
     <Form {...form}>
