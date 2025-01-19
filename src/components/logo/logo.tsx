@@ -4,10 +4,12 @@ import { ComponentProps } from "react";
 export default function Logo({
   className,
   variant = "mark",
+  ...rest
 }: ComponentProps<"svg"> & { variant?: "mark" | "full" }) {
   if (variant === "full") {
     return (
       <svg
+        {...rest}
         className={cn("shrink-0 size-32", className)}
         xmlns="http://www.w3.org/2000/svg"
         width="100"

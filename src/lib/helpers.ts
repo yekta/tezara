@@ -5,23 +5,27 @@ export function getTwitterMeta({
   title,
   description,
   slug = "home",
+  noImages,
 }: {
   title: string;
   description: string;
   slug?: string;
+  noImages?: boolean;
 }): Metadata["twitter"] {
   return {
     title,
     description,
     card: "summary_large_image",
-    images: [
-      {
-        url: getPreviewUrl(slug),
-        width: 1200,
-        height: 630,
-        alt: title,
-      },
-    ],
+    images: noImages
+      ? undefined
+      : [
+          {
+            url: getPreviewUrl(slug),
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
   };
 }
 
