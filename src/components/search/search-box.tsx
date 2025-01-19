@@ -214,6 +214,8 @@ export default function SearchBox({
       setUniversitiesQP(data.universities);
       setThesisTypesQP(data.thesisTypes);
       setOffsetQP(data.offset);
+      setYearLteQP(data.yearLte ? data.yearLte : null);
+      setYearGteQP(data.yearGte ? data.yearGte : null);
       return;
     }
   }
@@ -417,12 +419,12 @@ export default function SearchBox({
                             return;
                           }
                           const year = parseInt(v);
-                          field.onChange(year);
                           if (year !== yearGteQP) {
+                            field.onChange(year);
                             setYearGteQP(year);
                           }
                         }}
-                        value={field.value?.toString() || ""}
+                        value={yearGteQP?.toString() || ""}
                       >
                         <FormControl>
                           <SelectTrigger
@@ -476,12 +478,12 @@ export default function SearchBox({
                             return;
                           }
                           const year = parseInt(v);
-                          field.onChange(year);
                           if (year !== yearLteQP) {
+                            field.onChange(year);
                             setYearLteQP(year);
                           }
                         }}
-                        value={field.value?.toString() || ""}
+                        value={yearLteQP?.toString() || ""}
                       >
                         <FormControl>
                           <SelectTrigger
