@@ -4,6 +4,7 @@ import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
+import { getUniversities } from "@/server/meili/repo/university";
 import {
   FolderClosedIcon,
   GlobeIcon,
@@ -11,6 +12,7 @@ import {
   ScrollTextIcon,
 } from "lucide-react";
 import { Metadata } from "next";
+import { FC } from "react";
 
 type Props = {
   params: Promise<{ name: string }>;
@@ -123,31 +125,19 @@ export default async function Page({ params }: Props) {
             {minYear}-{maxYear}
           </span>
         </h1>
-        <h2 className="font-medium text-base mt-2 lead ing-tight text-muted-foreground">
-          <ScrollTextIcon className="inline size-4 text-foreground mr-1 -mt-0.5" />
-          <span className="font-semibold text-foreground">
-            {res.hits.length.toLocaleString()}
-          </span>{" "}
-          Tez
+        <div className="w-full flex flex-wrap items-center mt-1.5">
+          <Stat value={res.hits.length} label="Tez" Icon={ScrollTextIcon} />
           <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <GlobeIcon className="inline size-4 text-foreground mr-1 -mt-0.5" />
-          <span className="font-semibold text-foreground">
-            {languages.size.toLocaleString()}
-          </span>{" "}
-          Dil
+          <Stat value={languages.size} label="Dil" Icon={GlobeIcon} />
           <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <FolderClosedIcon className="inline size-4 text-foreground mr-1 -mt-0.5" />
-          <span className="font-semibold text-foreground">
-            {subjects.size.toLocaleString()}
-          </span>{" "}
-          Konu
+          <Stat value={subjects.size} label="Konu" Icon={FolderClosedIcon} />
           <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <KeyRoundIcon className="inline size-4 text-foreground mr-1 -mt-0.5" />
-          <span className="font-semibold text-foreground">
-            {keywords.size.toLocaleString()}
-          </span>{" "}
-          Anahtar Kelime
-        </h2>
+          <Stat
+            value={keywords.size}
+            label="Anahtar Kelime"
+            Icon={KeyRoundIcon}
+          />
+        </div>
       </div>
       <ThesesCountsByYearsChart
         className="mt-6"
@@ -161,6 +151,33 @@ export default async function Page({ params }: Props) {
       />
     </div>
   );
+}
+
+function Stat({
+  value,
+  label,
+  Icon,
+}: {
+  value: number;
+  label: string;
+  Icon: FC<{ className?: string }>;
+}) {
+  return (
+    <div className="flex items-center gap-1 text-base leading-tight">
+      <Icon className="inline size-4 text-foreground shrink-0" />
+      <p className="font-semibold text-foreground shrink min-w-0">
+        {value.toLocaleString()}
+      </p>{" "}
+      {label}
+    </div>
+  );
+}
+
+export async function generateStaticParams() {
+  const data = await getUniversities({ client: meiliAdmin });
+  return data.hits.map((u) => ({
+    name: u.name,
+  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

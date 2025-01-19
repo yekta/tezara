@@ -94,9 +94,9 @@ input[type="search"] {
     --chart-1: 210 90% 30%; /* Deep blue */
     --chart-2: 160 70% 35%; /* Teal */
     --chart-3: 300 80% 35%; /* Purple */
-    --chart-4: 0 85% 45%; /* Vibrant red */
-    --chart-5: 340 75% 40%; /* Magenta */
-    --chart-6: 35 90% 45%; /* Orange */
+    --chart-4: 35 90% 45%; /* Orange */
+    --chart-5: 0 85% 40%; /* Red */
+    --chart-6: 340 75% 40%; /* Magenta */
     --chart-7: 190 80% 40%; /* Aqua blue */
     --chart-8: 120 70% 35%; /* Green */
     --chart-9: 40 80% 25%; /* Earthy gold */

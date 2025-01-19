@@ -19,6 +19,7 @@ type TVariant =
   | "Sanatta Yeterlik"
   | "Diş Hekimliği Uzmanlık"
   | "Tıpta Yan Dal Uzmanlık"
+  | "Eczacılıkta Uzmanlık"
   | string
   | null;
 
@@ -45,6 +46,14 @@ export function getThesisTypeColorClassName(
   if (variant === "Diş Hekimliği Uzmanlık") {
     if (variable) return "hsl(var(--chart-5))";
     return "text-chart-5 bg-chart-5/10 border-chart-5/16";
+  }
+  if (variant === "Tıpta Yan Dal Uzmanlık") {
+    if (variable) return "hsl(var(--chart-6))";
+    return "text-chart-6 bg-chart-6/10 border-chart-6/16";
+  }
+  if (variant === "Eczacılıkta Uzmanlık") {
+    if (variable) return "hsl(var(--chart-7))";
+    return "text-chart-7 bg-chart-7/10 border-chart-7/16";
   }
   if (variable) return "hsl(var(--foreground))";
   return "text-foreground bg-foreground/8 border-foreground/12";
