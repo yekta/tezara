@@ -163,111 +163,108 @@ export default function SearchResults({}: Props) {
   ]);
 
   const metricsPendingClassName =
-    "group-data-[pending]/header:text-transparent group-data-[pending]/header:animate-skeleton group-data-[pending]/header:bg-foreground group-data-[pending]/header:rounded-sm";
+    "group-data-[pending]:text-transparent group-data-[pending]:animate-skeleton group-data-[pending]:bg-foreground group-data-[pending]:rounded-sm";
 
   return (
-    <div className="w-full flex flex-col pt-6">
+    <div
+      data-pending={isPending ? true : undefined}
+      className="w-full flex flex-col pt-6 md:pt-4 group"
+    >
       {((!data && isPending) || (data && data.hits)) && (
-        <div
-          data-pending={isPending ? true : undefined}
-          className="w-full flex flex-col items-start group/header"
-        >
-          <p className="max-w-full font-semibold text-sm text-muted-foreground px-1 text-balance">
-            <span>Eşleşen: </span>
-            {!data ? (
-              <span className={metricsPendingClassName}>900,000</span>
-            ) : (
-              <span className="text-foreground">
-                {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
-              </span>
+        <div className="w-full flex flex-wrap items-start gap-1.5">
+          <Button
+            onClick={() => downloadCsv()}
+            disabled={
+              !data ||
+              data.hits.length < 1 ||
+              isPendingCsvDownload ||
+              isPendingDownload
+            }
+            size="sm"
+            variant="success"
+            fadeOnDisabled={!data ? false : isPendingCsvDownload ? false : true}
+            className={`${
+              isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
+            }`}
+          >
+            {isPendingCsvDownload && (
+              <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
             )}
-            <span className="text-foreground/30 px-[0.75ch]">|</span>
-            <span>Gösterilen: </span>
-            {!data ? (
-              <span className={metricsPendingClassName}>10</span>
-            ) : (
-              <span className="text-foreground">
-                {data.hits.length.toLocaleString()}
-              </span>
-            )}
-            <span className="text-foreground/30 px-[0.75ch]">|</span>
-            {!data ? (
-              <span className={metricsPendingClassName}>0.001 sn.</span>
-            ) : (
-              <span className="text-foreground">
-                {data.processingTimeMs / 1000} sn.
-              </span>
-            )}
-          </p>
-          <div className="w-full flex flex-wrap items-start gap-1.5 mt-3">
-            <Button
-              onClick={() => downloadCsv()}
-              disabled={
-                !data ||
-                data.hits.length < 1 ||
-                isPendingCsvDownload ||
-                isPendingDownload
-              }
-              size="sm"
-              variant="success"
-              fadeOnDisabled={
-                !data ? false : isPendingCsvDownload ? false : true
-              }
-              className={`${
-                isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
-              }`}
-            >
+            <div className="size-5 -ml-1.5 relative">
+              {!isPendingCsvDownload && (
+                <FileExtensionIcon className="size-full" variant="csv" />
+              )}
               {isPendingCsvDownload && (
-                <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
+                <LoaderIcon className="size-full animate-spin" />
               )}
-              <div className="size-5 -ml-1.5 relative">
-                {!isPendingCsvDownload && (
-                  <FileExtensionIcon className="size-full" variant="csv" />
-                )}
-                {isPendingCsvDownload && (
-                  <LoaderIcon className="size-full animate-spin" />
-                )}
-              </div>
-              <p className="shrink min-w-0 relative">
-                {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
-              </p>
-            </Button>
-            <Button
-              onClick={() => downloadJson()}
-              disabled={
-                !data ||
-                data.hits.length < 1 ||
-                isPendingJsonDownload ||
-                isPendingDownload
-              }
-              size="sm"
-              fadeOnDisabled={
-                !data ? false : isPendingJsonDownload ? false : true
-              }
-              className={`${
-                isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
-              }`}
-            >
+            </div>
+            <p className="shrink min-w-0 relative">
+              {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
+            </p>
+          </Button>
+          <Button
+            onClick={() => downloadJson()}
+            disabled={
+              !data ||
+              data.hits.length < 1 ||
+              isPendingJsonDownload ||
+              isPendingDownload
+            }
+            size="sm"
+            fadeOnDisabled={
+              !data ? false : isPendingJsonDownload ? false : true
+            }
+            className={`${
+              isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
+            }`}
+          >
+            {isPendingJsonDownload && (
+              <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
+            )}
+            <div className="size-5 -ml-1.5 relative">
+              {!isPendingJsonDownload && (
+                <FileExtensionIcon className="size-full" variant="json" />
+              )}
               {isPendingJsonDownload && (
-                <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
+                <LoaderIcon className="size-full animate-spin" />
               )}
-              <div className="size-5 -ml-1.5 relative">
-                {!isPendingJsonDownload && (
-                  <FileExtensionIcon className="size-full" variant="json" />
-                )}
-                {isPendingJsonDownload && (
-                  <LoaderIcon className="size-full animate-spin" />
-                )}
-              </div>
-              <p className="shrink min-w-0 relative">
-                {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
-              </p>
-            </Button>
-          </div>
+            </div>
+            <p className="shrink min-w-0 relative">
+              {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
+            </p>
+          </Button>
         </div>
       )}
+      {/* Metrics */}
+      <p className="max-w-full py-3.5 px-1.5 font-semibold text-sm text-muted-foreground text-balance">
+        <span>Eşleşen: </span>
+        {!data ? (
+          <span className={metricsPendingClassName}>900,000</span>
+        ) : (
+          <span className="text-foreground">
+            {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
+          </span>
+        )}
+        <span className="text-foreground/30 px-[0.75ch]">|</span>
+        <span>Gösterilen: </span>
+        {!data ? (
+          <span className={metricsPendingClassName}>10</span>
+        ) : (
+          <span className="text-foreground">
+            {data.hits.length.toLocaleString()}
+          </span>
+        )}
+        <span className="text-foreground/30 px-[0.75ch]">|</span>
+        {!data ? (
+          <span className={metricsPendingClassName}>0.001 sn.</span>
+        ) : (
+          <span className="text-foreground">
+            {data.processingTimeMs / 1000} sn.
+          </span>
+        )}
+      </p>
       <div className="w-full flex flex-col">
-        <PaginationBar className="mt-5" />
+        <PaginationBar />
         {!data && !isPending && isLoadingError && (
           <div className="w-full py-12 flex flex-col items-center justify-center text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />

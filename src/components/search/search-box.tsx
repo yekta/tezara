@@ -385,7 +385,7 @@ export default function SearchBox({
           </div>
           {/* Advanced settings */}
           {advancedSearch && (
-            <div className="w-full max-w-3xl flex justify-center flex-wrap pt-2 pb-3">
+            <div className="w-full max-w-3xl flex justify-center flex-wrap pt-2">
               <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1 flex items-center">
                 <FormField
                   control={form.control}
