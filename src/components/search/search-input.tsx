@@ -185,12 +185,14 @@ export default function SearchInput({
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
       const paramStr = searchParams.toString();
-      let tries = 0;
-      while (queryIsLoading && tries < 100) {
-        await new Promise((r) => setTimeout(r, 10));
-        tries++;
-      }
-      await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
+      setTimeout(async () => {
+        let tries = 0;
+        while (queryIsLoading && tries < 100) {
+          await new Promise((r) => setTimeout(r, 10));
+          tries++;
+        }
+        await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
+      });
       return;
     }
     if (variant === "search") {
