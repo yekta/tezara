@@ -117,10 +117,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const locale = "tr";
   const { keywords, subjects, languages, minYear, maxYear, thesesCount } =
     await cachedGetPageData({ name: parsedName });
   const title = `${parsedName} Tez İstatistikleri | ${siteTitle}`;
-  const description = `${parsedName} bünyesinde ${minYear}-${maxYear} yılları arasında ${subjects.size} farklı konuda toplam ${thesesCount} tez üretilmiş. ${languages.size} farklı dil ve ${keywords.size} farklı anahtar kelime kullanılmış.`;
+  const description = `${parsedName} bünyesinde ${minYear}-${maxYear} yılları arasında ${subjects.size.toLocaleString(
+    locale
+  )} farklı konuda toplam ${thesesCount.toLocaleString(
+    locale
+  )} tez üretilmiş. ${languages.size.toLocaleString(
+    locale
+  )} farklı dil ve ${keywords.size.toLocaleString(
+    locale
+  )} farklı anahtar kelime kullanılmış.`;
 
   return {
     title,
