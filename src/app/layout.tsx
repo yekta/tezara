@@ -1,3 +1,5 @@
+import Footer from "@/components/navigation/footer";
+import Navbar from "@/components/navigation/navbar";
 import Providers from "@/components/providers/providers";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -6,6 +8,7 @@ import {
   siteTagline,
   siteTitle,
 } from "@/lib/constants";
+import { env } from "@/lib/env";
 import {
   AlertCircleIcon,
   CheckCircleIcon,
@@ -17,8 +20,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
-import Footer from "@/components/navigation/footer";
-import Navbar from "@/components/navigation/navbar";
 
 const sans = localFont({
   src: "./fonts/DMSansVF.woff2",
@@ -36,6 +37,7 @@ const title = `${siteTitle} | ${siteTagline}`;
 export const metadata: Metadata = {
   title,
   description: siteDescription,
+  metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
   openGraph: {
     images: [
       {
