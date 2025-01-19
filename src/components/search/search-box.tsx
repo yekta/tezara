@@ -7,6 +7,7 @@ import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider
 import { searchLikePageParams } from "@/components/search/constants/client";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectFormItem from "@/components/search/multi-select-form-item";
+import { useSearchResults } from "@/components/search/search-results-provider";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -31,8 +32,6 @@ import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@uidotdev/usehooks";
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
   CalendarArrowDownIcon,
   ChevronUpIcon,
   GlobeIcon,
@@ -47,8 +46,8 @@ import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useHotkeys } from "react-hotkeys-hook";
+import { z } from "zod";
 
 const SearchThesesSchema = z.object({
   query: z.string(),
@@ -101,6 +100,8 @@ export default function SearchBox({
       })),
     [thesisTypes]
   );
+
+  const searchResultsContext = useSearchResults();
 
   const searchParams = useSearchParams();
   const minYear = 1950;
@@ -281,10 +282,16 @@ export default function SearchBox({
     input?.setSelectionRange(input.value.length, input.value.length);
   }
 
+  const isPendingSearchResults = searchResultsContext
+    ? searchResultsContext.isPending
+    : false;
+
   return (
     <Form {...form}>
       <form
-        data-pending={isPendingAsyncPush ? true : undefined}
+        data-pending={
+          isPendingAsyncPush || isPendingSearchResults ? true : undefined
+        }
         onSubmit={form.handleSubmit(onSubmit, console.error)}
         className={cn(
           "w-full group/form flex flex-col items-center",
@@ -310,6 +317,7 @@ export default function SearchBox({
                   {...field}
                 />
                 {!isPendingAsyncPush &&
+                  !isPendingSearchResults &&
                   queryInput !== undefined &&
                   queryInput !== "" &&
                   queryInput !== null && (
@@ -324,7 +332,7 @@ export default function SearchBox({
                       <XIcon className="size-5" />
                     </Button>
                   )}
-                {isPendingAsyncPush && (
+                {(isPendingAsyncPush || isPendingSearchResults) && (
                   <div className="size-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
                     <LoaderIcon className="size-full animate-spin" />
                   </div>
@@ -339,11 +347,15 @@ export default function SearchBox({
           className="w-full flex flex-col items-center group pt-3"
         >
           <div className="max-w-full flex flex-wrap justify-center gap-2">
-            <Button disabled={isPendingAsyncPush} className="py-2 px-6">
+            <Button
+              disabled={isPendingAsyncPush || isPendingSearchResults}
+              className="py-2 px-6"
+              fadeOnDisabled={false}
+            >
               <p className="min-w-0 shrink group-data-[pending]/form:opacity-0">
                 Ara
               </p>
-              {isPendingAsyncPush && (
+              {(isPendingAsyncPush || isPendingSearchResults) && (
                 <div className="size-5 absolute left-1/2 top-1/2 transform -translate-y-1/2 -translate-x-1/2">
                   <LoaderIcon className="size-full animate-spin" />
                 </div>
@@ -418,9 +430,8 @@ export default function SearchBox({
                               placeholder={
                                 <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
                                   <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
-                                    Yıl
+                                    Yıl {`>=`}
                                   </p>
-                                  <ArrowUpIcon className="size-4 -my-1 shrink-0" />
                                 </div>
                               }
                             />
@@ -477,9 +488,8 @@ export default function SearchBox({
                               placeholder={
                                 <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
                                   <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
-                                    Yıl
+                                    Yıl {`<=`}
                                   </p>
-                                  <ArrowDownIcon className="size-4 -my-1 shrink-0" />
                                 </div>
                               }
                             />

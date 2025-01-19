@@ -126,11 +126,6 @@ export const SearchResultsProvider: React.FC<{
 
 export const useSearchResults = () => {
   const context = useContext(SearchResultsContext);
-  if (!context) {
-    throw new Error(
-      "SearchResultsProvider needs to wrap useSearchResults for it to work."
-    );
-  }
   return context;
 };
 

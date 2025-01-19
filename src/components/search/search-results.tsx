@@ -14,7 +14,14 @@ type Props = {
 };
 
 export default function SearchResults({}: Props) {
-  const { data, isPending, isLoadingError, bulkDownload } = useSearchResults();
+  const searchResultsContext = useSearchResults();
+  if (!searchResultsContext) {
+    throw new Error(
+      "SearchResultsProvider needs to wrap useSearchResults for it to work."
+    );
+  }
+  const { data, bulkDownload, isPending, isLoadingError } =
+    searchResultsContext;
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
   const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
   const isPendingDownload = isPendingCsvDownload || isPendingJsonDownload;
