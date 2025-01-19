@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -87,7 +87,12 @@ export default function SearchInput({
   );
   const searchParams = useSearchParams();
 
-  const [query, setQuery] = useQueryState("q", searchLikePageParams.q);
+  const [queryIsLoading, queryStartTransition] = useTransition();
+  const [query, setQuery] = useQueryState("q", {
+    ...searchLikePageParams.q,
+    startTransition: queryStartTransition,
+  });
+
   const [languagesQP, setLanguagesQP] = useQueryState(
     "languages",
     searchLikePageParams["languages"]
@@ -180,6 +185,11 @@ export default function SearchInput({
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
       const paramStr = searchParams.toString();
+      let tries = 0;
+      while (queryIsLoading && tries < 100) {
+        await new Promise((r) => setTimeout(r, 10));
+        tries++;
+      }
       await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
       return;
     }
