@@ -1,3 +1,4 @@
+import BroomIcon from "@/components/icons/broom";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -22,6 +23,8 @@ type Props = {
   items: { label: string; value: string }[];
   isItemSelected: (v: string) => boolean;
   onSelect: (v: string) => void;
+  onSelectClear?: () => void;
+  clearLength?: number;
   commandEmptyText: string;
   commandButtonText: ReactNode | string;
   commandInputPlaceholder: string;
@@ -32,10 +35,14 @@ type Props = {
   label: string;
 };
 
+const clearButtonText = "Temizle";
+
 export default function MultiSelectFormItem({
   items,
   isItemSelected,
   onSelect,
+  onSelectClear,
+  clearLength,
   Icon,
   IconSetForItem,
   iconSetForItemClassName,
@@ -92,6 +99,25 @@ export default function MultiSelectFormItem({
               <CommandList>
                 <CommandEmpty>{commandEmptyText}</CommandEmpty>
                 <CommandGroup>
+                  {onSelectClear && (
+                    <CommandItem
+                      value={clearButtonText}
+                      onSelect={onSelectClear}
+                      className="flex justify-start gap-2 py-2 text-warning data-[selected=true]:bg-warning/20 data-[selected=true]:text-warning"
+                    >
+                      <BroomIcon className="size-4 -my-1 -ml-0.25" />
+                      <div className="flex-1 min-w-0 flex items-center">
+                        <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap font-semibold leading-tight">
+                          {clearButtonText}
+                        </p>
+                        {clearLength && clearLength > 0 && (
+                          <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                            {clearLength}
+                          </p>
+                        )}
+                      </div>
+                    </CommandItem>
+                  )}
                   {items.map((item) => (
                     <CommandItem
                       value={item.label}
@@ -103,7 +129,7 @@ export default function MultiSelectFormItem({
                         {IconSetForItem && (
                           <IconSetForItem
                             className={cn(
-                              "size-4 -ml-0.25",
+                              "size-4 -my-1 -ml-0.25",
                               iconSetForItemClassName
                             )}
                             variant={item.value}

@@ -67,7 +67,7 @@ type Props = {
   thesisTypes: TGetThesisTypesResult["hits"];
 };
 
-const clearYearButtonText = "Temizle";
+const clearButtonText = "Temizle";
 
 export default function SearchBox({
   languages,
@@ -225,6 +225,21 @@ export default function SearchBox({
     form.setFocus("query");
   }
 
+  function clearUniversities() {
+    form.setValue("universities", []);
+    setUniversitiesQP([]);
+  }
+
+  function clearLanguages() {
+    form.setValue("languages", []);
+    setLanguagesQP([]);
+  }
+
+  function clearThesisTypes() {
+    form.setValue("thesisTypes", []);
+    setThesisTypesQP([]);
+  }
+
   function clearYearGte() {
     form.setValue("yearGte", undefined);
     setYearGteQP(null);
@@ -236,12 +251,9 @@ export default function SearchBox({
   }
 
   function clearAllFilters() {
-    setLanguagesQP([]);
-    setUniversitiesQP([]);
-    setThesisTypesQP([]);
-    form.setValue("languages", []);
-    form.setValue("universities", []);
-    form.setValue("thesisTypes", []);
+    clearUniversities();
+    clearLanguages();
+    clearThesisTypes();
     clearYearGte();
     clearYearLte();
   }
@@ -366,45 +378,6 @@ export default function SearchBox({
           {/* Advanced settings */}
           {advancedSearch && (
             <div className="w-full max-w-3xl flex justify-center flex-wrap pt-2 pb-3">
-              <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
-                <FormField
-                  control={form.control}
-                  name="universities"
-                  render={({}) => (
-                    <MultiSelectFormItem
-                      label="Üniversite"
-                      className="w-full"
-                      Icon={LandmarkIcon}
-                      commandButtonText={
-                        <div className="flex-1 min-w-0 flex items-center">
-                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
-                            Üniversite
-                          </p>
-                          {selectedUniversities &&
-                            selectedUniversities.length > 0 && (
-                              <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                                {selectedUniversities.length}
-                              </p>
-                            )}
-                        </div>
-                      }
-                      commandInputPlaceholder="Üniversite ara..."
-                      commandEmptyText="Eşleşen yok"
-                      isItemSelected={(v) =>
-                        selectedUniversities?.includes(v) || false
-                      }
-                      items={universityOptions}
-                      onSelect={(v) => {
-                        const newValue = toggleInArray(selectedUniversities, v);
-                        if (universitiesQP.join(",") !== newValue.join(",")) {
-                          setUniversitiesQP(newValue);
-                        }
-                        form.setValue("universities", newValue);
-                      }}
-                    />
-                  )}
-                />
-              </div>
               <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1 flex items-center">
                 <FormField
                   control={form.control}
@@ -414,7 +387,7 @@ export default function SearchBox({
                       <FormLabel className="sr-only">Yıl Büyüktür</FormLabel>
                       <Select
                         onValueChange={(v) => {
-                          if (v === clearYearButtonText) {
+                          if (v === clearButtonText) {
                             clearYearGte();
                             return;
                           }
@@ -446,11 +419,11 @@ export default function SearchBox({
                         </FormControl>
                         <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
                           {field.value && (
-                            <SelectItem value={clearYearButtonText}>
+                            <SelectItem value={clearButtonText}>
                               <div className="shrink min-w-0 flex items-center gap-1 text-warning">
                                 <BroomIcon className="size-4 -my-1" />
                                 <p className="shrink font-semibold min-w-0 overflow-hidden overflow-ellipsis">
-                                  {clearYearButtonText}
+                                  {clearButtonText}
                                 </p>
                               </div>
                             </SelectItem>
@@ -473,7 +446,7 @@ export default function SearchBox({
                       <FormLabel className="sr-only">Yıl Küçüktür</FormLabel>
                       <Select
                         onValueChange={(v) => {
-                          if (v === clearYearButtonText) {
+                          if (v === clearButtonText) {
                             clearYearLte();
                             return;
                           }
@@ -505,11 +478,11 @@ export default function SearchBox({
                         </FormControl>
                         <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
                           {field.value && (
-                            <SelectItem value={clearYearButtonText}>
+                            <SelectItem value={clearButtonText}>
                               <div className="shrink min-w-0 flex items-center gap-1 text-warning">
                                 <BroomIcon className="size-4 -my-1" />
                                 <p className="shrink font-semibold min-w-0 overflow-hidden overflow-ellipsis">
-                                  {clearYearButtonText}
+                                  {clearButtonText}
                                 </p>
                               </div>
                             </SelectItem>
@@ -522,6 +495,51 @@ export default function SearchBox({
                         </SelectContent>
                       </Select>
                     </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
+                <FormField
+                  control={form.control}
+                  name="universities"
+                  render={({}) => (
+                    <MultiSelectFormItem
+                      label="Üniversite"
+                      className="w-full"
+                      Icon={LandmarkIcon}
+                      commandButtonText={
+                        <div className="flex-1 min-w-0 flex items-center">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                            Üniversite
+                          </p>
+                          {selectedUniversities &&
+                            selectedUniversities.length > 0 && (
+                              <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                                {selectedUniversities.length}
+                              </p>
+                            )}
+                        </div>
+                      }
+                      commandInputPlaceholder="Üniversite ara..."
+                      commandEmptyText="Eşleşen yok"
+                      isItemSelected={(v) =>
+                        selectedUniversities?.includes(v) || false
+                      }
+                      items={universityOptions}
+                      onSelectClear={
+                        selectedUniversities && selectedUniversities.length > 0
+                          ? clearUniversities
+                          : undefined
+                      }
+                      onSelect={(v) => {
+                        const newValue = toggleInArray(selectedUniversities, v);
+                        if (universitiesQP.join(",") !== newValue.join(",")) {
+                          setUniversitiesQP(newValue);
+                        }
+                        form.setValue("universities", newValue);
+                      }}
+                      clearLength={selectedUniversities?.length}
+                    />
                   )}
                 />
               </div>
@@ -561,6 +579,12 @@ export default function SearchBox({
                         }
                         form.setValue("thesisTypes", newValue);
                       }}
+                      onSelectClear={
+                        selectedThesisTypes && selectedThesisTypes.length > 0
+                          ? clearThesisTypes
+                          : undefined
+                      }
+                      clearLength={selectedThesisTypes?.length}
                     />
                   )}
                 />
@@ -602,6 +626,12 @@ export default function SearchBox({
                         }
                         form.setValue("languages", newValue);
                       }}
+                      onSelectClear={
+                        selectedLanguages && selectedLanguages.length > 0
+                          ? clearLanguages
+                          : undefined
+                      }
+                      clearLength={selectedLanguages?.length}
                     />
                   )}
                 />
