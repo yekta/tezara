@@ -22,22 +22,31 @@ type TVariant =
   | string
   | null;
 
-export function getThesisTypeColorClassName(variant: TVariant) {
+export function getThesisTypeColorClassName(
+  variant: TVariant,
+  variable?: boolean
+) {
   if (variant === "Yüksek Lisans") {
+    if (variable) return "hsl(var(--chart-1))";
     return "text-chart-1 bg-chart-1/10 border-chart-1/16";
   }
   if (variant === "Doktora") {
+    if (variable) return "hsl(var(--chart-2))";
     return "text-chart-2 bg-chart-2/10 border-chart-2/16";
   }
   if (variant === "Tıpta Uzmanlık") {
+    if (variable) return "hsl(var(--chart-3))";
     return "text-chart-3 bg-chart-3/10 border-chart-3/16";
   }
   if (variant === "Sanatta Yeterlik") {
+    if (variable) return "hsl(var(--chart-4))";
     return "text-chart-4 bg-chart-4/10 border-chart-4/16";
   }
   if (variant === "Diş Hekimliği Uzmanlık") {
+    if (variable) return "hsl(var(--chart-5))";
     return "text-chart-5 bg-chart-5/10 border-chart-5/16";
   }
+  if (variable) return "hsl(var(--foreground))";
   return "text-foreground bg-foreground/8 border-foreground/12";
 }
 

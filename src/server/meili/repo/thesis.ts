@@ -28,6 +28,7 @@ export async function searchTheses({
   sort,
   hitsPerPage,
   page = PAGE_DEFAULT,
+  attributesToRetrieve,
 }: {
   client: MeiliSearch;
   query: string | undefined;
@@ -39,6 +40,7 @@ export async function searchTheses({
   sort: string[] | undefined;
   hitsPerPage: number | undefined;
   page: number | undefined;
+  attributesToRetrieve?: string[];
 }) {
   const index = client.index<TThesisExtended>(indexName);
   let filter = "";
@@ -99,6 +101,7 @@ export async function searchTheses({
     hitsPerPage,
     page,
     sort: _sort,
+    attributesToRetrieve,
   });
   return result;
 }

@@ -91,12 +91,17 @@ input[type="search"] {
     --banano: 35 100% 25%;
     --nano: 250 80% 25%;
     --radius: 0.5rem;
-    --chart-1: 250 80% 25%;
-    --chart-2: 130 84% 20%;
-    --chart-3: 35 100% 25%;
-    --chart-4: 280 100% 30%;
-    --chart-5: 0 100% 30%;
-    --chart-6: 310 100% 30%;
+    --chart-1: 210 90% 30%; /* Deep blue */
+    --chart-2: 160 70% 35%; /* Teal */
+    --chart-3: 300 80% 35%; /* Purple */
+    --chart-4: 0 85% 45%; /* Vibrant red */
+    --chart-5: 340 75% 40%; /* Magenta */
+    --chart-6: 35 90% 45%; /* Orange */
+    --chart-7: 190 80% 40%; /* Aqua blue */
+    --chart-8: 120 70% 35%; /* Green */
+    --chart-9: 40 80% 25%; /* Earthy gold */
+    --chart-10: 50 95% 30%; /* Warm yellow */
+
     --index-fear: 0 100% 70%;
     --index-neutral: 50 100% 60%;
     --index-greed: 120 50% 55%;
@@ -153,6 +158,10 @@ input[type="search"] {
     --chart-4: 275 90% 75%;
     --chart-5: 0 90% 70%;
     --chart-6: 320 80% 70%;
+    --chart-7: 50 85% 60%;
+    --chart-8: 190 80% 50%;
+    --chart-9: 260 70% 65%;
+    --chart-10: 300 75% 55%;
     --index-fear: 0 60% 60%;
     --index-neutral: 50 75% 60%;
     --index-greed: 120 40% 60%;
