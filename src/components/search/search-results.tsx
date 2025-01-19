@@ -259,7 +259,7 @@ export default function SearchResults({}: Props) {
           <span className={metricsPendingClassName}>0.001 sn.</span>
         ) : (
           <span className="text-foreground">
-            {data.processingTimeMs / 1000} sn.
+            {(data.processingTimeMs / 1000).toLocaleString()} sn.
           </span>
         )}
       </p>
