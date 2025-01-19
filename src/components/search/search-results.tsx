@@ -90,7 +90,7 @@ export default function SearchResults({}: Props) {
             group-data-[pending]/header:rounded-sm
             "
           >
-            <span>Sonuç: </span>
+            <span>Eşleşen: </span>
             {!data ? (
               <span>10,000</span>
             ) : (
@@ -98,21 +98,20 @@ export default function SearchResults({}: Props) {
                 {data.estimatedTotalHits.toLocaleString()}
               </span>
             )}
-            <span className="text-muted-more-foreground group-data-[pending]/header:text-transparent px-[0.65ch]">
+            <span className="text-foreground/30 group-data-[pending]/header:text-transparent px-[0.75ch]">
               |
             </span>
             <span>Gösterilen: </span>
             {!data ? (
-              <span className="pr-[0.65ch]">10</span>
+              <span>10</span>
             ) : (
               <span className="text-foreground">
                 {data.hits.length.toLocaleString()}
               </span>
             )}
-            <span className="text-muted-more-foreground group-data-[pending]/header:text-transparent px-[0.65ch]">
+            <span className="text-foreground/30 group-data-[pending]/header:text-transparent px-[0.75ch]">
               |
             </span>
-            <span>Süre: </span>
             <span className="text-foreground group-data-[pending]/header:text-transparent">
               {!data ? "0.001" : data.processingTimeMs / 1000} sn.
             </span>
