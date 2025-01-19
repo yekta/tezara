@@ -44,6 +44,14 @@ export const SearchResultsProvider: React.FC<{
     "thesis_types",
     searchLikePageParams["thesis_types"]
   );
+  const [yearLteQP] = useQueryState(
+    "year_lte",
+    searchLikePageParams["year_lte"]
+  );
+  const [yearGteQP] = useQueryState(
+    "year_gte",
+    searchLikePageParams["year_gte"]
+  );
   const [offset] = useQueryState("offset", searchLikePageParams["offset"]);
 
   const queryKey = getSearchThesesQueryKey({
@@ -51,6 +59,8 @@ export const SearchResultsProvider: React.FC<{
     languages,
     universities,
     thesisTypes,
+    yearGte: yearGteQP,
+    yearLte: yearLteQP,
     limit: LIMIT_DEFAULT,
     offset,
   });
@@ -62,9 +72,12 @@ export const SearchResultsProvider: React.FC<{
         languages,
         universities,
         thesisTypes,
-        client: meili,
+        yearGte: yearGteQP,
+        yearLte: yearLteQP,
+        sort: undefined,
         limit: LIMIT_DEFAULT,
         offset,
+        client: meili,
       }),
     queryKey,
     enabled: isSearchResultsPath,
@@ -78,15 +91,20 @@ export const SearchResultsProvider: React.FC<{
           languages,
           universities,
           thesisTypes,
-          client: meili,
+          yearGte: yearGteQP,
+          yearLte: yearLteQP,
+          sort: undefined,
           limit: LIMIT_BULK,
           offset,
+          client: meili,
         }),
       queryKey: getSearchThesesQueryKey({
         query,
         languages,
         universities,
         thesisTypes,
+        yearGte: yearGteQP,
+        yearLte: yearLteQP,
         limit: LIMIT_BULK,
         offset,
       }),

@@ -23,18 +23,22 @@ export async function searchTheses({
   languages,
   thesisTypes,
   universities,
+  yearGte,
+  yearLte,
   sort,
   limit,
   offset = OFFSET_DEFAULT,
 }: {
   client: MeiliSearch;
-  query: string;
-  languages?: string[];
-  thesisTypes?: string[];
-  universities?: string[];
-  sort?: string[];
-  limit?: number;
-  offset?: number;
+  query: string | undefined;
+  languages: string[] | undefined;
+  thesisTypes: string[] | undefined;
+  universities: string[] | undefined;
+  yearGte: number | null | undefined;
+  yearLte: number | null | undefined;
+  sort: string[] | undefined;
+  limit: number | undefined;
+  offset: number | undefined;
 }) {
   const index = client.index<TThesisExtended>(indexName);
   let filter = "";
@@ -73,8 +77,22 @@ export async function searchTheses({
     filter += thesisTypeFilter;
   }
 
+  if (yearGte) {
+    if (filter.length > 0) {
+      filter += " AND ";
+    }
+    filter += `year >= ${yearGte}`;
+  }
+
+  if (yearLte) {
+    if (filter.length > 0) {
+      filter += " AND ";
+    }
+    filter += `year <= ${yearLte}`;
+  }
+
   const _sort =
-    sort && sort.length > 0 ? sort : !query ? ["id:desc"] : undefined;
+    sort && sort.length > 0 ? sort : !query ? ["year:desc"] : undefined;
 
   const result = await index.search(query, {
     filter: filter ?? undefined,

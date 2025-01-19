@@ -10,12 +10,19 @@ import MultiSelectFormItem from "@/components/search/multi-select-form-item";
 import { Button } from "@/components/ui/button";
 import {
   Form,
+  FormControl,
   FormField,
-  FormHeader,
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
@@ -24,6 +31,9 @@ import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@uidotdev/usehooks";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CalendarArrowDownIcon,
   ChevronUpIcon,
   GlobeIcon,
   LandmarkIcon,
@@ -45,6 +55,8 @@ const SearchThesesSchema = z.object({
   universities: z.array(z.string()),
   thesisTypes: z.array(z.string()),
   offset: z.number(),
+  yearGte: z.number().optional(),
+  yearLte: z.number().optional(),
 });
 
 type Props = {
@@ -54,6 +66,8 @@ type Props = {
   universities: TGetUniversitiesResult["hits"];
   thesisTypes: TGetThesisTypesResult["hits"];
 };
+
+const clearYearButtonText = "Temizle";
 
 export default function SearchBox({
   languages,
@@ -86,7 +100,20 @@ export default function SearchBox({
       })),
     [thesisTypes]
   );
+
   const searchParams = useSearchParams();
+  const minYear = 1950;
+  const maxYear = new Date().getFullYear();
+  const yearOptions = useMemo(() => {
+    const options = [];
+    for (let i = maxYear; i >= minYear; i--) {
+      options.push({
+        value: i.toString(),
+        label: i.toString(),
+      });
+    }
+    return options;
+  }, [minYear, maxYear]);
 
   const [query, setQuery] = useQueryState("q", searchLikePageParams["q"]);
   const [languagesQP, setLanguagesQP] = useQueryState(
@@ -101,14 +128,14 @@ export default function SearchBox({
     "thesis_types",
     searchLikePageParams["thesis_types"]
   );
-  /*   const [yearLteQP, setYearLteQP] = useQueryState(
+  const [yearLteQP, setYearLteQP] = useQueryState(
     "year_lte",
     searchLikePageParams["year_lte"]
   );
   const [yearGteQP, setYearGteQP] = useQueryState(
     "year_gte",
     searchLikePageParams["year_gte"]
-  ); */
+  );
   const [advancedSearch, setAdvancedSearch] = useQueryState(
     "advanced",
     searchLikePageParams["advanced"]
@@ -127,6 +154,8 @@ export default function SearchBox({
       universities: universitiesQP,
       thesisTypes: thesisTypesQP,
       offset: offsetQP,
+      yearLte: yearLteQP ? yearLteQP : undefined,
+      yearGte: yearGteQP ? yearGteQP : undefined,
     },
   });
 
@@ -134,23 +163,25 @@ export default function SearchBox({
   const selectedLanguages = form.watch("languages");
   const selectedUniversities = form.watch("universities");
   const selectedThesisTypes = form.watch("thesisTypes");
+  const selectedYearLte = form.watch("yearLte");
+  const selectedYearGte = form.watch("yearGte");
   const offset = form.watch("offset");
 
-  const totalSelectedCount = useMemo(() => {
+  const totalSelectedFilters = useMemo(() => {
     let total = 0;
     if (selectedLanguages) total += selectedLanguages.length;
     if (selectedUniversities) total += selectedUniversities.length;
     if (selectedThesisTypes) total += selectedThesisTypes.length;
+    if (selectedYearLte) total += 1;
+    if (selectedYearGte) total += 1;
     return total;
-  }, [selectedLanguages, selectedUniversities, selectedThesisTypes]);
-
-  const hasFilters = useMemo(() => {
-    return (
-      (selectedLanguages && selectedLanguages.length > 0) ||
-      (selectedUniversities && selectedUniversities.length > 0) ||
-      (selectedThesisTypes && selectedThesisTypes.length > 0)
-    );
-  }, [selectedUniversities, selectedLanguages, selectedThesisTypes]);
+  }, [
+    selectedLanguages,
+    selectedUniversities,
+    selectedThesisTypes,
+    selectedYearGte,
+    selectedYearLte,
+  ]);
 
   const debouncedQueryInput = useDebounce(queryInput, 150);
 
@@ -192,6 +223,16 @@ export default function SearchBox({
     form.setFocus("query");
   }
 
+  function clearYearGte() {
+    form.setValue("yearGte", undefined);
+    setYearGteQP(null);
+  }
+
+  function clearYearLte() {
+    form.setValue("yearLte", undefined);
+    setYearLteQP(null);
+  }
+
   function clearAllFilters() {
     setLanguagesQP([]);
     setUniversitiesQP([]);
@@ -199,6 +240,8 @@ export default function SearchBox({
     form.setValue("languages", []);
     form.setValue("universities", []);
     form.setValue("thesisTypes", []);
+    clearYearGte();
+    clearYearLte();
   }
 
   const isTouchScreen = useIsTouchscreen();
@@ -219,7 +262,7 @@ export default function SearchBox({
     <Form {...form}>
       <form
         data-pending={isPendingAsyncPush ? true : undefined}
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, console.error)}
         className={cn(
           "w-full group/form flex flex-col items-center",
           className
@@ -231,9 +274,7 @@ export default function SearchBox({
           name="query"
           render={({ field }) => (
             <FormItem className="w-144 max-w-full">
-              <FormHeader className="sr-only">
-                <FormLabel>Ara</FormLabel>
-              </FormHeader>
+              <FormLabel className="sr-only">Ara</FormLabel>
               <div className="w-full relative group/input">
                 <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
                 <Input
@@ -301,7 +342,8 @@ export default function SearchBox({
                 </div>
                 <p className="shrink min-w-0">Filtrele</p>
               </Button>
-              {hasFilters && (
+
+              {totalSelectedFilters > 0 && (
                 <Button
                   type="button"
                   variant="warning-ghost"
@@ -313,7 +355,7 @@ export default function SearchBox({
                   </div>
                   <p className="shrink min-w-0">Temizle</p>
                   <p className="shrink-0 -ml-0.25 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                    {totalSelectedCount}
+                    {totalSelectedFilters}
                   </p>
                 </Button>
               )}
@@ -328,11 +370,12 @@ export default function SearchBox({
                   name="universities"
                   render={({}) => (
                     <MultiSelectFormItem
+                      label="Üniversite"
                       className="w-full"
                       Icon={LandmarkIcon}
                       commandButtonText={
                         <div className="flex-1 min-w-0 flex items-center">
-                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                             Üniversite
                           </p>
                           {selectedUniversities &&
@@ -360,18 +403,139 @@ export default function SearchBox({
                   )}
                 />
               </div>
+              <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1 flex items-center">
+                <FormField
+                  control={form.control}
+                  name="yearGte"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="sr-only">Yıl Büyüktür</FormLabel>
+                      <Select
+                        onValueChange={(v) => {
+                          if (v === clearYearButtonText) {
+                            clearYearGte();
+                            return;
+                          }
+                          const year = parseInt(v);
+                          field.onChange(year);
+                          if (year !== yearGteQP) {
+                            setYearGteQP(year);
+                          }
+                        }}
+                        value={field.value?.toString() || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className="py-2 rounded-r-none -mr-[0.5px]"
+                            classNameInnerContainer="flex items-center -ml-0.5 [&>span]:flex-1 [&>span]:min-w-0 [&>span]:h-5"
+                          >
+                            <CalendarArrowDownIcon className="size-4 shrink-0" />
+                            <SelectValue
+                              placeholder={
+                                <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
+                                  <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
+                                    Yıl
+                                  </p>
+                                  <ArrowUpIcon className="size-4 -my-1 shrink-0" />
+                                </div>
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
+                          {field.value && (
+                            <SelectItem value={clearYearButtonText}>
+                              <div className="shrink min-w-0 flex items-center gap-1 text-warning">
+                                <BroomIcon className="size-4 -my-1" />
+                                <p className="shrink font-semibold min-w-0 overflow-hidden overflow-ellipsis">
+                                  {clearYearButtonText}
+                                </p>
+                              </div>
+                            </SelectItem>
+                          )}
+                          {yearOptions.map((y) => (
+                            <SelectItem key={y.value} value={y.value}>
+                              {y.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="yearLte"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="sr-only">Yıl Küçüktür</FormLabel>
+                      <Select
+                        onValueChange={(v) => {
+                          if (v === clearYearButtonText) {
+                            clearYearLte();
+                            return;
+                          }
+                          const year = parseInt(v);
+                          field.onChange(year);
+                          if (year !== yearLteQP) {
+                            setYearLteQP(year);
+                          }
+                        }}
+                        value={field.value?.toString() || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className="py-2 rounded-l-none -ml-[0.5px]"
+                            classNameInnerContainer="flex items-center -ml-0.5 [&>span]:flex-1 [&>span]:min-w-0 [&>span]:h-5"
+                          >
+                            <CalendarArrowDownIcon className="size-4 shrink-0" />
+                            <SelectValue
+                              placeholder={
+                                <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
+                                  <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
+                                    Yıl
+                                  </p>
+                                  <ArrowDownIcon className="size-4 -my-1 shrink-0" />
+                                </div>
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
+                          {field.value && (
+                            <SelectItem value={clearYearButtonText}>
+                              <div className="shrink min-w-0 flex items-center gap-1 text-warning">
+                                <BroomIcon className="size-4 -my-1" />
+                                <p className="shrink font-semibold min-w-0 overflow-hidden overflow-ellipsis">
+                                  {clearYearButtonText}
+                                </p>
+                              </div>
+                            </SelectItem>
+                          )}
+                          {yearOptions.map((y) => (
+                            <SelectItem key={y.value} value={y.value}>
+                              {y.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
                 <FormField
                   control={form.control}
                   name="thesisTypes"
                   render={({}) => (
                     <MultiSelectFormItem
+                      label="Tez Türü"
                       className="w-full"
                       Icon={ScrollTextIcon}
                       IconSetForItem={ThesisTypeIcon}
                       commandButtonText={
                         <div className="flex-1 min-w-0 flex items-center">
-                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                             Tez Türü
                           </p>
                           {selectedThesisTypes &&
@@ -405,13 +569,14 @@ export default function SearchBox({
                   name="languages"
                   render={({}) => (
                     <MultiSelectFormItem
+                      label="Dil"
                       className="w-full"
                       Icon={GlobeIcon}
                       IconSetForItem={LanguageIcon}
                       iconSetForItemClassName="rounded-full"
                       commandButtonText={
                         <div className="flex-1 min-w-0 flex items-center">
-                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                             Dil
                           </p>
                           {selectedLanguages &&

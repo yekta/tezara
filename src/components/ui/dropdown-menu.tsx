@@ -145,7 +145,7 @@ const DropdownMenuContent = React.forwardRef<
           onCloseAutoFocus={handleCloseAutoFocus}
           collisionPadding={collisionPadding}
           className={cn(
-            "z-50 max-w-[var(--radix-popper-available-width)] max-h-[min(30rem,var(--radix-popper-available-height))] flex flex-col overflow-hidden rounded-md border bg-popover p-0 text-popover-foreground shadow-lg shadow-shadow/[var(--opacity-shadow)]",
+            "max-w-[var(--radix-popper-available-width)] max-h-[min(30rem,var(--radix-popper-available-height))] flex flex-col overflow-hidden rounded-md border bg-popover p-0 text-popover-foreground shadow-lg shadow-shadow/[var(--opacity-shadow)]",
             "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
             className
           )}

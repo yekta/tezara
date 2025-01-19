@@ -22,8 +22,15 @@ type Props = {
 
 export default async function Page({ searchParams }: Props) {
   await searchPageSearchParamsCache.parse(searchParams);
-  const { q, offset, languages, thesis_types, universities } =
-    await loadSearchLikePageSearchParams(searchParams);
+  const {
+    q,
+    offset,
+    languages,
+    thesis_types,
+    universities,
+    year_gte,
+    year_lte,
+  } = await loadSearchLikePageSearchParams(searchParams);
 
   const queryClient = getQueryClientServer();
   const queryKey = getSearchThesesQueryKey({
@@ -31,6 +38,8 @@ export default async function Page({ searchParams }: Props) {
     languages,
     universities,
     thesisTypes: thesis_types,
+    yearGte: year_gte,
+    yearLte: year_lte,
     limit: LIMIT_DEFAULT,
     offset,
   });
@@ -48,8 +57,11 @@ export default async function Page({ searchParams }: Props) {
           languages,
           universities,
           thesisTypes: thesis_types,
+          yearGte: year_gte,
+          yearLte: year_lte,
           offset: offset,
           limit: LIMIT_DEFAULT,
+          sort: undefined,
         }),
     }),
   ]);

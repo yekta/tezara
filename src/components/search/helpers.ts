@@ -8,21 +8,27 @@ export function getSearchThesesQueryKey({
   languages,
   universities,
   thesisTypes,
+  yearGte,
+  yearLte,
   limit,
   offset,
 }: {
-  query: string;
-  languages?: string[];
-  universities?: string[];
-  thesisTypes?: string[];
-  limit?: number;
-  offset?: number;
+  query: string | undefined;
+  languages: string[] | undefined;
+  universities: string[] | undefined;
+  thesisTypes: string[] | undefined;
+  yearGte: number | null;
+  yearLte: number | null;
+  limit: number | undefined;
+  offset: number | undefined;
 }) {
   return [
     query,
     languages && languages.length ? languages.join("_") : undefined,
     universities && universities.length ? universities.join("_") : undefined,
     thesisTypes && thesisTypes.length ? thesisTypes.join("_") : undefined,
+    yearGte !== undefined ? yearGte : undefined,
+    yearLte !== undefined ? yearLte : undefined,
     limit !== undefined ? limit : undefined,
     offset !== undefined ? offset : undefined,
   ];

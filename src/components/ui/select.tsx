@@ -25,24 +25,43 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
     hideChevron?: boolean;
+    classNameInnerContainer?: string;
   }
->(({ className, children, hideChevron = false, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex px-3 font-semibold gap-1.25 relative group/trigger before:w-full before:h-full before:min-w-[48px] before:min-h-[48px] before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:z-[-1] select-none z-0 before:bg-transparent before:absolute touch-manipulation items-center justify-between whitespace-nowrap rounded-md not-touch:hover:bg-border active:bg-border border border-input bg-transparent leading-tight py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-      className
-    )}
-    {...props}
-  >
-    <div className="shrink min-w-0 truncate">{children}</div>
-    {!hideChevron && (
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 -my-1 -mr-1.25 shrink-0 text-muted-more-foreground group-data-[state=open]/trigger:rotate-180 transition-transform" />
-      </SelectPrimitive.Icon>
-    )}
-  </SelectPrimitive.Trigger>
-));
+>(
+  (
+    {
+      className,
+      classNameInnerContainer,
+      children,
+      hideChevron = false,
+      ...props
+    },
+    ref
+  ) => (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "flex px-3 font-semibold gap-1.25 relative group/trigger before:w-full before:h-full before:min-w-[48px] before:min-h-[48px] before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:z-[-1] select-none z-0 before:bg-transparent before:absolute touch-manipulation items-center justify-between whitespace-nowrap rounded-md not-touch:hover:bg-border active:bg-border border border-input bg-transparent leading-tight py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+        className
+      )}
+      {...props}
+    >
+      <div
+        className={cn(
+          "shrink min-w-0 truncate gap-1.5 flex",
+          classNameInnerContainer
+        )}
+      >
+        {children}
+      </div>
+      {!hideChevron && (
+        <SelectPrimitive.Icon asChild>
+          <ChevronDownIcon className="size-4 -my-1 -mr-1.25 shrink-0 text-muted-more-foreground group-data-[state=open]/trigger:rotate-180 transition-transform" />
+        </SelectPrimitive.Icon>
+      )}
+    </SelectPrimitive.Trigger>
+  )
+);
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectScrollUpButton = React.forwardRef<
@@ -147,7 +166,7 @@ const SelectContent = React.forwardRef<
           collisionPadding={collisionPadding}
           ref={ref}
           className={cn(
-            "max-h-[min(20rem,var(--radix-popper-available-height))] relative shadow-lg shadow-shadow/[var(--opacity-shadow)] z-50 overflow-hidden rounded-md border bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            "max-w-[var(--radix-popper-available-width)] max-h-[min(30rem,var(--radix-popper-available-height))] relative shadow-lg shadow-shadow/[var(--opacity-shadow)] z-50 overflow-hidden rounded-md border bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
             position === "popper" &&
               "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
             className

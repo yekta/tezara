@@ -35,7 +35,7 @@ export default function ThesisSearchResultRow({
   return (
     <div
       data-placeholder={isPlaceholder ? true : undefined}
-      className="pt-3.5 pb-4.5 first-of-type:border-t border-b flex flex-row items-start gap-4 group/row"
+      className="pt-3.5 pb-4.5 first-of-type:border-t border-b border-foreground/10 flex flex-row items-start gap-4 group/row"
     >
       <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
         {isPlaceholder ? (
@@ -88,19 +88,19 @@ export default function ThesisSearchResultRow({
       </div>
       <div className="flex-1 min-w-0 flex flex-col items-start">
         {isPlaceholder ? (
-          <div className="text-base font-semibold leading-tight bg-foreground text-transparent animate-skeleton py-0.5 -mt-0.5 rounded-md">
+          <div className="max-w-full min-w-0 text-base font-semibold leading-tight bg-foreground text-transparent animate-skeleton py-0.5 -mt-0.5 rounded-md">
             Başlık yükleniyor................................
           </div>
         ) : (
           <Link
             href={`/thesis/${thesis.id}`}
-            className="text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
+            className="max-w-full min-w-0 text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
           >
             {thesis.title_original || noTitle}
           </Link>
         )}
         <p
-          className="mt-1 text-sm leading-tight font-medium text-muted-foreground
+          className="mt-1 max-w-full min-w-0 text-sm leading-tight font-medium text-muted-foreground
           group-data-[placeholder]/row:text-transparent
           group-data-[placeholder]/row:bg-muted-foreground
           group-data-[placeholder]/row:animate-skeleton
@@ -112,7 +112,7 @@ export default function ThesisSearchResultRow({
         </p>
         <div className="w-full flex mt-2">
           <p
-            className="shrink min-w-0 text-base leading-snug
+            className="max-w-full min-w-0 text-base leading-snug
             group-data-[placeholder]/row:text-transparent
             group-data-[placeholder]/row:bg-muted-foreground
             group-data-[placeholder]/row:animate-skeleton

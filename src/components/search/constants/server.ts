@@ -15,6 +15,8 @@ export const searchLikePageParams = {
   thesis_types: parseAsArrayOf(parseAsString).withDefault([]),
   advanced: parseAsBoolean.withDefault(false),
   offset: parseAsInteger.withDefault(OFFSET_DEFAULT),
+  year_gte: parseAsInteger,
+  year_lte: parseAsInteger,
 } as const;
 
 export const loadSearchLikePageSearchParams =

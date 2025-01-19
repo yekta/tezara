@@ -29,6 +29,7 @@ type Props = {
   Icon?: ComponentType<{ className: string }>;
   IconSetForItem?: ComponentType<{ className: string; variant: string }>;
   iconSetForItemClassName?: string;
+  label: string;
 };
 
 export default function MultiSelectFormItem({
@@ -41,6 +42,7 @@ export default function MultiSelectFormItem({
   commandButtonText,
   commandEmptyText,
   commandInputPlaceholder,
+  label,
   className,
 }: Props) {
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +50,7 @@ export default function MultiSelectFormItem({
 
   return (
     <FormItem className={cn("w-full max-w-full flex flex-col", className)}>
-      <FormLabel className="sr-only">Dil</FormLabel>
+      <FormLabel className="sr-only">{label}</FormLabel>
       <Popover>
         <PopoverTrigger asChild>
           <FormControl>
