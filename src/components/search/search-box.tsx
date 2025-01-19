@@ -5,6 +5,7 @@ import LanguageIcon from "@/components/icons/language";
 import ThesisTypeIcon from "@/components/icons/thesis-type";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
 import { searchLikePageParams } from "@/components/search/constants/client";
+import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectFormItem from "@/components/search/multi-select-form-item";
 import { Button } from "@/components/ui/button";
 import {
@@ -444,22 +445,4 @@ export default function SearchBox({
       </form>
     </Form>
   );
-}
-
-function toggleInArray<T>(arr: T[], item: T) {
-  if (!arr) return [item];
-  if (arr.includes(item)) {
-    return removeFromArray(arr, item);
-  }
-  return addToArray(arr, item);
-}
-
-function removeFromArray<T>(arr: T[], item: T) {
-  if (!arr) return [];
-  return arr.filter((i) => i !== item);
-}
-
-function addToArray<T>(arr: T[], item: T) {
-  if (!arr) return [item];
-  return [...arr, item];
 }

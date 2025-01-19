@@ -27,3 +27,21 @@ export function getSearchThesesQueryKey({
     offset !== undefined ? offset : undefined,
   ];
 }
+
+export function toggleInArray<T>(arr: T[], item: T) {
+  if (!arr) return [item];
+  if (arr.includes(item)) {
+    return removeFromArray(arr, item);
+  }
+  return addToArray(arr, item);
+}
+
+function removeFromArray<T>(arr: T[], item: T) {
+  if (!arr) return [];
+  return arr.filter((i) => i !== item);
+}
+
+function addToArray<T>(arr: T[], item: T) {
+  if (!arr) return [item];
+  return [...arr, item];
+}
