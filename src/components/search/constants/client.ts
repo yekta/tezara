@@ -1,4 +1,4 @@
-import { OFFSET_DEFAULT } from "@/components/search/constants/shared";
+import { PAGE_DEFAULT } from "@/components/search/constants/shared";
 import {
   parseAsArrayOf,
   parseAsBoolean,
@@ -13,7 +13,7 @@ export const searchLikePageParams = {
   universities: parseAsArrayOf(parseAsString).withDefault([]),
   thesis_types: parseAsArrayOf(parseAsString).withDefault([]),
   advanced: parseAsBoolean.withDefault(false),
-  offset: parseAsInteger.withDefault(OFFSET_DEFAULT),
+  page: parseAsInteger.withDefault(PAGE_DEFAULT),
   year_gte: parseAsInteger,
   year_lte: parseAsInteger,
 } as const;

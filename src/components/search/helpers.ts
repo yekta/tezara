@@ -10,8 +10,8 @@ export function getSearchThesesQueryKey({
   thesisTypes,
   yearGte,
   yearLte,
-  limit,
-  offset,
+  hitsPerPage,
+  page,
 }: {
   query: string | undefined;
   languages: string[] | undefined;
@@ -19,8 +19,8 @@ export function getSearchThesesQueryKey({
   thesisTypes: string[] | undefined;
   yearGte: number | null;
   yearLte: number | null;
-  limit: number | undefined;
-  offset: number | undefined;
+  hitsPerPage: number | undefined;
+  page: number | undefined;
 }) {
   return [
     query,
@@ -29,8 +29,8 @@ export function getSearchThesesQueryKey({
     thesisTypes && thesisTypes.length ? thesisTypes.join("_") : undefined,
     yearGte !== undefined ? yearGte : undefined,
     yearLte !== undefined ? yearLte : undefined,
-    limit !== undefined ? limit : undefined,
-    offset !== undefined ? offset : undefined,
+    hitsPerPage !== undefined ? hitsPerPage : undefined,
+    page !== undefined ? page : undefined,
   ];
 }
 

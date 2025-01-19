@@ -1,10 +1,11 @@
 "use client";
 
-import {
-  LIMIT_BULK,
-  LIMIT_DEFAULT,
-} from "@/components/search/constants/shared";
 import { searchLikePageParams } from "@/components/search/constants/client";
+import {
+  HITS_PER_PAGE_BULK,
+  HITS_PER_PAGE_DEFAULT,
+  PAGE_DEFAULT,
+} from "@/components/search/constants/shared";
 import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";
@@ -15,10 +16,18 @@ import {
 } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext, useEffect } from "react";
 
 type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
   bulkDownload: () => Promise<TSearchThesesResult>;
+  goToNextPage: () => void;
+  goToPrevPage: () => void;
+  goToPage: (page: number) => void;
+  firstPage: number;
+  lastPage: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  currentPage: number;
 };
 
 const LONG_STALE_TIME = 60 * 1000;
@@ -52,7 +61,15 @@ export const SearchResultsProvider: React.FC<{
     "year_gte",
     searchLikePageParams["year_gte"]
   );
-  const [offset] = useQueryState("offset", searchLikePageParams["offset"]);
+  const [pageQP, setPageQP] = useQueryState(
+    "page",
+    searchLikePageParams["page"]
+  );
+
+  useEffect(() => {
+    if (pageQP === PAGE_DEFAULT) return;
+    setPageQP(PAGE_DEFAULT);
+  }, [query, languages, universities, thesisTypes, yearGteQP, yearLteQP]);
 
   const queryKey = getSearchThesesQueryKey({
     query,
@@ -61,8 +78,8 @@ export const SearchResultsProvider: React.FC<{
     thesisTypes,
     yearGte: yearGteQP,
     yearLte: yearLteQP,
-    limit: LIMIT_DEFAULT,
-    offset,
+    hitsPerPage: HITS_PER_PAGE_DEFAULT,
+    page: pageQP,
   });
 
   const searchThesesQuery = useQuery({
@@ -75,8 +92,8 @@ export const SearchResultsProvider: React.FC<{
         yearGte: yearGteQP,
         yearLte: yearLteQP,
         sort: undefined,
-        limit: LIMIT_DEFAULT,
-        offset,
+        hitsPerPage: HITS_PER_PAGE_DEFAULT,
+        page: pageQP,
         client: meili,
       }),
     queryKey,
@@ -94,8 +111,8 @@ export const SearchResultsProvider: React.FC<{
           yearGte: yearGteQP,
           yearLte: yearLteQP,
           sort: undefined,
-          limit: LIMIT_BULK,
-          offset,
+          hitsPerPage: HITS_PER_PAGE_BULK,
+          page: PAGE_DEFAULT,
           client: meili,
         }),
       queryKey: getSearchThesesQueryKey({
@@ -105,18 +122,51 @@ export const SearchResultsProvider: React.FC<{
         thesisTypes,
         yearGte: yearGteQP,
         yearLte: yearLteQP,
-        limit: LIMIT_BULK,
-        offset,
+        hitsPerPage: HITS_PER_PAGE_DEFAULT,
+        page: PAGE_DEFAULT,
       }),
       staleTime: LONG_STALE_TIME,
     });
   };
+
+  const totalPages = searchThesesQuery.data?.totalPages;
+  const hasNext = totalPages ? pageQP < totalPages && totalPages > 1 : false;
+  const hasPrev = pageQP > 1 && totalPages !== undefined && totalPages > 1;
+
+  const goToNextPage = () => {
+    if (!hasNext) return;
+    if (!totalPages) return;
+    const adjustedPage = Math.min(totalPages, pageQP + 1);
+    setPageQP(adjustedPage);
+  };
+
+  const goToPrevPage = () => {
+    if (!hasPrev) return;
+    if (!totalPages) return;
+    const adjustedPage = Math.min(totalPages, Math.max(1, pageQP - 1));
+    setPageQP(adjustedPage);
+  };
+
+  const goToPage = (page: number) => {
+    setPageQP(page);
+  };
+
+  const firstPage = 1;
+  const lastPage = totalPages || 1;
 
   return (
     <SearchResultsContext.Provider
       value={{
         ...searchThesesQuery,
         bulkDownload,
+        goToNextPage,
+        goToPrevPage,
+        goToPage,
+        firstPage,
+        lastPage,
+        hasNext,
+        hasPrev,
+        currentPage: pageQP,
       }}
     >
       {children}

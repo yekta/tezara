@@ -1,4 +1,4 @@
-import { OFFSET_DEFAULT } from "@/components/search/constants/shared";
+import { PAGE_DEFAULT } from "@/components/search/constants/shared";
 import { TThesisExtended } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
@@ -26,8 +26,8 @@ export async function searchTheses({
   yearGte,
   yearLte,
   sort,
-  limit,
-  offset = OFFSET_DEFAULT,
+  hitsPerPage,
+  page = PAGE_DEFAULT,
 }: {
   client: MeiliSearch;
   query: string | undefined;
@@ -37,8 +37,8 @@ export async function searchTheses({
   yearGte: number | null | undefined;
   yearLte: number | null | undefined;
   sort: string[] | undefined;
-  limit: number | undefined;
-  offset: number | undefined;
+  hitsPerPage: number | undefined;
+  page: number | undefined;
 }) {
   const index = client.index<TThesisExtended>(indexName);
   let filter = "";
@@ -96,8 +96,8 @@ export async function searchTheses({
 
   const result = await index.search(query, {
     filter: filter ?? undefined,
-    limit,
-    offset,
+    hitsPerPage,
+    page,
     sort: _sort,
   });
   return result;

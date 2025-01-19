@@ -54,7 +54,6 @@ const SearchThesesSchema = z.object({
   languages: z.array(z.string()),
   universities: z.array(z.string()),
   thesisTypes: z.array(z.string()),
-  offset: z.number(),
   yearGte: z.number().optional(),
   yearLte: z.number().optional(),
 });
@@ -142,10 +141,6 @@ export default function SearchBox({
     "advanced",
     searchLikePageParams["advanced"]
   );
-  const [offsetQP, setOffsetQP] = useQueryState(
-    "offset",
-    searchLikePageParams["offset"]
-  );
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
@@ -155,7 +150,6 @@ export default function SearchBox({
       languages: languagesQP,
       universities: universitiesQP,
       thesisTypes: thesisTypesQP,
-      offset: offsetQP,
       yearLte: yearLteQP ? yearLteQP : undefined,
       yearGte: yearGteQP ? yearGteQP : undefined,
     },
@@ -167,7 +161,6 @@ export default function SearchBox({
   const selectedThesisTypes = form.watch("thesisTypes");
   const selectedYearLte = form.watch("yearLte");
   const selectedYearGte = form.watch("yearGte");
-  const offset = form.watch("offset");
 
   const totalSelectedFilters = useMemo(() => {
     let total = 0;
@@ -203,11 +196,6 @@ export default function SearchBox({
     setQuery(debouncedQueryInput);
   }, [debouncedQueryInput, variant, setQuery, query]);
 
-  useEffect(() => {
-    if (offsetQP === offset) return;
-    setOffsetQP(offset);
-  }, [offset, offsetQP, setOffsetQP]);
-
   async function onSubmit(data: z.infer<typeof SearchThesesSchema>) {
     if (variant === "home") {
       const paramStr = searchParams.toString();
@@ -219,7 +207,6 @@ export default function SearchBox({
       setLanguagesQP(data.languages);
       setUniversitiesQP(data.universities);
       setThesisTypesQP(data.thesisTypes);
-      setOffsetQP(data.offset);
       setYearLteQP(data.yearLte ? data.yearLte : null);
       setYearGteQP(data.yearGte ? data.yearGte : null);
       return;

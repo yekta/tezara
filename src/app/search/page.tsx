@@ -1,5 +1,8 @@
 import { loadSearchLikePageSearchParams } from "@/components/search/constants/server";
-import { LIMIT_DEFAULT } from "@/components/search/constants/shared";
+import {
+  HITS_PER_PAGE_DEFAULT,
+  LIMIT_DEFAULT,
+} from "@/components/search/constants/shared";
 import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import SearchBox from "@/components/search/search-box";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
@@ -22,15 +25,8 @@ type Props = {
 
 export default async function Page({ searchParams }: Props) {
   await searchPageSearchParamsCache.parse(searchParams);
-  const {
-    q,
-    offset,
-    languages,
-    thesis_types,
-    universities,
-    year_gte,
-    year_lte,
-  } = await loadSearchLikePageSearchParams(searchParams);
+  const { q, languages, thesis_types, universities, year_gte, year_lte, page } =
+    await loadSearchLikePageSearchParams(searchParams);
 
   const queryClient = getQueryClientServer();
   const queryKey = getSearchThesesQueryKey({
@@ -40,8 +36,8 @@ export default async function Page({ searchParams }: Props) {
     thesisTypes: thesis_types,
     yearGte: year_gte,
     yearLte: year_lte,
-    limit: LIMIT_DEFAULT,
-    offset,
+    page,
+    hitsPerPage: HITS_PER_PAGE_DEFAULT,
   });
 
   const [languagesData, universitiesData, thesisTypesData] = await Promise.all([
@@ -59,8 +55,8 @@ export default async function Page({ searchParams }: Props) {
           thesisTypes: thesis_types,
           yearGte: year_gte,
           yearLte: year_lte,
-          offset: offset,
-          limit: LIMIT_DEFAULT,
+          page,
+          hitsPerPage: HITS_PER_PAGE_DEFAULT,
           sort: undefined,
         }),
     }),

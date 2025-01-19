@@ -35,7 +35,7 @@ export default function ThesisSearchResultRow({
   return (
     <div
       data-placeholder={isPlaceholder ? true : undefined}
-      className="pt-3.5 pb-4.5 first-of-type:border-t border-b border-foreground/10 flex flex-row items-start gap-4 group/row"
+      className="pt-3.5 pb-4.5 last-of-type:border-b-0 border-b border-foreground/10 flex flex-row items-start gap-4 group/row"
     >
       <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
         {isPlaceholder ? (

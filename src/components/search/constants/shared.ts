@@ -1,14 +1,6 @@
-import { ParserMap } from "nuqs";
-
 export const OFFSET_DEFAULT = 0;
 export const LIMIT_DEFAULT = 50;
 export const LIMIT_BULK = 20_000;
-
-type TParams =
-  | "q"
-  | "languages"
-  | "universities"
-  | "thesis_types"
-  | "advanced"
-  | "offset";
-export type TSearchLikePageParams = Record<TParams, ParserMap>;
+export const PAGE_DEFAULT = 1;
+export const HITS_PER_PAGE_DEFAULT = 50;
+export const HITS_PER_PAGE_BULK = 20_000;
