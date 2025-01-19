@@ -7,6 +7,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { cn } from "@/components/ui/utils";
+import { truncateString } from "@/lib/helpers";
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
 
 type Props = {
@@ -62,6 +63,7 @@ export default function PopularSubjectsChart({
                   className="font-medium fill-[hsl(var(--background))]"
                   opacity={1}
                   fontSize={12}
+                  formatter={(v: string) => truncateString(v, 40)}
                 />
                 <LabelList
                   dataKey="count"
