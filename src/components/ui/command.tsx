@@ -9,7 +9,7 @@ import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { cva, VariantProps } from "class-variance-authority";
 
 const commandVariants = cva(
-  "flex h-full w-full flex-col overflow-hidden rounded-md focus:outline-none",
+  "flex h-full w-full flex-col overflow-hidden rounded-lg focus:outline-none",
   {
     variants: {
       variant: {
