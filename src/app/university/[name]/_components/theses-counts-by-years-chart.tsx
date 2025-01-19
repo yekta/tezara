@@ -11,7 +11,9 @@ import { cn } from "@/components/ui/utils";
 import { Bar, BarChart, XAxis } from "recharts";
 
 type Props = {
-  chartData: any;
+  chartData: {
+    [key: string]: string;
+  }[];
   dataKeys: string[];
   className?: string;
 };
@@ -21,10 +23,9 @@ export default function ThesesCountsByYearsChart({
   dataKeys,
   className,
 }: Props) {
-  let chartConfig = {} as ChartConfig;
+  const chartConfig = {} as ChartConfig;
 
   dataKeys.forEach((dataKey) => {
-    // @ts-ignore
     chartConfig[dataKey] = {
       color: getThesisTypeColorClassName(dataKey, true),
       label: dataKey,

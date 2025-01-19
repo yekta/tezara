@@ -42,11 +42,11 @@ export default async function Page({ params }: Props) {
     ],
   });
 
-  let keywords = new Set<string>();
-  let languages = new Set<string>();
-  let subjects = new Map<string, number>();
+  const keywords = new Set<string>();
+  const languages = new Set<string>();
+  const subjects = new Map<string, number>();
 
-  let thesesCountsByYears: Record<string, Record<string, number>> = {};
+  const thesesCountsByYears: Record<string, Record<string, number>> = {};
   res.hits.forEach((hit) => {
     if (hit.keywords_turkish) {
       hit.keywords_turkish.forEach((keyword) => {
@@ -93,13 +93,14 @@ export default async function Page({ params }: Props) {
   });
   const thesisTypes = Array.from(allThesisTypes);
 
-  const thesesCountsByYearsChartData = Array.from(
+  const thesesCountsByYearsChartData: { [key: string]: string }[] = Array.from(
     { length: maxYear - minYear + 1 },
     (_, index) => {
       const year = String(minYear + index);
+      const rest = thesesCountsByYears[year] || {};
       return {
         year,
-        ...thesesCountsByYears[year],
+        ...rest,
       };
     }
   );

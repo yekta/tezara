@@ -1,6 +1,5 @@
 "use client";
 
-import { getThesisTypeColorClassName } from "@/components/icons/thesis-type";
 import {
   ChartConfig,
   ChartContainer,
@@ -11,7 +10,7 @@ import { cn } from "@/components/ui/utils";
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
 
 type Props = {
-  chartData: any[];
+  chartData: { keyword: string; count: number }[];
   dataKeys: string[];
   className?: string;
 };
@@ -21,19 +20,18 @@ export default function PopularSubjectsChart({
   dataKeys,
   className,
 }: Props) {
-  let chartConfig = {
+  const chartConfig = {
     count: {
       label: "Tez Sayısı",
     },
   } as ChartConfig;
 
-  chartData = chartData.map((data: any, i) => ({
+  chartData = chartData.map((data, i) => ({
     ...data,
     fill: `hsl(var(--chart-${i + 1}))`,
   }));
 
   dataKeys.forEach((dataKey, index) => {
-    // @ts-ignore
     chartConfig[dataKey] = {
       color: `hsl(var(--chart-${index + 1}))`,
       label: dataKey,
@@ -44,7 +42,7 @@ export default function PopularSubjectsChart({
     <div className={cn("w-full flex flex-col gap-2", className)}>
       <h2 className="font-bold px-4 text-xl">Popüler Konular</h2>
       <div className="w-full px-1 md:px-3">
-        <div className="w-full px-2.5 py-2 rounded-lg border flex flex-col h-128 md:h-96 lg:h-80">
+        <div className="w-full px-2.5 py-2 rounded-lg border flex flex-col h-128 md:h-96 lg:h-96">
           <ChartContainer config={chartConfig}>
             <BarChart accessibilityLayer data={chartData} layout="vertical">
               <YAxis
