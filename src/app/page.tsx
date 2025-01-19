@@ -1,5 +1,5 @@
 import Logo from "@/components/logo/logo";
-import SearchBox from "@/components/search/search-input";
+import SearchBox from "@/components/search/search-box";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import { meili } from "@/server/meili/constants-client";
 import { getLanguages } from "@/server/meili/repo/language";

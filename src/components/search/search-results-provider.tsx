@@ -1,7 +1,10 @@
 "use client";
 
-import { LIMIT_BULK, LIMIT_DEFAULT } from "@/components/search/constants";
-import { searchLikePageParams } from "@/components/search/constants-client";
+import {
+  LIMIT_BULK,
+  LIMIT_DEFAULT,
+} from "@/components/search/constants/shared";
+import { searchLikePageParams } from "@/components/search/constants/client";
 import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";

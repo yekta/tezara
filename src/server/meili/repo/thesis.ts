@@ -1,4 +1,4 @@
-import { OFFSET_DEFAULT } from "@/components/search/constants";
+import { OFFSET_DEFAULT } from "@/components/search/constants/shared";
 import { TThesisExtended } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 

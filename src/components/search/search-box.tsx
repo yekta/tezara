@@ -4,7 +4,7 @@ import BroomIcon from "@/components/icons/broom";
 import LanguageIcon from "@/components/icons/language";
 import ThesisTypeIcon from "@/components/icons/thesis-type";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
-import { searchLikePageParams } from "@/components/search/constants-client";
+import { searchLikePageParams } from "@/components/search/constants/client";
 import MultiSelectFormItem from "@/components/search/multi-select-form-item";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +54,7 @@ type Props = {
   thesisTypes: TGetThesisTypesResult["hits"];
 };
 
-export default function SearchInput({
+export default function SearchBox({
   languages,
   universities,
   thesisTypes,
@@ -100,6 +100,14 @@ export default function SearchInput({
     "thesis_types",
     searchLikePageParams["thesis_types"]
   );
+  /*   const [yearLteQP, setYearLteQP] = useQueryState(
+    "year_lte",
+    searchLikePageParams["year_lte"]
+  );
+  const [yearGteQP, setYearGteQP] = useQueryState(
+    "year_gte",
+    searchLikePageParams["year_gte"]
+  ); */
   const [advancedSearch, setAdvancedSearch] = useQueryState(
     "advanced",
     searchLikePageParams["advanced"]
@@ -158,21 +166,6 @@ export default function SearchInput({
   }, [debouncedQueryInput, variant, setQuery, query]);
 
   useEffect(() => {
-    if (languagesQP.join(",") === selectedLanguages.join(",")) return;
-    setLanguagesQP(selectedLanguages);
-  }, [selectedLanguages, variant, setLanguagesQP, languagesQP]);
-
-  useEffect(() => {
-    if (universitiesQP.join(",") === selectedUniversities.join(",")) return;
-    setUniversitiesQP(selectedUniversities);
-  }, [selectedUniversities, variant, setUniversitiesQP, universitiesQP]);
-
-  useEffect(() => {
-    if (thesisTypesQP.join(",") === selectedThesisTypes.join(",")) return;
-    setThesisTypesQP(selectedThesisTypes);
-  }, [selectedThesisTypes, variant, setThesisTypesQP, thesisTypesQP]);
-
-  useEffect(() => {
     if (offsetQP === offset) return;
     setOffsetQP(offset);
   }, [offset, offsetQP, setOffsetQP]);
@@ -199,20 +192,12 @@ export default function SearchInput({
   }
 
   function clearAllFilters() {
-    if (variant === "home") {
-      setLanguagesQP([]);
-      setUniversitiesQP([]);
-      setThesisTypesQP([]);
-      form.setValue("languages", []);
-      form.setValue("universities", []);
-      form.setValue("thesisTypes", []);
-      return;
-    }
-    if (variant === "search") {
-      form.setValue("languages", []);
-      form.setValue("universities", []);
-      form.setValue("thesisTypes", []);
-    }
+    setLanguagesQP([]);
+    setUniversitiesQP([]);
+    setThesisTypesQP([]);
+    form.setValue("languages", []);
+    form.setValue("universities", []);
+    form.setValue("thesisTypes", []);
   }
 
   const isTouchScreen = useIsTouchscreen();
@@ -363,12 +348,13 @@ export default function SearchInput({
                         selectedUniversities?.includes(v) || false
                       }
                       items={universityOptions}
-                      onSelect={(v) =>
-                        form.setValue(
-                          "universities",
-                          toggleValueInArray(selectedUniversities, v)
-                        )
-                      }
+                      onSelect={(v) => {
+                        const newValue = toggleInArray(selectedUniversities, v);
+                        if (universitiesQP.join(",") !== newValue.join(",")) {
+                          setUniversitiesQP(newValue);
+                        }
+                        form.setValue("universities", newValue);
+                      }}
                     />
                   )}
                 />
@@ -401,12 +387,13 @@ export default function SearchInput({
                         selectedThesisTypes?.includes(v) || false
                       }
                       items={thesisTypeOptions}
-                      onSelect={(v) =>
-                        form.setValue(
-                          "thesisTypes",
-                          toggleValueInArray(selectedThesisTypes, v)
-                        )
-                      }
+                      onSelect={(v) => {
+                        const newValue = toggleInArray(selectedThesisTypes, v);
+                        if (thesisTypesQP.join(",") !== newValue.join(",")) {
+                          setThesisTypesQP(newValue);
+                        }
+                        form.setValue("thesisTypes", newValue);
+                      }}
                     />
                   )}
                 />
@@ -440,12 +427,13 @@ export default function SearchInput({
                         selectedLanguages?.includes(v) || false
                       }
                       items={languageOptions}
-                      onSelect={(v) =>
-                        form.setValue(
-                          "languages",
-                          toggleValueInArray(selectedLanguages, v)
-                        )
-                      }
+                      onSelect={(v) => {
+                        const newValue = toggleInArray(selectedLanguages, v);
+                        if (languagesQP.join(",") !== newValue.join(",")) {
+                          setLanguagesQP(newValue);
+                        }
+                        form.setValue("languages", newValue);
+                      }}
                     />
                   )}
                 />
@@ -458,20 +446,20 @@ export default function SearchInput({
   );
 }
 
-function toggleValueInArray<T>(arr: T[], item: T) {
+function toggleInArray<T>(arr: T[], item: T) {
   if (!arr) return [item];
   if (arr.includes(item)) {
-    return removeValueFromArray(arr, item);
+    return removeFromArray(arr, item);
   }
-  return addValueToArray(arr, item);
+  return addToArray(arr, item);
 }
 
-function removeValueFromArray<T>(arr: T[], item: T) {
+function removeFromArray<T>(arr: T[], item: T) {
   if (!arr) return [];
   return arr.filter((i) => i !== item);
 }
 
-function addValueToArray<T>(arr: T[], item: T) {
+function addToArray<T>(arr: T[], item: T) {
   if (!arr) return [item];
   return [...arr, item];
 }

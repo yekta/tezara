@@ -1,7 +1,7 @@
-import { LIMIT_DEFAULT } from "@/components/search/constants";
-import { loadSearchParams } from "@/components/search/constants-server";
+import { loadSearchLikePageSearchParams } from "@/components/search/constants/server";
+import { LIMIT_DEFAULT } from "@/components/search/constants/shared";
 import { getSearchThesesQueryKey } from "@/components/search/helpers";
-import SearchBox from "@/components/search/search-input";
+import SearchBox from "@/components/search/search-box";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
@@ -23,7 +23,7 @@ type Props = {
 export default async function Page({ searchParams }: Props) {
   await searchPageSearchParamsCache.parse(searchParams);
   const { q, offset, languages, thesis_types, universities } =
-    await loadSearchParams(searchParams);
+    await loadSearchLikePageSearchParams(searchParams);
 
   const queryClient = getQueryClientServer();
   const queryKey = getSearchThesesQueryKey({

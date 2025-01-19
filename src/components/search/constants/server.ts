@@ -1,11 +1,13 @@
-import { OFFSET_DEFAULT } from "@/components/search/constants";
+import { OFFSET_DEFAULT } from "@/components/search/constants/shared";
 import {
+  createLoader,
   parseAsArrayOf,
   parseAsBoolean,
   parseAsInteger,
   parseAsString,
-} from "nuqs";
+} from "nuqs/server";
 
+// DONT FORGET TO ADD EACH VALUE TO client.ts as well
 export const searchLikePageParams = {
   q: parseAsString.withDefault(""),
   languages: parseAsArrayOf(parseAsString).withDefault([]),
@@ -14,3 +16,6 @@ export const searchLikePageParams = {
   advanced: parseAsBoolean.withDefault(false),
   offset: parseAsInteger.withDefault(OFFSET_DEFAULT),
 } as const;
+
+export const loadSearchLikePageSearchParams =
+  createLoader(searchLikePageParams);
