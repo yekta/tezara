@@ -69,6 +69,7 @@ export const SearchResultsProvider: React.FC<{
   useEffect(() => {
     if (pageQP === PAGE_DEFAULT) return;
     setPageQP(PAGE_DEFAULT);
+    // We intentionally omit pageQP to prevent infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, languages, universities, thesisTypes, yearGteQP, yearLteQP]);
 
