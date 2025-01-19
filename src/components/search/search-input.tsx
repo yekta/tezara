@@ -88,7 +88,6 @@ export default function SearchInput({
   const searchParams = useSearchParams();
 
   const [query, setQuery] = useQueryState("q", searchLikePageParams["q"]);
-
   const [languagesQP, setLanguagesQP] = useQueryState(
     "languages",
     searchLikePageParams["languages"]
