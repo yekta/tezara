@@ -9,7 +9,6 @@ export const size = {
   width: 1200,
   height: 630,
 };
-
 export const contentType = "image/png";
 
 type Props = {
@@ -20,6 +19,7 @@ const logoAspectRatio = 100 / 24;
 const background = "hsl(0 0% 100%)";
 const foreground = "hsl(250 25% 4%)";
 const foregroundMuted = "hsl(250 6% 35%)";
+const logoSize = 220;
 
 export default async function Image({ params }: Props) {
   const { name } = await params;
@@ -60,7 +60,11 @@ export default async function Image({ params }: Props) {
       >
         <Logo
           variant="full"
-          style={{ width: 200, height: 200 / logoAspectRatio, marginTop: -12 }}
+          style={{
+            width: logoSize,
+            height: logoSize / logoAspectRatio,
+            marginTop: -12,
+          }}
         />
         <p
           style={{
