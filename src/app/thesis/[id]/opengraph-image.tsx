@@ -28,7 +28,7 @@ export default async function Image({ params }: Props) {
   const { id } = await params;
   let thesis: Awaited<ReturnType<typeof cachedGetPageData>>["thesis"];
 
-  const notFoundResponse = () =>
+  const notFoundResponse = async () =>
     new ImageResponse(<DefaultOpenGraphImage />, {
       ...size,
       // @ts-expect-error - This is fine, they don't export the type so I can't set it
