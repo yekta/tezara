@@ -77,7 +77,7 @@ export default async function RootLayout({
       <head>
         <UmamiProvider
           websiteId={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-          hostUrl={env.NEXT_PUBLIC_UMAMI_HOST_URL}
+          src={`${env.NEXT_PUBLIC_UMAMI_HOST_URL}/script.js`}
         />
       </head>
       <body
