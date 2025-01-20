@@ -46,7 +46,7 @@ function Sidebar({
   const buttonDisabled = side === "start" ? _currentThesisId <= 1 : false;
 
   return (
-    <div
+    <nav
       data-side={side}
       className={cn(
         "shrink-0 max-w-48 flex flex-col sticky top-14 h-[calc(100svh-6rem)]",
@@ -84,6 +84,6 @@ function Sidebar({
           {side === "end" && <ArrowRightIcon className="size-5 -mr-1.5" />}
         </LinkButton>
       )}
-    </div>
+    </nav>
   );
 }

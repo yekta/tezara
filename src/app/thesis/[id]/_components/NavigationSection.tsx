@@ -14,7 +14,7 @@ export default function NavigationSection({
   const buttonDisabled = currentThesisId <= 1;
 
   return (
-    <div
+    <nav
       className={cn(
         "w-full flex items-center justify-between gap-4",
         className
@@ -50,6 +50,6 @@ export default function NavigationSection({
         <p className="shrink min-w-0">Sonraki Tez</p>
         <ArrowRightIcon className="size-5 -mr-1.5" />
       </LinkButton>
-    </div>
+    </nav>
   );
 }
