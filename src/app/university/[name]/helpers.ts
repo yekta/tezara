@@ -42,7 +42,8 @@ async function getPageData({ name }: { name: string }) {
   ]);
 
   const keywords = new Set<string>();
-  const languages = new Set<string>();
+  const languages = new Map<string, number>();
+  const thesisTypes = new Map<string, number>();
   const subjects = new Map<string, number>();
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
@@ -59,7 +60,12 @@ async function getPageData({ name }: { name: string }) {
       });
     }
     if (hit.language) {
-      languages.add(hit.language);
+      const count = languages.get(hit.language) || 0;
+      languages.set(hit.language, count + 1);
+    }
+    if (hit.thesis_type) {
+      const count = thesisTypes.get(hit.thesis_type) || 0;
+      thesisTypes.set(hit.thesis_type, count + 1);
     }
     const year = hit.year || "Bilinmiyor";
     const thesisType = hit.thesis_type || "Diğer";
@@ -85,7 +91,6 @@ async function getPageData({ name }: { name: string }) {
       allThesisTypes.add(thesisType);
     });
   });
-  const thesisTypes = Array.from(allThesisTypes);
 
   const thesesCountsByYearsChartData: { [key: string]: string }[] = Array.from(
     { length: maxYear - minYear + 1 },

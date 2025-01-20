@@ -41,11 +41,16 @@ export default function PopularSubjectsChart({
 
   return (
     <div className={cn("w-full flex flex-col gap-2", className)}>
-      <h2 className="font-bold px-4 text-xl">Popüler Konular</h2>
-      <div className="w-full px-1 md:px-3">
-        <div className="w-full px-2.5 py-2 rounded-lg border flex flex-col h-128 md:h-96 lg:h-96">
+      <h2 className="max-w-full font-bold px-4 text-xl">Popüler Konular</h2>
+      <div className="w-full sm:px-2">
+        <div className="w-full bg-foreground/4 sm:rounded-xl flex flex-col h-128 md:h-96 lg:h-96">
           <ChartContainer config={chartConfig}>
-            <BarChart accessibilityLayer data={chartData} layout="vertical">
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              layout="vertical"
+              margin={{ left: 16, right: 32, top: 12, bottom: 12 }}
+            >
               <YAxis
                 dataKey="keyword"
                 type="category"
@@ -68,7 +73,6 @@ export default function PopularSubjectsChart({
                 <LabelList
                   dataKey="count"
                   position="right"
-                  offset={8}
                   className="fill-foreground font-semibold"
                   fontSize={12}
                   formatter={(v: string) => v.toLocaleString()}

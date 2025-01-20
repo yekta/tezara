@@ -34,11 +34,17 @@ export default function ThesesCountsByYearsChart({
 
   return (
     <div className={cn("w-full flex flex-col gap-2", className)}>
-      <h2 className="font-bold px-4 text-xl">Yıllara Göre Tez Sayıları</h2>
-      <div className="w-full px-1 md:px-3">
-        <div className="w-full px-3 md:px-4 py-1.5 rounded-lg border flex flex-col">
+      <h2 className="max-w-full font-bold px-4 text-xl">
+        Yıllara Göre Tez Sayıları
+      </h2>
+      <div className="w-full sm:px-2">
+        <div className="w-full bg-foreground/5 sm:rounded-xl flex flex-col">
           <ChartContainer config={chartConfig} className="h-64">
-            <BarChart accessibilityLayer data={chartData}>
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              margin={{ left: 16, right: 16, top: 8, bottom: 8 }}
+            >
               <XAxis
                 dataKey="year"
                 tickLine={false}

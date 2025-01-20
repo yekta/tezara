@@ -1,5 +1,7 @@
+import LanguagesChart from "@/app/university/[name]/_components/languages-chart";
 import PopularSubjectsChart from "@/app/university/[name]/_components/popular-subjects-chart";
 import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";
+import ThesisTypesChart from "@/app/university/[name]/_components/thesis-types-chart";
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
 import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
 import { siteTitle } from "@/lib/constants";
@@ -62,15 +64,37 @@ export default async function Page({ params }: Props) {
         </div>
       </div>
       <ThesesCountsByYearsChart
-        className="mt-6"
+        className="mt-8"
         chartData={thesesCountsByYearsChartData}
-        dataKeys={thesisTypes}
+        dataKeys={Array.from(thesisTypes.keys())}
       />
       <PopularSubjectsChart
         className="mt-8"
         chartData={popularSubjectsChartData}
         dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
       />
+      <div className="w-full flex flex-col sm:flex-row sm:items-end">
+        <LanguagesChart
+          className="mt-8 w-full sm:w-1/2 md:w-1/2 lg:w-1/3"
+          chartData={Array.from(languages.entries()).map(
+            ([language, count]) => ({
+              language,
+              count,
+            })
+          )}
+          dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
+        />
+        <ThesisTypesChart
+          className="mt-8 w-full sm:w-1/2 md:w-1/2 lg:w-1/3"
+          chartData={Array.from(thesisTypes.entries()).map(
+            ([thesisType, count]) => ({
+              thesisType,
+              count,
+            })
+          )}
+          dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
+        />
+      </div>
       <div className="w-full flex flex-col mt-8">
         <h2 className="font-bold px-4 text-xl">Son 10 Tez</h2>
         <div className="w-full flex flex-col px-3 mt-3">
