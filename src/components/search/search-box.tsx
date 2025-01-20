@@ -6,7 +6,7 @@ import ThesisTypeIcon from "@/components/icons/thesis-type";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
 import { searchLikePageParams } from "@/components/search/constants/client";
 import { toggleInArray } from "@/components/search/helpers";
-import MultiSelectFormItem from "@/components/search/multi-select-form-item";
+import MultiSelectCombobox from "@/components/search/multi-select-combobox";
 import { useSearchResults } from "@/components/search/search-results-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -504,7 +504,7 @@ export default function SearchBox({
               </Select>
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
-              <MultiSelectFormItem
+              <MultiSelectCombobox
                 label="Üniversite"
                 className="w-full"
                 Icon={LandmarkIcon}
@@ -539,7 +539,7 @@ export default function SearchBox({
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
-              <MultiSelectFormItem
+              <MultiSelectCombobox
                 label="Tez Türü"
                 className="w-full"
                 Icon={ScrollTextIcon}
@@ -575,7 +575,7 @@ export default function SearchBox({
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
-              <MultiSelectFormItem
+              <MultiSelectCombobox
                 label="Dil"
                 className="w-full"
                 Icon={GlobeIcon}
@@ -612,7 +612,7 @@ export default function SearchBox({
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
-              <MultiSelectFormItem
+              <MultiSelectCombobox
                 commandFilter={() => 1}
                 label="Yazar"
                 className="w-full"
@@ -622,6 +622,12 @@ export default function SearchBox({
                 isAsync
                 isPending={isPendingAuthors}
                 isError={isErrorAuthors}
+                hasNext={
+                  !isPendingAuthors &&
+                  !isErrorAuthors &&
+                  authorOptions.totalPages > 1
+                }
+                toLoadMoreText={"Daha fazlası için arama yap"}
                 items={
                   authorOptions
                     ? authorOptions?.hits.map((i) => ({
@@ -659,7 +665,7 @@ export default function SearchBox({
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
-              <MultiSelectFormItem
+              <MultiSelectCombobox
                 commandFilter={() => 1}
                 label="Danışman"
                 className="w-full"
@@ -669,6 +675,12 @@ export default function SearchBox({
                 isAsync
                 isPending={isPendingAdvisors}
                 isError={isErrorAdvisors}
+                hasNext={
+                  !isPendingAdvisors &&
+                  !isErrorAdvisors &&
+                  advisorOptions.totalPages > 1
+                }
+                toLoadMoreText={"Daha fazlası için arama yap"}
                 items={
                   advisorOptions
                     ? advisorOptions?.hits.map((i) => ({

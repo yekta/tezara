@@ -52,10 +52,12 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <UmamiProvider
-          websiteId={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-          src={`${env.NEXT_PUBLIC_UMAMI_HOST_URL}/script.js`}
-        />
+        {env.NEXT_PUBLIC_SITE_URL.includes("localhost") ? null : (
+          <UmamiProvider
+            websiteId={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            src={`${env.NEXT_PUBLIC_UMAMI_HOST_URL}/script.js`}
+          />
+        )}
       </head>
       <body
         className={`${sans.variable} ${mono.variable} bg-background text-foreground antialiased break-words`}

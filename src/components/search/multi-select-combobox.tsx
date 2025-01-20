@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/components/ui/utils";
-import { CheckIcon, ChevronDownIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  SearchIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { ComponentType, ReactNode, useRef } from "react";
 
 type Props = {
@@ -45,11 +50,13 @@ type Props = {
   isAsync?: boolean;
   isPending?: boolean;
   isError?: boolean;
+  hasNext?: boolean;
+  toLoadMoreText?: string;
 };
 
 const clearButtonText = "Temizle";
 
-export default function MultiSelectFormItem({
+export default function MultiSelectCombobox({
   items,
   isItemSelected,
   onSelect,
@@ -70,6 +77,8 @@ export default function MultiSelectFormItem({
   isAsync = false,
   isPending = false,
   isError = false,
+  hasNext = false,
+  toLoadMoreText,
 }: Props) {
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollId = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -120,10 +129,15 @@ export default function MultiSelectFormItem({
             <ScrollArea viewportRef={listRef}>
               <CommandList>
                 {(!isAsync || (isAsync && !isPending && !isError)) && (
-                  <CommandEmpty>{commandEmptyText}</CommandEmpty>
+                  <CommandEmpty className="text-muted-foreground text-sm font-medium text-center px-4 py-6">
+                    <div className="w-full flex flex-col items-center justify-center gap-0.5">
+                      <SearchIcon className="size-6" />
+                      {commandEmptyText}
+                    </div>
+                  </CommandEmpty>
                 )}
                 {isAsync && isError && (
-                  <CommandEmpty className="text-destructive font-semibold text-center px-4 py-6">
+                  <CommandEmpty className="text-destructive text-sm font-semibold text-center px-4 py-6">
                     <div className="w-full flex flex-col items-center justify-center gap-0.5">
                       <TriangleAlertIcon className="size-6" />
                       {commandErrorText}
@@ -191,6 +205,14 @@ export default function MultiSelectFormItem({
                     ))}
                 </CommandGroup>
               </CommandList>
+              {hasNext && toLoadMoreText && (
+                <div className="w-full border-t text-center flex items-center justify-center px-4 py-3 gap-1.5 text-muted-foreground text-sm font-medium">
+                  <SearchIcon className="size-4 shrink-0" />
+                  <p className="text-center shrink min-w-0 text-balance">
+                    {toLoadMoreText}
+                  </p>
+                </div>
+              )}
             </ScrollArea>
           </Command>
         </PopoverContent>
