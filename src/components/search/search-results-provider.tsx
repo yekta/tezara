@@ -7,6 +7,7 @@ import {
   PAGE_DEFAULT,
 } from "@/components/search/constants/shared";
 import { getSearchThesesQueryKey } from "@/components/search/helpers";
+import { useEffectAfterMount } from "@/lib/hooks/use-effect-after-mount";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";
 import {
@@ -16,7 +17,7 @@ import {
 } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
-import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 
 type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
   bulkDownload: () => Promise<TSearchThesesResult>;
@@ -65,13 +66,6 @@ export const SearchResultsProvider: React.FC<{
     "page",
     searchLikePageParams["page"]
   );
-
-  useEffect(() => {
-    if (pageQP === PAGE_DEFAULT) return;
-    setPageQP(PAGE_DEFAULT);
-    // We intentionally omit pageQP to prevent infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, languages, universities, thesisTypes, yearGteQP, yearLteQP]);
 
   const queryKey = getSearchThesesQueryKey({
     query,
@@ -152,6 +146,13 @@ export const SearchResultsProvider: React.FC<{
 
   const firstPage = 1;
   const lastPage = totalPages || 1;
+
+  useEffectAfterMount(() => {
+    if (pageQP === PAGE_DEFAULT) return;
+    setPageQP(PAGE_DEFAULT);
+    // We intentionally omit pageQP to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, languages, universities, thesisTypes, yearGteQP, yearLteQP]);
 
   return (
     <SearchResultsContext.Provider
