@@ -72,6 +72,11 @@ type Props = {
 
 const clearButtonText = "Temizle";
 
+const optionsPlaceholder = Array.from({ length: 20 }).map((_, i) => ({
+  label: `Yükleniyor ${i + 1}`,
+  value: `Yükleniyor ${i + 1}`,
+}));
+
 export default function SearchBox({
   languages,
   universities,
@@ -158,7 +163,13 @@ export default function SearchBox({
     isError: isErrorAdvisors,
   } = useQuery({
     queryKey: ["advisors", queryAdvisors ? queryAdvisors : undefined],
-    queryFn: () => searchAdvisors({ q: queryAdvisors, client: meili }),
+    queryFn: () =>
+      searchAdvisors({
+        q: queryAdvisors,
+        page: 1,
+        sort: undefined,
+        client: meili,
+      }),
   });
 
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
@@ -433,8 +444,6 @@ export default function SearchBox({
                             setYearGteQP(year);
                           }
                           field.onChange(year);
-                          console.log("triggered", year);
-                          console.log(form.getValues("yearGte"));
                         }}
                       >
                         <FormControl>
@@ -683,10 +692,7 @@ export default function SearchBox({
                               label: i.name,
                               value: i.name,
                             }))
-                          : Array.from({ length: 10 }).map((_, i) => ({
-                              label: `Yükleniyor ${i + 1}`,
-                              value: `Yükleniyor ${i + 1}`,
-                            }))
+                          : optionsPlaceholder
                       }
                       commandButtonText={
                         <div className="flex-1 min-w-0 flex items-center">

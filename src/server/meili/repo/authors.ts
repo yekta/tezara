@@ -1,10 +1,10 @@
 import { PAGE_DEFAULT } from "@/components/search/constants/shared";
-import { TAdvisor } from "@/server/meili/types";
+import { TAuthor } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
-const indexName = "advisors";
+const indexName = "authors";
 
-export async function searchAdvisors({
+export async function searchAuthors({
   q,
   page = PAGE_DEFAULT,
   sort = ["name:asc"],
@@ -15,7 +15,7 @@ export async function searchAdvisors({
   sort: string[] | undefined;
   client: MeiliSearch;
 }) {
-  const index = client.index<TAdvisor>(indexName);
+  const index = client.index<TAuthor>(indexName);
 
   const result = await index.search(q, {
     page,
@@ -26,4 +26,4 @@ export async function searchAdvisors({
   return result;
 }
 
-export type TSearchAdvisorsResult = Awaited<ReturnType<typeof searchAdvisors>>;
+export type TSearchAuthorsResult = Awaited<ReturnType<typeof searchAuthors>>;

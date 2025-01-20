@@ -5,6 +5,7 @@ import SearchBox from "@/components/search/search-box";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
+import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
 import { meili } from "@/server/meili/constants-client";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getLanguages } from "@/server/meili/repo/language";
@@ -67,6 +68,7 @@ export default async function Page({ searchParams }: Props) {
           client: meiliAdmin,
         }),
     }),
+    prefetchAdvisors({ queryClient }),
   ]);
 
   return (

@@ -44,6 +44,11 @@ export type TAdvisor = {
   name: string;
 };
 
+export type TAuthor = {
+  id: string;
+  name: string;
+};
+
 export type TLanguage = {
   id: string;
   name: string;
