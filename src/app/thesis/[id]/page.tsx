@@ -246,7 +246,8 @@ export default async function Page({ params }: Props) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const notFoundTitle = `Tez Bulunamadı | ${siteTitle}`;
+  const titleSuffix = `Tez | ${siteTitle}`
+  const notFoundTitle = `Tez Bulunamadı | ${titleSuffix}`;
   const notFoundDescription = `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`;
   const notFoundMeta: Metadata = {
     title: notFoundTitle,
@@ -272,7 +273,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${
     thesis.title_original || thesis.title_translated || `Tez ${thesis.id}`
-  } | ${siteTitle}`;
+  } | ${titleSuffix}`;
   const description = truncateDescription(
     thesis.abstract_original ||
       thesis.abstract_translated ||
