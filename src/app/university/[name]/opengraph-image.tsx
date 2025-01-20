@@ -56,7 +56,7 @@ export default async function Image({ params }: Props) {
             height: 200,
             color: foreground,
             position: "absolute",
-            opacity: 0.2,
+            opacity: 0.15,
             right: 64,
             bottom: 64,
           }}
@@ -122,10 +122,12 @@ function Stat({
   value,
   label,
   Icon,
+  color = foregroundMuted,
 }: {
   value: number;
   label: string;
   Icon?: FC<ComponentProps<"svg">>;
+  color?: string;
 }) {
   return (
     <div
@@ -135,9 +137,9 @@ function Stat({
         gap: 8,
       }}
     >
-      {Icon && <Icon style={{ width: 40, height: 40 }} />}
+      {Icon && <Icon style={{ width: 40, height: 40, color }} />}
       <p style={{ lineHeight: 1.2, fontSize: 40 }}>
-        <span style={{ paddingRight: 8, fontWeight: 600 }}>
+        <span style={{ paddingRight: 8, fontWeight: 700, color }}>
           {value.toLocaleString("tr")}
         </span>
         <span

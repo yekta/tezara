@@ -11,7 +11,12 @@ import {
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { TThesisExtended } from "@/server/meili/types";
-import { CalendarIcon, LandmarkIcon, UserIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  LandmarkIcon,
+  PenToolIcon,
+  UserIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 type Props =
@@ -118,15 +123,20 @@ export default function ThesisSearchResultRow({
             : thesis.title_translated || noTranslatedTitle}
         </p>
         <div className="w-full flex mt-2">
-          <p
-            className="max-w-full min-w-0 text-base leading-snug
-            group-data-[placeholder]/row:text-transparent
-            group-data-[placeholder]/row:bg-muted-foreground
-            group-data-[placeholder]/row:animate-skeleton
-            group-data-[placeholder]/row:rounded-md"
-          >
-            {isPlaceholder ? "Yazar yükleniyor..." : thesis.author || noAuthor}
-          </p>
+          <div className="w-full flex justify-start items-center gap-1">
+            {!isPlaceholder && <PenToolIcon className="size-4 shrink-0" />}
+            <p
+              className="shrink min-w-0 text-base leading-snug
+              group-data-[placeholder]/row:text-transparent
+              group-data-[placeholder]/row:bg-muted-foreground
+              group-data-[placeholder]/row:animate-skeleton
+              group-data-[placeholder]/row:rounded-md"
+            >
+              {isPlaceholder
+                ? "Yazar yükleniyor..."
+                : thesis.author || noAuthor}
+            </p>
+          </div>
         </div>
         {/* Chips */}
         <div className="w-full flex flex-wrap mt-3 gap-1.5">
@@ -134,9 +144,9 @@ export default function ThesisSearchResultRow({
             className={cn(
               "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1",
               "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground",
-              getThesisTypeColorClassName(
-                isPlaceholder ? null : thesis.thesis_type
-              )
+              getThesisTypeColorClassName({
+                variant: isPlaceholder ? null : thesis.thesis_type,
+              })
             )}
           >
             {!isPlaceholder && (

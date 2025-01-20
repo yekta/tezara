@@ -8,5 +8,7 @@ export const useEffectAfterMount: typeof useEffect = (effect, deps) => {
     } else {
       hasMounted.current = true;
     }
+    // We intentionally omit to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 };

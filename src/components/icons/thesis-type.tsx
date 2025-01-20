@@ -23,61 +23,86 @@ type TVariant =
   | string
   | null;
 
-export function getThesisTypeColorClassName(
-  variant: TVariant,
-  variable?: boolean
-) {
+export function getThesisTypeColorClassName({
+  variant,
+  classType = "chip",
+}: {
+  variant: TVariant;
+  classType?: "variable" | "chip" | "faded-icon";
+}) {
   if (variant === "Yüksek Lisans") {
-    if (variable) return "hsl(var(--chart-1))";
+    if (classType === "variable") return "hsl(var(--chart-1))";
+    if (classType === "faded-icon") return "text-chart-1/25";
     return "text-chart-1 bg-chart-1/10 border-chart-1/16";
   }
   if (variant === "Doktora") {
-    if (variable) return "hsl(var(--chart-2))";
+    if (classType === "variable") return "hsl(var(--chart-2))";
+    if (classType === "faded-icon") return "text-chart-2/25";
     return "text-chart-2 bg-chart-2/10 border-chart-2/16";
   }
   if (variant === "Tıpta Uzmanlık") {
-    if (variable) return "hsl(var(--chart-3))";
+    if (classType === "variable") return "hsl(var(--chart-3))";
+    if (classType === "faded-icon") return "text-chart-3/25";
     return "text-chart-3 bg-chart-3/10 border-chart-3/16";
   }
   if (variant === "Sanatta Yeterlik") {
-    if (variable) return "hsl(var(--chart-4))";
+    if (classType === "variable") return "hsl(var(--chart-4))";
+    if (classType === "faded-icon") return "text-chart-4/25";
     return "text-chart-4 bg-chart-4/10 border-chart-4/16";
   }
   if (variant === "Diş Hekimliği Uzmanlık") {
-    if (variable) return "hsl(var(--chart-5))";
+    if (classType === "variable") return "hsl(var(--chart-5))";
+    if (classType === "faded-icon") return "text-chart-5/25";
     return "text-chart-5 bg-chart-5/10 border-chart-5/16";
   }
   if (variant === "Tıpta Yan Dal Uzmanlık") {
-    if (variable) return "hsl(var(--chart-6))";
+    if (classType === "variable") return "hsl(var(--chart-6))";
+    if (classType === "faded-icon") return "text-chart-6/25";
     return "text-chart-6 bg-chart-6/10 border-chart-6/16";
   }
   if (variant === "Eczacılıkta Uzmanlık") {
-    if (variable) return "hsl(var(--chart-7))";
+    if (classType === "variable") return "hsl(var(--chart-7))";
+    if (classType === "faded-icon") return "text-chart-7/25";
     return "text-chart-7 bg-chart-7/10 border-chart-7/16";
   }
-  if (variable) return "hsl(var(--foreground))";
+
+  if (classType === "variable") return "hsl(var(--foreground))";
+  if (classType === "faded-icon") return "text-foreground/25";
   return "text-foreground bg-foreground/8 border-foreground/12";
 }
 
 export default function ThesisTypeIcon({
   className,
   variant,
+  style,
 }: ComponentProps<"svg"> & { variant: TVariant }) {
   if (variant === "Yüksek Lisans") {
-    return <GraduationCapIcon className={cn(defaultClassName, className)} />;
+    return (
+      <GraduationCapIcon
+        style={style}
+        className={cn(defaultClassName, className)}
+      />
+    );
   }
   if (variant === "Doktora") {
-    return <TrophyIcon className={cn(defaultClassName, className)} />;
+    return (
+      <TrophyIcon style={style} className={cn(defaultClassName, className)} />
+    );
   }
   if (variant === "Tıpta Uzmanlık") {
-    return <SyringeIcon className={cn(defaultClassName, className)} />;
+    return (
+      <SyringeIcon style={style} className={cn(defaultClassName, className)} />
+    );
   }
   if (variant === "Sanatta Yeterlik") {
-    return <BrushIcon className={cn(defaultClassName, className)} />;
+    return (
+      <BrushIcon style={style} className={cn(defaultClassName, className)} />
+    );
   }
   if (variant === "Diş Hekimliği Uzmanlık") {
     return (
       <svg
+        style={style}
         className={cn(defaultClassName, className)}
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -95,10 +120,19 @@ export default function ThesisTypeIcon({
     );
   }
   if (variant === "Tıpta Yan Dal Uzmanlık") {
-    return <TestTubeDiagonalIcon className={cn(defaultClassName, className)} />;
+    return (
+      <TestTubeDiagonalIcon
+        style={style}
+        className={cn(defaultClassName, className)}
+      />
+    );
   }
   if (variant === "Eczacılıkta Uzmanlık") {
-    return <PillIcon className={cn(defaultClassName, className)} />;
+    return (
+      <PillIcon style={style} className={cn(defaultClassName, className)} />
+    );
   }
-  return <PenToolIcon className={cn(defaultClassName, className)} />;
+  return (
+    <PenToolIcon style={style} className={cn(defaultClassName, className)} />
+  );
 }

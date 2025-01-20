@@ -27,7 +27,10 @@ export default function ThesesCountsByYearsChart({
 
   dataKeys.forEach((dataKey) => {
     chartConfig[dataKey] = {
-      color: getThesisTypeColorClassName(dataKey, true),
+      color: getThesisTypeColorClassName({
+        variant: dataKey,
+        classType: "variable",
+      }),
       label: dataKey,
     };
   });

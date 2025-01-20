@@ -29,7 +29,10 @@ export default function ThesisTypesChart({
 
   chartData = chartData.map((data) => ({
     ...data,
-    fill: getThesisTypeColorClassName(data.thesisType, true),
+    fill: getThesisTypeColorClassName({
+      variant: data.thesisType,
+      classType: "variable",
+    }),
   }));
 
   dataKeys.forEach((dataKey, index) => {
