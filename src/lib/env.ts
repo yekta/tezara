@@ -25,6 +25,7 @@ export const env = createEnv({
     NEXT_PUBLIC_MEILI_CLIENT_KEY: z.string(),
     NEXT_PUBLIC_SITE_URL: z.string(),
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string(),
+    NEXT_PUBLIC_UMAMI_HOST_URL: z.string().url(),
   },
 
   /**
@@ -37,6 +38,7 @@ export const env = createEnv({
     NEXT_PUBLIC_MEILI_URL: process.env.NEXT_PUBLIC_MEILI_URL,
     NEXT_PUBLIC_MEILI_CLIENT_KEY: process.env.NEXT_PUBLIC_MEILI_CLIENT_KEY,
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
+    NEXT_PUBLIC_UMAMI_HOST_URL: process.env.NEXT_PUBLIC_UMAMI_HOST_URL,
     MEILI_ADMIN_KEY: process.env.MEILI_ADMIN_KEY,
     MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
     NODE_ENV: process.env.NODE_ENV,
