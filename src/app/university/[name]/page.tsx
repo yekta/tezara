@@ -64,12 +64,12 @@ export default async function Page({ params }: Props) {
         </div>
       </div>
       <ThesesCountsByYearsChart
-        className="mt-8"
+        className="pt-8"
         chartData={thesesCountsByYearsChartData}
         dataKeys={Array.from(thesisTypes.keys())}
       />
       <PopularSubjectsChart
-        className="mt-8"
+        className="pt-8"
         chartData={popularSubjectsChartData}
         dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
       />
@@ -95,9 +95,9 @@ export default async function Page({ params }: Props) {
           dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
         />
       </div>
-      <div className="w-full flex flex-col mt-8">
+      <div className="w-full flex flex-col pt-8">
         <h2 className="font-bold px-4 text-xl">Son 10 Tez</h2>
-        <div className="w-full flex flex-col px-3 mt-3">
+        <div className="w-full flex flex-col px-3 pt-4">
           {lastThesesRes.map((t) => (
             <ThesisSearchResultRow
               className="first-of-type:border-t last-of-type:border-b"

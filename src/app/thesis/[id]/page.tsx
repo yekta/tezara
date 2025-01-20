@@ -228,10 +228,10 @@ export default async function Page({ params }: Props) {
       {similarTheses && (
         <div id="similar_theses_section" className="w-full flex flex-col">
           <h3 className="font-bold text-xl">Benzer Tezler</h3>
-          <div className="w-full flex flex-col mt-4">
+          <div className="w-full flex flex-col pt-4">
             {similarTheses.map((t) => (
               <ThesisSearchResultRow
-                className="last-of-type:border-b"
+                className="first-of-type:border-t last-of-type:border-b"
                 key={t.id}
                 thesis={t}
               />
