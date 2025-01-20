@@ -45,7 +45,7 @@ export default function LanguagesChart({
         <div className="w-full flex flex-col">
           <ChartContainer
             config={chartConfig}
-            className="w-full bg-foreground/8 sm:rounded-xl aspect-square"
+            className="w-full bg-background-hover sm:rounded-xl aspect-square"
           >
             <PieChart>
               <ChartTooltip

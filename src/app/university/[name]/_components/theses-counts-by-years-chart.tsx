@@ -38,7 +38,7 @@ export default function ThesesCountsByYearsChart({
         Yıllara Göre Tez Sayıları
       </h2>
       <div className="w-full sm:px-2">
-        <div className="w-full bg-foreground/5 sm:rounded-xl flex flex-col">
+        <div className="w-full bg-background-hover sm:rounded-xl flex flex-col">
           <ChartContainer config={chartConfig} className="h-64">
             <BarChart
               accessibilityLayer
@@ -53,15 +53,16 @@ export default function ThesesCountsByYearsChart({
                 tickFormatter={(value) => value}
               />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {dataKeys.map((dataKey) => (
-                <Bar
-                  key={dataKey}
-                  dataKey={dataKey}
-                  fill={chartConfig[dataKey].color}
-                  radius={0}
-                  stackId="a"
-                ></Bar>
-              ))}
+              {dataKeys.map((dataKey) => {
+                return (
+                  <Bar
+                    key={dataKey}
+                    dataKey={dataKey}
+                    fill={chartConfig[dataKey].color}
+                    stackId="a"
+                  ></Bar>
+                );
+              })}
             </BarChart>
           </ChartContainer>
         </div>

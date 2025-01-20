@@ -48,7 +48,7 @@ export default async function Page({ params }: Props) {
           <h1 className="max-w-full font-bold text-2xl text-balance leading-tight pr-1">
             {parsedName}
           </h1>
-          <p className="bg-foreground/10 border border-foreground/20 rounded-full font-medium text-sm px-2 py-0.25">
+          <p className="bg-foreground/10 rounded-full font-semibold text-sm px-2.5 py-0.5">
             {minYear}-{maxYear}
           </p>
         </div>

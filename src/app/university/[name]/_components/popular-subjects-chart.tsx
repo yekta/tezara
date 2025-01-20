@@ -43,7 +43,7 @@ export default function PopularSubjectsChart({
     <div className={cn("w-full flex flex-col gap-2", className)}>
       <h2 className="max-w-full font-bold px-4 text-xl">Popüler Konular</h2>
       <div className="w-full sm:px-2">
-        <div className="w-full bg-foreground/4 sm:rounded-xl flex flex-col h-128 md:h-96 lg:h-96">
+        <div className="w-full bg-background-hover sm:rounded-xl flex flex-col h-128 md:h-96 lg:h-96">
           <ChartContainer config={chartConfig}>
             <BarChart
               accessibilityLayer
