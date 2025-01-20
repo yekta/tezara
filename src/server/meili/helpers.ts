@@ -4,7 +4,7 @@ export function boostedStringSort<T extends Record<string, unknown>>({
   field,
 }: {
   boost?: string[];
-  hinder?: string[];
+  hinder?: string[] | ((i: string) => boolean)[];
   field: keyof T;
 }) {
   return (a: T, b: T) => {
@@ -23,8 +23,16 @@ export function boostedStringSort<T extends Record<string, unknown>>({
     }
 
     if (hinder) {
-      const hIdxA = hinder.indexOf(String(a[field]));
-      const hIdxB = hinder.indexOf(String(b[field]));
+      let hIdxA = undefined;
+      let hIdxB = undefined;
+      if (hinder.every((h) => typeof h === "function")) {
+        hIdxA = hinder.findIndex((h) => h(String(a[field])));
+        hIdxB = hinder.findIndex((h) => h(String(b[field])));
+        return hIdxA - hIdxB;
+      } else {
+        hIdxA = hinder.indexOf(String(a[field]));
+        hIdxB = hinder.indexOf(String(b[field]));
+      }
       if (hIdxA !== -1 && hIdxB !== -1) {
         return hIdxA - hIdxB;
       }

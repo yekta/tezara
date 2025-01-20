@@ -54,6 +54,7 @@ export const SearchResultsProvider: React.FC<{
     "advisors",
     searchLikePageParams["advisors"]
   );
+  const [authors] = useQueryState("authors", searchLikePageParams["advisors"]);
   const [thesisTypes] = useQueryState(
     "thesis_types",
     searchLikePageParams["thesis_types"]
@@ -76,6 +77,7 @@ export const SearchResultsProvider: React.FC<{
     languages,
     universities,
     advisors,
+    authors,
     thesis_types: thesisTypes,
     year_gte: yearGteQP,
     year_lte: yearLteQP,
@@ -90,6 +92,7 @@ export const SearchResultsProvider: React.FC<{
         languages,
         universities,
         advisors,
+        authors,
         thesis_types: thesisTypes,
         year_gte: yearGteQP,
         year_lte: yearLteQP,
@@ -108,6 +111,7 @@ export const SearchResultsProvider: React.FC<{
       languages,
       universities,
       advisors,
+      authors,
       thesis_types: thesisTypes,
       year_gte: yearGteQP,
       year_lte: yearLteQP,

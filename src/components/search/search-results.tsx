@@ -165,10 +165,12 @@ export default function SearchResults({}: Props) {
   const metricsPendingClassName =
     "group-data-[pending]:text-transparent group-data-[pending]:animate-skeleton group-data-[pending]:bg-foreground group-data-[pending]:rounded-sm";
 
+  const isHardError = !data && !isPending && isLoadingError;
+
   return (
     <div
       data-pending={isPending ? true : undefined}
-      className="w-full flex-1 flex flex-col pt-6 md:pt-4 group"
+      className="w-full flex-1 flex flex-col pt-6 group"
     >
       {((!data && isPending) || (data && data.hits)) && (
         <div className="w-full flex flex-wrap items-start gap-1.5">
@@ -239,7 +241,9 @@ export default function SearchResults({}: Props) {
       <p className="max-w-full py-3.5 px-1.5 font-semibold text-sm text-muted-foreground text-balance">
         <span>Eşleşen: </span>
         {!data ? (
-          <span className={metricsPendingClassName}>900,000</span>
+          <span className={metricsPendingClassName}>
+            {isHardError ? "0" : "900,000"}
+          </span>
         ) : (
           <span className="text-foreground">
             {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
@@ -248,7 +252,9 @@ export default function SearchResults({}: Props) {
         <span className="text-foreground/30 px-[0.75ch]">|</span>
         <span>Gösterilen: </span>
         {!data ? (
-          <span className={metricsPendingClassName}>10</span>
+          <span className={metricsPendingClassName}>
+            {isHardError ? 0 : 10}
+          </span>
         ) : (
           <span className="text-foreground">
             {data.hits.length.toLocaleString()}
@@ -256,7 +262,13 @@ export default function SearchResults({}: Props) {
         )}
         <span className="text-foreground/30 px-[0.75ch]">|</span>
         {!data ? (
-          <span className={metricsPendingClassName}>0.001 sn.</span>
+          <span
+            className={
+              isHardError ? "text-destructive" : metricsPendingClassName
+            }
+          >
+            {isHardError ? "Hata" : "0.001 sn."}
+          </span>
         ) : (
           <span className="text-foreground">
             {(data.processingTimeMs / 1000).toLocaleString()} sn.
@@ -265,7 +277,7 @@ export default function SearchResults({}: Props) {
       </p>
       <div className="w-full flex flex-col flex-1">
         <PaginationBar />
-        {!data && !isPending && isLoadingError && (
+        {isHardError && (
           <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">

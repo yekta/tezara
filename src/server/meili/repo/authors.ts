@@ -1,4 +1,5 @@
 import { PAGE_DEFAULT } from "@/components/search/constants/shared";
+import { boostedStringSort } from "@/server/meili/helpers";
 import { TAuthor } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
@@ -22,7 +23,16 @@ export async function searchAuthors({
     hitsPerPage: 50,
     sort,
   });
-  result.hits = result.hits.filter((h) => !h.name.includes("- -"));
+  result.hits = result.hits.sort(
+    boostedStringSort({
+      field: "name",
+      hinder: [
+        (i) => i.startsWith("("),
+        (i) => /^\d/.test(i),
+        (i) => i.startsWith("<"),
+      ],
+    })
+  );
   return result;
 }
 

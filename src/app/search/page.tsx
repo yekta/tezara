@@ -6,6 +6,7 @@ import { searchPageSearchParamsCache } from "@/components/search/search-query-pa
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
 import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
+import { prefetchAuthors } from "@/lib/queries/prefetch-authors";
 import { meili } from "@/server/meili/constants-client";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getLanguages } from "@/server/meili/repo/language";
@@ -28,10 +29,11 @@ export default async function Page({ searchParams }: Props) {
     languages,
     thesis_types,
     universities,
+    authors,
+    advisors,
     year_gte,
     year_lte,
     page,
-    advisors,
   } = await loadSearchLikePageSearchParams(searchParams);
 
   const queryClient = getQueryClientServer();
@@ -39,6 +41,7 @@ export default async function Page({ searchParams }: Props) {
     q,
     languages,
     universities,
+    authors,
     advisors,
     thesis_types,
     year_gte,
@@ -59,6 +62,7 @@ export default async function Page({ searchParams }: Props) {
           languages,
           universities,
           advisors,
+          authors,
           thesis_types: thesis_types,
           year_gte: year_gte,
           year_lte: year_lte,
@@ -69,6 +73,7 @@ export default async function Page({ searchParams }: Props) {
         }),
     }),
     prefetchAdvisors({ queryClient }),
+    prefetchAuthors({ queryClient }),
   ]);
 
   return (

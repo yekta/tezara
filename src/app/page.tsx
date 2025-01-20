@@ -2,6 +2,7 @@ import Logo from "@/components/logo/logo";
 import SearchBox from "@/components/search/search-box";
 import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
+import { prefetchAuthors } from "@/lib/queries/prefetch-authors";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { getLanguages } from "@/server/meili/repo/language";
@@ -35,6 +36,7 @@ export default async function Home({ searchParams }: Props) {
         }),
     }),
     prefetchAdvisors({ queryClient }),
+    prefetchAuthors({ queryClient }),
   ]);
 
   return (

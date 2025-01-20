@@ -27,6 +27,7 @@ import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
+import { searchAuthors } from "@/server/meili/repo/authors";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
@@ -39,6 +40,7 @@ import {
   GlobeIcon,
   LandmarkIcon,
   LoaderIcon,
+  PenToolIcon,
   ScrollTextIcon,
   SearchIcon,
   SettingsIcon,
@@ -57,6 +59,7 @@ const SearchThesesSchema = z.object({
   languages: z.array(z.string()),
   universities: z.array(z.string()),
   advisors: z.array(z.string()),
+  authors: z.array(z.string()),
   thesisTypes: z.array(z.string()),
   yearGte: z.number().or(z.null()),
   yearLte: z.number().or(z.null()),
@@ -139,6 +142,10 @@ export default function SearchBox({
     "advisors",
     searchLikePageParams["advisors"]
   );
+  const [authorsQP, setAuthorsQP] = useQueryState(
+    "authors",
+    searchLikePageParams["authors"]
+  );
   const [thesisTypesQP, setThesisTypesQP] = useQueryState(
     "thesis_types",
     searchLikePageParams["thesis_types"]
@@ -172,6 +179,22 @@ export default function SearchBox({
       }),
   });
 
+  const [queryAuthors, setQueryAuthors] = useState("");
+  const {
+    data: authorOptions,
+    isPending: isPendingAuthors,
+    isError: isErrorAuthors,
+  } = useQuery({
+    queryKey: ["authors", queryAuthors ? queryAuthors : undefined],
+    queryFn: () =>
+      searchAuthors({
+        q: queryAuthors,
+        page: 1,
+        sort: undefined,
+        client: meili,
+      }),
+  });
+
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
     resolver: zodResolver(SearchThesesSchema),
     defaultValues: {
@@ -179,6 +202,7 @@ export default function SearchBox({
       languages: languagesQP,
       universities: universitiesQP,
       advisors: advisorsQP,
+      authors: authorsQP,
       thesisTypes: thesisTypesQP,
       yearLte: yearLteQP,
       yearGte: yearGteQP,
@@ -192,12 +216,14 @@ export default function SearchBox({
   const selectedYearLte = form.watch("yearLte");
   const selectedYearGte = form.watch("yearGte");
   const selectedAdvisors = form.watch("advisors");
+  const selectedAuthors = form.watch("authors");
 
   const totalSelectedFilters = useMemo(() => {
     let total = 0;
     if (selectedLanguages) total += selectedLanguages.length;
     if (selectedUniversities) total += selectedUniversities.length;
     if (selectedAdvisors) total += selectedAdvisors.length;
+    if (selectedAuthors) total += selectedAuthors.length;
     if (selectedThesisTypes) total += selectedThesisTypes.length;
     if (selectedYearLte !== null && selectedYearLte !== undefined) total += 1;
     if (selectedYearGte !== null && selectedYearGte !== undefined) total += 1;
@@ -206,6 +232,7 @@ export default function SearchBox({
     selectedLanguages,
     selectedUniversities,
     selectedAdvisors,
+    selectedAuthors,
     selectedThesisTypes,
     selectedYearGte,
     selectedYearLte,
@@ -240,6 +267,7 @@ export default function SearchBox({
       setLanguagesQP(data.languages);
       setUniversitiesQP(data.universities);
       setAdvisorsQP(data.advisors);
+      setAuthorsQP(data.authors);
       setThesisTypesQP(data.thesisTypes);
       setYearGteQP(data.yearGte && data.yearGte > 0 ? data.yearGte : null);
       setYearLteQP(data.yearLte && data.yearLte > 0 ? data.yearLte : null);
@@ -260,6 +288,11 @@ export default function SearchBox({
   function clearAdvisors() {
     form.setValue("advisors", []);
     setAdvisorsQP([]);
+  }
+
+  function clearAuthors() {
+    form.setValue("authors", []);
+    setAuthorsQP([]);
   }
 
   function clearLanguages() {
@@ -285,6 +318,7 @@ export default function SearchBox({
   function clearAllFilters() {
     clearUniversities();
     clearAdvisors();
+    clearAuthors();
     clearLanguages();
     clearThesisTypes();
     clearYearGte();
@@ -675,6 +709,64 @@ export default function SearchBox({
               <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
                 <FormField
                   control={form.control}
+                  name="authors"
+                  render={({}) => (
+                    <MultiSelectFormItem
+                      commandFilter={() => 1}
+                      label="Yazar"
+                      className="w-full"
+                      Icon={PenToolIcon}
+                      commandInputValue={queryAuthors}
+                      commandInputOnValueChange={(v) => setQueryAuthors(v)}
+                      isAsync
+                      isPending={isPendingAuthors}
+                      isError={isErrorAuthors}
+                      items={
+                        authorOptions
+                          ? authorOptions?.hits.map((i) => ({
+                              label: i.name,
+                              value: i.name,
+                            }))
+                          : optionsPlaceholder
+                      }
+                      commandButtonText={
+                        <div className="flex-1 min-w-0 flex items-center">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                            Yazar
+                          </p>
+                          {selectedAuthors && selectedAuthors.length > 0 && (
+                            <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                              {selectedAuthors.length}
+                            </p>
+                          )}
+                        </div>
+                      }
+                      commandInputPlaceholder="Yazar ara..."
+                      commandEmptyText="Eşleşen yok"
+                      commandErrorText="Bir şeyler ters gitti"
+                      isItemSelected={(v) =>
+                        selectedAuthors?.includes(v) || false
+                      }
+                      onSelectClear={
+                        selectedAuthors && selectedAuthors.length > 0
+                          ? clearAuthors
+                          : undefined
+                      }
+                      onSelect={(v) => {
+                        const newValue = toggleInArray(selectedAuthors, v);
+                        if (authorsQP.join(",") !== newValue.join(",")) {
+                          setAuthorsQP(newValue);
+                        }
+                        form.setValue("authors", newValue);
+                      }}
+                      clearLength={selectedAuthors?.length}
+                    />
+                  )}
+                />
+              </div>
+              <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
+                <FormField
+                  control={form.control}
                   name="advisors"
                   render={({}) => (
                     <MultiSelectFormItem
@@ -682,6 +774,7 @@ export default function SearchBox({
                       label="Danışman"
                       className="w-full"
                       Icon={UserIcon}
+                      commandInputValue={queryAdvisors}
                       commandInputOnValueChange={(v) => setQueryAdvisors(v)}
                       isAsync
                       isPending={isPendingAdvisors}
@@ -706,7 +799,6 @@ export default function SearchBox({
                           )}
                         </div>
                       }
-                      commandInputValue={queryAdvisors}
                       commandInputPlaceholder="Danışman ara..."
                       commandEmptyText="Eşleşen yok"
                       commandErrorText="Bir şeyler ters gitti"
