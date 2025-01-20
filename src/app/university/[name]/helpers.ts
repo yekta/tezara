@@ -32,7 +32,7 @@ async function getPageData({ name }: { name: string }) {
     searchTheses({
       hits_per_page: 10,
       page: 1,
-      sort: ["year:desc", "id:desc"],
+      sort: undefined,
       universities: [name],
       languages: undefined,
       advisors: undefined,

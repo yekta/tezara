@@ -177,7 +177,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: getTwitterMeta({
       title,
       description,
-      noImages: true,
     }),
   };
 }

@@ -2,12 +2,7 @@ import Footer from "@/components/navigation/footer";
 import Navbar from "@/components/navigation/navbar";
 import Providers from "@/components/providers/providers";
 import { Toaster } from "@/components/ui/sonner";
-import {
-  getPreviewUrl,
-  siteDescription,
-  siteTagline,
-  siteTitle,
-} from "@/lib/constants";
+import { siteDescription, siteTagline, siteTitle } from "@/lib/constants";
 import { env } from "@/lib/env";
 import {
   AlertCircleIcon,
@@ -17,10 +12,10 @@ import {
   XIcon,
 } from "lucide-react";
 import type { Metadata, Viewport } from "next";
+import UmamiProvider from "next-umami";
 import localFont from "next/font/local";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
-import UmamiProvider from "next-umami";
 
 const sans = localFont({
   src: "./fonts/DMSansVF.woff2",
@@ -42,28 +37,10 @@ export const metadata: Metadata = {
   title,
   description: siteDescription,
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
-  openGraph: {
-    images: [
-      {
-        url: getPreviewUrl("home"),
-        width: 1200,
-        height: 630,
-        alt: siteTitle,
-      },
-    ],
-  },
   twitter: {
     title,
     description: siteDescription,
     card: "summary_large_image",
-    images: [
-      {
-        url: getPreviewUrl("home"),
-        width: 1200,
-        height: 630,
-        alt: siteTitle,
-      },
-    ],
   },
 };
 

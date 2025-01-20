@@ -257,7 +257,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: getTwitterMeta({
       title: notFoundTitle,
       description: notFoundDescription,
-      noImages: true,
     }),
   };
 
@@ -288,7 +287,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: getTwitterMeta({
       title,
       description,
-      noImages: true,
     }),
   };
 }

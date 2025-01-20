@@ -1,3 +1,5 @@
+import PenToolIcon from "@/components/icons/pen-tool-icon";
+import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
 
 type Props = {
@@ -15,7 +17,7 @@ export const opengraphSize = {
 };
 export const opengraphContentType = "image/png";
 
-export default function DefaultOpenGraphImage({ logoSize = 220 }: Props) {
+export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
   return (
     <div
       style={{
@@ -28,11 +30,38 @@ export default function DefaultOpenGraphImage({ logoSize = 220 }: Props) {
         justifyContent: "center",
       }}
     >
+      <ScrollTextIcon
+        style={{
+          color: foreground,
+          opacity: 0.15,
+          width: 330,
+          height: 330,
+          position: "absolute",
+          left: -48,
+          top: -72,
+        }}
+        strokeWidth={1.5}
+      />
+      <PenToolIcon
+        style={{
+          color: foreground,
+          opacity: 0.15,
+          width: 320,
+          height: 320,
+          position: "absolute",
+          right: -40,
+          bottom: -56,
+          transform: "rotate(-5deg)",
+        }}
+        strokeWidth={1.5}
+      />
+
       <Logo
         variant="full"
         style={{
           width: logoSize,
           height: logoSize / logoAspectRatio,
+          marginTop: -34,
         }}
       />
     </div>

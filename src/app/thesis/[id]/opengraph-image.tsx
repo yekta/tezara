@@ -8,6 +8,8 @@ import DefaultOpenGraphImage, {
   opengraphContentType,
   opengraphSize,
 } from "@/components/default-opengraph-image";
+import PenTool from "@/components/icons/pen-tool-icon";
+import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
 import { truncateString } from "@/lib/helpers";
 import { ImageResponse } from "next/og";
@@ -86,7 +88,7 @@ export default async function Image({ params }: Props) {
             fontSize: 56,
             width: "100%",
             lineHeight: 1.15,
-            marginTop: 36,
+            marginTop: 40,
             fontWeight: 700,
           }}
         >
@@ -102,6 +104,7 @@ export default async function Image({ params }: Props) {
             display: "flex",
             width: "100%",
             flexDirection: "column",
+            marginTop: 8,
             gap: -20,
           }}
         >
@@ -121,50 +124,6 @@ export default async function Image({ params }: Props) {
       // @ts-expect-error - This is fine, they don't export the type so I can't set it
       fonts: await getOpengraphFonts(),
     }
-  );
-}
-
-function ScrollTextIcon({ style }: ComponentProps<"svg">) {
-  return (
-    <svg
-      style={style}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 12h-5" />
-      <path d="M15 8h-5" />
-      <path d="M19 17V5a2 2 0 0 0-2-2H4" />
-      <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" />
-    </svg>
-  );
-}
-
-function PenTool({ style }: ComponentProps<"svg">) {
-  return (
-    <svg
-      style={style}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z" />
-      <path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18" />
-      <path d="m2.3 2.3 7.286 7.286" />
-      <circle cx="11" cy="11" r="2" />
-    </svg>
   );
 }
 

@@ -44,7 +44,7 @@ export async function searchTheses({
   sort: string[] | undefined;
   hits_per_page: number | undefined;
   page: number | undefined;
-  attributes_to_retrieve?: string[];
+  attributes_to_retrieve?: (keyof TThesisExtended)[];
 }) {
   const index = client.index<TThesisExtended>(indexName);
   let filter = "";
@@ -121,7 +121,8 @@ export async function searchTheses({
     filter += `year <= ${year_lte}`;
   }
 
-  const _sort = sort && sort.length > 0 ? sort : !q ? ["year:desc"] : undefined;
+  const _sort =
+    sort && sort.length > 0 ? sort : !q ? ["year:desc", "id:desc"] : undefined;
 
   const result = await index.search(q, {
     filter: filter ?? undefined,

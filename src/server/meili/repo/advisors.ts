@@ -26,7 +26,10 @@ export async function searchAdvisors({
   result.hits = result.hits.sort(
     boostedStringSort({
       field: "name",
-      hinder: ["- -"],
+      hinder: [
+        (v: string) => v.startsWith("- -"),
+        (v: string) => v.startsWith("null"),
+      ],
     })
   );
   return result;
