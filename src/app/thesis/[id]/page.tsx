@@ -38,16 +38,17 @@ export default async function Page({ params }: Props) {
   try {
     similarTheses = (
       await searchTheses({
-        query: thesis.title_original || thesis.title_translated || undefined,
-        hitsPerPage: 6,
+        q: thesis.title_original || thesis.title_translated || undefined,
+        hits_per_page: 6,
         page: 1,
         languages: undefined,
-        thesisTypes: undefined,
+        thesis_types: undefined,
         universities: undefined,
+        advisors: undefined,
         sort: undefined,
-        yearGte: undefined,
-        yearLte: undefined,
-        attributesToRetrieve: undefined,
+        year_gte: undefined,
+        year_lte: undefined,
+        attributes_to_retrieve: undefined,
         client: meiliAdmin,
       })
     ).hits.filter((t) => t.id !== idNumber);
@@ -246,7 +247,7 @@ export default async function Page({ params }: Props) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const titleSuffix = `Tez | ${siteTitle}`
+  const titleSuffix = `Tez | ${siteTitle}`;
   const notFoundTitle = `Tez Bulunamadı | ${titleSuffix}`;
   const notFoundDescription = `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`;
   const notFoundMeta: Metadata = {
