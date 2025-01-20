@@ -8,7 +8,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -76,30 +75,28 @@ export default function MultiSelectFormItem({
   const scrollId = useRef<NodeJS.Timeout | undefined>(undefined);
 
   return (
-    <FormItem className={cn("w-full max-w-full flex flex-col", className)}>
-      <FormLabel className="sr-only">{label}</FormLabel>
+    <div className={cn("w-full max-w-full flex flex-col", className)}>
+      <p className="sr-only">{label}</p>
       <Popover>
         <PopoverTrigger asChild>
-          <FormControl>
-            <Button
-              variant="outline"
-              size="sm"
-              role="combobox"
-              className={cn("w-full justify-between rounded-lg px-3")}
-            >
-              <div className="flex shrink min-w-0 items-center gap-1.5">
-                {Icon && <Icon className="size-4 shrink-0 -ml-0.5" />}
-                {typeof commandButtonText === "string" ? (
-                  <p className="shrink min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
-                    {commandButtonText}
-                  </p>
-                ) : (
-                  commandButtonText
-                )}
-              </div>
-              <ChevronDownIcon className="size-4 shrink-0 opacity-50 -mr-1" />
-            </Button>
-          </FormControl>
+          <Button
+            variant="outline"
+            size="sm"
+            role="combobox"
+            className={cn("w-full justify-between rounded-lg px-3")}
+          >
+            <div className="flex shrink min-w-0 items-center gap-1.5">
+              {Icon && <Icon className="size-4 shrink-0 -ml-0.5" />}
+              {typeof commandButtonText === "string" ? (
+                <p className="shrink min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                  {commandButtonText}
+                </p>
+              ) : (
+                commandButtonText
+              )}
+            </div>
+            <ChevronDownIcon className="size-4 shrink-0 opacity-50 -mr-1" />
+          </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0">
           <Command
@@ -198,6 +195,6 @@ export default function MultiSelectFormItem({
           </Command>
         </PopoverContent>
       </Popover>
-    </FormItem>
+    </div>
   );
 }
