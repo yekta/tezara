@@ -276,7 +276,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = truncateDescription(
     thesis.abstract_original ||
       thesis.abstract_translated ||
-      "Bu tezin özeti bulunamadı."
+      `Tez detaylarını ${siteTitle} üzerinde incele.`
   );
 
   return {
