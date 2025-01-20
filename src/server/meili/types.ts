@@ -39,6 +39,11 @@ export type TUniversity = {
   name: string;
 };
 
+export type TAdvisor = {
+  id: string;
+  name: string;
+};
+
 export type TLanguage = {
   id: string;
   name: string;

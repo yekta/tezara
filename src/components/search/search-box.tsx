@@ -25,10 +25,13 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
+import { meili } from "@/server/meili/constants-client";
+import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import {
   CalendarArrowDownIcon,
@@ -44,7 +47,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
 import { z } from "zod";
@@ -101,9 +104,10 @@ export default function SearchBox({
     [thesisTypes]
   );
 
+  const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const searchResultsContext = useSearchResults();
-
   const searchParams = useSearchParams();
+
   const minYear = 1950;
   const maxYear = new Date().getFullYear();
   const yearOptions = useMemo(() => {
@@ -147,7 +151,15 @@ export default function SearchBox({
     searchLikePageParams["advanced"]
   );
 
-  const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
+  const [queryAdvisors, setQueryAdvisors] = useState("");
+  const {
+    data: advisorOptions,
+    isPending: isPendingAdvisors,
+    isError: isErrorAdvisors,
+  } = useQuery({
+    queryKey: ["advisors", queryAdvisors ? queryAdvisors : undefined],
+    queryFn: () => searchAdvisors({ q: queryAdvisors, client: meili }),
+  });
 
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
     resolver: zodResolver(SearchThesesSchema),
@@ -657,9 +669,25 @@ export default function SearchBox({
                   name="advisors"
                   render={({}) => (
                     <MultiSelectFormItem
+                      commandFilter={() => 1}
                       label="Danışman"
                       className="w-full"
                       Icon={UserIcon}
+                      commandInputOnValueChange={(v) => setQueryAdvisors(v)}
+                      isAsync
+                      isPending={isPendingAdvisors}
+                      isError={isErrorAdvisors}
+                      items={
+                        advisorOptions
+                          ? advisorOptions?.hits.map((i) => ({
+                              label: i.name,
+                              value: i.name,
+                            }))
+                          : Array.from({ length: 10 }).map((_, i) => ({
+                              label: `Yükleniyor ${i + 1}`,
+                              value: `Yükleniyor ${i + 1}`,
+                            }))
+                      }
                       commandButtonText={
                         <div className="flex-1 min-w-0 flex items-center">
                           <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
@@ -672,12 +700,13 @@ export default function SearchBox({
                           )}
                         </div>
                       }
+                      commandInputValue={queryAdvisors}
                       commandInputPlaceholder="Danışman ara..."
                       commandEmptyText="Eşleşen yok"
+                      commandErrorText="Bir şeyler ters gitti"
                       isItemSelected={(v) =>
                         selectedAdvisors?.includes(v) || false
                       }
-                      items={universityOptions}
                       onSelectClear={
                         selectedAdvisors && selectedAdvisors.length > 0
                           ? clearAdvisors

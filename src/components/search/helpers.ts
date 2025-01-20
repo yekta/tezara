@@ -24,6 +24,7 @@ export function getSearchThesesQueryKey({
   page,
 }: TGetSearchThesesQueryKeyParams) {
   return [
+    "searchTheses",
     q,
     languages && languages.length ? languages.join("_") : undefined,
     universities && universities.length ? universities.join("_") : undefined,

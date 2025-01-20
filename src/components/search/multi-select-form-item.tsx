@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/components/ui/utils";
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, TriangleAlertIcon } from "lucide-react";
 import { ComponentType, ReactNode, useRef } from "react";
 
 type Props = {
@@ -26,13 +26,26 @@ type Props = {
   onSelectClear?: () => void;
   clearLength?: number;
   commandEmptyText: string;
+  commandErrorText?: string;
   commandButtonText: ReactNode | string;
+  commandInputValue?: string;
   commandInputPlaceholder: string;
+  commandInputOnValueChange?: (v: string) => void;
+  commandFilter?:
+    | ((
+        value: string,
+        search: string,
+        keywords?: string[] | undefined
+      ) => number)
+    | undefined;
   className?: string;
   Icon?: ComponentType<{ className: string }>;
   IconSetForItem?: ComponentType<{ className: string; variant: string }>;
   iconSetForItemClassName?: string;
   label: string;
+  isAsync?: boolean;
+  isPending?: boolean;
+  isError?: boolean;
 };
 
 const clearButtonText = "Temizle";
@@ -48,9 +61,16 @@ export default function MultiSelectFormItem({
   iconSetForItemClassName,
   commandButtonText,
   commandEmptyText,
+  commandErrorText = "Something went wrong",
+  commandInputValue,
   commandInputPlaceholder,
+  commandInputOnValueChange,
+  commandFilter,
   label,
   className,
+  isAsync = false,
+  isPending = false,
+  isError = false,
 }: Props) {
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollId = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -82,9 +102,14 @@ export default function MultiSelectFormItem({
           </FormControl>
         </PopoverTrigger>
         <PopoverContent className="p-0">
-          <Command className="max-h-[min(25rem,var(--radix-popper-available-height))]">
+          <Command
+            filter={commandFilter}
+            className="max-h-[min(25rem,var(--radix-popper-available-height))]"
+          >
             <CommandInput
-              onValueChange={() => {
+              value={commandInputValue}
+              onValueChange={(v) => {
+                commandInputOnValueChange?.(v);
                 clearTimeout(scrollId.current);
                 scrollId.current = setTimeout(() => {
                   const div = listRef.current;
@@ -97,9 +122,19 @@ export default function MultiSelectFormItem({
             />
             <ScrollArea viewportRef={listRef}>
               <CommandList>
-                <CommandEmpty>{commandEmptyText}</CommandEmpty>
+                {(!isAsync || (isAsync && !isPending && !isError)) && (
+                  <CommandEmpty>{commandEmptyText}</CommandEmpty>
+                )}
+                {isAsync && isError && (
+                  <CommandEmpty className="text-destructive font-semibold text-center px-4 py-6">
+                    <div className="w-full flex flex-col items-center justify-center gap-0.5">
+                      <TriangleAlertIcon className="size-6" />
+                      {commandErrorText}
+                    </div>
+                  </CommandEmpty>
+                )}
                 <CommandGroup>
-                  {onSelectClear && (
+                  {!isPending && onSelectClear && (
                     <CommandItem
                       value={clearButtonText}
                       onSelect={onSelectClear}
@@ -118,38 +153,45 @@ export default function MultiSelectFormItem({
                       </div>
                     </CommandItem>
                   )}
-                  {items.map((item) => (
-                    <CommandItem
-                      value={item.label}
-                      key={item.value}
-                      onSelect={onSelect}
-                      className="flex justify-between gap-2 py-2"
-                    >
-                      <div className="flex shrink min-w-0 items-center gap-2">
-                        {IconSetForItem && (
-                          <IconSetForItem
-                            className={cn(
-                              "size-4 -my-1 -ml-0.25",
-                              iconSetForItemClassName
-                            )}
-                            variant={item.value}
-                          />
-                        )}
-                        <p className="shrink min-w-0 overflow-hidden overflow-ellipsis leading-tight">
-                          {item.label}
-                        </p>
-                      </div>
-                      <CheckIcon
-                        strokeWidth={3}
-                        className={cn(
-                          "size-4",
-                          isItemSelected(item.value)
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
+                  {!isError &&
+                    items.map((item) => (
+                      <CommandItem
+                        value={item.label}
+                        key={item.value}
+                        onSelect={onSelect}
+                        className="flex justify-between gap-2 py-2 group/item"
+                        data-pending={isPending ? true : undefined}
+                        disabled={isPending}
+                      >
+                        <div className="flex shrink min-w-0 items-center gap-2">
+                          {!isPending && IconSetForItem && (
+                            <IconSetForItem
+                              className={cn(
+                                "size-4 -my-1 -ml-0.25",
+                                iconSetForItemClassName
+                              )}
+                              variant={item.value}
+                            />
+                          )}
+                          <p
+                            className="shrink min-w-0 overflow-hidden overflow-ellipsis leading-tight 
+                          group-data-[pending]/item:text-transparent group-data-[pending]/item:bg-foreground group-data-[pending]/item:animate-skeleton
+                          group-data-[pending]/item:rounded-sm"
+                          >
+                            {item.label}
+                          </p>
+                        </div>
+                        <CheckIcon
+                          strokeWidth={3}
+                          className={cn(
+                            "size-4",
+                            isItemSelected(item.value)
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
                 </CommandGroup>
               </CommandList>
             </ScrollArea>

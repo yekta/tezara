@@ -1,26 +1,23 @@
-import { boostedStringSort } from "@/server/meili/helpers";
-import { TLanguage } from "@/server/meili/types";
+import { TAdvisor } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
-const indexName = "languages";
+const indexName = "advisors";
 
-export async function getLanguages({ client }: { client: MeiliSearch }) {
-  const index = client.index<TLanguage>(indexName);
-  const result = await index.search(undefined, {
-    limit: 5000,
+export async function searchAdvisors({
+  q,
+  client,
+}: {
+  q: string;
+  client: MeiliSearch;
+}) {
+  const index = client.index<TAdvisor>(indexName);
+  const result = await index.search(q, {
+    page: 1,
+    hitsPerPage: 50,
     sort: ["name:asc"],
   });
-
-  const hits = [...result.hits];
-  hits.sort(
-    boostedStringSort({
-      boost: ["Türkçe", "İngilizce", "Arapça"],
-      field: "name",
-    })
-  );
-  result.hits = hits;
-
+  result.hits = result.hits.filter((h) => !h.name.includes("- -"));
   return result;
 }
 
-export type TGetLanguagesResult = Awaited<ReturnType<typeof getLanguages>>;
+export type TSearchAdvisorsResult = Awaited<ReturnType<typeof searchAdvisors>>;
