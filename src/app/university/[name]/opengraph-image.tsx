@@ -1,24 +1,26 @@
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
+import {
+  background,
+  foreground,
+  foregroundMuted,
+  getOpengraphFonts,
+  logoAspectRatio,
+  opengraphContentType,
+  opengraphSize,
+} from "@/components/default-opengraph-image";
 import Logo from "@/components/logo/logo";
 import { truncateString } from "@/lib/helpers";
 import { ImageResponse } from "next/og";
 import { ComponentProps, FC } from "react";
 
 export const alt = "Üniversite sayfası";
-export const size = {
-  width: 1200,
-  height: 630,
-};
-export const contentType = "image/png";
+export const size = opengraphSize;
+export const contentType = opengraphContentType;
 
 type Props = {
   params: Promise<{ name: string }>;
 };
 
-const logoAspectRatio = 100 / 24;
-const background = "hsl(0 0% 100%)";
-const foreground = "hsl(250 25% 4%)";
-const foregroundMuted = "hsl(250 6% 35%)";
 const logoSize = 220;
 
 export default async function Image({ params }: Props) {
@@ -29,16 +31,6 @@ export default async function Image({ params }: Props) {
     await cachedGetPageData({
       name: parsedName,
     });
-
-  const fontBold = fetch("http://localhost:3000/fonts/DMSansBold.ttf").then(
-    (r) => r.arrayBuffer()
-  );
-  const fontSemiBold = fetch(
-    "http://localhost:3000/fonts/DMSansSemiBold.ttf"
-  ).then((r) => r.arrayBuffer());
-  const fontMedium = fetch("http://localhost:3000/fonts/DMSansMedium.ttf").then(
-    (r) => r.arrayBuffer()
-  );
 
   return new ImageResponse(
     (
@@ -58,6 +50,17 @@ export default async function Image({ params }: Props) {
           justifyContent: "center",
         }}
       >
+        <LandmarkIcon
+          style={{
+            width: 200,
+            height: 200,
+            color: foreground,
+            position: "absolute",
+            opacity: 0.2,
+            right: 64,
+            bottom: 64,
+          }}
+        />
         <Logo
           variant="full"
           style={{
@@ -107,31 +110,10 @@ export default async function Image({ params }: Props) {
         </div>
       </div>
     ),
-    // ImageResponse options
     {
-      // For convenience, we can re-use the exported opengraph-image
-      // size config to also set the ImageResponse's width and height.
       ...size,
-      fonts: [
-        {
-          name: "dm",
-          weight: 700,
-          style: "normal",
-          data: await fontBold,
-        },
-        {
-          name: "dm",
-          weight: 600,
-          style: "normal",
-          data: await fontSemiBold,
-        },
-        {
-          name: "dm",
-          weight: 500,
-          style: "normal",
-          data: await fontMedium,
-        },
-      ],
+      // @ts-expect-error - This is fine, they don't export the type so I can't set it
+      fonts: await getOpengraphFonts(),
     }
   );
 }
@@ -249,6 +231,30 @@ function KeyRoundIcon({ style }: ComponentProps<"svg">) {
     >
       <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" />
       <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function LandmarkIcon({ style }: ComponentProps<"svg">) {
+  return (
+    <svg
+      style={style}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="3" x2="21" y1="22" y2="22" />
+      <line x1="6" x2="6" y1="18" y2="11" />
+      <line x1="10" x2="10" y1="18" y2="11" />
+      <line x1="14" x2="14" y1="18" y2="11" />
+      <line x1="18" x2="18" y1="18" y2="11" />
+      <polygon points="12 2 20 7 4 7" />
     </svg>
   );
 }
