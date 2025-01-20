@@ -122,11 +122,11 @@ function Stat({
   Icon: FC<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-center gap-1 leading-tight pr-3">
-      <Icon className="inline size-4 text-foreground shrink-0" />
-      <p className="font-semibold text-foreground shrink min-w-0">
+    <div className="flex items-center gap-1 leading-tight pr-3 text-muted-foreground">
+      <Icon className="inline size-4 shrink-0" />
+      <p className="font-bold shrink min-w-0">
         {value.toLocaleString()}
-        <span className="font-medium text-muted-foreground"> {label}</span>
+        <span className="font-medium"> {label}</span>
       </p>
     </div>
   );
@@ -141,7 +141,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
-  const titleSuffix = `Üniversite | ${siteTitle}`
+  const titleSuffix = `Üniversite | ${siteTitle}`;
   const parsedName = decodeURIComponent(name);
   const notFoundTitle = `Üniversite Bulunamadı | ${titleSuffix}`;
   const notFoundDescription = `Üniversite ${siteTitle} platformunda mevcut değil.`;

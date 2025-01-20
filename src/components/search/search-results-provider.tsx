@@ -50,6 +50,10 @@ export const SearchResultsProvider: React.FC<{
     "universities",
     searchLikePageParams["universities"]
   );
+  const [advisors] = useQueryState(
+    "advisors",
+    searchLikePageParams["advisors"]
+  );
   const [thesisTypes] = useQueryState(
     "thesis_types",
     searchLikePageParams["thesis_types"]
@@ -68,27 +72,29 @@ export const SearchResultsProvider: React.FC<{
   );
 
   const queryKey = getSearchThesesQueryKey({
-    query,
+    q: query,
     languages,
     universities,
-    thesisTypes,
-    yearGte: yearGteQP,
-    yearLte: yearLteQP,
-    hitsPerPage: HITS_PER_PAGE_DEFAULT,
+    advisors,
+    thesis_types: thesisTypes,
+    year_gte: yearGteQP,
+    year_lte: yearLteQP,
+    hits_per_page: HITS_PER_PAGE_DEFAULT,
     page: pageQP,
   });
 
   const searchThesesQuery = useQuery({
     queryFn: () =>
       searchTheses({
-        query,
+        q: query,
         languages,
         universities,
-        thesisTypes,
-        yearGte: yearGteQP,
-        yearLte: yearLteQP,
+        advisors,
+        thesis_types: thesisTypes,
+        year_gte: yearGteQP,
+        year_lte: yearLteQP,
         sort: undefined,
-        hitsPerPage: HITS_PER_PAGE_DEFAULT,
+        hits_per_page: HITS_PER_PAGE_DEFAULT,
         page: pageQP,
         client: meili,
       }),
@@ -98,13 +104,14 @@ export const SearchResultsProvider: React.FC<{
 
   const bulkDownload: TSearchResultsContext["bulkDownload"] = async () => {
     const params: Parameters<typeof getSearchThesesQueryKey>[0] = {
-      query,
+      q: query,
       languages,
       universities,
-      thesisTypes,
-      yearGte: yearGteQP,
-      yearLte: yearLteQP,
-      hitsPerPage: HITS_PER_PAGE_BULK,
+      advisors,
+      thesis_types: thesisTypes,
+      year_gte: yearGteQP,
+      year_lte: yearLteQP,
+      hits_per_page: HITS_PER_PAGE_BULK,
       page: PAGE_DEFAULT,
     };
 

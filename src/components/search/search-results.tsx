@@ -168,7 +168,7 @@ export default function SearchResults({}: Props) {
   return (
     <div
       data-pending={isPending ? true : undefined}
-      className="w-full flex flex-col pt-6 md:pt-4 group"
+      className="w-full flex-1 flex flex-col pt-6 md:pt-4 group"
     >
       {((!data && isPending) || (data && data.hits)) && (
         <div className="w-full flex flex-wrap items-start gap-1.5">
@@ -263,10 +263,10 @@ export default function SearchResults({}: Props) {
           </span>
         )}
       </p>
-      <div className="w-full flex flex-col">
+      <div className="w-full flex flex-col flex-1">
         <PaginationBar />
         {!data && !isPending && isLoadingError && (
-          <div className="w-full py-12 flex flex-col items-center justify-center text-destructive text-sm">
+          <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Birşeyler ters gitti
@@ -274,7 +274,7 @@ export default function SearchResults({}: Props) {
           </div>
         )}
         {data && data.hits && data.hits.length === 0 && (
-          <div className="w-full py-12 flex flex-col items-center justify-center text-muted-foreground text-sm">
+          <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-muted-foreground text-sm">
             <SearchIcon className="size-7" />
             <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
               Eşleşen yok
@@ -284,7 +284,7 @@ export default function SearchResults({}: Props) {
         {/* Result rows */}
         {((!data && isPending) ||
           (data && data.hits && data.hits.length > 0)) && (
-          <div className="w-full flex flex-col">
+          <div className="w-full flex-1 flex flex-col">
             <div className="w-full flex flex-col">
               {data
                 ? data.hits.map((i, index) => (

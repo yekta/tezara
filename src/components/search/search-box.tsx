@@ -22,7 +22,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
@@ -40,6 +39,7 @@ import {
   ScrollTextIcon,
   SearchIcon,
   SettingsIcon,
+  UserIcon,
   XIcon,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -53,9 +53,10 @@ const SearchThesesSchema = z.object({
   query: z.string(),
   languages: z.array(z.string()),
   universities: z.array(z.string()),
+  advisors: z.array(z.string()),
   thesisTypes: z.array(z.string()),
-  yearGte: z.number().optional(),
-  yearLte: z.number().optional(),
+  yearGte: z.number().or(z.null()),
+  yearLte: z.number().or(z.null()),
 });
 
 type Props = {
@@ -125,6 +126,10 @@ export default function SearchBox({
     "universities",
     searchLikePageParams["universities"]
   );
+  const [advisorsQP, setAdvisorsQP] = useQueryState(
+    "advisors",
+    searchLikePageParams["advisors"]
+  );
   const [thesisTypesQP, setThesisTypesQP] = useQueryState(
     "thesis_types",
     searchLikePageParams["thesis_types"]
@@ -143,15 +148,17 @@ export default function SearchBox({
   );
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
+
   const form = useForm<z.infer<typeof SearchThesesSchema>>({
     resolver: zodResolver(SearchThesesSchema),
     defaultValues: {
       query,
       languages: languagesQP,
       universities: universitiesQP,
+      advisors: advisorsQP,
       thesisTypes: thesisTypesQP,
-      yearLte: yearLteQP ? yearLteQP : undefined,
-      yearGte: yearGteQP ? yearGteQP : undefined,
+      yearLte: yearLteQP,
+      yearGte: yearGteQP,
     },
   });
 
@@ -161,18 +168,21 @@ export default function SearchBox({
   const selectedThesisTypes = form.watch("thesisTypes");
   const selectedYearLte = form.watch("yearLte");
   const selectedYearGte = form.watch("yearGte");
+  const selectedAdvisors = form.watch("advisors");
 
   const totalSelectedFilters = useMemo(() => {
     let total = 0;
     if (selectedLanguages) total += selectedLanguages.length;
     if (selectedUniversities) total += selectedUniversities.length;
+    if (selectedAdvisors) total += selectedAdvisors.length;
     if (selectedThesisTypes) total += selectedThesisTypes.length;
-    if (selectedYearLte) total += 1;
-    if (selectedYearGte) total += 1;
+    if (selectedYearLte !== null && selectedYearLte !== undefined) total += 1;
+    if (selectedYearGte !== null && selectedYearGte !== undefined) total += 1;
     return total;
   }, [
     selectedLanguages,
     selectedUniversities,
+    selectedAdvisors,
     selectedThesisTypes,
     selectedYearGte,
     selectedYearLte,
@@ -206,9 +216,10 @@ export default function SearchBox({
       setQuery(data.query);
       setLanguagesQP(data.languages);
       setUniversitiesQP(data.universities);
+      setAdvisorsQP(data.advisors);
       setThesisTypesQP(data.thesisTypes);
-      setYearLteQP(data.yearLte ? data.yearLte : null);
-      setYearGteQP(data.yearGte ? data.yearGte : null);
+      setYearGteQP(data.yearGte && data.yearGte > 0 ? data.yearGte : null);
+      setYearLteQP(data.yearLte && data.yearLte > 0 ? data.yearLte : null);
       return;
     }
   }
@@ -223,6 +234,11 @@ export default function SearchBox({
     setUniversitiesQP([]);
   }
 
+  function clearAdvisors() {
+    form.setValue("advisors", []);
+    setAdvisorsQP([]);
+  }
+
   function clearLanguages() {
     form.setValue("languages", []);
     setLanguagesQP([]);
@@ -234,17 +250,18 @@ export default function SearchBox({
   }
 
   function clearYearGte() {
-    form.setValue("yearGte", undefined);
+    form.setValue("yearGte", null);
     setYearGteQP(null);
   }
 
   function clearYearLte() {
-    form.setValue("yearLte", undefined);
+    form.setValue("yearLte", null);
     setYearLteQP(null);
   }
 
   function clearAllFilters() {
     clearUniversities();
+    clearAdvisors();
     clearLanguages();
     clearThesisTypes();
     clearYearGte();
@@ -401,27 +418,24 @@ export default function SearchBox({
                           }
                           const year = parseInt(v);
                           if (year !== yearGteQP) {
-                            field.onChange(year);
                             setYearGteQP(year);
                           }
+                          field.onChange(year);
+                          console.log("triggered", year);
+                          console.log(form.getValues("yearGte"));
                         }}
-                        value={yearGteQP?.toString() || ""}
                       >
                         <FormControl>
                           <SelectTrigger
                             className="py-2 rounded-r-none -mr-[0.5px]"
-                            classNameInnerContainer="flex items-center -ml-0.5 [&>span]:flex-1 [&>span]:min-w-0 [&>span]:h-5"
+                            classNameInnerContainer="flex items-center -ml-0.5"
                           >
                             <CalendarArrowDownIcon className="size-4 shrink-0" />
-                            <SelectValue
-                              placeholder={
-                                <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
-                                  <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
-                                    Yıl {`>=`}
-                                  </p>
-                                </div>
-                              }
-                            />
+                            <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
+                              <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
+                                {field.value ? field.value : `Yıl >=`}
+                              </p>
+                            </div>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
@@ -459,27 +473,22 @@ export default function SearchBox({
                           }
                           const year = parseInt(v);
                           if (year !== yearLteQP) {
-                            field.onChange(year);
                             setYearLteQP(year);
                           }
+                          field.onChange(year);
                         }}
-                        value={yearLteQP?.toString() || ""}
                       >
                         <FormControl>
                           <SelectTrigger
                             className="py-2 rounded-l-none -ml-[0.5px]"
-                            classNameInnerContainer="flex items-center -ml-0.5 [&>span]:flex-1 [&>span]:min-w-0 [&>span]:h-5"
+                            classNameInnerContainer="flex items-center -ml-0.5"
                           >
                             <CalendarArrowDownIcon className="size-4 shrink-0" />
-                            <SelectValue
-                              placeholder={
-                                <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
-                                  <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
-                                    Yıl {`<=`}
-                                  </p>
-                                </div>
-                              }
-                            />
+                            <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
+                              <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
+                                {field.value ? field.value : `Yıl <=`}
+                              </p>
+                            </div>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
@@ -638,6 +647,50 @@ export default function SearchBox({
                           : undefined
                       }
                       clearLength={selectedLanguages?.length}
+                    />
+                  )}
+                />
+              </div>
+              <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
+                <FormField
+                  control={form.control}
+                  name="advisors"
+                  render={({}) => (
+                    <MultiSelectFormItem
+                      label="Danışman"
+                      className="w-full"
+                      Icon={UserIcon}
+                      commandButtonText={
+                        <div className="flex-1 min-w-0 flex items-center">
+                          <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                            Danışman
+                          </p>
+                          {selectedAdvisors && selectedAdvisors.length > 0 && (
+                            <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                              {selectedAdvisors.length}
+                            </p>
+                          )}
+                        </div>
+                      }
+                      commandInputPlaceholder="Danışman ara..."
+                      commandEmptyText="Eşleşen yok"
+                      isItemSelected={(v) =>
+                        selectedAdvisors?.includes(v) || false
+                      }
+                      items={universityOptions}
+                      onSelectClear={
+                        selectedAdvisors && selectedAdvisors.length > 0
+                          ? clearAdvisors
+                          : undefined
+                      }
+                      onSelect={(v) => {
+                        const newValue = toggleInArray(selectedAdvisors, v);
+                        if (advisorsQP.join(",") !== newValue.join(",")) {
+                          setAdvisorsQP(newValue);
+                        }
+                        form.setValue("advisors", newValue);
+                      }}
+                      clearLength={selectedAdvisors?.length}
                     />
                   )}
                 />

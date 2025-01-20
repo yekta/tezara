@@ -22,19 +22,28 @@ type Props = {
 
 export default async function Page({ searchParams }: Props) {
   await searchPageSearchParamsCache.parse(searchParams);
-  const { q, languages, thesis_types, universities, year_gte, year_lte, page } =
-    await loadSearchLikePageSearchParams(searchParams);
+  const {
+    q,
+    languages,
+    thesis_types,
+    universities,
+    year_gte,
+    year_lte,
+    page,
+    advisors,
+  } = await loadSearchLikePageSearchParams(searchParams);
 
   const queryClient = getQueryClientServer();
   const queryKey = getSearchThesesQueryKey({
-    query: q,
+    q,
     languages,
     universities,
-    thesisTypes: thesis_types,
-    yearGte: year_gte,
-    yearLte: year_lte,
+    advisors,
+    thesis_types,
+    year_gte,
+    year_lte,
     page,
-    hitsPerPage: HITS_PER_PAGE_DEFAULT,
+    hits_per_page: HITS_PER_PAGE_DEFAULT,
   });
 
   const [languagesData, universitiesData, thesisTypesData] = await Promise.all([
@@ -45,16 +54,17 @@ export default async function Page({ searchParams }: Props) {
       queryKey,
       queryFn: () =>
         searchTheses({
-          client: meiliAdmin,
-          query: q,
+          q,
           languages,
           universities,
-          thesisTypes: thesis_types,
-          yearGte: year_gte,
-          yearLte: year_lte,
+          advisors,
+          thesis_types: thesis_types,
+          year_gte: year_gte,
+          year_lte: year_lte,
           page,
-          hitsPerPage: HITS_PER_PAGE_DEFAULT,
+          hits_per_page: HITS_PER_PAGE_DEFAULT,
           sort: undefined,
+          client: meiliAdmin,
         }),
     }),
   ]);
@@ -62,8 +72,8 @@ export default async function Page({ searchParams }: Props) {
   return (
     <HydrateClient>
       <div className="w-full flex-1 flex flex-col items-center">
-        <div className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-[calc(6vh+6rem)]">
-          <div className="w-full flex flex-col items-center">
+        <div className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-32">
+          <div className="w-full flex flex-col items-center flex-1">
             <SearchResultsProvider>
               <SearchBox
                 languages={languagesData.hits}

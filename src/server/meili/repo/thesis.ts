@@ -19,33 +19,36 @@ export type TGetThesisResult = Awaited<ReturnType<typeof getThesis>>;
 
 export async function searchTheses({
   client,
-  query,
+  q,
   languages,
-  thesisTypes,
+  thesis_types,
   universities,
-  yearGte,
-  yearLte,
+  advisors,
+  year_gte,
+  year_lte,
   sort,
-  hitsPerPage,
+  hits_per_page,
   page = PAGE_DEFAULT,
-  attributesToRetrieve,
+  attributes_to_retrieve,
 }: {
   client: MeiliSearch;
-  query: string | undefined;
+  q: string | undefined;
   languages: string[] | undefined;
-  thesisTypes: string[] | undefined;
+  thesis_types: string[] | undefined;
   universities: string[] | undefined;
-  yearGte: number | null | undefined;
-  yearLte: number | null | undefined;
+  advisors: string[] | undefined;
+  year_gte: number | null | undefined;
+  year_lte: number | null | undefined;
   sort: string[] | undefined;
-  hitsPerPage: number | undefined;
+  hits_per_page: number | undefined;
   page: number | undefined;
-  attributesToRetrieve?: string[];
+  attributes_to_retrieve?: string[];
 }) {
   const index = client.index<TThesisExtended>(indexName);
   let filter = "";
   let languageFilter = "";
   let universityFilter = "";
+  let advisorFilter = "";
   let thesisTypeFilter = "";
 
   if (languages && languages.length > 0) {
@@ -56,8 +59,12 @@ export async function searchTheses({
     const entries = universities.map((u) => `university = "${u}"`);
     universityFilter = `(${entries.join(" OR ")})`;
   }
-  if (thesisTypes && thesisTypes.length > 0) {
-    const entries = thesisTypes.map((t) => `thesis_type = "${t}"`);
+  if (advisors && advisors.length > 0) {
+    const entries = advisors.map((a) => `advisors = "${a}"`);
+    advisorFilter = `(${entries.join(" OR ")})`;
+  }
+  if (thesis_types && thesis_types.length > 0) {
+    const entries = thesis_types.map((t) => `thesis_type = "${t}"`);
     thesisTypeFilter = `(${entries.join(" OR ")})`;
   }
 
@@ -72,6 +79,13 @@ export async function searchTheses({
     filter += universityFilter;
   }
 
+  if (advisorFilter.length > 0) {
+    if (filter.length > 0) {
+      filter += " AND ";
+    }
+    filter += advisorFilter;
+  }
+
   if (thesisTypeFilter.length > 0) {
     if (filter.length > 0) {
       filter += " AND ";
@@ -79,29 +93,28 @@ export async function searchTheses({
     filter += thesisTypeFilter;
   }
 
-  if (yearGte) {
+  if (year_gte) {
     if (filter.length > 0) {
       filter += " AND ";
     }
-    filter += `year >= ${yearGte}`;
+    filter += `year >= ${year_gte}`;
   }
 
-  if (yearLte) {
+  if (year_lte) {
     if (filter.length > 0) {
       filter += " AND ";
     }
-    filter += `year <= ${yearLte}`;
+    filter += `year <= ${year_lte}`;
   }
 
-  const _sort =
-    sort && sort.length > 0 ? sort : !query ? ["year:desc"] : undefined;
+  const _sort = sort && sort.length > 0 ? sort : !q ? ["year:desc"] : undefined;
 
-  const result = await index.search(query, {
+  const result = await index.search(q, {
     filter: filter ?? undefined,
-    hitsPerPage,
+    hitsPerPage: hits_per_page,
     page,
     sort: _sort,
-    attributesToRetrieve,
+    attributesToRetrieve: attributes_to_retrieve,
   });
   return result;
 }

@@ -1,3 +1,4 @@
+import type { TSearchLikePageParams } from "@/components/search/constants/client";
 import { PAGE_DEFAULT } from "@/components/search/constants/shared";
 import {
   createLoader,
@@ -12,12 +13,13 @@ export const searchLikePageParams = {
   q: parseAsString.withDefault(""),
   languages: parseAsArrayOf(parseAsString).withDefault([]),
   universities: parseAsArrayOf(parseAsString).withDefault([]),
+  advisors: parseAsArrayOf(parseAsString).withDefault([]),
   thesis_types: parseAsArrayOf(parseAsString).withDefault([]),
   advanced: parseAsBoolean.withDefault(false),
   page: parseAsInteger.withDefault(PAGE_DEFAULT),
   year_gte: parseAsInteger,
   year_lte: parseAsInteger,
-} as const;
+} satisfies Record<keyof TSearchLikePageParams, unknown>;
 
 export const loadSearchLikePageSearchParams =
   createLoader(searchLikePageParams);

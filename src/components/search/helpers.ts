@@ -1,35 +1,37 @@
+import { TSearchLikePageParams } from "@/components/search/constants/client";
+
 export const cleanAdvisors = (advisors?: string[] | null) => {
   if (!advisors) return [];
   return advisors.filter((advisor) => !advisor.includes("Yer Bilgisi:"));
 };
 
+type TGetSearchThesesQueryKeyParams = Omit<
+  TSearchLikePageParams,
+  "advanced"
+> & {
+  hits_per_page: number | undefined;
+};
+
 export function getSearchThesesQueryKey({
-  query,
+  q,
   languages,
   universities,
-  thesisTypes,
-  yearGte,
-  yearLte,
-  hitsPerPage,
+  advisors,
+  thesis_types,
+  year_gte,
+  year_lte,
+  hits_per_page,
   page,
-}: {
-  query: string | undefined;
-  languages: string[] | undefined;
-  universities: string[] | undefined;
-  thesisTypes: string[] | undefined;
-  yearGte: number | null;
-  yearLte: number | null;
-  hitsPerPage: number | undefined;
-  page: number | undefined;
-}) {
+}: TGetSearchThesesQueryKeyParams) {
   return [
-    query,
+    q,
     languages && languages.length ? languages.join("_") : undefined,
     universities && universities.length ? universities.join("_") : undefined,
-    thesisTypes && thesisTypes.length ? thesisTypes.join("_") : undefined,
-    yearGte !== undefined ? yearGte : undefined,
-    yearLte !== undefined ? yearLte : undefined,
-    hitsPerPage !== undefined ? hitsPerPage : undefined,
+    advisors && advisors.length ? advisors.join("_") : undefined,
+    thesis_types && thesis_types.length ? thesis_types.join("_") : undefined,
+    year_gte !== null ? year_gte : undefined,
+    year_lte !== null ? year_lte : undefined,
+    hits_per_page !== undefined ? hits_per_page : undefined,
     page !== undefined ? page : undefined,
   ];
 }
