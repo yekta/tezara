@@ -141,8 +141,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
+  const titleSuffix = `Üniversite | ${siteTitle}`
   const parsedName = decodeURIComponent(name);
-  const notFoundTitle = `Üniversite Bulunamadı | ${siteTitle}`;
+  const notFoundTitle = `Üniversite Bulunamadı | ${titleSuffix}`;
   const notFoundDescription = `Üniversite ${siteTitle} platformunda mevcut değil.`;
 
   if (!name) {
@@ -159,7 +160,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = "tr";
   const { keywords, subjects, languages, minYear, maxYear, thesesCount } =
     await cachedGetPageData({ name: parsedName });
-  const title = `${parsedName} Tez İstatistikleri | ${siteTitle}`;
+  const title = `${parsedName} Tez İstatistikleri | ${titleSuffix}`;
   const description = `${parsedName} bünyesinde ${minYear}-${maxYear} yılları arasında ${subjects.size.toLocaleString(
     locale
   )} farklı konuda toplam ${thesesCount.toLocaleString(
