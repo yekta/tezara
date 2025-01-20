@@ -20,6 +20,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
+import UmamiProvider from "next-umami";
 
 const sans = localFont({
   src: "./fonts/DMSansVF.woff2",
@@ -73,6 +74,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <UmamiProvider websiteId={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID} />
+      </head>
       <body
         className={`${sans.variable} ${mono.variable} bg-background text-foreground antialiased break-words`}
       >
