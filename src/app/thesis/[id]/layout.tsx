@@ -13,7 +13,7 @@ export default async function Layout({ params, children }: Props) {
   const idNumber = parseInt(Number(id).toString());
 
   return (
-    <div className="w-full flex-1 relative flex flex-col md:flex-row md:justify-center text-lg px-5 md:px-3 lg:px-5">
+    <div className="w-full flex-1 relative flex flex-col md:flex-row md:justify-center px-5 md:px-3 lg:px-5">
       <NavigationSection id={idNumber} className="md:hidden pb-4" />
       {/* Md left */}
       <Sidebar

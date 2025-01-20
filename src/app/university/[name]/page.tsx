@@ -122,7 +122,7 @@ function Stat({
   Icon: FC<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-center gap-1 text-base leading-tight pr-3">
+    <div className="flex items-center gap-1 leading-tight pr-3">
       <Icon className="inline size-4 text-foreground shrink-0" />
       <p className="font-semibold text-foreground shrink min-w-0">
         {value.toLocaleString()}

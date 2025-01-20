@@ -212,15 +212,15 @@ export default async function Page({ params }: Props) {
       </div>
       {/* Abstract */}
       <div id="abstract_section" className="pt-6">
-        <h3 className="font-bold">Özet</h3>
-        <p id="abstract" className="mt-2">
+        <h3 className="font-bold text-xl">Özet</h3>
+        <p id="abstract" className="pt-3 text-lg">
           {thesis.abstract_original || noAbstractText}
         </p>
       </div>
       {/* Translated abstract */}
       <div id="abstract_translated_section" className="pt-6">
-        <h3 className="font-bold">Özet (Çeviri)</h3>
-        <p id="abstract_translated" className="mt-2">
+        <h3 className="font-bold text-xl">Özet (Çeviri)</h3>
+        <p id="abstract_translated" className="pt-3 text-lg">
           {thesis.abstract_translated || noTranslatedAbstractText}
         </p>
       </div>
