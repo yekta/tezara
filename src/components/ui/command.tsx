@@ -5,8 +5,8 @@ import { type DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
 import { cn } from "@/components/ui/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { cva, VariantProps } from "class-variance-authority";
+import { LoaderIcon, SearchIcon } from "lucide-react";
 
 const commandVariants = cva(
   "flex h-full w-full flex-col overflow-hidden rounded-lg focus:outline-none",
@@ -59,17 +59,28 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
     classNameWrapper?: string;
+    showSpinner?: boolean;
   }
->(({ className, classNameWrapper, ...props }, ref) => (
+>(({ className, classNameWrapper, showSpinner = false, ...props }, ref) => (
   <div
-    className={cn("flex items-center border-b px-3", classNameWrapper)}
+    className={cn("flex items-center border-b px-3 gap-1.5", classNameWrapper)}
     cmdk-input-wrapper=""
   >
-    <MagnifyingGlassIcon className="mr-2 size-5 shrink-0 text-muted-foreground" />
+    <div
+      data-show-spinner={showSpinner ? true : undefined}
+      className="size-4 -ml-0.5 shrink-0 text-muted-foreground group relative"
+    >
+      {!showSpinner && (
+        <SearchIcon className="size-full text-muted-foreground" />
+      )}
+      {showSpinner && (
+        <LoaderIcon className="absolute size-full  animate-spin" />
+      )}
+    </div>
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "flex w-full py-3 leading-none rounded-md bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "flex w-full py-2 leading-none rounded-md bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}

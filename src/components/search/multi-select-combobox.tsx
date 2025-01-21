@@ -50,6 +50,7 @@ type Props = {
   label: string;
   isAsync?: boolean;
   isPending?: boolean;
+  isFetching?: boolean;
   isError?: boolean;
   hasNext?: boolean;
   toLoadMoreText?: string;
@@ -78,6 +79,7 @@ export default function MultiSelectCombobox({
   className,
   isAsync = false,
   isPending = false,
+  isFetching = false,
   isError = false,
   hasNext = false,
   toLoadMoreText,
@@ -125,9 +127,8 @@ export default function MultiSelectCombobox({
                   div?.scrollTo({ top: 0 });
                 });
               }}
+              showSpinner={isFetching}
               placeholder={commandInputPlaceholder}
-              className="py-2"
-              classNameWrapper="px-2"
             />
             <ScrollArea viewportRef={listRef}>
               <CommandList>

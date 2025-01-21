@@ -17,7 +17,6 @@ export async function searchAuthors({
   client: MeiliSearch;
 }) {
   const index = client.index<TAuthor>(indexName);
-
   const result = await index.search(q, {
     page,
     hitsPerPage: 50,

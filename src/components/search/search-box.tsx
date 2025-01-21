@@ -176,6 +176,7 @@ export default function SearchBox({
   const {
     data: advisorOptions,
     isPending: isPendingAdvisors,
+    isFetching: isFetchingAdvisors,
     isError: isErrorAdvisors,
   } = useQuery({
     queryKey: ["advisors", queryAdvisors ? queryAdvisors : undefined],
@@ -186,12 +187,14 @@ export default function SearchBox({
         sort: undefined,
         client: meili,
       }),
+    placeholderData: (prev) => prev,
   });
 
   const [queryAuthors, setQueryAuthors] = useState("");
   const {
     data: authorOptions,
     isPending: isPendingAuthors,
+    isFetching: isFetchingAuthors,
     isError: isErrorAuthors,
   } = useQuery({
     queryKey: ["authors", queryAuthors ? queryAuthors : undefined],
@@ -202,12 +205,14 @@ export default function SearchBox({
         sort: undefined,
         client: meili,
       }),
+    placeholderData: (prev) => prev,
   });
 
   const [queryDepartments, setQueryDepartments] = useState("");
   const {
     data: departmentOptions,
     isPending: isPendingDepartments,
+    isFetching: isFetchingDepartments,
     isError: isErrorDepartments,
   } = useQuery({
     queryKey: ["departments", queryDepartments ? queryDepartments : undefined],
@@ -218,6 +223,7 @@ export default function SearchBox({
         sort: undefined,
         client: meili,
       }),
+    placeholderData: (prev) => prev,
   });
 
   const totalSelectedFilters = useMemo(() => {
@@ -613,6 +619,7 @@ export default function SearchBox({
                 commandInputOnValueChange={(v) => setQueryDepartments(v)}
                 isAsync
                 isPending={isPendingDepartments}
+                isFetching={isFetchingDepartments}
                 isError={isErrorDepartments}
                 hasNext={
                   !isPendingDepartments &&
@@ -750,6 +757,7 @@ export default function SearchBox({
                 commandInputOnValueChange={(v) => setQueryAuthors(v)}
                 isAsync
                 isPending={isPendingAuthors}
+                isFetching={isFetchingAuthors}
                 isError={isErrorAuthors}
                 hasNext={
                   !isPendingAuthors &&
@@ -806,6 +814,7 @@ export default function SearchBox({
                 commandInputOnValueChange={(v) => setQueryAdvisors(v)}
                 isAsync
                 isPending={isPendingAdvisors}
+                isFetching={isFetchingAdvisors}
                 isError={isErrorAdvisors}
                 hasNext={
                   !isPendingAdvisors &&
