@@ -1,4 +1,5 @@
 import { cn } from "@/components/ui/utils";
+import { staticAssetsRoute } from "@/lib/constants";
 import { GlobeIcon } from "lucide-react";
 import Image from "next/image";
 import { ComponentProps } from "react";
@@ -56,7 +57,7 @@ export default function LanguageIcon({
         height={512}
         className={cn(defaultClassName, className)}
         alt={variant || "Dil İkonu"}
-        src={`/flags/${variant}.svg`}
+        src={`${staticAssetsRoute}/flags/${variant}.svg`}
       />
     );
   return <GlobeIcon className={cn(defaultClassName, className)} />;

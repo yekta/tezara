@@ -71,13 +71,13 @@ export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
 
 export async function getOpengraphFonts() {
   const fontBold = fetch(
-    `${env.NEXT_PUBLIC_SITE_URL}/fonts/DMSansBold.ttf`
+    `${env.NEXT_PUBLIC_SITE_URL}/static/fonts/DMSansBold.ttf`
   ).then((r) => r.arrayBuffer());
   const fontSemiBold = fetch(
-    `${env.NEXT_PUBLIC_SITE_URL}/fonts/DMSansSemiBold.ttf`
+    `${env.NEXT_PUBLIC_SITE_URL}/static/fonts/DMSansSemiBold.ttf`
   ).then((r) => r.arrayBuffer());
   const fontMedium = fetch(
-    `${env.NEXT_PUBLIC_SITE_URL}/fonts/DMSansMedium.ttf`
+    `${env.NEXT_PUBLIC_SITE_URL}/static/fonts/DMSansMedium.ttf`
   ).then((r) => r.arrayBuffer());
 
   const [fontBoldData, fontSemiBoldData, fontMediumData] = await Promise.all([
