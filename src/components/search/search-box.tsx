@@ -41,7 +41,7 @@ import {
   SettingsIcon,
   XIcon,
 } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -95,6 +95,8 @@ export default function SearchBox({
   );
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
+  const [isPendingHackyPush, setIsPendingHackyPush] = useState(false);
+  const isPendingPush = isPendingAsyncPush || isPendingHackyPush;
   const searchResultsContext = useSearchResults();
   const searchParams = useSearchParams();
 
@@ -242,7 +244,6 @@ export default function SearchBox({
   });
 
   const pushToSearch = async () => {
-    console.log("Trying to push");
     const paramStr = searchParams.toString();
     await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
   };
@@ -255,6 +256,7 @@ export default function SearchBox({
       let counter = 20;
       let pathname = window.location.pathname;
       // TO-DO: Fix this, it is a horrible hack for Safari caused by search params not updating
+      setIsPendingHackyPush(true);
       while (
         counter > 0 &&
         (pathname !== "/search" || !pathname.startsWith("/search")) &&
@@ -266,6 +268,7 @@ export default function SearchBox({
         await pushToSearch();
         counter--;
       }
+      setIsPendingHackyPush(false);
     }
   }
 
@@ -324,9 +327,7 @@ export default function SearchBox({
 
   return (
     <form
-      data-pending={
-        isPendingAsyncPush || isPendingSearchResults ? true : undefined
-      }
+      data-pending={isPendingPush || isPendingSearchResults ? true : undefined}
       onSubmit={onSubmit}
       className={cn("w-full group/form flex flex-col items-center", className)}
     >
@@ -338,13 +339,13 @@ export default function SearchBox({
           id="main-search-input"
           type="search"
           enterKeyHint="search"
-          disabled={isPendingAsyncPush}
+          disabled={isPendingPush}
           className="w-full pl-8.5 pr-12 bg-background-hover"
           placeholder="Tez, yazar, veya danışman ara..."
           value={queryInputValue}
           onChange={(e) => setQueryInputValue(e.target.value)}
         />
-        {!isPendingAsyncPush &&
+        {!isPendingPush &&
           !isPendingSearchResults &&
           queryInputValue !== undefined &&
           queryInputValue !== "" &&
@@ -363,7 +364,7 @@ export default function SearchBox({
               <XIcon className="size-5" />
             </Button>
           )}
-        {(isPendingAsyncPush || isPendingSearchResults) && (
+        {(isPendingPush || isPendingSearchResults) && (
           <div className="size-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
             <LoaderIcon className="size-full animate-spin" />
           </div>
@@ -376,7 +377,7 @@ export default function SearchBox({
       >
         <div className="max-w-full flex flex-wrap justify-center items-center gap-2">
           <Button
-            disabled={isPendingAsyncPush || isPendingSearchResults}
+            disabled={isPendingPush || isPendingSearchResults}
             className="py-[calc(0.5rem+1px)] px-5"
             fadeOnDisabled={false}
           >
@@ -386,7 +387,7 @@ export default function SearchBox({
               </div>
               <p className="shrink min-w-0">Ara</p>
             </div>
-            {(isPendingAsyncPush || isPendingSearchResults) && (
+            {(isPendingPush || isPendingSearchResults) && (
               <div className="size-5 absolute left-1/2 top-1/2 transform -translate-y-1/2 -translate-x-1/2">
                 <LoaderIcon className="size-full animate-spin" />
               </div>
