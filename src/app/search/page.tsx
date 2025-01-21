@@ -4,8 +4,7 @@ import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import SearchBox from "@/components/search/search-box";
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
-import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
-import { prefetchAuthors } from "@/lib/queries/prefetch-authors";
+import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
 import { meili } from "@/server/meili/constants-client";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getLanguages } from "@/server/meili/repo/language";
@@ -73,8 +72,7 @@ export default async function Page({ searchParams }: Props) {
           client: meiliAdmin,
         }),
     }),
-    prefetchAdvisors({ queryClient }),
-    prefetchAuthors({ queryClient }),
+    ...getSearchLikePagePrefetchPromises({ queryClient }),
   ]);
 
   return (

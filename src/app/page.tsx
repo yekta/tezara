@@ -1,8 +1,7 @@
 import Logo from "@/components/logo/logo";
 import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
 import SearchBox from "@/components/search/search-box";
-import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
-import { prefetchAuthors } from "@/lib/queries/prefetch-authors";
+import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { getLanguages } from "@/server/meili/repo/language";
@@ -35,8 +34,7 @@ export default async function Home({ searchParams }: Props) {
           client: meili,
         }),
     }),
-    prefetchAdvisors({ queryClient }),
-    prefetchAuthors({ queryClient }),
+    ...getSearchLikePagePrefetchPromises({ queryClient }),
   ]);
 
   return (
