@@ -1,33 +1,41 @@
-export type TThesis = {
-  id: number;
-  detail_id_1: string | null;
-  detail_id_2: string | null;
-  author: string | null;
-  year: number | null;
-  title_original: string | null;
-  title_translated: string | null;
-  university: string | null;
-  language: string | null;
-  thesis_type: string | null;
-  subjects_turkish: string[] | null;
-  subjects_english: string[] | null;
-};
+import { z } from "zod";
 
-export type TExtention = {
-  pdf_url: string | null;
-  advisors: string[] | null;
-  pages: number | null;
-  abstract_original: string | null;
-  abstract_translated: string | null;
-  keywords_turkish: string[] | null;
-  keywords_english: string[] | null;
-  status: string | null;
-  institute: string | null;
-  department: string | null;
-  branch: string | null;
-};
+export const ThesisSchema = z.object({
+  id: z.number(),
+  detail_id_1: z.string().nullable(),
+  detail_id_2: z.string().nullable(),
+  author: z.string().nullable(),
+  year: z.number().nullable(),
+  title_original: z.string().nullable(),
+  title_translated: z.string().nullable(),
+  university: z.string().nullable(),
+  language: z.string().nullable(),
+  thesis_type: z.string().nullable(),
+  subjects_turkish: z.array(z.string()).nullable(),
+  subjects_english: z.array(z.string()).nullable(),
+});
 
+export const ThesisExtentionSchema = z.object({
+  pdf_url: z.string().nullable(),
+  advisors: z.array(z.string()).nullable(),
+  pages: z.number().nullable(),
+  abstract_original: z.string().nullable(),
+  abstract_translated: z.string().nullable(),
+  keywords_turkish: z.array(z.string()).nullable(),
+  keywords_english: z.array(z.string()).nullable(),
+  status: z.string().nullable(),
+  institute: z.string().nullable(),
+  department: z.string().nullable(),
+  branch: z.string().nullable(),
+});
+
+export const ThesisExtendedSchema = ThesisSchema.merge(ThesisExtentionSchema);
+
+export type TThesis = z.infer<typeof ThesisSchema>;
+export type TExtention = z.infer<typeof ThesisExtentionSchema>;
 export type TThesisExtended = TThesis & TExtention;
+export const allThesisAttributes = ThesisExtendedSchema.keyof().options;
+export type TThesisAttribute = (typeof allThesisAttributes)[number];
 
 export type TThesisType = {
   id: string;

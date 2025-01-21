@@ -1,6 +1,6 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
-import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
+import ThesisSearchResultRowList from "@/components/search/results/thesis-search-result-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
@@ -24,8 +24,7 @@ export default async function Page({ params }: Props) {
   }
 
   let thesis: Awaited<ReturnType<typeof getThesis>> | null = null;
-  let similarTheses: Awaited<ReturnType<typeof searchTheses>>["hits"] | null =
-    null;
+  let similarTheses: Awaited<ReturnType<typeof searchTheses>> | null = null;
 
   try {
     thesis = await getThesis({ id: idNumber, client: meiliAdmin });
@@ -36,24 +35,26 @@ export default async function Page({ params }: Props) {
   if (!thesis) return notFound();
 
   try {
-    similarTheses = (
-      await searchTheses({
-        q: thesis.title_original || thesis.title_translated || "",
-        hits_per_page: 6,
-        page: 1,
-        languages: [],
-        thesis_types: [],
-        universities: [],
-        departments: [],
-        authors: [],
-        advisors: [],
-        sort: undefined,
-        year_gte: null,
-        year_lte: null,
-        attributes_to_retrieve: undefined,
-        client: meiliAdmin,
-      })
-    ).hits.filter((t) => t.id !== idNumber);
+    similarTheses = await searchTheses({
+      q: thesis.title_original || thesis.title_translated || "",
+      hits_per_page: 6,
+      page: 1,
+      languages: [],
+      thesis_types: [],
+      universities: [],
+      departments: [],
+      authors: [],
+      advisors: [],
+      sort: undefined,
+      year_gte: null,
+      year_lte: null,
+      attributes_to_retrieve: undefined,
+      attributes_to_not_retrieve: undefined,
+      client: meiliAdmin,
+    });
+    similarTheses.hits = similarTheses.hits.filter(
+      (hit) => hit.id !== idNumber
+    );
   } catch (error) {
     console.log("Failed to fetch similar theses.", error);
   }
@@ -231,15 +232,11 @@ export default async function Page({ params }: Props) {
       {similarTheses && (
         <div id="similar_theses_section" className="w-full flex flex-col">
           <h3 className="font-bold text-xl">Benzer Tezler</h3>
-          <ol className="w-full flex flex-col pt-4">
-            {similarTheses.map((t) => (
-              <ThesisSearchResultRow
-                className="first-of-type:border-t last-of-type:border-b"
-                key={t.id}
-                thesis={t}
-              />
-            ))}
-          </ol>
+          <ThesisSearchResultRowList
+            data={similarTheses}
+            className="w-full flex flex-col pt-4"
+            classNameRow="first-of-type:border-t last-of-type:border-b"
+          />
         </div>
       )}
       <NavigationSection id={thesis.id} className="md:hidden pb-4 mt-8" />

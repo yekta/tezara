@@ -22,6 +22,7 @@ async function getPageData({ name }: { name: string }) {
         "keywords_turkish",
         "subjects_turkish",
       ],
+      attributes_to_not_retrieve: undefined,
       advisors: [],
       authors: [],
       languages: [],
@@ -41,6 +42,8 @@ async function getPageData({ name }: { name: string }) {
       advisors: [],
       authors: [],
       thesis_types: [],
+      attributes_to_retrieve: undefined,
+      attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
       year_gte: null,
       year_lte: null,
       client: meiliAdmin,
@@ -128,6 +131,6 @@ async function getPageData({ name }: { name: string }) {
     maxYear,
     thesisTypes,
     thesesCount: mainRes.hits.length,
-    lastThesesRes: lastThesesRes.hits,
+    lastThesesRes,
   };
 }

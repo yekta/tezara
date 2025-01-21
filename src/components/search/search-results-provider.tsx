@@ -35,6 +35,7 @@ const LONG_STALE_TIME = 60 * 1000;
 const SearchResultsContext = createContext<TSearchResultsContext | null>(null);
 
 export const SearchResultsProvider: React.FC<{
+  initialData?: TSearchThesesResult;
   children: ReactNode;
 }> = ({ children }) => {
   const queryClient = useQueryClient();
@@ -87,6 +88,8 @@ export const SearchResultsProvider: React.FC<{
     year_gte: yearGteQP,
     year_lte: yearLteQP,
     hits_per_page: HITS_PER_PAGE_DEFAULT,
+    attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
+    attributes_to_retrieve: undefined,
     page: pageQP,
   });
 
@@ -105,6 +108,11 @@ export const SearchResultsProvider: React.FC<{
         sort: undefined,
         hits_per_page: HITS_PER_PAGE_DEFAULT,
         page: pageQP,
+        attributes_to_not_retrieve: [
+          "abstract_original",
+          "abstract_translated",
+        ],
+        attributes_to_retrieve: undefined,
         client: meili,
       }),
     queryKey,
@@ -123,6 +131,8 @@ export const SearchResultsProvider: React.FC<{
       year_gte: yearGteQP,
       year_lte: yearLteQP,
       hits_per_page: HITS_PER_PAGE_BULK,
+      attributes_to_not_retrieve: undefined,
+      attributes_to_retrieve: undefined,
       page: PAGE_DEFAULT,
     };
 

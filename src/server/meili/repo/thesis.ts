@@ -2,7 +2,11 @@ import {
   PAGE_DEFAULT,
   TSearchLikePageParamsSearchProps,
 } from "@/components/search/constants/shared";
-import { TThesisExtended } from "@/server/meili/types";
+import {
+  allThesisAttributes,
+  TThesisAttribute,
+  TThesisExtended,
+} from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
 const indexName = "theses";
@@ -35,10 +39,12 @@ export async function searchTheses({
   hits_per_page,
   page = PAGE_DEFAULT,
   attributes_to_retrieve,
+  attributes_to_not_retrieve,
 }: {
   sort: string[] | undefined;
   hits_per_page: number | undefined;
-  attributes_to_retrieve?: (keyof TThesisExtended)[];
+  attributes_to_retrieve: TThesisAttribute[] | undefined;
+  attributes_to_not_retrieve: TThesisAttribute[] | undefined;
   client: MeiliSearch;
 } & TSearchLikePageParamsSearchProps) {
   const index = client.index<TThesisExtended>(indexName);
@@ -49,6 +55,12 @@ export async function searchTheses({
   let advisorFilter = "";
   let authorsFilter = "";
   let thesisTypeFilter = "";
+
+  if (attributes_to_not_retrieve && attributes_to_not_retrieve.length > 0) {
+    attributes_to_retrieve = allThesisAttributes.filter(
+      (attr) => !attributes_to_not_retrieve?.includes(attr)
+    );
+  }
 
   if (languages && languages.length > 0) {
     const entries = languages.map((l) => `language = "${l}"`);

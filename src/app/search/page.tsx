@@ -4,7 +4,7 @@ import {
   HITS_PER_PAGE_DEFAULT,
 } from "@/components/search/constants/shared";
 import SearchBox from "@/components/search/search-box";
-import SearchResults from "@/components/search/search-results";
+import SearchResults from "@/components/search/results/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
 import { meili } from "@/server/meili/constants-client";
@@ -49,6 +49,8 @@ export default async function Page({ searchParams }: Props) {
     year_lte,
     page,
     hits_per_page: HITS_PER_PAGE_DEFAULT,
+    attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
+    attributes_to_retrieve: undefined,
   });
 
   const [languagesData, universitiesData, thesisTypesData] = await Promise.all([
@@ -71,6 +73,11 @@ export default async function Page({ searchParams }: Props) {
           page,
           hits_per_page: HITS_PER_PAGE_DEFAULT,
           sort: undefined,
+          attributes_to_not_retrieve: [
+            "abstract_original",
+            "abstract_translated",
+          ],
+          attributes_to_retrieve: undefined,
           client: meiliAdmin,
         }),
     }),

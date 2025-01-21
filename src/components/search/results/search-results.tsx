@@ -3,8 +3,8 @@
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { formatForDownload } from "@/components/search/format-for-download";
 import PaginationBar from "@/components/search/pagination-bar";
+import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { useSearchResults } from "@/components/search/search-results-provider";
-import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
 import { Button } from "@/components/ui/button";
 import { Parser } from "@json2csv/plainjs";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
@@ -238,20 +238,7 @@ export default function SearchResults({}: Props) {
         {/* Result rows */}
         {((!data && isPending) ||
           (data && data.hits && data.hits.length > 0)) && (
-          <div className="w-full flex-1 flex flex-col">
-            <ol className="w-full flex flex-col">
-              {data
-                ? data.hits.map((i, index) => (
-                    <ThesisSearchResultRow
-                      key={`${i.id}-${index}`}
-                      thesis={i}
-                    />
-                  ))
-                : Array.from({ length: 20 }).map((i, index) => (
-                    <ThesisSearchResultRow key={index} isPlaceholder />
-                  ))}
-            </ol>
-          </div>
+          <ResultsSection data={data} />
         )}
         <PaginationBar
           hasNext={hasNext}
