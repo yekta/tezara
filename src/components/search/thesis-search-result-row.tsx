@@ -44,11 +44,11 @@ export default function ThesisSearchResultRow({
     <div
       data-placeholder={isPlaceholder ? true : undefined}
       className={cn(
-        "pt-3.5 pb-4.5 last-of-type:border-b-0 border-b border-foreground/10 flex flex-row items-start gap-4 group/row",
+        "pt-3.5 pb-4.5 px-1 last-of-type:border-b-0 border-b border-foreground/10 flex flex-col sm:flex-row sm:px-0 sm:gap-4 items-start gap-2 group/row",
         className
       )}
     >
-      <div className="flex shrink-0 min-w-12 -mt-0.5 flex-col items-center">
+      <div className="flex shrink-0 min-w-12 -mt-0.5 flex-row flex-wrap sm:flex-col sm:-ml-0 items-center -ml-1.5">
         {isPlaceholder ? (
           <div className="flex shrink flex-col text-xs font-mono justify-start items-start gap-0.5 px-1.5 py-1 rounded-md">
             <p className="flex-1 min-w-0 font-medium leading-tight font-sans text-transparent bg-muted-foreground animate-skeleton rounded-sm">
@@ -105,15 +105,15 @@ export default function ThesisSearchResultRow({
           </Button>
         )}
       </div>
-      <div className="flex-1 min-w-0 flex flex-col items-start">
+      <div className="flex-1 min-w-0 flex flex-col items-start -mt-1 sm:-mt-0.5">
         {isPlaceholder ? (
-          <div className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight bg-foreground text-transparent animate-skeleton py-0.5 -mt-0.5 rounded-md">
+          <div className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight bg-foreground text-transparent animate-skeleton py-0.5 rounded-md">
             Başlık yükleniyor................................
           </div>
         ) : (
           <Link
             href={`/thesis/${thesis.id}`}
-            className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5 -mt-0.5"
+            className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5"
           >
             {thesis.title_original || noTitle}
           </Link>
