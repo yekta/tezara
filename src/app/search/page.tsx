@@ -79,20 +79,16 @@ export default async function Page({ searchParams }: Props) {
 
   return (
     <HydrateClient>
-      <div className="w-full flex-1 flex flex-col items-center">
-        <div className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-32">
-          <div className="w-full flex flex-col items-center flex-1">
-            <SearchResultsProvider>
-              <SearchBox
-                languages={languagesData.hits}
-                universities={universitiesData.hits}
-                thesisTypes={thesisTypesData.hits}
-                variant="search"
-              />
-              <SearchResults />
-            </SearchResultsProvider>
-          </div>
-        </div>
+      <div className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-32">
+        <SearchResultsProvider>
+          <SearchBox
+            languages={languagesData.hits}
+            universities={universitiesData.hits}
+            thesisTypes={thesisTypesData.hits}
+            variant="search"
+          />
+          <SearchResults />
+        </SearchResultsProvider>
       </div>
     </HydrateClient>
   );
