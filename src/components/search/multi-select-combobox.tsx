@@ -115,7 +115,7 @@ export default function MultiSelectCombobox({
         <PopoverContent className="p-0">
           <Command
             filter={commandFilter}
-            className="max-h-[min(25rem,var(--radix-popper-available-height))]"
+            className="max-h-[min(20rem,var(--radix-popper-available-height))]"
           >
             <CommandInput
               value={commandInputValue}
