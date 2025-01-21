@@ -41,7 +41,7 @@ import {
   SettingsIcon,
   XIcon,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -241,12 +241,26 @@ export default function SearchBox({
     focusToMainInput();
   });
 
+  const pathname = usePathname();
+
+  const pushToSearch = async () => {
+    const paramStr = searchParams.toString();
+    await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
+  };
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (variant === "home") {
-      const paramStr = searchParams.toString();
-      await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
-      return;
+      await pushToSearch();
+      let counter = 10;
+
+      while (counter > 0 && pathname !== "search" && !isPendingAsyncPush) {
+        setTimeout(async () => {
+          if (window.location.pathname === "/search") return;
+          await pushToSearch();
+        }, counter * 100);
+        counter--;
+      }
     }
   }
 
