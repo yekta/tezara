@@ -1,7 +1,7 @@
 import { TSearchThesesResult } from "@/server/meili/repo/thesis";
 import { UseQueryResult } from "@tanstack/react-query";
 
-const emptyFieldText = "[[Yok]]";
+const emptyFieldText = "[[[[Yok]]]]";
 
 export function formatForDownload(
   data: NonNullable<
