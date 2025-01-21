@@ -44,7 +44,7 @@ export default function ThesisSearchResultRow({
     <div
       data-placeholder={isPlaceholder ? true : undefined}
       className={cn(
-        "pt-3.5 pb-4.5 px-1 last-of-type:border-b-0 border-b border-foreground/10 flex flex-col sm:flex-row sm:px-0 sm:gap-4 items-start gap-2 group/row",
+        "pt-3.5 pb-5 sm:pt-4 sm:pb-5.5 px-1 last-of-type:border-b-0 border-b border-foreground/10 flex flex-col sm:flex-row sm:px-0 sm:gap-4 items-start gap-2 group/row",
         className
       )}
     >
