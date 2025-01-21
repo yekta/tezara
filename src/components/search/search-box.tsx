@@ -41,6 +41,7 @@ import {
   SettingsIcon,
   XIcon,
 } from "lucide-react";
+import { useUmami } from "next-umami";
 import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
@@ -93,6 +94,8 @@ export default function SearchBox({
       })),
     [thesisTypes]
   );
+
+  const umami = useUmami();
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const [isPendingHackyPush, setIsPendingHackyPush] = useState(false);
@@ -164,7 +167,7 @@ export default function SearchBox({
   );
   const [yearGteQPKey, setYearGteQPKey] = useState(0);
 
-  const [advancedSearch, setAdvancedSearch] = useQueryState(
+  const [advancedSearchQP, setAdvancedSearchQP] = useQueryState(
     "advanced",
     searchLikePageParams["advanced"]
   );
@@ -379,7 +382,7 @@ export default function SearchBox({
       </div>
       {/* Advanced search section */}
       <div
-        data-advanced={advancedSearch ? true : undefined}
+        data-advanced={advancedSearchQP ? true : undefined}
         className="w-full flex flex-col items-center group pt-3"
       >
         <div className="max-w-full flex flex-wrap justify-center items-center gap-2">
@@ -406,10 +409,15 @@ export default function SearchBox({
               type="button"
               variant="outline"
               className="font-semibold py-2 px-3.75"
-              onClick={() => setAdvancedSearch((a) => !a)}
+              onClick={() => {
+                if (!advancedSearchQP) {
+                  umami.event("Advance Search Clicked");
+                }
+                setAdvancedSearchQP((a) => !a);
+              }}
             >
               <div className="size-5 -ml-1 transform transition group-data-[advanced]:rotate-90">
-                {advancedSearch ? (
+                {advancedSearchQP ? (
                   <ChevronUpIcon className="size-full -rotate-90" />
                 ) : (
                   <SettingsIcon className="size-full" />
@@ -436,12 +444,15 @@ export default function SearchBox({
           </div>
         </div>
         {/* Advanced settings */}
-        {advancedSearch && (
+        {advancedSearchQP && (
           <div className="w-full max-w-3xl flex justify-center flex-wrap pt-2">
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1 flex items-center">
               {/* Year Gte */}
               <Select
                 key={`year-gte-${yearGteQPKey}`}
+                onOpenChange={(o) => {
+                  if (o) umami.event("Year GTE Filter Clicked");
+                }}
                 value={yearGteQP?.toString()}
                 onValueChange={(v) => {
                   if (v === clearButtonText) {
@@ -496,6 +507,9 @@ export default function SearchBox({
               {/* Year LTE */}
               <Select
                 key={`year-lte-${yearLteQPKey}`}
+                onOpenChange={(o) => {
+                  if (o) umami.event("Year LTE Filter Clicked");
+                }}
                 value={yearLteQP?.toString()}
                 onValueChange={(v) => {
                   if (v === clearButtonText) {
@@ -552,6 +566,9 @@ export default function SearchBox({
               <MultiSelectCombobox
                 label="Üniversite Bazlı Filterele"
                 className="w-full"
+                triggerOnClick={() => {
+                  umami.event("University Filter Clicked");
+                }}
                 Icon={LandmarkIcon}
                 commandButtonText={
                   <div className="flex-1 min-w-0 flex items-center">
@@ -588,6 +605,9 @@ export default function SearchBox({
                 commandFilter={() => 1}
                 label="Ana Bilim Dalı Bazlı Filtrele"
                 className="w-full"
+                triggerOnClick={() => {
+                  umami.event("Department Filter Clicked");
+                }}
                 Icon={BuildingIcon}
                 commandInputValue={queryDepartments}
                 commandInputOnValueChange={(v) => setQueryDepartments(v)}
@@ -642,6 +662,9 @@ export default function SearchBox({
               <MultiSelectCombobox
                 label="Tez Türü Bazlı Filtrele"
                 className="w-full"
+                triggerOnClick={() => {
+                  umami.event("Thesis Type Filter Clicked");
+                }}
                 Icon={ScrollTextIcon}
                 IconSetForItem={ThesisTypeIcon}
                 commandButtonText={
@@ -678,6 +701,9 @@ export default function SearchBox({
               <MultiSelectCombobox
                 label="Dil Bazlı Filtrele"
                 className="w-full"
+                triggerOnClick={() => {
+                  umami.event("Language Filter Clicked");
+                }}
                 Icon={GlobeIcon}
                 IconSetForItem={LanguageIcon}
                 iconSetForItemClassName="rounded-full"
@@ -716,6 +742,9 @@ export default function SearchBox({
                 commandFilter={() => 1}
                 label="Yazar Bazlı Filtrele"
                 className="w-full"
+                triggerOnClick={() => {
+                  umami.event("Author Filter Clicked");
+                }}
                 Icon={PenToolIcon}
                 commandInputValue={queryAuthors}
                 commandInputOnValueChange={(v) => setQueryAuthors(v)}
@@ -769,6 +798,9 @@ export default function SearchBox({
                 commandFilter={() => 1}
                 label="Danışman Bazlı Filtrele"
                 className="w-full"
+                triggerOnClick={() => {
+                  umami.event("Advisor Filter Clicked");
+                }}
                 Icon={UserPenIcon}
                 commandInputValue={queryAdvisors}
                 commandInputOnValueChange={(v) => setQueryAdvisors(v)}

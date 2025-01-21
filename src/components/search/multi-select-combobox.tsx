@@ -42,6 +42,7 @@ type Props = {
         keywords?: string[] | undefined
       ) => number)
     | undefined;
+  triggerOnClick?: () => void;
   className?: string;
   Icon?: ComponentType<{ className: string }>;
   IconSetForItem?: ComponentType<{ className: string; variant: string }>;
@@ -72,6 +73,7 @@ export default function MultiSelectCombobox({
   commandInputPlaceholder,
   commandInputOnValueChange,
   commandFilter,
+  triggerOnClick,
   label,
   className,
   isAsync = false,
@@ -92,6 +94,7 @@ export default function MultiSelectCombobox({
             variant="outline"
             size="sm"
             role="combobox"
+            onClick={triggerOnClick}
             className={cn("w-full justify-between rounded-lg px-3")}
           >
             <div className="flex shrink min-w-0 items-center gap-1.5">
