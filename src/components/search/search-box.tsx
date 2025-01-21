@@ -243,33 +243,40 @@ export default function SearchBox({
     focusToMainInput();
   });
 
+  const searchRoute = "/search";
+
   const pushToSearch = async () => {
     const paramStr = searchParams.toString();
-    await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
+    await asyncPush(`${searchRoute}${paramStr ? `?${paramStr}` : ""}`);
   };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (variant === "home") {
-      await pushToSearch();
-
-      let counter = 20;
-      let pathname = window.location.pathname;
-      // TO-DO: Fix this, it is a horrible hack for Safari caused by search params not updating
-      setIsPendingHackyPush(true);
-      while (
-        counter > 0 &&
-        (pathname !== "/search" || !pathname.startsWith("/search")) &&
-        !isPendingAsyncPush
-      ) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        pathname = window.location.pathname;
-        if (pathname === "/search") return;
+    setIsPendingHackyPush(true);
+    try {
+      if (variant === "home") {
         await pushToSearch();
-        counter--;
+
+        let counter = 20;
+        let pathname = window.location.pathname;
+
+        // TO-DO: Fix this, it is a horrible hack for Safari caused by search params not updating
+        while (
+          counter > 0 &&
+          (pathname !== searchRoute || !pathname.startsWith(searchRoute)) &&
+          !isPendingAsyncPush
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          pathname = window.location.pathname;
+          if (pathname === searchRoute) return;
+          await pushToSearch();
+          counter--;
+        }
       }
-      setIsPendingHackyPush(false);
+    } catch (error) {
+      console.log(error);
     }
+    setIsPendingHackyPush(false);
   }
 
   function clearQuery() {
