@@ -1,8 +1,7 @@
-import { loadSearchLikePageSearchParams } from "@/components/search/constants/server";
+import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
 import { HITS_PER_PAGE_DEFAULT } from "@/components/search/constants/shared";
 import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import SearchBox from "@/components/search/search-box";
-import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";
 import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
@@ -23,7 +22,6 @@ type Props = {
 };
 
 export default async function Page({ searchParams }: Props) {
-  await searchPageSearchParamsCache.parse(searchParams);
   const {
     q,
     languages,
@@ -34,7 +32,7 @@ export default async function Page({ searchParams }: Props) {
     year_gte,
     year_lte,
     page,
-  } = await loadSearchLikePageSearchParams(searchParams);
+  } = await cachedSearchLikePageSearchParams.parse(searchParams);
 
   const queryClient = getQueryClientServer();
   const queryKey = getSearchThesesQueryKey({

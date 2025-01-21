@@ -1,8 +1,9 @@
-import FileExtensionIcon from "@/components/icons/file-extension";
+import FileExtensionIcon from "@/components/icons/sets/file-extension";
+import LandmarkIcon from "@/components/icons/landmark";
 import LanguageIcon from "@/components/icons/language";
 import ThesisTypeIcon, {
   getThesisTypeColorClassName,
-} from "@/components/icons/thesis-type";
+} from "@/components/icons/sets/thesis-type";
 import { cleanAdvisors } from "@/components/search/helpers";
 import {
   Button,
@@ -11,13 +12,10 @@ import {
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { TThesisExtended } from "@/server/meili/types";
-import {
-  CalendarIcon,
-  LandmarkIcon,
-  PenToolIcon,
-  UserIcon,
-} from "lucide-react";
 import Link from "next/link";
+import PenToolIcon from "@/components/icons/pen-tool";
+import UserPenIcon from "@/components/icons/user-pen";
+import CalendarIcon from "@/components/icons/calendar";
 
 type Props =
   | (
@@ -95,8 +93,14 @@ export default function ThesisSearchResultRow({
             <FileExtensionIcon variant="pdf" className="size-7" />
           </LinkButton>
         ) : (
-          <Button variant="ghost" size="icon" className="rounded-lg" disabled>
-            <FileExtensionIcon variant="no-pdf" className="size-7" />
+          <Button
+            aria-label="PDF İndir"
+            variant="ghost"
+            size="icon"
+            className="rounded-lg"
+            disabled
+          >
+            <FileExtensionIcon variant="pdf-x" className="size-7" />
           </Button>
         )}
       </div>
@@ -124,23 +128,19 @@ export default function ThesisSearchResultRow({
             ? "Başlık çevirisi yükleniyor..."
             : thesis.title_translated || noTranslatedTitle}
         </p>
-        <div className="w-full flex mt-2">
-          <div className="w-full flex justify-start items-center gap-1">
-            {!isPlaceholder && thesis.author && (
-              <PenToolIcon className="size-4 shrink-0" />
-            )}
-            <p
-              className="shrink min-w-0 text-base leading-snug
+        <div className="w-full flex mt-2 justify-start items-center gap-1">
+          {!isPlaceholder && thesis.author && (
+            <PenToolIcon className="size-4 shrink-0" />
+          )}
+          <p
+            className="shrink min-w-0 text-base leading-snug
               group-data-[placeholder]/row:text-transparent
               group-data-[placeholder]/row:bg-muted-foreground
               group-data-[placeholder]/row:animate-skeleton
               group-data-[placeholder]/row:rounded-md"
-            >
-              {isPlaceholder
-                ? "Yazar yükleniyor..."
-                : thesis.author || noAuthor}
-            </p>
-          </div>
+          >
+            {isPlaceholder ? "Yazar yükleniyor..." : thesis.author || noAuthor}
+          </p>
         </div>
         {/* Chips */}
         <div className="w-full flex flex-wrap mt-3 gap-1.5">
@@ -252,7 +252,7 @@ export default function ThesisSearchResultRow({
                 )}
               >
                 {!isPlaceholder && (
-                  <UserIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
+                  <UserPenIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
                 )}
                 <p
                   className="shrink min-w-0 text-sm leading-none font-medium

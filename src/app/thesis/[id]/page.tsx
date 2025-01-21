@@ -1,5 +1,5 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
-import FileExtensionIcon from "@/components/icons/file-extension";
+import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
@@ -88,7 +88,7 @@ export default async function Page({ params }: Props) {
           </LinkButton>
         ) : (
           <Button size="sm" variant="destructive" disabled>
-            <FileExtensionIcon className="size-5 -ml-1.5" variant="no-pdf" />
+            <FileExtensionIcon className="size-5 -ml-1.5" variant="pdf-x" />
             <p className="shrink min-w-0">PDF Yok</p>
           </Button>
         )}

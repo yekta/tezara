@@ -1,8 +1,11 @@
 "use client";
 
 import BroomIcon from "@/components/icons/broom";
+import LandmarkIcon from "@/components/icons/landmark";
 import LanguageIcon from "@/components/icons/language";
-import ThesisTypeIcon from "@/components/icons/thesis-type";
+import PenToolIcon from "@/components/icons/pen-tool";
+import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
+import UserPenIcon from "@/components/icons/user-pen";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
 import { searchLikePageParams } from "@/components/search/constants/client";
 import { toggleInArray } from "@/components/search/helpers";
@@ -30,13 +33,10 @@ import {
   CalendarArrowDownIcon,
   ChevronUpIcon,
   GlobeIcon,
-  LandmarkIcon,
   LoaderIcon,
-  PenToolIcon,
   ScrollTextIcon,
   SearchIcon,
   SettingsIcon,
-  UserIcon,
   XIcon,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -676,7 +676,7 @@ export default function SearchBox({
                 commandFilter={() => 1}
                 label="Danışman Bazlı Filtrele"
                 className="w-full"
-                Icon={UserIcon}
+                Icon={UserPenIcon}
                 commandInputValue={queryAdvisors}
                 commandInputOnValueChange={(v) => setQueryAdvisors(v)}
                 isAsync

@@ -1,6 +1,6 @@
 import Logo from "@/components/logo/logo";
+import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
 import SearchBox from "@/components/search/search-box";
-import { searchPageSearchParamsCache } from "@/components/search/search-query-params";
 import { prefetchAdvisors } from "@/lib/queries/prefetch-advisors";
 import { prefetchAuthors } from "@/lib/queries/prefetch-authors";
 import { meili } from "@/server/meili/constants-client";
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default async function Home({ searchParams }: Props) {
-  await searchPageSearchParamsCache.parse(searchParams);
+  await cachedSearchLikePageSearchParams.parse(searchParams);
   const queryClient = getQueryClientServer();
 
   const [languages, universities, thesisTypes] = await Promise.all([

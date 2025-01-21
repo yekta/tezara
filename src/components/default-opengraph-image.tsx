@@ -1,4 +1,4 @@
-import PenToolIcon from "@/components/icons/pen-tool-icon";
+import PenToolIcon from "@/components/icons/pen-tool";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
 import { env } from "@/lib/env";

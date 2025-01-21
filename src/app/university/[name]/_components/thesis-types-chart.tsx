@@ -1,6 +1,6 @@
 "use client";
 
-import { getThesisTypeColorClassName } from "@/components/icons/thesis-type";
+import { getThesisTypeColorClassName } from "@/components/icons/sets/thesis-type";
 import {
   ChartConfig,
   ChartContainer,

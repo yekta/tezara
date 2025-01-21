@@ -1,13 +1,11 @@
+import BrushIcon from "@/components/icons/brush";
+import GraduationCapIcon from "@/components/icons/graduation-cap";
+import PenToolIcon from "@/components/icons/pen-tool";
+import PillIcon from "@/components/icons/pill";
+import SyringeIcon from "@/components/icons/syringe";
+import TestTubeDiagonalIcon from "@/components/icons/test-tube-diagonal";
+import TrophyIcon from "@/components/icons/trophy";
 import { cn } from "@/components/ui/utils";
-import {
-  BrushIcon,
-  GraduationCapIcon,
-  PenToolIcon,
-  PillIcon,
-  SyringeIcon,
-  TestTubeDiagonalIcon,
-  TrophyIcon,
-} from "lucide-react";
 import { ComponentProps } from "react";
 
 const defaultClassName = "size-5 shrink-0";

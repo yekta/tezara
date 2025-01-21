@@ -8,7 +8,7 @@ import DefaultOpenGraphImage, {
   opengraphContentType,
   opengraphSize,
 } from "@/components/default-opengraph-image";
-import PenTool from "@/components/icons/pen-tool-icon";
+import PenToolIcon from "@/components/icons/pen-tool";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
 import { truncateString } from "@/lib/helpers";
@@ -110,7 +110,7 @@ export default async function Image({ params }: Props) {
         >
           <Info
             label={truncateString(thesis.author || `Yazar belirtilmemiş`, 70)}
-            Icon={PenTool}
+            Icon={PenToolIcon}
           />
           <Info
             label={thesis.thesis_type || "Tez türü belirtilmemiş"}

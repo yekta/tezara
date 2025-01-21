@@ -1,7 +1,7 @@
 import type { TSearchLikePageParams } from "@/components/search/constants/client";
 import { PAGE_DEFAULT } from "@/components/search/constants/shared";
 import {
-  createLoader,
+  createSearchParamsCache,
   parseAsArrayOf,
   parseAsBoolean,
   parseAsInteger,
@@ -22,5 +22,5 @@ export const searchLikePageParams = {
   year_lte: parseAsInteger,
 } satisfies Record<keyof TSearchLikePageParams, unknown>;
 
-export const loadSearchLikePageSearchParams =
-  createLoader(searchLikePageParams);
+export const cachedSearchLikePageSearchParams =
+  createSearchParamsCache(searchLikePageParams);

@@ -8,10 +8,10 @@ import {
   opengraphContentType,
   opengraphSize,
 } from "@/components/default-opengraph-image";
-import FolderClosedIcon from "@/components/icons/folder-closed-icon";
-import { GlobeIcon } from "@/components/icons/globe-icon";
-import KeyRoundIcon from "@/components/icons/key-round-icon";
-import LandmarkIcon from "@/components/icons/landmark-icon";
+import FolderClosedIcon from "@/components/icons/folder-closed";
+import GlobeIcon from "@/components/icons/globe";
+import KeyRoundIcon from "@/components/icons/key-round";
+import LandmarkIcon from "@/components/icons/landmark";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
 import { truncateString } from "@/lib/helpers";

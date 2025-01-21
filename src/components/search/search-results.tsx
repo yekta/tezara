@@ -1,6 +1,6 @@
 "use client";
 
-import FileExtensionIcon from "@/components/icons/file-extension";
+import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { formatForDownload } from "@/components/search/format-for-download";
 import PaginationBar from "@/components/search/pagination-bar";
 import { useSearchResults } from "@/components/search/search-results-provider";
