@@ -62,6 +62,7 @@ export default function ThesisSearchResultRow({
           <LinkButton
             variant="ghost"
             href={`/thesis/${thesis.id}`}
+            prefetch={false}
             className="flex shrink flex-col text-xs font-mono justify-start items-start gap-0.5 px-1.5 py-1 rounded-md"
           >
             <p className="flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
@@ -112,6 +113,7 @@ export default function ThesisSearchResultRow({
           </div>
         ) : (
           <Link
+            prefetch={false}
             href={`/thesis/${thesis.id}`}
             className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5"
           >
@@ -229,6 +231,7 @@ export default function ThesisSearchResultRow({
             </div>
           ) : (
             <Link
+              prefetch={false}
               href={`/university/${thesis.university}`}
               className={cn(
                 "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
