@@ -238,7 +238,7 @@ export default function SearchResults({}: Props) {
         {((!data && isPending) ||
           (data && data.hits && data.hits.length > 0)) && (
           <div className="w-full flex-1 flex flex-col">
-            <div className="w-full flex flex-col">
+            <ol className="w-full flex flex-col">
               {data
                 ? data.hits.map((i, index) => (
                     <ThesisSearchResultRow
@@ -249,7 +249,7 @@ export default function SearchResults({}: Props) {
                 : Array.from({ length: 20 }).map((i, index) => (
                     <ThesisSearchResultRow key={index} isPlaceholder />
                   ))}
-            </div>
+            </ol>
           </div>
         )}
         <PaginationBar

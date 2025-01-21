@@ -36,8 +36,8 @@ export default function ThesesCountsByYearsChart({
   });
 
   return (
-    <div className={cn("w-full flex flex-col gap-2", className)}>
-      <h2 className="max-w-full font-bold px-4 text-xl">
+    <div className={cn("w-full flex flex-col gap-3", className)}>
+      <h2 className="max-w-full font-bold text-balance px-4 text-xl">
         Yıllara Göre Tez Sayıları
       </h2>
       <div className="w-full sm:px-2">

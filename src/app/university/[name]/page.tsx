@@ -45,7 +45,7 @@ export default async function Page({ params }: Props) {
       {/* Title */}
       <div className="w-full flex flex-col px-4">
         <div className="w-full flex items-center flex-wrap gap-1.5">
-          <h1 className="max-w-full font-bold text-2xl text-balance leading-tight pr-1">
+          <h1 className="max-w-full font-bold text-3xl text-balance leading-tight pr-1">
             {parsedName}
           </h1>
           <p className="bg-foreground/10 rounded-full font-semibold text-sm px-2.5 py-0.5">
@@ -97,7 +97,7 @@ export default async function Page({ params }: Props) {
       </div>
       <div className="w-full flex flex-col pt-8">
         <h2 className="font-bold px-4 text-xl">Son 10 Tez</h2>
-        <div className="w-full flex flex-col px-3 pt-4">
+        <ol className="w-full flex flex-col px-3 pt-4">
           {lastThesesRes.map((t) => (
             <ThesisSearchResultRow
               className="first-of-type:border-t last-of-type:border-b"
@@ -106,7 +106,7 @@ export default async function Page({ params }: Props) {
               disableUniversityLink
             />
           ))}
-        </div>
+        </ol>
       </div>
     </div>
   );

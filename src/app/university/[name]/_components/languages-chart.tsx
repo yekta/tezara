@@ -39,8 +39,8 @@ export default function LanguagesChart({
   });
 
   return (
-    <div className={cn("w-full flex flex-col gap-2", className)}>
-      <h2 className="max-w-full font-bold px-4 text-xl">Diller</h2>
+    <div className={cn("w-full flex flex-col gap-3", className)}>
+      <h2 className="max-w-full font-bold text-balance px-4 text-xl">Diller</h2>
       <div className="w-full sm:px-2">
         <div className="w-full flex flex-col">
           <ChartContainer

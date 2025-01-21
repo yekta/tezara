@@ -231,7 +231,7 @@ export default async function Page({ params }: Props) {
       {similarTheses && (
         <div id="similar_theses_section" className="w-full flex flex-col">
           <h3 className="font-bold text-xl">Benzer Tezler</h3>
-          <div className="w-full flex flex-col pt-4">
+          <ol className="w-full flex flex-col pt-4">
             {similarTheses.map((t) => (
               <ThesisSearchResultRow
                 className="first-of-type:border-t last-of-type:border-b"
@@ -239,7 +239,7 @@ export default async function Page({ params }: Props) {
                 thesis={t}
               />
             ))}
-          </div>
+          </ol>
         </div>
       )}
       <NavigationSection id={thesis.id} className="md:hidden pb-4 mt-8" />
