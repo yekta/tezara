@@ -35,6 +35,7 @@ export default function SearchResults({}: Props) {
     firstPage,
     lastPage,
   } = searchResultsContext;
+
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
   const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
   const isPendingDownload = isPendingCsvDownload || isPendingJsonDownload;
