@@ -1,7 +1,7 @@
 import { TSearchLikePageParams } from "@/components/search/constants/client";
 
 export const PAGE_DEFAULT = 1;
-export const HITS_PER_PAGE_DEFAULT = 50;
+export const HITS_PER_PAGE_DEFAULT = 30;
 export const HITS_PER_PAGE_BULK = 15_000;
 
 export type TSearchLikePageParamsSearchProps = Omit<
