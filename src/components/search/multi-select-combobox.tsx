@@ -85,10 +85,10 @@ export default function MultiSelectCombobox({
 
   return (
     <div className={cn("w-full max-w-full flex flex-col", className)}>
-      <p className="sr-only">{label}</p>
       <Popover>
         <PopoverTrigger asChild>
           <Button
+            aria-label={label}
             variant="outline"
             size="sm"
             role="combobox"

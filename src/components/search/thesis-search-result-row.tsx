@@ -75,6 +75,7 @@ export default function ThesisSearchResultRow({
         )}
         {isPlaceholder ? (
           <Button
+            aria-label="PDF İndir"
             variant="ghost"
             size="icon"
             className="rounded-lg animate-skeleton"
@@ -84,6 +85,7 @@ export default function ThesisSearchResultRow({
           </Button>
         ) : thesis.pdf_url ? (
           <LinkButton
+            aria-label="PDF İndir"
             target="_blank"
             href={thesis.pdf_url}
             variant="destructive-ghost"
@@ -124,7 +126,9 @@ export default function ThesisSearchResultRow({
         </p>
         <div className="w-full flex mt-2">
           <div className="w-full flex justify-start items-center gap-1">
-            {!isPlaceholder && <PenToolIcon className="size-4 shrink-0" />}
+            {!isPlaceholder && thesis.author && (
+              <PenToolIcon className="size-4 shrink-0" />
+            )}
             <p
               className="shrink min-w-0 text-base leading-snug
               group-data-[placeholder]/row:text-transparent

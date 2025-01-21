@@ -362,6 +362,7 @@ export default function SearchBox({
               </div>
             )}
           </Button>
+          {/* Filter and clear buttons */}
           <div className="shrink min-w-0 flex flex-wrap justify-center gap-2">
             <Button
               type="button"
@@ -400,6 +401,7 @@ export default function SearchBox({
         {advancedSearch && (
           <div className="w-full max-w-3xl flex justify-center flex-wrap pt-2">
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1 flex items-center">
+              {/* Year Gte */}
               <Select
                 key={`year-gte-${yearGteQPKey}`}
                 value={yearGteQP?.toString()}
@@ -422,6 +424,7 @@ export default function SearchBox({
                 }}
               >
                 <SelectTrigger
+                  aria-label="Başlangıç Yılı"
                   className="flex-1 py-2 rounded-r-none -mr-[0.5px]"
                   classNameInnerContainer="flex items-center -ml-0.5"
                 >
@@ -452,6 +455,7 @@ export default function SearchBox({
                   ))}
                 </SelectContent>
               </Select>
+              {/* Year LTE */}
               <Select
                 key={`year-lte-${yearLteQPKey}`}
                 value={yearLteQP?.toString()}
@@ -474,6 +478,7 @@ export default function SearchBox({
                 }}
               >
                 <SelectTrigger
+                  aria-label="Bitiş Yılı"
                   className="flex-1 py-2 rounded-l-none -ml-[0.5px]"
                   classNameInnerContainer="flex items-center -ml-0.5"
                 >
@@ -507,7 +512,7 @@ export default function SearchBox({
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
-                label="Üniversite"
+                label="Üniversite Bazlı Filterele"
                 className="w-full"
                 Icon={LandmarkIcon}
                 commandButtonText={
@@ -542,7 +547,7 @@ export default function SearchBox({
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
-                label="Tez Türü"
+                label="Tez Türü Bazlı Filtrele"
                 className="w-full"
                 Icon={ScrollTextIcon}
                 IconSetForItem={ThesisTypeIcon}
@@ -578,7 +583,7 @@ export default function SearchBox({
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
-                label="Dil"
+                label="Dil Bazlı Filtrele"
                 className="w-full"
                 Icon={GlobeIcon}
                 IconSetForItem={LanguageIcon}
@@ -616,7 +621,7 @@ export default function SearchBox({
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
                 commandFilter={() => 1}
-                label="Yazar"
+                label="Yazar Bazlı Filtrele"
                 className="w-full"
                 Icon={PenToolIcon}
                 commandInputValue={queryAuthors}
@@ -669,7 +674,7 @@ export default function SearchBox({
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
                 commandFilter={() => 1}
-                label="Danışman"
+                label="Danışman Bazlı Filtrele"
                 className="w-full"
                 Icon={UserIcon}
                 commandInputValue={queryAdvisors}

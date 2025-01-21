@@ -125,12 +125,14 @@ export default function SearchResults({}: Props) {
               onClick={() => goToPage(firstPage)}
             />
           </PaginationItem>
-          <p className="flex-1 px-2 text-sm overflow-hidden leading-tight overflow-ellipsis whitespace-nowrap text-center shrink min-w-0 font-semibold text-muted-foreground">
-            Sayfa:{" "}
-            <span className="text-foreground font-mono font-bold">
-              {currentPage.toLocaleString()}
-            </span>
-          </p>
+          <li className="flex-1 flex items-center justify-center min-w-0">
+            <p className="flex-1 px-2 text-sm overflow-hidden leading-tight overflow-ellipsis whitespace-nowrap text-center shrink min-w-0 font-semibold text-muted-foreground">
+              Sayfa:{" "}
+              <span className="text-foreground font-mono font-bold">
+                {currentPage.toLocaleString()}
+              </span>
+            </p>
+          </li>
           <PaginationItem>
             <PaginationNext
               variant="last"

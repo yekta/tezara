@@ -4,6 +4,7 @@ import ThesisSearchResultRow from "@/components/search/thesis-search-result-row"
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
+import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getThesis, searchTheses } from "@/server/meili/repo/thesis";
@@ -284,6 +285,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    /* publisher: thesis.university ? thesis.university : undefined,
+    authors: thesis.author
+      ? [
+          {
+            name: thesis.author,
+            url: `${env.NEXT_PUBLIC_SITE_URL}/author/${encodeURIComponent(
+              thesis.author
+            )}`,
+          },
+        ]
+      : [], */
     twitter: getTwitterMeta({
       title,
       description,
