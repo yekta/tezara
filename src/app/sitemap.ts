@@ -4,7 +4,7 @@ import { searchTheses } from "@/server/meili/repo/thesis";
 import { getUniversities } from "@/server/meili/repo/university";
 import type { MetadataRoute } from "next";
 
-const SITEMAP_ENTRIES_PER_PAGE = 10_000;
+const SITEMAP_ENTRIES_PER_PAGE = 5_000;
 const main: MetadataRoute.Sitemap = [
   {
     url: `${env.NEXT_PUBLIC_SITE_URL}`,
