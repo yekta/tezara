@@ -8,6 +8,7 @@ import { useSearchResults } from "@/components/search/search-results-provider";
 import { Button } from "@/components/ui/button";
 import { Parser } from "@json2csv/plainjs";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
+import { useUmami } from "next-umami";
 import { useState } from "react";
 
 type Props = {
@@ -21,6 +22,7 @@ export default function SearchResults({}: Props) {
       "SearchResultsProvider needs to wrap useSearchResults for it to work."
     );
   }
+
   const {
     data,
     bulkDownload,
@@ -36,6 +38,7 @@ export default function SearchResults({}: Props) {
     lastPage,
   } = searchResultsContext;
 
+  const umami = useUmami();
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
   const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
   const isPendingDownload = isPendingCsvDownload || isPendingJsonDownload;
@@ -49,12 +52,16 @@ export default function SearchResults({}: Props) {
       const csv = parser.parse(formatted);
 
       // Convert CSV to a Blob
-      const csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
       setIsPendingDownload(false);
+      umami.event("Downloaded Bulk CSV", {
+        "Row Count": res.hits.length,
+        "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
+      });
 
       const name = `search-results-${Date.now()}.csv`;
-      downloadAndClean(name, csvBlob);
+      downloadAndClean(name, blob);
     } catch (error) {
       console.log(error);
       setIsPendingDownload(false);
@@ -67,14 +74,18 @@ export default function SearchResults({}: Props) {
       const res = await bulkDownload();
       const formatted = formatForDownload(res.hits);
       // Convert the formatted JSON to a Blob
-      const jsonBlob = new Blob([JSON.stringify(formatted, null, 2)], {
+      const blob = new Blob([JSON.stringify(formatted, null, 2)], {
         type: "application/json",
       });
 
       setIsPendingJsonDownload(false);
+      umami.event("Downloaded Bulk JSON", {
+        "Row Count": res.hits.length,
+        "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
+      });
 
       const name = `search-results-${Date.now()}.json`;
-      downloadAndClean(name, jsonBlob);
+      downloadAndClean(name, blob);
     } catch (error) {
       console.log(error);
       setIsPendingJsonDownload(false);
