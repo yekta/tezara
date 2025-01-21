@@ -265,6 +265,10 @@ export default function SearchBox({
     setIsPendingHackyPush(true);
     try {
       if (variant === "home") {
+        umami.event("Searched", {
+          Query: queryQP,
+          Variant: variant,
+        });
         await pushToSearch();
 
         let counter = 20;
