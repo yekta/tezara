@@ -64,18 +64,24 @@ export const SearchResultsProvider: React.FC<{
     "thesis_types",
     searchLikePageParams["thesis_types"]
   );
-  const [yearLteQP] = useQueryState(
-    "year_lte",
-    searchLikePageParams["year_lte"]
-  );
-  const [yearGteQP] = useQueryState(
-    "year_gte",
-    searchLikePageParams["year_gte"]
-  );
-  const [pageQP, setPageQP] = useQueryState(
-    "page",
-    searchLikePageParams["page"]
-  );
+  const [yearLte] = useQueryState("year_lte", searchLikePageParams["year_lte"]);
+  const [yearGte] = useQueryState("year_gte", searchLikePageParams["year_gte"]);
+  const [page, setPage] = useQueryState("page", searchLikePageParams["page"]);
+
+  useEffectAfterMount(() => {
+    if (page === PAGE_DEFAULT) return;
+    setPage(PAGE_DEFAULT);
+  }, [
+    query,
+    languages,
+    universities,
+    thesisTypes,
+    yearGte,
+    yearLte,
+    departments,
+    advisors,
+    authors,
+  ]);
 
   const queryKey = getSearchThesesQueryKey({
     q: query,
@@ -85,12 +91,12 @@ export const SearchResultsProvider: React.FC<{
     advisors,
     authors,
     thesis_types: thesisTypes,
-    year_gte: yearGteQP,
-    year_lte: yearLteQP,
+    year_gte: yearGte,
+    year_lte: yearLte,
     hits_per_page: HITS_PER_PAGE_DEFAULT,
     attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
     attributes_to_retrieve: undefined,
-    page: pageQP,
+    page: page,
   });
 
   const searchThesesQuery = useQuery({
@@ -103,11 +109,11 @@ export const SearchResultsProvider: React.FC<{
         advisors,
         authors,
         thesis_types: thesisTypes,
-        year_gte: yearGteQP,
-        year_lte: yearLteQP,
+        year_gte: yearGte,
+        year_lte: yearLte,
         sort: undefined,
         hits_per_page: HITS_PER_PAGE_DEFAULT,
-        page: pageQP,
+        page: page,
         attributes_to_not_retrieve: [
           "abstract_original",
           "abstract_translated",
@@ -117,6 +123,7 @@ export const SearchResultsProvider: React.FC<{
       }),
     queryKey,
     enabled: isSearchResultsPath,
+    placeholderData: (prev) => prev,
   });
 
   const bulkDownload: TSearchResultsContext["bulkDownload"] = async () => {
@@ -128,8 +135,8 @@ export const SearchResultsProvider: React.FC<{
       advisors,
       authors,
       thesis_types: thesisTypes,
-      year_gte: yearGteQP,
-      year_lte: yearLteQP,
+      year_gte: yearGte,
+      year_lte: yearLte,
       hits_per_page: HITS_PER_PAGE_BULK,
       attributes_to_not_retrieve: undefined,
       attributes_to_retrieve: undefined,
@@ -151,34 +158,29 @@ export const SearchResultsProvider: React.FC<{
   };
 
   const totalPages = searchThesesQuery.data?.totalPages;
-  const hasNext = totalPages ? pageQP < totalPages && totalPages > 1 : false;
-  const hasPrev = pageQP > 1 && totalPages !== undefined && totalPages > 1;
+  const hasNext = totalPages ? page < totalPages && totalPages > 1 : false;
+  const hasPrev = page > 1 && totalPages !== undefined && totalPages > 1;
 
   const goToNextPage = () => {
     if (!hasNext) return;
     if (!totalPages) return;
-    const adjustedPage = Math.min(totalPages, pageQP + 1);
-    setPageQP(adjustedPage);
+    const adjustedPage = Math.min(totalPages, page + 1);
+    setPage(adjustedPage);
   };
 
   const goToPrevPage = () => {
     if (!hasPrev) return;
     if (!totalPages) return;
-    const adjustedPage = Math.min(totalPages, Math.max(1, pageQP - 1));
-    setPageQP(adjustedPage);
+    const adjustedPage = Math.min(totalPages, Math.max(1, page - 1));
+    setPage(adjustedPage);
   };
 
   const goToPage = (page: number) => {
-    setPageQP(page);
+    setPage(page);
   };
 
   const firstPage = 1;
   const lastPage = totalPages || 1;
-
-  useEffectAfterMount(() => {
-    if (pageQP === PAGE_DEFAULT) return;
-    setPageQP(PAGE_DEFAULT);
-  }, [query, languages, universities, thesisTypes, yearGteQP, yearLteQP]);
 
   return (
     <SearchResultsContext.Provider
@@ -192,7 +194,7 @@ export const SearchResultsProvider: React.FC<{
         lastPage,
         hasNext,
         hasPrev,
-        currentPage: pageQP,
+        currentPage: page,
       }}
     >
       {children}

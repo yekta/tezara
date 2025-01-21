@@ -6,6 +6,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
+import { LoaderIcon } from "lucide-react";
 
 type Props = {
   className?: string;
@@ -17,6 +18,7 @@ type Props = {
   goToNextPage: () => void;
   goToPrevPage: () => void;
   goToPage: (page: number) => void;
+  showLoader?: boolean;
 };
 export default function PaginationBar({
   className,
@@ -28,6 +30,7 @@ export default function PaginationBar({
   goToNextPage,
   goToPrevPage,
   goToPage,
+  showLoader,
 }: Props) {
   return (
     <Pagination
@@ -53,12 +56,20 @@ export default function PaginationBar({
           />
         </PaginationItem>
         <li className="flex-1 flex items-center justify-center min-w-0">
-          <p className="flex-1 px-2 text-sm overflow-hidden leading-tight overflow-ellipsis whitespace-nowrap text-center shrink min-w-0 font-semibold text-muted-foreground">
-            Sayfa:{" "}
-            <span className="text-foreground font-mono font-bold">
-              {currentPage.toLocaleString()}
-            </span>
-          </p>
+          <div className="flex-1 flex items-center justify-center min-w-0 px-2 gap-1.5">
+            <div className="size-4 -my-1 text-muted-foreground shrink-0" />
+            <p className="text-sm overflow-hidden leading-tight overflow-ellipsis whitespace-nowrap text-center shrink min-w-0 font-semibold text-muted-foreground">
+              Sayfa:{" "}
+              <span className="text-foreground font-mono font-bold">
+                {currentPage.toLocaleString()}
+              </span>
+            </p>
+            {showLoader ? (
+              <LoaderIcon className="size-4 -my-1 text-muted-foreground shrink-0 animate-spin" />
+            ) : (
+              <div className="size-4 -my-1 text-muted-foreground shrink-0" />
+            )}
+          </div>
         </li>
         <PaginationItem>
           <PaginationNext

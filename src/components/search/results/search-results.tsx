@@ -4,7 +4,7 @@ import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { formatForDownload } from "@/components/search/format-for-download";
 import PaginationBar from "@/components/search/pagination-bar";
 import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
-import { useSearchResults } from "@/components/search/search-results-provider";
+import { useSearchResults } from "@/components/search/results/search-results-provider";
 import { Button } from "@/components/ui/button";
 import { Parser } from "@json2csv/plainjs";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
@@ -27,7 +27,8 @@ export default function SearchResults({}: Props) {
     data,
     bulkDownload,
     isPending,
-    isLoadingError,
+    isFetching,
+    isError,
     currentPage,
     hasNext,
     hasPrev,
@@ -37,6 +38,9 @@ export default function SearchResults({}: Props) {
     firstPage,
     lastPage,
   } = searchResultsContext;
+
+  const isHardError = !data && !isPending && isError;
+  const isJustFetching = !isPending && isFetching;
 
   const umami = useUmami();
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
@@ -109,116 +113,133 @@ export default function SearchResults({}: Props) {
   const metricsPendingClassName =
     "group-data-[pending]:text-transparent group-data-[pending]:animate-skeleton group-data-[pending]:bg-foreground group-data-[pending]:rounded-sm";
 
-  const isHardError = !data && !isPending && isLoadingError;
-
   return (
     <div
       data-pending={isPending ? true : undefined}
       className="w-full flex-1 flex flex-col pt-6 group"
     >
-      {((!data && isPending) || (data && data.hits)) && (
-        <div className="w-full flex flex-wrap items-start gap-1.5">
-          <Button
-            onClick={() => downloadCsv()}
-            disabled={
-              !data ||
-              data.hits.length < 1 ||
-              isPendingCsvDownload ||
-              isPendingDownload
-            }
-            size="sm"
-            variant="success"
-            fadeOnDisabled={!data ? false : isPendingCsvDownload ? false : true}
-            className={`${
-              isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
-            }`}
-          >
+      <div className="w-full flex flex-wrap items-start gap-1.5">
+        <Button
+          onClick={() => downloadCsv()}
+          disabled={
+            !data ||
+            data.hits.length < 1 ||
+            isPendingCsvDownload ||
+            isPendingDownload
+          }
+          size="sm"
+          variant="success"
+          fadeOnDisabled={
+            !data && isError
+              ? true
+              : !data
+              ? false
+              : isPendingCsvDownload
+              ? false
+              : true
+          }
+          className={`${
+            isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
+          }`}
+        >
+          {isPendingCsvDownload && (
+            <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
+          )}
+          <div className="size-5 -ml-1.5 relative">
+            {!isPendingCsvDownload && (
+              <FileExtensionIcon className="size-full" variant="csv" />
+            )}
             {isPendingCsvDownload && (
-              <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
+              <LoaderIcon className="size-full animate-spin" />
             )}
-            <div className="size-5 -ml-1.5 relative">
-              {!isPendingCsvDownload && (
-                <FileExtensionIcon className="size-full" variant="csv" />
-              )}
-              {isPendingCsvDownload && (
-                <LoaderIcon className="size-full animate-spin" />
-              )}
-            </div>
-            <p className="shrink min-w-0 relative">
-              {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
-            </p>
-          </Button>
-          <Button
-            onClick={() => downloadJson()}
-            disabled={
-              !data ||
-              data.hits.length < 1 ||
-              isPendingJsonDownload ||
-              isPendingDownload
-            }
-            size="sm"
-            fadeOnDisabled={
-              !data ? false : isPendingJsonDownload ? false : true
-            }
-            className={`${
-              isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
-            }`}
-          >
+          </div>
+          <p className="shrink min-w-0 relative">
+            {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
+          </p>
+        </Button>
+        <Button
+          onClick={() => downloadJson()}
+          disabled={
+            !data ||
+            data.hits.length < 1 ||
+            isPendingJsonDownload ||
+            isPendingDownload
+          }
+          size="sm"
+          fadeOnDisabled={
+            !data && isError
+              ? true
+              : !data
+              ? false
+              : isPendingJsonDownload
+              ? false
+              : true
+          }
+          className={`${
+            isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
+          }`}
+        >
+          {isPendingJsonDownload && (
+            <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
+          )}
+          <div className="size-5 -ml-1.5 relative">
+            {!isPendingJsonDownload && (
+              <FileExtensionIcon className="size-full" variant="json" />
+            )}
             {isPendingJsonDownload && (
-              <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
+              <LoaderIcon className="size-full animate-spin" />
             )}
-            <div className="size-5 -ml-1.5 relative">
-              {!isPendingJsonDownload && (
-                <FileExtensionIcon className="size-full" variant="json" />
-              )}
-              {isPendingJsonDownload && (
-                <LoaderIcon className="size-full animate-spin" />
-              )}
-            </div>
-            <p className="shrink min-w-0 relative">
-              {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
-            </p>
-          </Button>
-        </div>
-      )}
+          </div>
+          <p className="shrink min-w-0 relative">
+            {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
+          </p>
+        </Button>
+      </div>
       {/* Metrics */}
-      <p className="max-w-full py-3.5 px-1.5 font-semibold text-sm text-muted-foreground text-balance">
-        <span>Eşleşen: </span>
-        {!data ? (
-          <span className={metricsPendingClassName}>
-            {isHardError ? "0" : "900,000"}
-          </span>
+      <div className="w-full flex items-center justify-start py-3.5 px-1.5 gap-1.5">
+        <p className="shrink min-w-0 font-semibold text-sm text-muted-foreground text-balance">
+          <span>Eşleşen: </span>
+          {!data ? (
+            <span className={metricsPendingClassName}>
+              {isHardError ? "0" : "900,000"}
+            </span>
+          ) : (
+            <span className="text-foreground">
+              {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
+            </span>
+          )}
+          <span className="text-foreground/30 px-[0.75ch]">|</span>
+          <span>Gösterilen: </span>
+          {!data ? (
+            <span className={metricsPendingClassName}>
+              {isHardError ? 0 : 10}
+            </span>
+          ) : (
+            <span className="text-foreground">
+              {data.hits.length.toLocaleString()}
+            </span>
+          )}
+          <span className="text-foreground/30 px-[0.75ch]">|</span>
+          {!data ? (
+            <span
+              className={
+                isHardError ? "text-destructive" : metricsPendingClassName
+              }
+            >
+              {isHardError ? "Hata" : "0.001 sn."}
+            </span>
+          ) : (
+            <span className="text-foreground">
+              {(data.processingTimeMs / 1000).toLocaleString()} sn.
+            </span>
+          )}
+        </p>
+        {isJustFetching ? (
+          <LoaderIcon className="size-4 animate-spin text-muted-foreground" />
         ) : (
-          <span className="text-foreground">
-            {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
-          </span>
+          <div className="size-4" />
         )}
-        <span className="text-foreground/30 px-[0.75ch]">|</span>
-        <span>Gösterilen: </span>
-        {!data ? (
-          <span className={metricsPendingClassName}>
-            {isHardError ? 0 : 10}
-          </span>
-        ) : (
-          <span className="text-foreground">
-            {data.hits.length.toLocaleString()}
-          </span>
-        )}
-        <span className="text-foreground/30 px-[0.75ch]">|</span>
-        {!data ? (
-          <span
-            className={
-              isHardError ? "text-destructive" : metricsPendingClassName
-            }
-          >
-            {isHardError ? "Hata" : "0.001 sn."}
-          </span>
-        ) : (
-          <span className="text-foreground">
-            {(data.processingTimeMs / 1000).toLocaleString()} sn.
-          </span>
-        )}
-      </p>
+      </div>
       <div className="w-full flex flex-col flex-1">
         <PaginationBar
           hasNext={hasNext}
@@ -229,6 +250,7 @@ export default function SearchResults({}: Props) {
           currentPage={currentPage}
           firstPage={firstPage}
           lastPage={lastPage}
+          showLoader={isJustFetching}
         />
         {isHardError && (
           <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
@@ -260,6 +282,7 @@ export default function SearchResults({}: Props) {
           currentPage={currentPage}
           firstPage={firstPage}
           lastPage={lastPage}
+          showLoader={isJustFetching}
         />
       </div>
     </div>

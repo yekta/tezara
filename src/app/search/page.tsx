@@ -5,7 +5,7 @@ import {
 } from "@/components/search/constants/shared";
 import SearchBox from "@/components/search/search-box";
 import SearchResults from "@/components/search/results/search-results";
-import SearchResultsProvider from "@/components/search/search-results-provider";
+import SearchResultsProvider from "@/components/search/results/search-results-provider";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
 import { meili } from "@/server/meili/constants-client";
 import { meiliAdmin } from "@/server/meili/constants-server";

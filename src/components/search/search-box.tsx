@@ -9,9 +9,10 @@ import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
 import UserPenIcon from "@/components/icons/user-pen";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
 import { searchLikePageParams } from "@/components/search/constants/client";
+import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
-import { useSearchResults } from "@/components/search/search-results-provider";
+import { useSearchResults } from "@/components/search/results/search-results-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -337,13 +338,19 @@ export default function SearchBox({
     input?.setSelectionRange(input.value.length, input.value.length);
   }
 
-  const isPendingSearchResults = searchResultsContext
+  const isPendingResults = searchResultsContext
     ? searchResultsContext.isPending
     : false;
+  const isFetchingResults = searchResultsContext
+    ? searchResultsContext.isFetching
+    : false;
+  const isPendingOrFetchingResults = isPendingResults || isFetchingResults;
 
   return (
     <form
-      data-pending={isPendingPush || isPendingSearchResults ? true : undefined}
+      data-pending={
+        isPendingPush || isPendingOrFetchingResults ? true : undefined
+      }
       onSubmit={onSubmit}
       className={cn("w-full group/form flex flex-col items-center", className)}
     >
@@ -362,7 +369,7 @@ export default function SearchBox({
           onChange={(e) => setQueryInputValue(e.target.value)}
         />
         {!isPendingPush &&
-          !isPendingSearchResults &&
+          !isPendingOrFetchingResults &&
           queryInputValue !== undefined &&
           queryInputValue !== "" &&
           queryInputValue !== null && (
@@ -380,7 +387,7 @@ export default function SearchBox({
               <XIcon className="size-5" />
             </Button>
           )}
-        {(isPendingPush || isPendingSearchResults) && (
+        {(isPendingPush || isPendingOrFetchingResults) && (
           <div className="size-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
             <LoaderIcon className="size-full animate-spin" />
           </div>
@@ -393,21 +400,18 @@ export default function SearchBox({
       >
         <div className="max-w-full flex flex-wrap justify-center items-center gap-2">
           <Button
-            disabled={isPendingPush || isPendingSearchResults}
-            className="py-[calc(0.5rem+1px)] px-5"
+            disabled={isPendingPush || isPendingOrFetchingResults}
+            className="py-[calc(0.5rem+1px)] px-5 gap-2"
             fadeOnDisabled={false}
           >
-            <div className="shrink min-w-0 flex items-center justify-center gap-2 group-data-[pending]/form:opacity-0">
-              <div className="size-5 -ml-2.25">
-                <SearchIcon className="size-full" />
-              </div>
-              <p className="shrink min-w-0">Ara</p>
-            </div>
-            {(isPendingPush || isPendingSearchResults) && (
-              <div className="size-5 absolute left-1/2 top-1/2 transform -translate-y-1/2 -translate-x-1/2">
+            <div className="size-5 -ml-2.25">
+              {isPendingPush || isPendingOrFetchingResults ? (
                 <LoaderIcon className="size-full animate-spin" />
-              </div>
-            )}
+              ) : (
+                <SearchIcon className="size-full" />
+              )}
+            </div>
+            <p className="shrink min-w-0">Ara</p>
           </Button>
           {/* Filter and clear buttons */}
           <div className="shrink min-w-0 flex flex-wrap justify-center gap-2">
@@ -441,10 +445,10 @@ export default function SearchBox({
                 <div className="size-5 -ml-1 transform transition">
                   <BroomIcon className="size-full" />
                 </div>
-                <p className="shrink min-w-0">Temizle</p>
-                <p className="shrink-0 -ml-0.25 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                  {totalSelectedFilters}
-                </p>
+                <p className="shrink min-w-0">{clearButtonText}</p>
+                <FilterCountChip className="-ml-0.25">
+                  {totalSelectedFilters.toLocaleString()}
+                </FilterCountChip>
               </Button>
             )}
           </div>
@@ -583,14 +587,14 @@ export default function SearchBox({
                 }}
                 Icon={LandmarkIcon}
                 commandButtonText={
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                       Üniversite
                     </p>
                     {universitiesQP && universitiesQP.length > 0 && (
-                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                        {universitiesQP.length}
-                      </p>
+                      <FilterCountChip>
+                        {universitiesQP.length.toLocaleString()}
+                      </FilterCountChip>
                     )}
                   </div>
                 }
@@ -638,14 +642,14 @@ export default function SearchBox({
                     : optionsPlaceholder
                 }
                 commandButtonText={
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                       Ana Bilim Dalı
                     </p>
                     {departmentsQP && departmentsQP.length > 0 && (
-                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                        {departmentsQP.length}
-                      </p>
+                      <FilterCountChip>
+                        {departmentsQP.length.toLocaleString()}
+                      </FilterCountChip>
                     )}
                   </div>
                 }
@@ -673,14 +677,14 @@ export default function SearchBox({
                 Icon={ScrollTextIcon}
                 IconSetForItem={ThesisTypeIcon}
                 commandButtonText={
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                       Tez Türü
                     </p>
                     {thesisTypesQP && thesisTypesQP.length > 0 && (
-                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                        {thesisTypesQP.length}
-                      </p>
+                      <FilterCountChip>
+                        {thesisTypesQP.length.toLocaleString()}
+                      </FilterCountChip>
                     )}
                   </div>
                 }
@@ -709,14 +713,14 @@ export default function SearchBox({
                 IconSetForItem={LanguageIcon}
                 iconSetForItemClassName="rounded-full"
                 commandButtonText={
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                       Dil
                     </p>
                     {languagesQP && languagesQP.length > 0 && (
-                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                        {languagesQP.length}
-                      </p>
+                      <FilterCountChip>
+                        {languagesQP.length.toLocaleString()}
+                      </FilterCountChip>
                     )}
                   </div>
                 }
@@ -764,14 +768,14 @@ export default function SearchBox({
                     : optionsPlaceholder
                 }
                 commandButtonText={
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                       Yazar
                     </p>
                     {authorsQP && authorsQP.length > 0 && (
-                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                        {authorsQP.length}
-                      </p>
+                      <FilterCountChip>
+                        {authorsQP.length.toLocaleString()}
+                      </FilterCountChip>
                     )}
                   </div>
                 }
@@ -819,14 +823,14 @@ export default function SearchBox({
                     : optionsPlaceholder
                 }
                 commandButtonText={
-                  <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
                       Danışman
                     </p>
                     {advisorsQP && advisorsQP.length > 0 && (
-                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                        {advisorsQP.length}
-                      </p>
+                      <FilterCountChip>
+                        {advisorsQP.length.toLocaleString()}
+                      </FilterCountChip>
                     )}
                   </div>
                 }
