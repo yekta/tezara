@@ -94,8 +94,8 @@ input[type="search"] {
     --chart-6: 190 80% 35%;
     --chart-7: 120 70% 35%;
     --chart-8: 330 75% 40%;
-    --chart-9: 20 95% 30%;
-    --chart-10: 40 80% 25%;
+    --chart-9: 270 60% 30%;
+    --chart-10: 20 90% 30%;
 
     --index-fear: 0 100% 70%;
     --index-neutral: 50 100% 60%;
@@ -155,8 +155,8 @@ input[type="search"] {
     --chart-6: 200 80% 70%;
     --chart-7: 80 85% 60%;
     --chart-8: 320 60% 60%;
-    --chart-9: 40 80% 65%;
-    --chart-10: 60 70% 65%;
+    --chart-9: 250 100% 75%;
+    --chart-10: 40 80% 65%;
     --index-fear: 0 60% 60%;
     --index-neutral: 50 75% 60%;
     --index-greed: 120 40% 60%;
