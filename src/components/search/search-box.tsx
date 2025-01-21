@@ -494,7 +494,10 @@ export default function SearchBox({
                 </SelectTrigger>
                 <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
                   {yearGteQP && (
-                    <SelectItem value={clearButtonText}>
+                    <SelectItem
+                      value={clearButtonText}
+                      className="data-[highlighted]:bg-warning/20"
+                    >
                       <div className="shrink min-w-0 flex items-center gap-1 text-warning">
                         <BroomIcon className="size-4 -my-1" />
                         <p className="shrink font-semibold min-w-0 overflow-hidden overflow-ellipsis">
@@ -551,7 +554,10 @@ export default function SearchBox({
                 </SelectTrigger>
                 <SelectContent className="p-1 w-[--radix-popper-anchor-width]">
                   {yearLteQP && (
-                    <SelectItem value={clearButtonText}>
+                    <SelectItem
+                      className="data-[highlighted]:bg-warning/20"
+                      value={clearButtonText}
+                    >
                       <div className="shrink min-w-0 flex items-center gap-1 text-warning">
                         <BroomIcon className="size-4 -my-1" />
                         <p className="shrink font-semibold min-w-0 overflow-hidden overflow-ellipsis">
@@ -592,18 +598,14 @@ export default function SearchBox({
                 commandEmptyText="Eşleşen yok"
                 isItemSelected={(v) => universitiesQP?.includes(v) || false}
                 items={universityOptions}
-                onSelectClear={
-                  universitiesQP && universitiesQP.length > 0
-                    ? clearUniversities
-                    : undefined
-                }
+                onClearButtonClick={clearUniversities}
+                clearLength={universitiesQP?.length}
                 onSelect={(v) => {
                   const newValue = toggleInArray(universitiesQP, v);
                   if (universitiesQP.join(",") !== newValue.join(",")) {
                     setUniversitiesQP(newValue);
                   }
                 }}
-                clearLength={universitiesQP?.length}
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
@@ -651,18 +653,14 @@ export default function SearchBox({
                 commandEmptyText="Eşleşen yok"
                 commandErrorText="Bir şeyler ters gitti"
                 isItemSelected={(v) => departmentsQP?.includes(v) || false}
-                onSelectClear={
-                  departmentsQP && departmentsQP.length > 0
-                    ? clearDepartments
-                    : undefined
-                }
+                onClearButtonClick={clearDepartments}
+                clearLength={departmentsQP?.length}
                 onSelect={(v) => {
                   const newValue = toggleInArray(departmentsQP, v);
                   if (departmentsQP.join(",") !== newValue.join(",")) {
                     setDepartmentsQP(newValue);
                   }
                 }}
-                clearLength={departmentsQP?.length}
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
@@ -690,18 +688,14 @@ export default function SearchBox({
                 commandEmptyText="Eşleşen yok"
                 isItemSelected={(v) => thesisTypesQP?.includes(v) || false}
                 items={thesisTypeOptions}
+                onClearButtonClick={clearThesisTypes}
+                clearLength={thesisTypesQP?.length}
                 onSelect={(v) => {
                   const newValue = toggleInArray(thesisTypesQP, v);
                   if (thesisTypesQP.join(",") !== newValue.join(",")) {
                     setThesisTypesQP(newValue);
                   }
                 }}
-                onSelectClear={
-                  thesisTypesQP && thesisTypesQP.length > 0
-                    ? clearThesisTypes
-                    : undefined
-                }
-                clearLength={thesisTypesQP?.length}
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
@@ -730,18 +724,14 @@ export default function SearchBox({
                 commandEmptyText="Eşleşen yok"
                 isItemSelected={(v) => languagesQP?.includes(v) || false}
                 items={languageOptions}
+                onClearButtonClick={clearLanguages}
+                clearLength={languagesQP?.length}
                 onSelect={(v) => {
                   const newValue = toggleInArray(languagesQP, v);
                   if (languagesQP.join(",") !== newValue.join(",")) {
                     setLanguagesQP(newValue);
                   }
                 }}
-                onSelectClear={
-                  languagesQP && languagesQP.length > 0
-                    ? clearLanguages
-                    : undefined
-                }
-                clearLength={languagesQP?.length}
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
@@ -789,16 +779,14 @@ export default function SearchBox({
                 commandEmptyText="Eşleşen yok"
                 commandErrorText="Bir şeyler ters gitti"
                 isItemSelected={(v) => authorsQP?.includes(v) || false}
-                onSelectClear={
-                  authorsQP && authorsQP.length > 0 ? clearAuthors : undefined
-                }
+                onClearButtonClick={clearAuthors}
+                clearLength={authorsQP?.length}
                 onSelect={(v) => {
                   const newValue = toggleInArray(authorsQP, v);
                   if (authorsQP.join(",") !== newValue.join(",")) {
                     setAuthorsQP(newValue);
                   }
                 }}
-                clearLength={authorsQP?.length}
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
@@ -846,18 +834,14 @@ export default function SearchBox({
                 commandEmptyText="Eşleşen yok"
                 commandErrorText="Bir şeyler ters gitti"
                 isItemSelected={(v) => advisorsQP?.includes(v) || false}
-                onSelectClear={
-                  advisorsQP && advisorsQP.length > 0
-                    ? clearAdvisors
-                    : undefined
-                }
+                onClearButtonClick={clearAdvisors}
+                clearLength={advisorsQP?.length}
                 onSelect={(v) => {
                   const newValue = toggleInArray(advisorsQP, v);
                   if (advisorsQP.join(",") !== newValue.join(",")) {
                     setAdvisorsQP(newValue);
                   }
                 }}
-                clearLength={advisorsQP?.length}
               />
             </div>
           </div>

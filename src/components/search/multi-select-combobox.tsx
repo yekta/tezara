@@ -27,7 +27,7 @@ type Props = {
   items: { label: string; value: string }[];
   isItemSelected: (v: string) => boolean;
   onSelect: (v: string) => void;
-  onSelectClear?: () => void;
+  onClearButtonClick?: () => void;
   clearLength?: number;
   commandEmptyText: string;
   commandErrorText?: string;
@@ -56,13 +56,11 @@ type Props = {
   toLoadMoreText?: string;
 };
 
-const clearButtonText = "Temizle";
-
 export default function MultiSelectCombobox({
   items,
   isItemSelected,
   onSelect,
-  onSelectClear,
+  onClearButtonClick,
   clearLength,
   Icon,
   IconSetForItem,
@@ -87,8 +85,19 @@ export default function MultiSelectCombobox({
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollId = useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const hasClearButton =
+    clearLength !== undefined &&
+    clearLength > 0 &&
+    onClearButtonClick !== undefined;
+
   return (
-    <div className={cn("w-full max-w-full flex flex-col", className)}>
+    <div
+      data-has-clean={hasClearButton ? true : undefined}
+      className={cn(
+        "w-full max-w-full group flex flex-col relative",
+        className
+      )}
+    >
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -97,7 +106,9 @@ export default function MultiSelectCombobox({
             size="sm"
             role="combobox"
             onClick={triggerOnClick}
-            className={cn("w-full justify-between rounded-lg px-3")}
+            className={cn(
+              "w-full justify-between rounded-lg px-3 group-data-[has-clean]:pr-12"
+            )}
           >
             <div className="flex shrink min-w-0 items-center gap-1.5">
               {Icon && <Icon className="size-4 shrink-0 -ml-0.5" />}
@@ -112,6 +123,19 @@ export default function MultiSelectCombobox({
             <ChevronDownIcon className="size-4 shrink-0 opacity-50 -mr-1" />
           </Button>
         </PopoverTrigger>
+        {hasClearButton && (
+          <div className="absolute top-0 z-50 rounded-r-lg bg-background h-full flex right-0">
+            <Button
+              aria-label={`Temizle: ${clearLength}`}
+              onClick={onClearButtonClick}
+              variant="warning-outline"
+              type="button"
+              className="flex px-2.5 rounded-lg rounded-l-none  justify-start gap-1.5 py-2 text-warning"
+            >
+              <BroomIcon className="size-4 -my-1" />
+            </Button>
+          </div>
+        )}
         <PopoverContent className="p-0">
           <Command
             filter={commandFilter}
@@ -149,25 +173,6 @@ export default function MultiSelectCombobox({
                   </CommandEmpty>
                 )}
                 <CommandGroup>
-                  {!isPending && onSelectClear && (
-                    <CommandItem
-                      value={clearButtonText}
-                      onSelect={onSelectClear}
-                      className="flex justify-start gap-2 py-2 text-warning data-[selected=true]:bg-warning/20 data-[selected=true]:text-warning"
-                    >
-                      <BroomIcon className="size-4 -my-1 -ml-0.25" />
-                      <div className="flex-1 min-w-0 flex items-center">
-                        <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap font-semibold leading-tight">
-                          {clearButtonText}
-                        </p>
-                        {clearLength && clearLength > 0 && (
-                          <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
-                            {clearLength}
-                          </p>
-                        )}
-                      </div>
-                    </CommandItem>
-                  )}
                   {!isError &&
                     items.map((item) => (
                       <CommandItem
@@ -190,8 +195,8 @@ export default function MultiSelectCombobox({
                           )}
                           <p
                             className="shrink min-w-0 overflow-hidden overflow-ellipsis leading-tight 
-                          group-data-[pending]/item:text-transparent group-data-[pending]/item:bg-foreground group-data-[pending]/item:animate-skeleton
-                          group-data-[pending]/item:rounded-sm"
+                            group-data-[pending]/item:text-transparent group-data-[pending]/item:bg-foreground group-data-[pending]/item:animate-skeleton
+                            group-data-[pending]/item:rounded-sm"
                           >
                             {item.label}
                           </p>
