@@ -68,6 +68,27 @@ export default function ThesesCountsByYearsChart({
               })}
             </BarChart>
           </ChartContainer>
+          <div className="w-full flex items-center justify-center flex-wrap gap-1 pt-1 pb-4 px-4">
+            {dataKeys.map((k) => (
+              <div
+                key={k}
+                className={cn(
+                  "flex items-center justify-center text-xs gap-1 px-1.5 py-0.5 rounded-md"
+                )}
+              >
+                <div
+                  style={{
+                    background: getThesisTypeColorClassName({
+                      variant: k,
+                      classType: "variable",
+                    }),
+                  }}
+                  className="size-3.5 rounded"
+                />
+                <p className="shrink min-w-0">{k}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
