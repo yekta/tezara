@@ -215,9 +215,9 @@ export default function MultiSelectCombobox({
                 </CommandGroup>
               </CommandList>
               {hasNext && toLoadMoreText && (
-                <div className="w-full border-t text-center flex items-center justify-center px-4 py-3 gap-1.5 text-muted-foreground text-sm font-medium">
+                <div className="w-full border-t flex items-center justify-center px-4 py-3 gap-1.5 text-muted-foreground text-sm font-medium">
                   <SearchIcon className="size-4 shrink-0" />
-                  <p className="text-center shrink min-w-0 text-balance">
+                  <p className="shrink min-w-0 text-balance leading-tight">
                     {toLoadMoreText}
                   </p>
                 </div>

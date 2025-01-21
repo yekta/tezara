@@ -628,7 +628,7 @@ export default function SearchBox({
                   !isErrorDepartments &&
                   departmentOptions.totalPages > 1
                 }
-                toLoadMoreText={"Daha fazlası için arama yap"}
+                toLoadMoreText={"Diğerleri için arama yap"}
                 items={
                   departmentOptions
                     ? departmentOptions?.hits.map((i) => ({
@@ -754,7 +754,7 @@ export default function SearchBox({
                   !isErrorAuthors &&
                   authorOptions.totalPages > 1
                 }
-                toLoadMoreText={"Daha fazlası için arama yap"}
+                toLoadMoreText={"Diğerleri için arama yap"}
                 items={
                   authorOptions
                     ? authorOptions?.hits.map((i) => ({
@@ -809,7 +809,7 @@ export default function SearchBox({
                   !isErrorAdvisors &&
                   advisorOptions.totalPages > 1
                 }
-                toLoadMoreText={"Daha fazlası için arama yap"}
+                toLoadMoreText={"Diğerleri için arama yap"}
                 items={
                   advisorOptions
                     ? advisorOptions?.hits.map((i) => ({
