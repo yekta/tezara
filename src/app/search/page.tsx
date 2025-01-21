@@ -1,6 +1,8 @@
 import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
-import { HITS_PER_PAGE_DEFAULT } from "@/components/search/constants/shared";
-import { getSearchThesesQueryKey } from "@/components/search/helpers";
+import {
+  getSearchThesesQueryKey,
+  HITS_PER_PAGE_DEFAULT,
+} from "@/components/search/constants/shared";
 import SearchBox from "@/components/search/search-box";
 import SearchResults from "@/components/search/search-results";
 import SearchResultsProvider from "@/components/search/search-results-provider";

@@ -38,18 +38,18 @@ export default async function Page({ params }: Props) {
   try {
     similarTheses = (
       await searchTheses({
-        q: thesis.title_original || thesis.title_translated || undefined,
+        q: thesis.title_original || thesis.title_translated || "",
         hits_per_page: 6,
         page: 1,
-        languages: undefined,
-        thesis_types: undefined,
-        universities: undefined,
-        departments: undefined,
-        authors: undefined,
-        advisors: undefined,
+        languages: [],
+        thesis_types: [],
+        universities: [],
+        departments: [],
+        authors: [],
+        advisors: [],
         sort: undefined,
-        year_gte: undefined,
-        year_lte: undefined,
+        year_gte: null,
+        year_lte: null,
         attributes_to_retrieve: undefined,
         client: meiliAdmin,
       })

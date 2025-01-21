@@ -2,11 +2,11 @@
 
 import { searchLikePageParams } from "@/components/search/constants/client";
 import {
+  getSearchThesesQueryKey,
   HITS_PER_PAGE_BULK,
   HITS_PER_PAGE_DEFAULT,
   PAGE_DEFAULT,
 } from "@/components/search/constants/shared";
-import { getSearchThesesQueryKey } from "@/components/search/helpers";
 import { useEffectAfterMount } from "@/lib/hooks/use-effect-after-mount";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";

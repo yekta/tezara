@@ -1,4 +1,7 @@
-import { PAGE_DEFAULT } from "@/components/search/constants/shared";
+import {
+  PAGE_DEFAULT,
+  TSearchLikePageParamsSearchProps,
+} from "@/components/search/constants/shared";
 import { TThesisExtended } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
@@ -33,21 +36,11 @@ export async function searchTheses({
   page = PAGE_DEFAULT,
   attributes_to_retrieve,
 }: {
-  client: MeiliSearch;
-  q: string | undefined;
-  languages: string[] | undefined;
-  thesis_types: string[] | undefined;
-  universities: string[] | undefined;
-  departments: string[] | undefined;
-  advisors: string[] | undefined;
-  authors: string[] | undefined;
-  year_gte: number | null | undefined;
-  year_lte: number | null | undefined;
   sort: string[] | undefined;
   hits_per_page: number | undefined;
-  page: number | undefined;
   attributes_to_retrieve?: (keyof TThesisExtended)[];
-}) {
+  client: MeiliSearch;
+} & TSearchLikePageParamsSearchProps) {
   const index = client.index<TThesisExtended>(indexName);
   let filter = "";
   let languageFilter = "";
