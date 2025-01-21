@@ -13,6 +13,7 @@ export const searchLikePageParams = {
   q: parseAsString.withDefault(""),
   languages: parseAsArrayOf(parseAsString).withDefault([]),
   universities: parseAsArrayOf(parseAsString).withDefault([]),
+  departments: parseAsArrayOf(parseAsString).withDefault([]),
   advisors: parseAsArrayOf(parseAsString).withDefault([]),
   authors: parseAsArrayOf(parseAsString).withDefault([]),
   thesis_types: parseAsArrayOf(parseAsString).withDefault([]),

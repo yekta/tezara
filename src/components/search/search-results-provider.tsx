@@ -50,6 +50,10 @@ export const SearchResultsProvider: React.FC<{
     "universities",
     searchLikePageParams["universities"]
   );
+  const [departments] = useQueryState(
+    "departments",
+    searchLikePageParams["departments"]
+  );
   const [advisors] = useQueryState(
     "advisors",
     searchLikePageParams["advisors"]
@@ -76,6 +80,7 @@ export const SearchResultsProvider: React.FC<{
     q: query,
     languages,
     universities,
+    departments,
     advisors,
     authors,
     thesis_types: thesisTypes,
@@ -91,6 +96,7 @@ export const SearchResultsProvider: React.FC<{
         q: query,
         languages,
         universities,
+        departments,
         advisors,
         authors,
         thesis_types: thesisTypes,
@@ -110,6 +116,7 @@ export const SearchResultsProvider: React.FC<{
       q: query,
       languages,
       universities,
+      departments,
       advisors,
       authors,
       thesis_types: thesisTypes,

@@ -44,6 +44,7 @@ export default async function Page({ params }: Props) {
         languages: undefined,
         thesis_types: undefined,
         universities: undefined,
+        departments: undefined,
         authors: undefined,
         advisors: undefined,
         sort: undefined,

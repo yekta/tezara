@@ -5,10 +5,12 @@ export const cleanAdvisors = (advisors?: string[] | null) => {
   return advisors.filter((advisor) => !advisor.includes("Yer Bilgisi:"));
 };
 
-type TGetSearchThesesQueryKeyParams = Omit<
+type TSearchLikePageParamsWithoutAdvanced = Omit<
   TSearchLikePageParams,
   "advanced"
-> & {
+>;
+
+type TGetSearchThesesQueryKeyParams = TSearchLikePageParamsWithoutAdvanced & {
   hits_per_page: number | undefined;
 };
 
@@ -16,6 +18,7 @@ export function getSearchThesesQueryKey({
   q,
   languages,
   universities,
+  departments,
   advisors,
   authors,
   thesis_types,
@@ -29,6 +32,7 @@ export function getSearchThesesQueryKey({
     q,
     languages && languages.length ? languages.join("_") : undefined,
     universities && universities.length ? universities.join("_") : undefined,
+    departments && departments.length ? departments.join("_") : undefined,
     advisors && advisors.length ? advisors.join("_") : undefined,
     authors && authors.length ? authors.join("_") : undefined,
     thesis_types && thesis_types.length ? thesis_types.join("_") : undefined,

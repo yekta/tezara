@@ -78,6 +78,7 @@ async function getTheses({ page }: { page: number }) {
     advisors: undefined,
     authors: undefined,
     universities: undefined,
+    departments: undefined,
     languages: undefined,
     sort: undefined,
     thesis_types: undefined,

@@ -1,6 +1,7 @@
 "use client";
 
 import BroomIcon from "@/components/icons/broom";
+import BuildingIcon from "@/components/icons/building";
 import LandmarkIcon from "@/components/icons/landmark";
 import LanguageIcon from "@/components/icons/language";
 import PenToolIcon from "@/components/icons/pen-tool";
@@ -25,6 +26,7 @@ import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { searchAuthors } from "@/server/meili/repo/authors";
+import { searchDepartments } from "@/server/meili/repo/departments";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
@@ -131,6 +133,10 @@ export default function SearchBox({
     "universities",
     searchLikePageParams["universities"]
   );
+  const [departmentsQP, setDepartmentsQP] = useQueryState(
+    "departments",
+    searchLikePageParams["departments"]
+  );
   const [advisorsQP, setAdvisorsQP] = useQueryState(
     "advisors",
     searchLikePageParams["advisors"]
@@ -193,10 +199,27 @@ export default function SearchBox({
       }),
   });
 
+  const [queryDepartments, setQueryDepartments] = useState("");
+  const {
+    data: departmentOptions,
+    isPending: isPendingDepartments,
+    isError: isErrorDepartments,
+  } = useQuery({
+    queryKey: ["departments", queryDepartments ? queryDepartments : undefined],
+    queryFn: () =>
+      searchDepartments({
+        q: queryDepartments,
+        page: 1,
+        sort: undefined,
+        client: meili,
+      }),
+  });
+
   const totalSelectedFilters = useMemo(() => {
     let total = 0;
     if (languagesQP) total += languagesQP.length;
     if (universitiesQP) total += universitiesQP.length;
+    if (departmentsQP) total += departmentsQP.length;
     if (advisorsQP) total += advisorsQP.length;
     if (authorsQP) total += authorsQP.length;
     if (thesisTypesQP) total += thesisTypesQP.length;
@@ -206,6 +229,7 @@ export default function SearchBox({
   }, [
     languagesQP,
     universitiesQP,
+    departmentsQP,
     advisorsQP,
     authorsQP,
     thesisTypesQP,
@@ -231,45 +255,32 @@ export default function SearchBox({
     setQueryQP("");
   }
 
-  function clearUniversities() {
-    setUniversitiesQP([]);
-  }
+  const clearUniversities = () => setUniversitiesQP([]);
+  const clearDepartments = () => setDepartmentsQP([]);
+  const clearAdvisors = () => setAdvisorsQP([]);
+  const clearAuthors = () => setAuthorsQP([]);
+  const clearLanguages = () => setLanguagesQP([]);
+  const clearThesisTypes = () => setThesisTypesQP([]);
 
-  function clearAdvisors() {
-    setAdvisorsQP([]);
-  }
-
-  function clearAuthors() {
-    setAuthorsQP([]);
-  }
-
-  function clearLanguages() {
-    setLanguagesQP([]);
-  }
-
-  function clearThesisTypes() {
-    setThesisTypesQP([]);
-  }
-
-  function clearYearGte() {
+  const clearYearGte = () => {
     setYearGteQP(null);
     setYearGteQPKey((k) => k + 1);
-  }
-
-  function clearYearLte() {
+  };
+  const clearYearLte = () => {
     setYearLteQP(null);
     setYearLteQPKey((k) => k + 1);
-  }
+  };
 
-  function clearAllFilters() {
+  const clearAllFilters = () => {
     clearUniversities();
+    clearDepartments();
     clearAdvisors();
     clearAuthors();
     clearLanguages();
     clearThesisTypes();
     clearYearGte();
     clearYearLte();
-  }
+  };
 
   const isTouchScreen = useIsTouchscreen();
 
@@ -543,6 +554,61 @@ export default function SearchBox({
                   }
                 }}
                 clearLength={universitiesQP?.length}
+              />
+            </div>
+            <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
+              <MultiSelectCombobox
+                commandFilter={() => 1}
+                label="Ana Bilim Dalı Bazlı Filtrele"
+                className="w-full"
+                Icon={BuildingIcon}
+                commandInputValue={queryDepartments}
+                commandInputOnValueChange={(v) => setQueryDepartments(v)}
+                isAsync
+                isPending={isPendingDepartments}
+                isError={isErrorDepartments}
+                hasNext={
+                  !isPendingDepartments &&
+                  !isErrorDepartments &&
+                  departmentOptions.totalPages > 1
+                }
+                toLoadMoreText={"Daha fazlası için arama yap"}
+                items={
+                  departmentOptions
+                    ? departmentOptions?.hits.map((i) => ({
+                        label: i.name,
+                        value: i.name,
+                      }))
+                    : optionsPlaceholder
+                }
+                commandButtonText={
+                  <div className="flex-1 min-w-0 flex items-center">
+                    <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                      Ana Bilim Dalı
+                    </p>
+                    {departmentsQP && departmentsQP.length > 0 && (
+                      <p className="ml-1.5 shrink-0 bg-warning/16 text-warning text-xs px-1 py-px font-bold rounded-sm">
+                        {departmentsQP.length}
+                      </p>
+                    )}
+                  </div>
+                }
+                commandInputPlaceholder="Ana bilim dalı ara..."
+                commandEmptyText="Eşleşen yok"
+                commandErrorText="Bir şeyler ters gitti"
+                isItemSelected={(v) => departmentsQP?.includes(v) || false}
+                onSelectClear={
+                  departmentsQP && departmentsQP.length > 0
+                    ? clearDepartments
+                    : undefined
+                }
+                onSelect={(v) => {
+                  const newValue = toggleInArray(departmentsQP, v);
+                  if (departmentsQP.join(",") !== newValue.join(",")) {
+                    setDepartmentsQP(newValue);
+                  }
+                }}
+                clearLength={departmentsQP?.length}
               />
             </div>
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">

@@ -13,6 +13,7 @@ async function getPageData({ name }: { name: string }) {
       page: 1,
       hits_per_page: 100_000,
       universities: [name],
+      departments: undefined,
       attributes_to_retrieve: [
         "year",
         "language",
@@ -34,6 +35,7 @@ async function getPageData({ name }: { name: string }) {
       page: 1,
       sort: undefined,
       universities: [name],
+      departments: undefined,
       languages: undefined,
       advisors: undefined,
       authors: undefined,

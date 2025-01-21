@@ -23,6 +23,7 @@ export async function searchTheses({
   languages,
   thesis_types,
   universities,
+  departments,
   advisors,
   authors,
   year_gte,
@@ -37,6 +38,7 @@ export async function searchTheses({
   languages: string[] | undefined;
   thesis_types: string[] | undefined;
   universities: string[] | undefined;
+  departments: string[] | undefined;
   advisors: string[] | undefined;
   authors: string[] | undefined;
   year_gte: number | null | undefined;
@@ -50,6 +52,7 @@ export async function searchTheses({
   let filter = "";
   let languageFilter = "";
   let universityFilter = "";
+  let departmentFilter = "";
   let advisorFilter = "";
   let authorsFilter = "";
   let thesisTypeFilter = "";
@@ -61,6 +64,10 @@ export async function searchTheses({
   if (universities && universities.length > 0) {
     const entries = universities.map((u) => `university = "${u}"`);
     universityFilter = `(${entries.join(" OR ")})`;
+  }
+  if (departments && departments.length > 0) {
+    const entries = departments.map((d) => `department = "${d}"`);
+    departmentFilter = `(${entries.join(" OR ")})`;
   }
   if (advisors && advisors.length > 0) {
     const entries = advisors.map((a) => `advisors = "${a}"`);
@@ -84,6 +91,13 @@ export async function searchTheses({
       filter += " AND ";
     }
     filter += universityFilter;
+  }
+
+  if (departmentFilter.length > 0) {
+    if (filter.length > 0) {
+      filter += " AND ";
+    }
+    filter += departmentFilter;
   }
 
   if (advisorFilter.length > 0) {

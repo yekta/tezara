@@ -16,6 +16,7 @@ import Link from "next/link";
 import PenToolIcon from "@/components/icons/pen-tool";
 import UserPenIcon from "@/components/icons/user-pen";
 import CalendarIcon from "@/components/icons/calendar";
+import BuildingIcon from "@/components/icons/building";
 
 type Props =
   | (
@@ -242,6 +243,35 @@ export default function ThesisSearchResultRow({
               </p>
             </Link>
           )}
+          {thesis?.department &&
+            (isPlaceholder ? (
+              <div
+                className={cn(
+                  "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
+                  "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground",
+                  minButtonSizeEnforcerClassName
+                )}
+              >
+                <p
+                  className="shrink min-w-0 text-sm leading-none font-medium
+                  group-data-[placeholder]/row:text-transparent"
+                >
+                  Yükleniyor...
+                </p>
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
+                  minButtonSizeEnforcerClassName
+                )}
+              >
+                <BuildingIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
+                <p className="shrink min-w-0 text-sm leading-none font-medium">
+                  {thesis.department}
+                </p>
+              </div>
+            ))}
           {cleanAdvisors(thesis?.advisors || ["Yükleniyor..."]).map(
             (advisor, index) => (
               <div
