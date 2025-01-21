@@ -344,26 +344,29 @@ export default function SearchBox({
         data-advanced={advancedSearch ? true : undefined}
         className="w-full flex flex-col items-center group pt-3"
       >
-        <div className="max-w-full flex flex-wrap justify-center gap-2">
+        <div className="max-w-full flex flex-wrap justify-center items-center gap-2">
           <Button
             disabled={isPendingAsyncPush || isPendingSearchResults}
-            className="py-2 px-6"
+            className="py-[calc(0.5rem+1px)] px-5"
             fadeOnDisabled={false}
           >
-            <p className="min-w-0 shrink group-data-[pending]/form:opacity-0">
-              Ara
-            </p>
+            <div className="shrink min-w-0 flex items-center justify-center gap-2 group-data-[pending]/form:opacity-0">
+              <div className="size-5 -ml-2.25">
+                <SearchIcon className="size-full" />
+              </div>
+              <p className="shrink min-w-0">Ara</p>
+            </div>
             {(isPendingAsyncPush || isPendingSearchResults) && (
               <div className="size-5 absolute left-1/2 top-1/2 transform -translate-y-1/2 -translate-x-1/2">
                 <LoaderIcon className="size-full animate-spin" />
               </div>
             )}
           </Button>
-          <div className="shrink min-w-0 flex flex-wrap">
+          <div className="shrink min-w-0 flex flex-wrap justify-center gap-2">
             <Button
               type="button"
-              variant="ghost"
-              className="text-muted-foreground font-semibold py-2 px-3.5"
+              variant="outline"
+              className="font-semibold py-2 px-3.75"
               onClick={() => setAdvancedSearch((a) => !a)}
             >
               <div className="size-5 -ml-1 transform transition group-data-[advanced]:rotate-90">
@@ -375,12 +378,11 @@ export default function SearchBox({
               </div>
               <p className="shrink min-w-0">Filtrele</p>
             </Button>
-
             {totalSelectedFilters > 0 && (
               <Button
                 type="button"
-                variant="warning-ghost"
-                className="font-semibold py-2 px-3.5"
+                variant="warning-outline"
+                className="font-semibold py-2 px-3.75"
                 onClick={() => clearAllFilters()}
               >
                 <div className="size-5 -ml-1 transform transition">
