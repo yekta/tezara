@@ -41,7 +41,7 @@ import {
   SettingsIcon,
   XIcon,
 } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -241,9 +241,8 @@ export default function SearchBox({
     focusToMainInput();
   });
 
-  const pathname = usePathname();
-
   const pushToSearch = async () => {
+    console.log("Trying to push");
     const paramStr = searchParams.toString();
     await asyncPush(`/search${paramStr ? `?${paramStr}` : ""}`);
   };
@@ -252,13 +251,15 @@ export default function SearchBox({
     e.preventDefault();
     if (variant === "home") {
       await pushToSearch();
-      let counter = 10;
 
+      let pathname = window.location.pathname;
+      let counter = 20;
+      // TO-DO: Fix this, it is a horrible hack for Safari caused by search params not updating
       while (counter > 0 && pathname !== "search" && !isPendingAsyncPush) {
-        setTimeout(async () => {
-          if (window.location.pathname === "/search") return;
-          await pushToSearch();
-        }, counter * 100);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        pathname = window.location.pathname;
+        if (pathname === "/search") return;
+        await pushToSearch();
         counter--;
       }
     }
