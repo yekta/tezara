@@ -2,20 +2,13 @@
 
 import FileExtensionIcon from "@/components/icons/file-extension";
 import { formatForDownload } from "@/components/search/format-for-download";
+import PaginationBar from "@/components/search/pagination-bar";
 import { useSearchResults } from "@/components/search/search-results-provider";
 import ThesisSearchResultRow from "@/components/search/thesis-search-result-row";
 import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { cn } from "@/components/ui/utils";
 import { Parser } from "@json2csv/plainjs";
 import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   className?: string;
@@ -100,69 +93,6 @@ export default function SearchResults({}: Props) {
     document.body.removeChild(downloadLink);
     URL.revokeObjectURL(downloadLink.href);
   }
-
-  const PaginationBar = useMemo(() => {
-    const Component = ({ className }: { className?: string }) => (
-      <Pagination
-        className={cn(
-          "w-full border-t border-b border-foreground/10 py-0.5",
-          className
-        )}
-      >
-        <PaginationContent className="w-full flex">
-          <PaginationItem className="-ml-1">
-            <PaginationPrevious
-              disabled={!hasPrev}
-              isButton
-              onClick={goToPrevPage}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationPrevious
-              variant="first"
-              disabled={!hasPrev}
-              isButton
-              onClick={() => goToPage(firstPage)}
-            />
-          </PaginationItem>
-          <li className="flex-1 flex items-center justify-center min-w-0">
-            <p className="flex-1 px-2 text-sm overflow-hidden leading-tight overflow-ellipsis whitespace-nowrap text-center shrink min-w-0 font-semibold text-muted-foreground">
-              Sayfa:{" "}
-              <span className="text-foreground font-mono font-bold">
-                {currentPage.toLocaleString()}
-              </span>
-            </p>
-          </li>
-          <PaginationItem>
-            <PaginationNext
-              variant="last"
-              isButton
-              disabled={!hasNext}
-              onClick={() => goToPage(lastPage)}
-            />
-          </PaginationItem>
-          <PaginationItem className="-mr-1">
-            <PaginationNext
-              isButton
-              disabled={!hasNext}
-              onClick={goToNextPage}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-    Component.displayName = "PaginationBar";
-    return Component;
-  }, [
-    hasPrev,
-    goToNextPage,
-    goToPrevPage,
-    currentPage,
-    hasNext,
-    firstPage,
-    lastPage,
-    goToPage,
-  ]);
 
   const metricsPendingClassName =
     "group-data-[pending]:text-transparent group-data-[pending]:animate-skeleton group-data-[pending]:bg-foreground group-data-[pending]:rounded-sm";
@@ -278,7 +208,16 @@ export default function SearchResults({}: Props) {
         )}
       </p>
       <div className="w-full flex flex-col flex-1">
-        <PaginationBar />
+        <PaginationBar
+          hasNext={hasNext}
+          hasPrev={hasPrev}
+          goToPage={goToPage}
+          goToNextPage={goToNextPage}
+          goToPrevPage={goToPrevPage}
+          currentPage={currentPage}
+          firstPage={firstPage}
+          lastPage={lastPage}
+        />
         {isHardError && (
           <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
             <TriangleAlertIcon className="size-7" />
@@ -313,7 +252,16 @@ export default function SearchResults({}: Props) {
             </div>
           </div>
         )}
-        <PaginationBar />
+        <PaginationBar
+          hasNext={hasNext}
+          hasPrev={hasPrev}
+          goToPage={goToPage}
+          goToNextPage={goToNextPage}
+          goToPrevPage={goToPrevPage}
+          currentPage={currentPage}
+          firstPage={firstPage}
+          lastPage={lastPage}
+        />
       </div>
     </div>
   );
