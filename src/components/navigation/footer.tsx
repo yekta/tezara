@@ -1,6 +1,6 @@
 import ThemeButton from "@/components/theme-button";
 import { cn } from "@/components/ui/utils";
-import { siteTitle } from "@/lib/constants";
+import { sc, siteTitle } from "@/lib/constants";
 import Link from "next/link";
 import { ReactNode } from "react";
 
@@ -33,12 +33,11 @@ export default async function Footer({ className }: { className?: string }) {
             {" • "}
           </span>
           <div className="w-full mt-0.5 md:mt-0 md:w-auto shrink min-w-0 flex flex-row flex-wrap items-center justify-start">
-            <FooterLink href="https://github.com/yekta/tezara">
-              GitHub
-            </FooterLink>
-            {/* <span className="px-0.5 md:px-0.75 text-muted-more-foreground">
+            <FooterLink href={sc.github.href}>{sc.github.name}</FooterLink>
+            <span className="px-0.5 md:px-0.75 text-muted-more-foreground">
               •
-            </span> */}
+            </span>
+            <FooterLink href={sc.x.href}>{sc.x.name}</FooterLink>
           </div>
         </div>
         <div className="flex items-center justify-end gap-1.75">

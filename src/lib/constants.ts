@@ -15,3 +15,31 @@ export const getPreviewUrl = (slug: string) =>
   `${env.NEXT_PUBLIC_SITE_URL}${previewImages.path}/${previewImages.version}/${slug}.png`;
 
 export const TURKISH = "Türkçe";
+
+export type TScOption = "x" | "github";
+
+export const sc: Record<
+  TScOption,
+  {
+    name: string;
+    href: string;
+    slug: TScOption;
+    joinable: boolean;
+    xOrder: number;
+  }
+> = {
+  x: {
+    name: "X (Twitter)",
+    href: "https://x.com/yektagg",
+    slug: "x",
+    joinable: true,
+    xOrder: 1,
+  },
+  github: {
+    name: "GitHub",
+    href: "https://github.com/yekta/tezara",
+    slug: "github",
+    joinable: true,
+    xOrder: 2,
+  },
+};
