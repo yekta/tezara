@@ -1,3 +1,5 @@
+"use client";
+
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import Link from "next/link";
@@ -84,6 +86,8 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
+
+export type TButtonVariants = VariantProps<typeof buttonVariants>;
 
 export interface LinkButtonProps
   extends React.ComponentPropsWithRef<typeof Link>,

@@ -66,14 +66,16 @@ export default async function Page({ params }: Props) {
       <ThesesCountsByYearsChart
         className="pt-8"
         chartData={thesesCountsByYearsChartData}
-        dataKeys={Array.from(thesisTypes.keys())}
+        dataKeys={Array.from(thesisTypes)
+          .sort((a, b) => b[1] - a[1])
+          .map(([thesisType]) => thesisType)}
       />
       <PopularSubjectsChart
         className="pt-8"
         chartData={popularSubjectsChartData}
         dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
       />
-      <div className="w-full flex flex-col sm:flex-row sm:items-end">
+      <div className="w-full flex flex-col sm:flex-row">
         <LanguagesChart
           className="mt-8 w-full sm:w-1/2 md:w-1/2 lg:w-1/3"
           chartData={Array.from(languages.entries()).map(
@@ -82,7 +84,9 @@ export default async function Page({ params }: Props) {
               count,
             })
           )}
-          dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
+          dataKeys={Array.from(languages.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([language]) => language)}
         />
         <ThesisTypesChart
           className="mt-8 w-full sm:w-1/2 md:w-1/2 lg:w-1/3"
@@ -92,7 +96,9 @@ export default async function Page({ params }: Props) {
               count,
             })
           )}
-          dataKeys={popularSubjectsChartData.map((data) => data.keyword)}
+          dataKeys={Array.from(thesisTypes.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([thesisType]) => thesisType)}
         />
       </div>
       <div className="w-full flex flex-col pt-8">

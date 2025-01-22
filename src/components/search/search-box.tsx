@@ -360,7 +360,13 @@ export default function SearchBox({
     >
       {/* Main search box */}
       <div className="relative group/input w-144 max-w-full">
-        <SearchIcon className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground" />
+        <div className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
+          {isPendingPush || isPendingOrFetchingResults ? (
+            <LoaderIcon className="size-full animate-spin" />
+          ) : (
+            <SearchIcon className="size-full" />
+          )}
+        </div>
         <Input
           aria-label="Ara"
           id="main-search-input"
@@ -373,7 +379,6 @@ export default function SearchBox({
           onChange={(e) => setQueryInputValue(e.target.value)}
         />
         {!isPendingPush &&
-          !isPendingOrFetchingResults &&
           queryInputValue !== undefined &&
           queryInputValue !== "" &&
           queryInputValue !== null && (
@@ -391,11 +396,6 @@ export default function SearchBox({
               <XIcon className="size-5" />
             </Button>
           )}
-        {(isPendingPush || isPendingOrFetchingResults) && (
-          <div className="size-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
-            <LoaderIcon className="size-full animate-spin" />
-          </div>
-        )}
       </div>
       {/* Advanced search section */}
       <div

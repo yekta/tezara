@@ -1,9 +1,15 @@
-import FileExtensionIcon from "@/components/icons/sets/file-extension";
+"use client";
+
+import BuildingIcon from "@/components/icons/building";
+import CalendarIcon from "@/components/icons/calendar";
 import LandmarkIcon from "@/components/icons/landmark";
 import LanguageIcon from "@/components/icons/language";
+import PenToolIcon from "@/components/icons/pen-tool";
+import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import ThesisTypeIcon, {
   getThesisTypeColorClassName,
 } from "@/components/icons/sets/thesis-type";
+import UserPenIcon from "@/components/icons/user-pen";
 import { cleanAdvisors } from "@/components/search/helpers";
 import {
   Button,
@@ -13,10 +19,6 @@ import {
 import { cn } from "@/components/ui/utils";
 import { TThesisExtended } from "@/server/meili/types";
 import Link from "next/link";
-import PenToolIcon from "@/components/icons/pen-tool";
-import UserPenIcon from "@/components/icons/user-pen";
-import CalendarIcon from "@/components/icons/calendar";
-import BuildingIcon from "@/components/icons/building";
 
 type Props =
   | (
@@ -42,6 +44,7 @@ export default function ThesisSearchResultRow({
 }: Props) {
   return (
     <li
+      id={thesis ? `thesis-${thesis.id}` : undefined}
       data-placeholder={isPlaceholder ? true : undefined}
       className={cn(
         "pt-3.5 pb-5 smpt-4 sm:pb-5.5 px-1 last-of-type:border-b-0 border-b border-foreground/10 flex flex-col sm:flex-row sm:px-0 sm:gap-4 items-start gap-2 group/row",

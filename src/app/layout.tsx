@@ -71,7 +71,7 @@ export default async function RootLayout({
             height={2}
           />
           <Navbar />
-          <div className="pointer-events-none h-14 w-full" />
+          <div className="pointer-events-none h-12 md:h-13 w-full" />
           {children}
           <Footer />
           <Toaster
