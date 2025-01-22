@@ -3,11 +3,16 @@
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { formatForDownload } from "@/components/search/format-for-download";
 import PaginationBar from "@/components/search/pagination-bar";
-import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
+import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { Button } from "@/components/ui/button";
 import { Parser } from "@json2csv/plainjs";
-import { LoaderIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  CheckCircleIcon,
+  LoaderIcon,
+  SearchIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { useUmami } from "next-umami";
 import { useState } from "react";
 
@@ -237,7 +242,11 @@ export default function SearchResults({}: Props) {
         {isJustFetching ? (
           <LoaderIcon className="size-4 animate-spin text-muted-foreground" />
         ) : (
-          <div className="size-4" />
+          <div className="size-4">
+            {!isPending && !isFetching && !isError && data && (
+              <CheckCircleIcon className="text-success size-full" />
+            )}
+          </div>
         )}
       </div>
       <div className="w-full flex flex-col flex-1">
