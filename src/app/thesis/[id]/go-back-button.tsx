@@ -3,6 +3,7 @@ import { cn } from "@/components/ui/utils";
 import { ArrowLeftIcon } from "lucide-react";
 
 type Props = {
+  buttonText: string;
   variant?: TButtonVariants["variant"];
   size?: TButtonVariants["size"];
   href: string;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function BackButton({
+  buttonText,
   size = "sm",
   variant = "ghost",
   href,
@@ -22,8 +24,8 @@ export default function BackButton({
       size={size}
       className={cn("text-muted-foreground", className)}
     >
-      <ArrowLeftIcon className="shrink-0 size-5 -ml-1.5" />
-      <p className="shrink min-w-0">Geri Dön</p>
+      <ArrowLeftIcon className="shrink-0 size-5 -ml-2" />
+      <p className="shrink min-w-0">{buttonText}</p>
     </LinkButton>
   );
 }

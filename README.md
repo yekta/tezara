@@ -2,6 +2,8 @@
 
 Tezara, YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden arama ve metaveri analizi yapmanızı sağlar. Yazar, başlık, özet, danışman, yıl, üniversite ve dil gibi verilere ulaşabilir, bu verileri filtreleyebilir ve tablo ya da grafiğe dönüştürerek topluca indirebilirsiniz.
 
+![Tezara Ana Sayfa Filtreler](https://bucket.tezara.org/mockups/home_filters.png)
+
 Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
 (🟢 = Yapıldı, 🟡 = Yapılıyor, 🔵 Yapılacak)
@@ -16,7 +18,7 @@ Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
   [Gelişmiş Arama Örneği](<https://tezara.org/search?languages=Arap%C3%A7a,%C4%B0ngilizce&thesis-types=Doktora,Y%C3%BCksek+Lisans&universities=Umm+al-Qura+University,Cairo+University+(%D8%AC%D8%A7%D9%85%D8%B9%D8%A9+%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9),Yalova+%C3%9Cniversitesi&advanced=true>)
 
-- 🟡 Her üniversitenin kendi tezlerinin ve istatistiklerinin olduğu sayfalara `tezara.org/university/{Üniversite Adı}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
+- 🟢 Her üniversitenin kendi tezlerinin ve istatistiklerinin olduğu sayfalara `tezara.org/university/{Üniversite Adı}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
 
 - 🟡 Toplu PDF indirme
 
@@ -30,9 +32,16 @@ Notlar:
 
 ---
 
+![Tezara Arama Sonucu](https://bucket.tezara.org/mockups/search.png)
+![Tezara Üniversite Sayfası](https://bucket.tezara.org/mockups/university.png)
+
+---
+
 # Tezara | Thesis Search and Metadata Analysis Tool: [tezara.org](https://tezara.org)
 
 Tezara allows you to search and analyze metadata from the theses entered into the YÖK National Thesis Center. You can access data such as author, title, abstract, advisor, year, university, and language. You can filter this data, convert it to a table or graph, and download in bulk.
+
+![Tezara Homepage with Filters](https://bucket.tezara.org/mockups/home_filters.png)
 
 The differences between Tezara and YÖK's system are as follows:
 
@@ -48,7 +57,7 @@ The differences between Tezara and YÖK's system are as follows:
 
   [Example of Advanced Search](<https://tezara.org/search?languages=Arap%C3%A7a,%C4%B0ngilizce&thesis-types=Doktora,Y%C3%BCksek+Lisans&universities=Umm+al-Qura+University,Cairo+University+(%D8%AC%D8%A7%D9%85%D8%B9%D8%A9+%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9),Yalova+%C3%9Cniversitesi&advanced=true>)
 
-- 🟡 You can access each university's own page with their theses and statistics at `tezara.org/university/{University Name}`. For example: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
+- 🟢 You can access each university's own page with their theses and statistics at `tezara.org/university/{University Name}`. For example: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
 
 - 🟡 Bulk PDF download
 
@@ -59,3 +68,8 @@ Notes:
 - This project was developed due to a need to filter and download 3500 theses while doing the final assignment of the course "Human Resources Management and Applications" by [Assistant Professor Kemal Demir](https://ubs.yalova.edu.tr/ABPDS/AcademicInformation/BilgiGoruntulemev2/Index?pid=U2bdP510gBlFktL3iVOXsQ!xGGx!!xGGx!).
 
 - The project has no association with YÖK.
+
+---
+
+![Tezara Search Result](https://bucket.tezara.org/mockups/search.png)
+![Tezara University Page](https://bucket.tezara.org/mockups/university.png)

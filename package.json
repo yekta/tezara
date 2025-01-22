@@ -39,6 +39,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.3",
     "drizzle-zod": "^0.5.1",
+    "jotai": "^2.11.1",
     "lucide-react": "^0.468.0",
     "meilisearch": "^0.48.1",
     "next": "15.1.4",

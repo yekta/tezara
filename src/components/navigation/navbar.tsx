@@ -21,7 +21,7 @@ export default async function Navbar({}: { className?: string }) {
           </LinkButton>
         </NavigationMenuItem>
       </div>
-      <div className="flex flex-wrap min-w-0 items-center justify-end">
+      <div className="flex flex-wrap min-w-0 items-center justify-end gap-1">
         <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.github.name}

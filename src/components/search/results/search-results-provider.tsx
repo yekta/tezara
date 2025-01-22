@@ -7,7 +7,7 @@ import {
   HITS_PER_PAGE_DEFAULT,
   PAGE_DEFAULT,
 } from "@/components/search/constants/shared";
-import { useEffectAfterMount } from "@/lib/hooks/use-effect-after-mount";
+import { useEffectAfterCurrentPageMount } from "@/lib/hooks/use-effect-after-current-page-mount";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";
 import {
@@ -68,7 +68,7 @@ export const SearchResultsProvider: React.FC<{
   const [yearGte] = useQueryState("year_gte", searchLikePageParams["year_gte"]);
   const [page, setPage] = useQueryState("page", searchLikePageParams["page"]);
 
-  useEffectAfterMount(() => {
+  useEffectAfterCurrentPageMount(() => {
     if (page === PAGE_DEFAULT) return;
     setPage(PAGE_DEFAULT);
   }, [

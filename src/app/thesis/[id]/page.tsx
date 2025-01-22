@@ -1,4 +1,5 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
+import GoBackBar from "@/app/thesis/[id]/go-back-bar";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import ThesisSearchResultRowList from "@/components/search/results/thesis-search-result-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -240,7 +241,8 @@ export default async function Page({ params }: Props) {
           />
         </div>
       )}
-      <NavigationSection id={thesis.id} className="md:hidden pb-4 mt-8" />
+      <NavigationSection id={thesis.id} className="md:hidden py-4" />
+      <GoBackBar buttonText="Geri Dön" className="pb-4 -mt-2 md:mt-6" />
     </div>
   );
 }
