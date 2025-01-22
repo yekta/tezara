@@ -1,4 +1,3 @@
-import GoBackBar from "@/app/thesis/[id]/go-back-bar";
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { cn } from "@/components/ui/utils";
 
@@ -13,7 +12,6 @@ export default async function Layout({ params, children }: Props) {
 
   return (
     <div className="w-full flex flex-col items-center flex-1">
-      <GoBackBar className="-mb-2 md:mb-0" />
       <div className="w-full pt-4 flex-1 relative flex flex-col md:flex-row md:justify-center px-5 md:px-3 lg:px-5">
         {/* Md left */}
         <Sidebar
