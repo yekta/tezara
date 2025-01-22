@@ -101,7 +101,7 @@ export default function ThesisTypesChart({
               </ChartContainer>
             </div>
           </div>
-          <div className="w-full flex items-center justify-center flex-wrap gap-1 pb-4 px-4">
+          <div className="w-full flex items-center justify-center flex-wrap gap-1 -mt-2 pb-4 px-4">
             {dataKeys.map((k) => (
               <div
                 key={k}
