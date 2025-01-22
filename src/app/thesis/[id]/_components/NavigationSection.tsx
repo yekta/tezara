@@ -1,5 +1,8 @@
+"use client";
+
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { cn } from "@/components/ui/utils";
+import { useUmami } from "next-umami";
 
 export default function NavigationSection({
   className,
@@ -11,6 +14,14 @@ export default function NavigationSection({
   const idNumber = parseInt(Number(id).toString());
   const currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
   const disabled = currentThesisId <= 1;
+
+  const umami = useUmami();
+  const sendEvent = (to: number) => {
+    umami.event("Prev/Next Thesis Button Clicked", {
+      "From Thesis ID": currentThesisId,
+      "To Thesis ID": to,
+    });
+  };
 
   return (
     <nav
@@ -24,6 +35,7 @@ export default function NavigationSection({
         variant="prev"
         href={`/thesis/${currentThesisId - 1}`}
         className="-ml-3.5"
+        onClick={() => sendEvent(currentThesisId - 1)}
       >
         Önceki Tez
       </NextPrevButton>
@@ -32,6 +44,7 @@ export default function NavigationSection({
         variant="next"
         href={`/thesis/${currentThesisId + 1}`}
         className="-mr-3.5"
+        onClick={() => sendEvent(currentThesisId + 1)}
       >
         Sonraki Tez
       </NextPrevButton>

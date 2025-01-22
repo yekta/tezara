@@ -8,6 +8,7 @@ type Props = {
   disabled?: boolean;
   variant: "prev" | "next";
   className?: string;
+  onClick?: () => void;
 };
 
 export default function NextPrevButton({
@@ -16,6 +17,7 @@ export default function NextPrevButton({
   disabled,
   children,
   className,
+  onClick,
 }: Props) {
   return disabled || !href ? (
     <Button
@@ -30,6 +32,7 @@ export default function NextPrevButton({
     </Button>
   ) : (
     <LinkButton
+      onClick={onClick}
       href={href}
       size="sm"
       variant="ghost"

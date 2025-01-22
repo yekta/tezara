@@ -28,6 +28,8 @@ type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
   lastPage: number;
   hasNext: boolean;
   hasPrev: boolean;
+  prevPage: number | undefined;
+  nextPage: number | undefined;
   currentPage: number;
 };
 
@@ -158,21 +160,25 @@ export const SearchResultsProvider: React.FC<{
   };
 
   const totalPages = searchThesesQuery.data?.totalPages;
-  const hasNext = totalPages ? page < totalPages && totalPages > 1 : false;
-  const hasPrev = page > 1 && totalPages !== undefined && totalPages > 1;
 
-  const goToNextPage = () => {
-    if (!hasNext) return;
-    if (!totalPages) return;
-    const adjustedPage = Math.min(totalPages, page + 1);
-    setPage(adjustedPage);
-  };
+  const hasPrev = totalPages ? page > 1 && totalPages > 1 : false;
+  const hasNext =
+    page <= 0 ? true : totalPages ? page < totalPages && totalPages > 1 : false;
+
+  const prevPage =
+    hasPrev && totalPages ? Math.min(totalPages, page - 1) : undefined;
+  const nextPage =
+    page <= 0
+      ? 1
+      : hasNext && totalPages
+      ? Math.min(totalPages, Math.max(1, page + 1))
+      : undefined;
 
   const goToPrevPage = () => {
-    if (!hasPrev) return;
-    if (!totalPages) return;
-    const adjustedPage = Math.min(totalPages, Math.max(1, page - 1));
-    setPage(adjustedPage);
+    if (prevPage !== undefined) setPage(prevPage);
+  };
+  const goToNextPage = () => {
+    if (nextPage !== undefined) setPage(nextPage);
   };
 
   const goToPage = (page: number) => {
@@ -194,6 +200,8 @@ export const SearchResultsProvider: React.FC<{
         lastPage,
         hasNext,
         hasPrev,
+        prevPage,
+        nextPage,
         currentPage: page,
       }}
     >

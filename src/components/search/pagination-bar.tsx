@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Pagination,
   PaginationContent,
@@ -7,11 +9,14 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
 import { LoaderIcon } from "lucide-react";
+import { useUmami } from "next-umami";
 
 type Props = {
   className?: string;
   hasPrev: boolean;
   hasNext: boolean;
+  prevPage: number | undefined;
+  nextPage: number | undefined;
   currentPage: number;
   firstPage: number;
   lastPage: number;
@@ -20,10 +25,13 @@ type Props = {
   goToPage: (page: number) => void;
   showLoader?: boolean;
 };
+
 export default function PaginationBar({
   className,
   hasPrev,
   hasNext,
+  prevPage,
+  nextPage,
   currentPage,
   firstPage,
   lastPage,
@@ -32,6 +40,14 @@ export default function PaginationBar({
   goToPage,
   showLoader,
 }: Props) {
+  const umami = useUmami();
+  const sendEvent = (to: number | undefined) => {
+    umami.event("Prev/Next Search Result Page Button Clicked", {
+      "From Page": currentPage,
+      "To Page": to || "Undefined",
+    });
+  };
+
   return (
     <Pagination
       className={cn(
@@ -44,7 +60,10 @@ export default function PaginationBar({
           <PaginationPrevious
             disabled={!hasPrev}
             isButton
-            onClick={goToPrevPage}
+            onClick={() => {
+              goToPrevPage();
+              sendEvent(prevPage);
+            }}
           />
         </PaginationItem>
         <PaginationItem>
@@ -52,7 +71,10 @@ export default function PaginationBar({
             variant="first"
             disabled={!hasPrev}
             isButton
-            onClick={() => goToPage(firstPage)}
+            onClick={() => {
+              goToPage(firstPage);
+              sendEvent(firstPage);
+            }}
           />
         </PaginationItem>
         <li className="flex-1 flex items-center justify-center min-w-0">
@@ -76,11 +98,21 @@ export default function PaginationBar({
             variant="last"
             isButton
             disabled={!hasNext}
-            onClick={() => goToPage(lastPage)}
+            onClick={() => {
+              goToPage(lastPage);
+              sendEvent(lastPage);
+            }}
           />
         </PaginationItem>
         <PaginationItem className="-mr-1">
-          <PaginationNext isButton disabled={!hasNext} onClick={goToNextPage} />
+          <PaginationNext
+            isButton
+            disabled={!hasNext}
+            onClick={() => {
+              goToNextPage();
+              sendEvent(nextPage);
+            }}
+          />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

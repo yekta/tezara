@@ -42,6 +42,8 @@ export default function SearchResults({}: Props) {
     goToPage,
     firstPage,
     lastPage,
+    prevPage,
+    nextPage,
   } = searchResultsContext;
 
   const isHardError = !data && !isPending && isError;
@@ -253,6 +255,8 @@ export default function SearchResults({}: Props) {
         <PaginationBar
           hasNext={hasNext}
           hasPrev={hasPrev}
+          prevPage={prevPage}
+          nextPage={nextPage}
           goToPage={goToPage}
           goToNextPage={goToNextPage}
           goToPrevPage={goToPrevPage}
@@ -285,6 +289,8 @@ export default function SearchResults({}: Props) {
         <PaginationBar
           hasNext={hasNext}
           hasPrev={hasPrev}
+          prevPage={prevPage}
+          nextPage={nextPage}
           goToPage={goToPage}
           goToNextPage={goToNextPage}
           goToPrevPage={goToPrevPage}
