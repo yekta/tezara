@@ -1,6 +1,7 @@
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
 import {
   background,
+  defaultParagraphClassName,
   foreground,
   foregroundMuted,
   getOpengraphFonts,
@@ -81,6 +82,7 @@ export default async function Image({ params }: Props) {
             lineHeight: 1.2,
             marginTop: 36,
             fontWeight: 700,
+            ...defaultParagraphClassName,
           }}
         >
           {truncateString(parsedName, 70)}
@@ -143,7 +145,9 @@ function Stat({
       }}
     >
       {Icon && <Icon style={{ width: 40, height: 40, color }} />}
-      <p style={{ lineHeight: 1.2, fontSize: 40 }}>
+      <p
+        style={{ lineHeight: 1.2, fontSize: 40, ...defaultParagraphClassName }}
+      >
         <span style={{ paddingRight: 8, fontWeight: 700, color }}>
           {value.toLocaleString("tr")}
         </span>

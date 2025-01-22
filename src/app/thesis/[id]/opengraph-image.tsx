@@ -1,6 +1,7 @@
 import { cachedGetPageData } from "@/app/thesis/[id]/helpers";
 import DefaultOpenGraphImage, {
   background,
+  defaultParagraphClassName,
   foreground,
   foregroundMuted,
   getOpengraphFonts,
@@ -80,7 +81,6 @@ export default async function Image({ params }: Props) {
           style={{
             width: logoSize,
             height: logoSize / logoAspectRatio,
-            marginTop: -12,
           }}
         />
         <p
@@ -88,15 +88,16 @@ export default async function Image({ params }: Props) {
             fontSize: 56,
             width: "100%",
             lineHeight: 1.15,
-            marginTop: 40,
+            marginTop: 36,
             fontWeight: 700,
+            ...defaultParagraphClassName,
           }}
         >
           {truncateString(
             thesis.title_original ||
               thesis.title_translated ||
               `Tez No: ${thesis.id}`,
-            100
+            115
           )}
         </p>
         <div
@@ -145,7 +146,16 @@ function Info({
       }}
     >
       {Icon && <Icon style={{ width: 40, height: 40, color }} />}
-      <p style={{ lineHeight: 1.2, fontSize: 40, color }}>{label}</p>
+      <p
+        style={{
+          lineHeight: 1.2,
+          fontSize: 40,
+          color,
+          ...defaultParagraphClassName,
+        }}
+      >
+        {label}
+      </p>
     </div>
   );
 }

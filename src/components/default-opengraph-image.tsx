@@ -2,6 +2,7 @@ import PenToolIcon from "@/components/icons/pen-tool";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
 import { env } from "@/lib/env";
+import { CSSProperties } from "react";
 
 type Props = {
   logoSize?: number;
@@ -17,6 +18,10 @@ export const opengraphSize = {
   height: 630,
 };
 export const opengraphContentType = "image/png";
+export const defaultParagraphClassName: CSSProperties = {
+  wordBreak: "break-word",
+  textWrap: "balance",
+};
 
 export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
   return (
