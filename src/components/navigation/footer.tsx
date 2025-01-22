@@ -33,11 +33,17 @@ export default async function Footer({ className }: { className?: string }) {
             {" • "}
           </span>
           <div className="w-full mt-0.5 md:mt-0 md:w-auto shrink min-w-0 flex flex-row flex-wrap items-center justify-start">
-            <FooterLink href={sc.github.href}>{sc.github.name}</FooterLink>
+            {/* <FooterLink href={sc.buymeacoffee.href}>
+              {sc.buymeacoffee.name}
+            </FooterLink>
+            <span className="px-0.5 md:px-0.75 text-muted-more-foreground">
+              •
+            </span> */}
+            <FooterLink href={sc.x.href}>{sc.x.name}</FooterLink>
             <span className="px-0.5 md:px-0.75 text-muted-more-foreground">
               •
             </span>
-            <FooterLink href={sc.x.href}>{sc.x.name}</FooterLink>
+            <FooterLink href={sc.github.href}>{sc.github.name}</FooterLink>
           </div>
         </div>
         <div className="flex items-center justify-end gap-1.75">

@@ -22,18 +22,18 @@ export default async function Navbar({}: { className?: string }) {
         </NavigationMenuItem>
       </div>
       <div className="flex flex-wrap min-w-0 items-center justify-end gap-1">
-        <NavigationMenuItem asChild>
+        {/* <NavigationMenuItem asChild>
           <LinkButton
-            aria-label={sc.github.name}
-            href={sc.github.href}
+            aria-label={sc.buymeacoffee.name}
+            href={sc.buymeacoffee.href}
             size="icon"
             variant="ghost"
             className="size-8.5 rounded-lg"
             target="_blank"
           >
-            <ScIcon slug={sc.github.slug} className="size-6 shrink-0" />
+            <ScIcon slug={sc.buymeacoffee.slug} className="size-6 shrink-0" />
           </LinkButton>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
         <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.x.name}
@@ -44,6 +44,18 @@ export default async function Navbar({}: { className?: string }) {
             target="_blank"
           >
             <ScIcon slug={sc.x.slug} className="size-6 shrink-0" />
+          </LinkButton>
+        </NavigationMenuItem>
+        <NavigationMenuItem asChild>
+          <LinkButton
+            aria-label={sc.github.name}
+            href={sc.github.href}
+            size="icon"
+            variant="ghost"
+            className="size-8.5 rounded-lg"
+            target="_blank"
+          >
+            <ScIcon slug={sc.github.slug} className="size-6 shrink-0" />
           </LinkButton>
         </NavigationMenuItem>
       </div>

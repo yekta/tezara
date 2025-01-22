@@ -16,7 +16,7 @@ export const getPreviewUrl = (slug: string) =>
 
 export const TURKISH = "Türkçe";
 
-export type TScOption = "x" | "github";
+export type TScOption = "x" | "github" | "buymeacoffee";
 
 export const sc: Record<
   TScOption,
@@ -28,6 +28,13 @@ export const sc: Record<
     xOrder: number;
   }
 > = {
+  buymeacoffee: {
+    name: "Bağış Yap",
+    href: "https://buymeacoffee.com/yekta",
+    slug: "buymeacoffee",
+    joinable: true,
+    xOrder: 1,
+  },
   x: {
     name: "X (Twitter)",
     href: "https://x.com/yektagg",
