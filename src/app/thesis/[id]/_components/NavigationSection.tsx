@@ -2,6 +2,7 @@
 
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { cn } from "@/components/ui/utils";
+import { usePlausible } from "@/lib/plausible";
 import { useUmami } from "next-umami";
 
 export default function NavigationSection({
@@ -16,10 +17,17 @@ export default function NavigationSection({
   const disabled = currentThesisId <= 1;
 
   const umami = useUmami();
+  const plausible = usePlausible();
   const sendEvent = (to: number) => {
     umami.event("Prev/Next Thesis Button Clicked", {
       "From Thesis ID": currentThesisId,
       "To Thesis ID": to,
+    });
+    plausible("Prev/Next Thesis Button Clicked", {
+      props: {
+        "From Thesis ID": currentThesisId,
+        "To Thesis ID": to,
+      },
     });
   };
 

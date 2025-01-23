@@ -31,7 +31,7 @@ export default async function Navbar({}: { className?: string }) {
             className="size-8.5 rounded-lg"
             target="_blank"
           >
-            <ScIcon slug={sc.buymeacoffee.slug} className="size-6 shrink-0" />
+            <ScIcon slug={sc.buymeacoffee.slug} className="size-7 shrink-0" />
           </LinkButton>
         </NavigationMenuItem> */}
         <NavigationMenuItem asChild>

@@ -8,6 +8,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
+import { usePlausible } from "@/lib/plausible";
 import { LoaderIcon } from "lucide-react";
 import { useUmami } from "next-umami";
 
@@ -41,10 +42,17 @@ export default function PaginationBar({
   showLoader,
 }: Props) {
   const umami = useUmami();
+  const plausible = usePlausible();
   const sendEvent = (to: number | undefined) => {
     umami.event("Prev/Next Search Result Page Button Clicked", {
       "From Page": currentPage,
       "To Page": to || "Undefined",
+    });
+    plausible("Prev/Next Search Result Page Button Clicked", {
+      props: {
+        "From Page": currentPage,
+        "To Page": to || "Undefined",
+      },
     });
   };
 

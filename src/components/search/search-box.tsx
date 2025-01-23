@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
+import { usePlausible } from "@/lib/plausible";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { searchAuthors } from "@/server/meili/repo/authors";
@@ -97,6 +98,7 @@ export default function SearchBox({
   );
 
   const umami = useUmami();
+  const plausible = usePlausible();
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const [isPendingHackyPush, setIsPendingHackyPush] = useState(false);
@@ -269,6 +271,12 @@ export default function SearchBox({
           Query: queryQP,
           Variant: variant,
         });
+        plausible("Searched", {
+          props: {
+            Query: queryQP,
+            Variant: variant,
+          },
+        });
         await pushToSearch();
 
         let counter = 20;
@@ -426,6 +434,7 @@ export default function SearchBox({
               onClick={() => {
                 if (!advancedSearchQP) {
                   umami.event("Advance Search Clicked");
+                  plausible("Advance Search Clicked", { props: {} });
                 }
                 setAdvancedSearchQP((a) => !a);
               }}
@@ -465,7 +474,10 @@ export default function SearchBox({
               <Select
                 key={`year-gte-${yearGteQPKey}`}
                 onOpenChange={(o) => {
-                  if (o) umami.event("Year GTE Filter Clicked");
+                  if (o) {
+                    umami.event("Year GTE Filter Clicked");
+                    plausible("Year GTE Filter Clicked", { props: {} });
+                  }
                 }}
                 value={yearGteQP?.toString()}
                 onValueChange={(v) => {
@@ -525,7 +537,10 @@ export default function SearchBox({
               <Select
                 key={`year-lte-${yearLteQPKey}`}
                 onOpenChange={(o) => {
-                  if (o) umami.event("Year LTE Filter Clicked");
+                  if (o) {
+                    umami.event("Year LTE Filter Clicked");
+                    plausible("Year LTE Filter Clicked", { props: {} });
+                  }
                 }}
                 value={yearLteQP?.toString()}
                 onValueChange={(v) => {
@@ -588,6 +603,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("University Filter Clicked");
+                  plausible("University Filter Clicked", { props: {} });
                 }}
                 Icon={LandmarkIcon}
                 commandButtonText={
@@ -623,6 +639,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Department Filter Clicked");
+                  plausible("Department Filter Clicked", { props: {} });
                 }}
                 Icon={BuildingIcon}
                 commandInputValue={queryDepartments}
@@ -677,6 +694,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Thesis Type Filter Clicked");
+                  plausible("Thesis Type Filter Clicked", { props: {} });
                 }}
                 Icon={ScrollTextIcon}
                 IconSetForItem={ThesisTypeIcon}
@@ -712,6 +730,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Language Filter Clicked");
+                  plausible("Language Filter Clicked", { props: {} });
                 }}
                 Icon={GlobeIcon}
                 IconSetForItem={LanguageIcon}
@@ -749,6 +768,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Author Filter Clicked");
+                  plausible("Author Filter Clicked", { props: {} });
                 }}
                 Icon={PenToolIcon}
                 commandInputValue={queryAuthors}
@@ -804,6 +824,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Advisor Filter Clicked");
+                  plausible("Advisor Filter Clicked", { props: {} });
                 }}
                 Icon={UserPenIcon}
                 commandInputValue={queryAdvisors}

@@ -6,6 +6,7 @@ import PaginationBar from "@/components/search/pagination-bar";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { Button } from "@/components/ui/button";
+import { usePlausible } from "@/lib/plausible";
 import { Parser } from "@json2csv/plainjs";
 import {
   CheckCircleIcon,
@@ -50,6 +51,8 @@ export default function SearchResults({}: Props) {
   const isJustFetching = !isPending && isFetching;
 
   const umami = useUmami();
+  const plausible = usePlausible();
+
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
   const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
   const isPendingDownload = isPendingCsvDownload || isPendingJsonDownload;
@@ -69,6 +72,12 @@ export default function SearchResults({}: Props) {
       umami.event("Downloaded Bulk CSV", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
+      });
+      plausible("Downloaded Bulk CSV", {
+        props: {
+          "Row Count": res.hits.length,
+          "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
+        },
       });
 
       const name = `search-results-${Date.now()}.csv`;
@@ -93,6 +102,12 @@ export default function SearchResults({}: Props) {
       umami.event("Downloaded Bulk JSON", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
+      });
+      plausible("Downloaded Bulk JSON", {
+        props: {
+          "Row Count": res.hits.length,
+          "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
+        },
       });
 
       const name = `search-results-${Date.now()}.json`;
