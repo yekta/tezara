@@ -55,7 +55,7 @@ export default function ThesesCountsByYearsChart({
                 axisLine={false}
                 tickFormatter={(value) => value}
               />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <ChartTooltip content={<ChartTooltipContent />} />
               {dataKeys.map((dataKey) => {
                 return (
                   <Bar

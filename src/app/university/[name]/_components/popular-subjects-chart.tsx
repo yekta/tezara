@@ -61,7 +61,7 @@ export default function PopularSubjectsChart({
                 hide
               />
               <XAxis dataKey="count" type="number" hide />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <ChartTooltip content={<ChartTooltipContent />} />
               <Bar dataKey="count" layout="vertical">
                 <LabelList
                   dataKey="keyword"
