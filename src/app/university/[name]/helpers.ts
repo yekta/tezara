@@ -19,8 +19,8 @@ async function getPageData({ name }: { name: string }) {
         "year",
         "language",
         "thesis_type",
-        "keywords_turkish",
-        "subjects_turkish",
+        "keywords",
+        "subjects",
       ],
       attributes_to_not_retrieve: undefined,
       advisors: [],
@@ -57,16 +57,20 @@ async function getPageData({ name }: { name: string }) {
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
   mainRes.hits.forEach((hit) => {
-    if (hit.keywords_turkish) {
-      hit.keywords_turkish.forEach((keyword) => {
-        keywords.add(keyword);
-      });
+    if (hit.keywords) {
+      hit.keywords
+        .filter((i) => i.language !== "English")
+        .forEach((keyword) => {
+          keywords.add(keyword.name);
+        });
     }
-    if (hit.subjects_turkish) {
-      hit.subjects_turkish.forEach((subject) => {
-        const count = subjects.get(subject) || 0;
-        subjects.set(subject, count + 1);
-      });
+    if (hit.subjects) {
+      hit.subjects
+        .filter((i) => i.language !== "English")
+        .forEach((subject) => {
+          const count = subjects.get(subject.name) || 0;
+          subjects.set(subject.name, count + 1);
+        });
     }
     if (hit.language) {
       const count = languages.get(hit.language) || 0;

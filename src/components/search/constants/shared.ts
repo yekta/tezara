@@ -1,5 +1,5 @@
 import { TSearchLikePageParams } from "@/components/search/constants/client";
-import { TThesisExtended } from "@/server/meili/types";
+import { TThesis } from "@/server/meili/types";
 
 export const PAGE_DEFAULT = 1;
 export const HITS_PER_PAGE_DEFAULT = 20;
@@ -12,8 +12,8 @@ export type TSearchLikePageParamsSearchProps = Omit<
 
 type TGetSearchThesesQueryKeyParams = TSearchLikePageParamsSearchProps & {
   hits_per_page: number | undefined;
-  attributes_to_retrieve: (keyof TThesisExtended)[] | undefined;
-  attributes_to_not_retrieve: (keyof TThesisExtended)[] | undefined;
+  attributes_to_retrieve: (keyof TThesis)[] | undefined;
+  attributes_to_not_retrieve: (keyof TThesis)[] | undefined;
 };
 
 export function getSearchThesesQueryKey(props: TGetSearchThesesQueryKeyParams) {

@@ -5,7 +5,7 @@ import {
 import {
   allThesisAttributes,
   TThesisAttribute,
-  TThesisExtended,
+  TThesis,
 } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
@@ -18,7 +18,7 @@ export async function getThesis({
   client: MeiliSearch;
   id: number;
 }) {
-  const index = client.index<TThesisExtended>(indexName);
+  const index = client.index<TThesis>(indexName);
   const result = await index.getDocument(id);
   return result;
 }
@@ -47,7 +47,7 @@ export async function searchTheses({
   attributes_to_not_retrieve: TThesisAttribute[] | undefined;
   client: MeiliSearch;
 } & TSearchLikePageParamsSearchProps) {
-  const index = client.index<TThesisExtended>(indexName);
+  const index = client.index<TThesis>(indexName);
   let filter = "";
   let languageFilter = "";
   let universityFilter = "";

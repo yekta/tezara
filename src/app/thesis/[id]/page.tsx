@@ -157,18 +157,18 @@ export default async function Page({ params }: Props) {
         <p id="advisor_names_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Konu: </span>
           <span className="font-bold" id="advisor_names">
-            {!thesis.subjects_turkish || thesis.subjects_turkish.length < 1
-              ? notAvailable
-              : thesis.subjects_turkish
-                  .map(
-                    (k, i) =>
-                      `${
-                        thesis.subjects_english?.[i]
-                          ? `${k} (${thesis.subjects_english?.[i]})`
-                          : k
-                      }`
-                  )
-                  .join(", ")}
+            {thesis.subjects && thesis.subjects.length > 1
+              ? thesis.subjects
+                  .sort((a, b) => {
+                    if (a.language === "Turkish" && b.language === "English")
+                      return -1;
+                    if (a.language === "English" && b.language === "Turkish")
+                      return 1;
+                    return 0;
+                  })
+                  .map((i) => i.name)
+                  .join(", ")
+              : notAvailable}
           </span>
         </p>
         <Divider />
@@ -211,7 +211,7 @@ export default async function Page({ params }: Props) {
             Sayfa Sayısı:{" "}
           </span>
           <span className="font-bold" id="page_count">
-            {thesis.pages}
+            {thesis.page_count || notAvailable}
           </span>
         </p>
         <Divider />

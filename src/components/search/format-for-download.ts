@@ -28,7 +28,7 @@ export function formatForDownload(
           ? result.advisors.map((advisor) => advisor).join(", ")
           : emptyFieldText,
       Yıl: result.year || emptyFieldText,
-      "Safya Sayısı": result.pages || emptyFieldText,
+      "Safya Sayısı": result.page_count || emptyFieldText,
       Dil: result.language || emptyFieldText,
       "PDF Linki": result.pdf_url || emptyFieldText,
     });

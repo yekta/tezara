@@ -17,13 +17,13 @@ import {
   minButtonSizeEnforcerClassName,
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
-import { TThesisExtended } from "@/server/meili/types";
+import { TThesis } from "@/server/meili/types";
 import Link from "next/link";
 
 type Props =
   | (
       | {
-          thesis: TThesisExtended;
+          thesis: TThesis;
           isPlaceholder?: false;
         }
       | {
