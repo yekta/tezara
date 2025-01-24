@@ -78,12 +78,12 @@ export default async function Page({ params }: Props) {
       <div className="w-full flex flex-col sm:flex-row">
         <LanguagesChart
           className="mt-8 w-full sm:w-1/2 md:w-1/2 lg:w-1/3"
-          chartData={Array.from(languages.entries()).map(
-            ([language, count]) => ({
+          chartData={Array.from(languages.entries())
+            .map(([language, count]) => ({
               language,
               count,
-            })
-          )}
+            }))
+            .sort((a, b) => b.count - a.count)}
           dataKeys={Array.from(languages.entries())
             .sort((a, b) => b[1] - a[1])
             .map(([language]) => language)}
