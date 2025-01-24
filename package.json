@@ -59,6 +59,7 @@
     "recharts": "^2.13.3",
     "server-only": "^0.0.1",
     "sonner": "^1.7.1",
+    "sql-template-tag": "^5.2.1",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

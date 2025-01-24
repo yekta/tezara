@@ -5,6 +5,7 @@ import ThesisTypesChart from "@/app/university/[name]/_components/thesis-types-c
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
 import ThesisSearchResultRowList from "@/components/search/results/thesis-search-result-row-list";
 import { siteTitle } from "@/lib/constants";
+import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getUniversities } from "@/server/meili/repo/university";

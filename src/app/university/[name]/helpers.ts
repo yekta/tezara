@@ -1,5 +1,7 @@
+import { clickhouse } from "@/server/clickhouse/constants";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
+import sql from "sql-template-tag";
 import { cache } from "react";
 
 export const cachedGetPageData = cache(({ name }: { name: string }) =>
@@ -7,102 +9,182 @@ export const cachedGetPageData = cache(({ name }: { name: string }) =>
 );
 
 async function getPageData({ name }: { name: string }) {
-  const [mainRes, lastThesesRes] = await Promise.all([
-    searchTheses({
-      q: "",
-      client: meiliAdmin,
-      page: 1,
-      hits_per_page: 100_000,
-      universities: [name],
-      departments: [],
-      attributes_to_retrieve: [
-        "year",
-        "language",
-        "thesis_type",
-        "keywords",
-        "subjects",
-      ],
-      attributes_to_not_retrieve: undefined,
-      advisors: [],
-      authors: [],
-      languages: [],
-      sort: undefined,
-      thesis_types: [],
-      year_gte: null,
-      year_lte: null,
-    }),
-    searchTheses({
-      q: "",
-      hits_per_page: 10,
-      page: 1,
-      sort: undefined,
-      universities: [name],
-      departments: [],
-      languages: [],
-      advisors: [],
-      authors: [],
-      thesis_types: [],
-      attributes_to_retrieve: undefined,
-      attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
-      year_gte: null,
-      year_lte: null,
-      client: meiliAdmin,
-    }),
-  ]);
+  const thesisCountsByYearsPromise = clickhouse
+    .query({
+      query: sql`
+      SELECT
+        year,
+        thesis_type,
+        count() as count
+      FROM theses
+      WHERE university = {university: String}
+      GROUP BY year, thesis_type
+      ORDER BY year ASC
+    `.text,
+      query_params: {
+        university: name,
+      },
+      format: "JSON",
+    })
+    .then((res) => res.json());
 
-  const keywords = new Set<string>();
-  const languages = new Map<string, number>();
-  const thesisTypes = new Map<string, number>();
-  const subjects = new Map<string, number>();
+  const languagesPromise = clickhouse
+    .query({
+      query: sql`
+      SELECT
+        language,
+        count() as count
+      FROM theses
+      WHERE university = {university: String}
+      GROUP BY language
+      ORDER BY count DESC
+    `.text,
+      query_params: {
+        university: name,
+      },
+      format: "JSON",
+    })
+    .then((res) => res.json());
+
+  const subjectsPromise = clickhouse
+    .query({
+      query: sql`
+      SELECT 
+          ts.subject_name,
+          count() as count
+      FROM theses t
+      INNER JOIN thesis_subjects ts ON t.id = ts.thesis_id
+      INNER JOIN subjects s ON ts.subject_name = s.name
+      WHERE t.university = {university: String}
+      AND s.language = 'Turkish'
+      GROUP BY ts.subject_name
+      ORDER BY count DESC
+    `.text,
+      query_params: {
+        university: name,
+      },
+      format: "JSON",
+    })
+    .then((res) => res.json());
+
+  const keywordsPromise = clickhouse
+    .query({
+      query: sql`
+      SELECT 
+          ts.keyword_name,
+          count() as count
+      FROM theses t
+      INNER JOIN thesis_keywords ts ON t.id = ts.thesis_id
+      INNER JOIN keywords s ON ts.keyword_name = s.name
+      WHERE t.university = {university: String}
+      AND s.language = 'Turkish'
+      GROUP BY ts.keyword_name
+      ORDER BY count DESC
+    `.text,
+      query_params: {
+        university: name,
+      },
+      format: "JSON",
+    })
+    .then((res) => res.json());
+
+  const lastThesesPromise = searchTheses({
+    q: "",
+    hits_per_page: 10,
+    page: 1,
+    sort: undefined,
+    universities: [name],
+    departments: [],
+    languages: [],
+    advisors: [],
+    authors: [],
+    thesis_types: [],
+    attributes_to_retrieve: undefined,
+    attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
+    year_gte: null,
+    year_lte: null,
+    client: meiliAdmin,
+  });
+
+  const start = performance.now();
+  const [
+    thesisCountsByYearsRes,
+    languagesRes,
+    subjectsRes,
+    keywordsRes,
+    lastThesesRes,
+  ] = await Promise.all([
+    thesisCountsByYearsPromise,
+    languagesPromise,
+    subjectsPromise,
+    keywordsPromise,
+    lastThesesPromise,
+  ]);
+  console.log(
+    `university/[name]:getPageData() | ${Math.round(
+      performance.now() - start
+    ).toLocaleString()}ms`
+  );
+
+  const thesisCountsByYearsData = thesisCountsByYearsRes.data as {
+    year: number;
+    thesis_type: string;
+    count: string;
+  }[];
+
+  const languagesData = languagesRes.data as {
+    language: string;
+    count: string;
+  }[];
+
+  const subjectsData = subjectsRes.data as {
+    subject_name: string;
+    count: string;
+  }[];
+
+  const keywordsData = keywordsRes.data as {
+    keyword_name: string;
+    count: string;
+  }[];
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
-  mainRes.hits.forEach((hit) => {
-    if (hit.keywords) {
-      hit.keywords
-        .filter((i) => i.language !== "English")
-        .forEach((keyword) => {
-          keywords.add(keyword.name);
-        });
+  let minYear = Infinity;
+  let maxYear = -Infinity;
+  let thesesCount = 0;
+  const languages = new Map<string, number>(
+    languagesData.map(({ language, count }) => [language, Number(count)])
+  );
+  const subjects = new Map<string, number>(
+    subjectsData.map(({ subject_name, count }) => [subject_name, Number(count)])
+  );
+  const keywords = new Map<string, number>(
+    keywordsData.map(({ keyword_name, count }) => [keyword_name, Number(count)])
+  );
+  const thesisTypes = new Map<string, number>();
+
+  thesisCountsByYearsData.forEach(({ year, thesis_type, count }) => {
+    const countAsNumber = Number(count);
+    const thesisTypeCount = thesisTypes.get(thesis_type) || 0;
+    thesisTypes.set(thesis_type, thesisTypeCount + countAsNumber);
+
+    thesesCount += countAsNumber;
+
+    if (year < minYear) {
+      minYear = year;
     }
-    if (hit.subjects) {
-      hit.subjects
-        .filter((i) => i.language !== "English")
-        .forEach((subject) => {
-          const count = subjects.get(subject.name) || 0;
-          subjects.set(subject.name, count + 1);
-        });
+    if (year > maxYear) {
+      maxYear = year;
     }
-    if (hit.language) {
-      const count = languages.get(hit.language) || 0;
-      languages.set(hit.language, count + 1);
-    }
-    if (hit.thesis_type) {
-      const count = thesisTypes.get(hit.thesis_type) || 0;
-      thesisTypes.set(hit.thesis_type, count + 1);
-    }
-    const year = hit.year || "Bilinmiyor";
-    const thesisType = hit.thesis_type || "Diğer";
+
     if (!thesesCountsByYears[year]) {
       thesesCountsByYears[year] = {};
     }
-    if (!thesesCountsByYears[year][thesisType]) {
-      thesesCountsByYears[year] = {
-        ...thesesCountsByYears[year],
-        [thesisType]: 1,
-      };
+
+    if (!thesesCountsByYears[year][thesis_type]) {
+      thesesCountsByYears[year][thesis_type] = 0;
     }
-    thesesCountsByYears[year][thesisType] += 1;
-  });
 
-  const years = Object.keys(thesesCountsByYears).map(Number);
-  const minYear = Math.min(...years);
-  const maxYear = Math.max(...years);
-
-  const allThesisTypes = new Set<string>();
-  Object.values(thesesCountsByYears).forEach((thesesCount) => {
-    Object.keys(thesesCount).forEach((thesisType) => {
-      allThesisTypes.add(thesisType);
-    });
+    thesesCountsByYears[year][thesis_type] += countAsNumber;
   });
 
   const thesesCountsByYearsChartData: { [key: string]: string }[] = Array.from(
@@ -126,15 +208,15 @@ async function getPageData({ name }: { name: string }) {
     .slice(0, 10);
 
   return {
-    keywords,
-    languages,
-    subjects,
     thesesCountsByYearsChartData,
     popularSubjectsChartData,
+    keywords,
+    subjects,
+    languages,
     minYear,
     maxYear,
     thesisTypes,
-    thesesCount: mainRes.hits.length,
+    thesesCount,
     lastThesesRes,
   };
 }
