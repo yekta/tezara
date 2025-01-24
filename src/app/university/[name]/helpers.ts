@@ -49,17 +49,14 @@ async function getPageData({ name }: { name: string }) {
   const subjectsPromise = clickhouse
     .query({
       query: sql`
-      SELECT 
-          ts.subject_name,
-          count() as count
-      FROM theses t
-      INNER JOIN thesis_subjects ts ON t.id = ts.thesis_id
-      INNER JOIN subjects s ON ts.subject_name = s.name
-      WHERE t.university = {university: String}
-      AND s.language = 'Turkish'
-      GROUP BY ts.subject_name
-      ORDER BY count DESC
-    `.text,
+        SELECT 
+            subject_name,
+            count AS count
+        FROM thesis_subject_counts
+        WHERE university = {university: String}
+        AND subject_language = 'Turkish'
+        ORDER BY count DESC
+      `.text,
       query_params: {
         university: name,
       },
@@ -70,17 +67,14 @@ async function getPageData({ name }: { name: string }) {
   const keywordsPromise = clickhouse
     .query({
       query: sql`
-      SELECT 
-          ts.keyword_name,
-          count() as count
-      FROM theses t
-      INNER JOIN thesis_keywords ts ON t.id = ts.thesis_id
-      INNER JOIN keywords s ON ts.keyword_name = s.name
-      WHERE t.university = {university: String}
-      AND s.language = 'Turkish'
-      GROUP BY ts.keyword_name
-      ORDER BY count DESC
-    `.text,
+        SELECT 
+            keyword_name,
+            count AS count
+        FROM thesis_keyword_counts
+        WHERE university = {university: String}
+        AND keyword_language = 'Turkish'
+        ORDER BY count DESC
+      `.text,
       query_params: {
         university: name,
       },
@@ -121,7 +115,7 @@ async function getPageData({ name }: { name: string }) {
     lastThesesPromise,
   ]);
   console.log(
-    `university/[name]:getPageData() | ${Math.round(
+    `university/[name]:getPageData("${name}") | ${Math.round(
       performance.now() - start
     ).toLocaleString()}ms`
   );
