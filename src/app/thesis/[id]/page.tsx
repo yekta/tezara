@@ -5,7 +5,6 @@ import ThesisSearchResultRowList from "@/components/search/results/thesis-search
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
-import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getThesis, searchTheses } from "@/server/meili/repo/thesis";
