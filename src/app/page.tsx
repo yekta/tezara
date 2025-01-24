@@ -2,6 +2,7 @@ import Logo from "@/components/logo/logo";
 import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
 import SearchBox from "@/components/search/search-box";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
+import { clickhouse } from "@/server/clickhouse/constants";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { getLanguages } from "@/server/meili/repo/language";
@@ -19,6 +20,13 @@ type Props = {
 export default async function Home({ searchParams }: Props) {
   await cachedSearchLikePageSearchParams.parse(searchParams);
   const queryClient = getQueryClientServer();
+
+  console.log("Clickhouse test");
+  const res = await clickhouse.query({
+    query: "SELECT count(*) as count FROM theses",
+    format: "JSON",
+  });
+  console.log(await res.json());
 
   const [languages, universities, thesisTypes] = await Promise.all([
     getLanguages({ client: meili }),

@@ -10,6 +10,9 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     MEILI_ADMIN_KEY: z.string(),
     MEILI_URL_INTERNAL: z.string().url(),
+    CLICKHOUSE_URL: z.string().url(),
+    CLICKHOUSE_USERNAME: z.string(),
+    CLICKHOUSE_PASSWORD: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -43,6 +46,9 @@ export const env = createEnv({
     MEILI_ADMIN_KEY: process.env.MEILI_ADMIN_KEY,
     MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
     NEXT_PUBLIC_PLAUSIBLE_URL: process.env.NEXT_PUBLIC_PLAUSIBLE_URL,
+    CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
+    CLICKHOUSE_USERNAME: process.env.CLICKHOUSE_USERNAME,
+    CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
