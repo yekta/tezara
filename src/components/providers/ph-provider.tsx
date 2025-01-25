@@ -12,6 +12,7 @@ if (
   posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY, {
     api_host: "/ingest",
     ui_host: env.NEXT_PUBLIC_SITE_URL,
+    person_profiles: "always",
   });
 }
 
