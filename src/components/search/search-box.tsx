@@ -134,6 +134,7 @@ export default function SearchBox({
         Variant: variant,
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const debouncedCaptureSearch = useDebounceCallback(captureSearch, 4000);
