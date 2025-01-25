@@ -52,7 +52,7 @@ async function getPageData({ name }: { name: string }) {
         SELECT 
             subject_name,
             count AS count
-        FROM thesis_subject_counts
+        FROM thesis_subject_stats
         WHERE university = {university: String}
         AND subject_language = 'Turkish'
         ORDER BY count DESC
@@ -70,7 +70,7 @@ async function getPageData({ name }: { name: string }) {
         SELECT 
             keyword_name,
             count AS count
-        FROM thesis_keyword_counts
+        FROM thesis_keyword_stats
         WHERE university = {university: String}
         AND keyword_language = 'Turkish'
         ORDER BY count DESC
