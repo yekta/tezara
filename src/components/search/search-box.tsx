@@ -356,10 +356,11 @@ export default function SearchBox({
   const isTouchScreen = useIsTouchscreen();
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (isTouchScreen) return;
       focusToMainInput();
     });
+    return () => clearTimeout(timeoutId);
   }, [isTouchScreen]);
 
   function focusToMainInput() {
