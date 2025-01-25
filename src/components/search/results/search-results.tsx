@@ -1,13 +1,12 @@
 "use client";
 
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
-import { capture } from "@/components/providers/ph-provider";
 import { formatForDownload } from "@/components/search/format-for-download";
 import PaginationBar from "@/components/search/pagination-bar";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { Button } from "@/components/ui/button";
-import { useUmamiEvent } from "@/lib/hooks/use-umami";
+import { useUmami } from "@/lib/hooks/use-umami";
 import { Parser } from "@json2csv/plainjs";
 import {
   CheckCircleIcon,
@@ -15,6 +14,7 @@ import {
   SearchIcon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 type Props = {
@@ -50,7 +50,8 @@ export default function SearchResults({}: Props) {
   const isHardError = !data && !isPending && isError;
   const isJustFetching = !isPending && isFetching;
 
-  const umami = useUmamiEvent();
+  const umami = useUmami();
+  const posthog = usePostHog();
 
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
   const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
@@ -68,11 +69,11 @@ export default function SearchResults({}: Props) {
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
       setIsPendingDownload(false);
-      umami("Downloaded Bulk CSV", {
+      umami.capture("Downloaded Bulk CSV", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
       });
-      capture("Downloaded Bulk CSV", {
+      posthog.capture("Downloaded Bulk CSV", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
       });
@@ -96,11 +97,11 @@ export default function SearchResults({}: Props) {
       });
 
       setIsPendingJsonDownload(false);
-      umami("Downloaded Bulk JSON", {
+      umami.capture("Downloaded Bulk JSON", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
       });
-      capture("Downloaded Bulk JSON", {
+      posthog.capture("Downloaded Bulk JSON", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
       });

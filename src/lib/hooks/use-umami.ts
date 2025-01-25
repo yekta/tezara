@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { TUmamiTrackFunction } from "../../../app";
 
-export const useUmamiEvent = () => {
+export const useUmami = () => {
   const umamiTrackFunction = useCallback<TUmamiTrackFunction>(
     (event, props) => {
       if (
@@ -17,5 +17,5 @@ export const useUmamiEvent = () => {
     },
     []
   );
-  return umamiTrackFunction;
+  return { capture: umamiTrackFunction };
 };

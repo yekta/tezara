@@ -8,7 +8,6 @@ import PenToolIcon from "@/components/icons/pen-tool";
 import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
 import UserPenIcon from "@/components/icons/user-pen";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
-import { capture } from "@/components/providers/ph-provider";
 import { searchLikePageParams } from "@/components/search/constants/client";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
@@ -26,7 +25,7 @@ import {
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import useDebounceIf from "@/lib/hooks/use-debounce-if";
-import { useUmamiEvent } from "@/lib/hooks/use-umami";
+import { useUmami } from "@/lib/hooks/use-umami";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { searchAuthors } from "@/server/meili/repo/authors";
@@ -47,6 +46,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceCallback } from "usehooks-ts";
@@ -98,7 +98,8 @@ export default function SearchBox({
     [thesisTypes]
   );
 
-  const umami = useUmamiEvent();
+  const umami = useUmami();
+  const posthog = usePostHog();
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const [isPendingHackyPush, setIsPendingHackyPush] = useState(false);
@@ -126,11 +127,11 @@ export default function SearchBox({
   const captureSearch = useCallback(
     (query: string, variant: Props["variant"]) => {
       if (!query) return;
-      umami("Searched", {
+      umami.capture("Searched", {
         Query: query,
         Variant: variant,
       });
-      capture("Searched", {
+      posthog.capture("Searched", {
         Query: query,
         Variant: variant,
       });
@@ -309,11 +310,11 @@ export default function SearchBox({
     setIsPendingHackyPush(true);
     try {
       if (variant === "home") {
-        umami("Searched", {
+        umami.capture("Searched", {
           Query: queryQP,
           Variant: variant,
         });
-        capture("Searched", {
+        posthog.capture("Searched", {
           Query: queryQP,
           Variant: variant,
         });
@@ -474,8 +475,8 @@ export default function SearchBox({
               className="font-semibold py-2 px-3.75"
               onClick={() => {
                 if (!advancedSearchQP) {
-                  umami("Advance Search Clicked");
-                  capture("Advance Search Clicked");
+                  umami.capture("Advance Search Clicked");
+                  posthog.capture("Advance Search Clicked");
                 }
                 setAdvancedSearchQP((a) => !a);
               }}
@@ -516,8 +517,8 @@ export default function SearchBox({
                 key={`year-gte-${yearGteQPKey}`}
                 onOpenChange={(o) => {
                   if (o) {
-                    umami("Year GTE Filter Clicked");
-                    capture("Year GTE Filter Clicked");
+                    umami.capture("Year GTE Filter Clicked");
+                    posthog.capture("Year GTE Filter Clicked");
                   }
                 }}
                 value={yearGteQP?.toString()}
@@ -579,8 +580,8 @@ export default function SearchBox({
                 key={`year-lte-${yearLteQPKey}`}
                 onOpenChange={(o) => {
                   if (o) {
-                    umami("Year LTE Filter Clicked");
-                    capture("Year LTE Filter Clicked");
+                    umami.capture("Year LTE Filter Clicked");
+                    posthog.capture("Year LTE Filter Clicked");
                   }
                 }}
                 value={yearLteQP?.toString()}
@@ -643,8 +644,8 @@ export default function SearchBox({
                 label="Üniversite Bazlı Filterele"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami("University Filter Clicked");
-                  capture("University Filter Clicked");
+                  umami.capture("University Filter Clicked");
+                  posthog.capture("University Filter Clicked");
                 }}
                 Icon={LandmarkIcon}
                 commandButtonText={
@@ -679,8 +680,8 @@ export default function SearchBox({
                 label="Ana Bilim Dalı Bazlı Filtrele"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami("Department Filter Clicked");
-                  capture("Department Filter Clicked");
+                  umami.capture("Department Filter Clicked");
+                  posthog.capture("Department Filter Clicked");
                 }}
                 Icon={BuildingIcon}
                 commandInputValue={queryDepartments}
@@ -734,8 +735,8 @@ export default function SearchBox({
                 label="Tez Türü Bazlı Filtrele"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami("Thesis Type Filter Clicked");
-                  capture("Thesis Type Filter Clicked");
+                  umami.capture("Thesis Type Filter Clicked");
+                  posthog.capture("Thesis Type Filter Clicked");
                 }}
                 Icon={ScrollTextIcon}
                 IconSetForItem={ThesisTypeIcon}
@@ -770,8 +771,8 @@ export default function SearchBox({
                 label="Dil Bazlı Filtrele"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami("Language Filter Clicked");
-                  capture("Language Filter Clicked");
+                  umami.capture("Language Filter Clicked");
+                  posthog.capture("Language Filter Clicked");
                 }}
                 Icon={GlobeIcon}
                 IconSetForItem={LanguageIcon}
@@ -808,8 +809,8 @@ export default function SearchBox({
                 label="Yazar Bazlı Filtrele"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami("Author Filter Clicked");
-                  capture("Author Filter Clicked");
+                  umami.capture("Author Filter Clicked");
+                  posthog.capture("Author Filter Clicked");
                 }}
                 Icon={PenToolIcon}
                 commandInputValue={queryAuthors}
@@ -864,8 +865,8 @@ export default function SearchBox({
                 label="Danışman Bazlı Filtrele"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami("Advisor Filter Clicked");
-                  capture("Advisor Filter Clicked");
+                  umami.capture("Advisor Filter Clicked");
+                  posthog.capture("Advisor Filter Clicked");
                 }}
                 Icon={UserPenIcon}
                 commandInputValue={queryAdvisors}

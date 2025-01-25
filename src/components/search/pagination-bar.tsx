@@ -1,6 +1,5 @@
 "use client";
 
-import { capture } from "@/components/providers/ph-provider";
 import {
   Pagination,
   PaginationContent,
@@ -9,8 +8,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
-import { useUmamiEvent } from "@/lib/hooks/use-umami";
+import { useUmami } from "@/lib/hooks/use-umami";
 import { LoaderIcon } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 type Props = {
   className?: string;
@@ -41,13 +41,14 @@ export default function PaginationBar({
   goToPage,
   showLoader,
 }: Props) {
-  const umami = useUmamiEvent();
+  const umami = useUmami();
+  const posthog = usePostHog();
   const sendEvent = (to: number | undefined) => {
-    umami("Prev/Next Search Result Page Button Clicked", {
+    umami.capture("Prev/Next Search Result Page Button Clicked", {
       "From Page": currentPage,
       "To Page": to || "Undefined",
     });
-    capture("Prev/Next Search Result Page Button Clicked", {
+    posthog.capture("Prev/Next Search Result Page Button Clicked", {
       "From Page": currentPage,
       "To Page": to || "Undefined",
     });

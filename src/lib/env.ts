@@ -30,9 +30,9 @@ export const env = createEnv({
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string(),
     NEXT_PUBLIC_UMAMI_HOST_URL: z.string().url(),
     NEXT_PUBLIC_UMAMI_DOMAINS: z.string(),
-    NEXT_PUBLIC_POSTHOG_KEY: z.string().nullable(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.string().nullable(),
-    NEXT_PUBLIC_POSTHOG_HOST_ASSETS: z.string().nullable(),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string(),
+    NEXT_PUBLIC_POSTHOG_HOST_ASSETS: z.string(),
   },
 
   /**

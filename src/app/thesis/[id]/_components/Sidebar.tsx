@@ -1,9 +1,9 @@
 "use client";
 
 import NextPrevButton from "@/components/navigation/next-prev-button";
-import { capture } from "@/components/providers/ph-provider";
 import { cn } from "@/components/ui/utils";
-import { useUmamiEvent } from "@/lib/hooks/use-umami";
+import { useUmami } from "@/lib/hooks/use-umami";
+import { usePostHog } from "posthog-js/react";
 
 export default function Sidebar({
   className,
@@ -18,13 +18,14 @@ export default function Sidebar({
   const _currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
   const disabled = side === "start" ? _currentThesisId <= 1 : false;
 
-  const umami = useUmamiEvent();
+  const umami = useUmami();
+  const posthog = usePostHog();
   const sendEvent = (to: number) => {
-    umami("Prev/Next Thesis Button Clicked", {
+    umami.capture("Prev/Next Thesis Button Clicked", {
       "From Thesis ID": currentThesisId,
       "To Thesis ID": to,
     });
-    capture("Prev/Next Thesis Button Clicked", {
+    posthog.capture("Prev/Next Thesis Button Clicked", {
       "From Thesis ID": currentThesisId,
       "To Thesis ID": to,
     });
