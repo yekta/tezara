@@ -1,8 +1,8 @@
 "use client";
 
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
+import PaginationBar from "@/components/navigation/pagination-bar";
 import { formatForDownload } from "@/components/search/format-for-download";
-import PaginationBar from "@/components/search/pagination-bar";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { Button } from "@/components/ui/button";
@@ -264,6 +264,7 @@ export default function SearchResults({}: Props) {
       </div>
       <div className="w-full flex flex-col flex-1">
         <PaginationBar
+          eventName="Prev/Next Search Result Page Button Clicked"
           hasNext={hasNext}
           hasPrev={hasPrev}
           prevPage={prevPage}
@@ -298,6 +299,7 @@ export default function SearchResults({}: Props) {
           <ResultsSection data={data} />
         )}
         <PaginationBar
+          eventName="Prev/Next Search Result Page Button Clicked"
           hasNext={hasNext}
           hasPrev={hasPrev}
           prevPage={prevPage}

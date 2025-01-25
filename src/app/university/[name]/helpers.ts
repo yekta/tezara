@@ -115,7 +115,7 @@ async function getPageData({ name }: { name: string }) {
     lastThesesPromise,
   ]);
   console.log(
-    `university/[name]:getPageData("${name}") | ${Math.round(
+    `/university/[name]:getPageData("${name}") | ${Math.round(
       performance.now() - start
     ).toLocaleString()}ms`
   );

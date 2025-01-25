@@ -25,6 +25,7 @@ type Props = {
   goToPrevPage: () => void;
   goToPage: (page: number) => void;
   showLoader?: boolean;
+  eventName: string;
 };
 
 export default function PaginationBar({
@@ -40,15 +41,16 @@ export default function PaginationBar({
   goToPrevPage,
   goToPage,
   showLoader,
+  eventName,
 }: Props) {
   const umami = useUmami();
   const posthog = usePostHog();
   const sendEvent = (to: number | undefined) => {
-    umami.capture("Prev/Next Search Result Page Button Clicked", {
+    umami.capture(eventName, {
       "From Page": currentPage,
       "To Page": to || "Undefined",
     });
-    posthog.capture("Prev/Next Search Result Page Button Clicked", {
+    posthog.capture(eventName, {
       "From Page": currentPage,
       "To Page": to || "Undefined",
     });
