@@ -46,7 +46,7 @@ import {
 import { useUmami } from "next-umami";
 import { useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceCallback } from "usehooks-ts";
 
@@ -122,12 +122,33 @@ export default function SearchBox({
   const debouncedSetQueryQP = useDebounceCallback(setQueryQP, 150);
   const [queryInputValue, setQueryInputValue] = useState(queryQP);
 
+  const captureSearch = useCallback(
+    (query: string, variant: Props["variant"]) => {
+      if (!query) return;
+      umami.event("Searched", {
+        Query: query,
+        Variant: variant,
+      });
+      capture("Searched", {
+        Query: query,
+        Variant: variant,
+      });
+    },
+    []
+  );
+  const debouncedCaptureSearch = useDebounceCallback(captureSearch, 4000);
+
   useEffect(() => {
     if (variant === "home") {
       setQueryQP(queryInputValue);
       return;
     }
-    debouncedSetQueryQP(queryInputValue);
+    if (!queryInputValue) {
+      setQueryQP("");
+    } else {
+      debouncedSetQueryQP(queryInputValue);
+      debouncedCaptureSearch(queryInputValue, variant);
+    }
     // This is a stable function, no need to add it to deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryInputValue]);
