@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
+import useDebounceIf from "@/lib/hooks/use-debounce-if";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { searchAuthors } from "@/server/meili/repo/authors";
@@ -196,9 +197,19 @@ export default function SearchBox({
     searchLikePageParams["advanced"]
   );
 
-  const [queryAdvisors, setQueryAdvisors] = useState("");
-  const [queryAuthors, setQueryAuthors] = useState("");
-  const [queryDepartments, setQueryDepartments] = useState("");
+  const isNonEmpty = useCallback(
+    (v: string) => v !== "" && v !== null && v !== undefined,
+    []
+  );
+  const [queryAdvisors, setQueryAdvisors, debouncedQueryAdvisors] =
+    useDebounceIf("", isNonEmpty, 150);
+  const [queryAuthors, setQueryAuthors, debouncedQueryAuthors] = useDebounceIf(
+    "",
+    isNonEmpty,
+    150
+  );
+  const [queryDepartments, setQueryDepartments, debouncedQueryDepartments] =
+    useDebounceIf("", isNonEmpty, 150);
 
   const {
     data: advisorOptions,
@@ -206,10 +217,13 @@ export default function SearchBox({
     isFetching: isFetchingAdvisors,
     isError: isErrorAdvisors,
   } = useQuery({
-    queryKey: ["advisors", queryAdvisors ? queryAdvisors : undefined],
+    queryKey: [
+      "advisors",
+      debouncedQueryAdvisors ? debouncedQueryAdvisors : undefined,
+    ],
     queryFn: () =>
       searchAdvisors({
-        q: queryAdvisors,
+        q: debouncedQueryAdvisors,
         page: 1,
         sort: undefined,
         client: meili,
@@ -223,10 +237,13 @@ export default function SearchBox({
     isFetching: isFetchingAuthors,
     isError: isErrorAuthors,
   } = useQuery({
-    queryKey: ["authors", queryAuthors ? queryAuthors : undefined],
+    queryKey: [
+      "authors",
+      debouncedQueryAuthors ? debouncedQueryAuthors : undefined,
+    ],
     queryFn: () =>
       searchAuthors({
-        q: queryAuthors,
+        q: debouncedQueryAuthors,
         page: 1,
         sort: undefined,
         client: meili,
@@ -240,10 +257,13 @@ export default function SearchBox({
     isFetching: isFetchingDepartments,
     isError: isErrorDepartments,
   } = useQuery({
-    queryKey: ["departments", queryDepartments ? queryDepartments : undefined],
+    queryKey: [
+      "departments",
+      debouncedQueryDepartments ? debouncedQueryDepartments : undefined,
+    ],
     queryFn: () =>
       searchDepartments({
-        q: queryDepartments,
+        q: debouncedQueryDepartments,
         page: 1,
         sort: undefined,
         client: meili,
