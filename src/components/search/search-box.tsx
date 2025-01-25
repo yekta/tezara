@@ -8,6 +8,7 @@ import PenToolIcon from "@/components/icons/pen-tool";
 import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
 import UserPenIcon from "@/components/icons/user-pen";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
+import { capture } from "@/components/providers/ph-provider";
 import { searchLikePageParams } from "@/components/search/constants/client";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
@@ -24,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
-import { usePlausible } from "@/lib/plausible";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisors";
 import { searchAuthors } from "@/server/meili/repo/authors";
@@ -98,7 +98,6 @@ export default function SearchBox({
   );
 
   const umami = useUmami();
-  const plausible = usePlausible();
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
   const [isPendingHackyPush, setIsPendingHackyPush] = useState(false);
@@ -271,11 +270,9 @@ export default function SearchBox({
           Query: queryQP,
           Variant: variant,
         });
-        plausible("Searched", {
-          props: {
-            Query: queryQP,
-            Variant: variant,
-          },
+        capture("Searched", {
+          Query: queryQP,
+          Variant: variant,
         });
         await pushToSearch();
 
@@ -434,7 +431,7 @@ export default function SearchBox({
               onClick={() => {
                 if (!advancedSearchQP) {
                   umami.event("Advance Search Clicked");
-                  plausible("Advance Search Clicked", { props: {} });
+                  capture("Advance Search Clicked");
                 }
                 setAdvancedSearchQP((a) => !a);
               }}
@@ -476,7 +473,7 @@ export default function SearchBox({
                 onOpenChange={(o) => {
                   if (o) {
                     umami.event("Year GTE Filter Clicked");
-                    plausible("Year GTE Filter Clicked", { props: {} });
+                    capture("Year GTE Filter Clicked");
                   }
                 }}
                 value={yearGteQP?.toString()}
@@ -539,7 +536,7 @@ export default function SearchBox({
                 onOpenChange={(o) => {
                   if (o) {
                     umami.event("Year LTE Filter Clicked");
-                    plausible("Year LTE Filter Clicked", { props: {} });
+                    capture("Year LTE Filter Clicked");
                   }
                 }}
                 value={yearLteQP?.toString()}
@@ -603,7 +600,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("University Filter Clicked");
-                  plausible("University Filter Clicked", { props: {} });
+                  capture("University Filter Clicked");
                 }}
                 Icon={LandmarkIcon}
                 commandButtonText={
@@ -639,7 +636,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Department Filter Clicked");
-                  plausible("Department Filter Clicked", { props: {} });
+                  capture("Department Filter Clicked");
                 }}
                 Icon={BuildingIcon}
                 commandInputValue={queryDepartments}
@@ -694,7 +691,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Thesis Type Filter Clicked");
-                  plausible("Thesis Type Filter Clicked", { props: {} });
+                  capture("Thesis Type Filter Clicked");
                 }}
                 Icon={ScrollTextIcon}
                 IconSetForItem={ThesisTypeIcon}
@@ -730,7 +727,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Language Filter Clicked");
-                  plausible("Language Filter Clicked", { props: {} });
+                  capture("Language Filter Clicked");
                 }}
                 Icon={GlobeIcon}
                 IconSetForItem={LanguageIcon}
@@ -768,7 +765,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Author Filter Clicked");
-                  plausible("Author Filter Clicked", { props: {} });
+                  capture("Author Filter Clicked");
                 }}
                 Icon={PenToolIcon}
                 commandInputValue={queryAuthors}
@@ -824,7 +821,7 @@ export default function SearchBox({
                 className="w-full"
                 triggerOnClick={() => {
                   umami.event("Advisor Filter Clicked");
-                  plausible("Advisor Filter Clicked", { props: {} });
+                  capture("Advisor Filter Clicked");
                 }}
                 Icon={UserPenIcon}
                 commandInputValue={queryAdvisors}

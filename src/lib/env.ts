@@ -29,7 +29,9 @@ export const env = createEnv({
     NEXT_PUBLIC_SITE_URL: z.string(),
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string(),
     NEXT_PUBLIC_UMAMI_HOST_URL: z.string().url(),
-    NEXT_PUBLIC_PLAUSIBLE_URL: z.string().url(),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().nullable(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().nullable(),
+    NEXT_PUBLIC_POSTHOG_HOST_ASSETS: z.string().nullable(),
   },
 
   /**
@@ -45,10 +47,13 @@ export const env = createEnv({
     NEXT_PUBLIC_UMAMI_HOST_URL: process.env.NEXT_PUBLIC_UMAMI_HOST_URL,
     MEILI_ADMIN_KEY: process.env.MEILI_ADMIN_KEY,
     MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
-    NEXT_PUBLIC_PLAUSIBLE_URL: process.env.NEXT_PUBLIC_PLAUSIBLE_URL,
     CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
     CLICKHOUSE_USERNAME: process.env.CLICKHOUSE_USERNAME,
     CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    NEXT_PUBLIC_POSTHOG_HOST_ASSETS:
+      process.env.NEXT_PUBLIC_POSTHOG_HOST_ASSETS,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
