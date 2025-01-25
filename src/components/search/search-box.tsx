@@ -143,15 +143,21 @@ export default function SearchBox({
 
   useEffect(() => {
     if (variant === "home") {
-      setQueryQP(queryInputValue);
+      if (!queryInputValue) {
+        setQueryQP("");
+        return;
+      }
+      debouncedSetQueryQP(queryInputValue);
       return;
     }
+
     if (!queryInputValue) {
       setQueryQP("");
-    } else {
-      debouncedSetQueryQP(queryInputValue);
-      debouncedCaptureSearch(queryInputValue, variant);
+      return;
     }
+    debouncedSetQueryQP(queryInputValue);
+    debouncedCaptureSearch(queryInputValue, variant);
+
     // This is a stable function, no need to add it to deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryInputValue]);
@@ -301,7 +307,9 @@ export default function SearchBox({
   const searchRoute = "/search";
 
   const pushToSearch = async () => {
-    const paramStr = searchParams.toString();
+    const params = new URLSearchParams(searchParams);
+    params.set("q", queryInputValue);
+    const paramStr = params.toString();
     await asyncPush(`${searchRoute}${paramStr ? `?${paramStr}` : ""}`);
   };
 
