@@ -3,7 +3,7 @@
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { capture } from "@/components/providers/ph-provider";
 import { cn } from "@/components/ui/utils";
-import { useUmami } from "next-umami";
+import { useUmamiEvent } from "@/lib/hooks/use-umami";
 
 export default function Sidebar({
   className,
@@ -18,9 +18,9 @@ export default function Sidebar({
   const _currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
   const disabled = side === "start" ? _currentThesisId <= 1 : false;
 
-  const umami = useUmami();
+  const umami = useUmamiEvent();
   const sendEvent = (to: number) => {
-    umami.event("Prev/Next Thesis Button Clicked", {
+    umami("Prev/Next Thesis Button Clicked", {
       "From Thesis ID": currentThesisId,
       "To Thesis ID": to,
     });

@@ -9,8 +9,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
+import { useUmamiEvent } from "@/lib/hooks/use-umami";
 import { LoaderIcon } from "lucide-react";
-import { useUmami } from "next-umami";
 
 type Props = {
   className?: string;
@@ -41,9 +41,9 @@ export default function PaginationBar({
   goToPage,
   showLoader,
 }: Props) {
-  const umami = useUmami();
+  const umami = useUmamiEvent();
   const sendEvent = (to: number | undefined) => {
-    umami.event("Prev/Next Search Result Page Button Clicked", {
+    umami("Prev/Next Search Result Page Button Clicked", {
       "From Page": currentPage,
       "To Page": to || "Undefined",
     });

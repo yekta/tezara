@@ -7,6 +7,7 @@ import PaginationBar from "@/components/search/pagination-bar";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
 import { Button } from "@/components/ui/button";
+import { useUmamiEvent } from "@/lib/hooks/use-umami";
 import { Parser } from "@json2csv/plainjs";
 import {
   CheckCircleIcon,
@@ -14,7 +15,6 @@ import {
   SearchIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useUmami } from "next-umami";
 import { useState } from "react";
 
 type Props = {
@@ -50,7 +50,7 @@ export default function SearchResults({}: Props) {
   const isHardError = !data && !isPending && isError;
   const isJustFetching = !isPending && isFetching;
 
-  const umami = useUmami();
+  const umami = useUmamiEvent();
 
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
   const [isPendingJsonDownload, setIsPendingJsonDownload] = useState(false);
@@ -68,7 +68,7 @@ export default function SearchResults({}: Props) {
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
       setIsPendingDownload(false);
-      umami.event("Downloaded Bulk CSV", {
+      umami("Downloaded Bulk CSV", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
       });
@@ -96,7 +96,7 @@ export default function SearchResults({}: Props) {
       });
 
       setIsPendingJsonDownload(false);
-      umami.event("Downloaded Bulk JSON", {
+      umami("Downloaded Bulk JSON", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
       });

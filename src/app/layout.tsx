@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
@@ -51,12 +52,11 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* {env.NEXT_PUBLIC_SITE_URL.includes("localhost") ? null : (
-          <UmamiProvider
-            websiteId={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-            src={`${env.NEXT_PUBLIC_UMAMI_HOST_URL}/script.js`}
-          />
-        )} */}
+        <Script
+          data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+          data-domains={env.NEXT_PUBLIC_UMAMI_DOMAINS}
+          src={`${env.NEXT_PUBLIC_UMAMI_HOST_URL}/script.js`}
+        />
       </head>
       <body
         className={`${sans.variable} ${mono.variable} w-full flex flex-col min-h-[100svh] relative items-center bg-background text-foreground antialiased break-words`}
