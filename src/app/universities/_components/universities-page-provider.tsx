@@ -5,7 +5,7 @@ import { TSearchThesesResult } from "@/server/meili/repo/thesis";
 import { AppRouterOutputs, AppRouterQueryResult } from "@/server/trpc/api/root";
 import { api } from "@/server/trpc/setup/react";
 import { useQueryState } from "nuqs";
-import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 
 type TUniversitiesPageContext = AppRouterQueryResult<
   AppRouterOutputs["main"]["getUniversities"]
@@ -40,13 +40,6 @@ export const UniversitiesPageProvider: React.FC<{
       placeholderData: (prev) => prev,
     }
   );
-
-  useEffect(() => {
-    if (window.location.hash) {
-      const urlWithoutHash = window.location.href.split("#")[0]; // Remove the hash
-      window.history.replaceState(null, "", urlWithoutHash); // Update the URL
-    }
-  }, []);
 
   const totalPages = query.data?.maxPage;
   const hasPrev = totalPages ? page > 1 && totalPages > 1 : false;

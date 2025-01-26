@@ -1,36 +1,26 @@
 "use client";
 
-import { cn } from "@/components/ui/utils";
-import { previousPathForThesisPageAtom } from "@/lib/store/main";
-import { useAtomValue } from "jotai";
-import { Suspense } from "react";
-import { useHydrateAtoms } from "jotai/utils";
 import BackButton from "@/app/thesis/[id]/go-back-button";
+import { cn } from "@/components/ui/utils";
+import { previousPathAtom } from "@/lib/store/main";
+import { useAtomValue } from "jotai";
 
 export type TGoBackBarProps = {
   buttonText: string;
   className?: string;
+  defaultPath: string;
 };
 
-export default function GoBackBar({ buttonText, className }: TGoBackBarProps) {
-  useHydrateAtoms([[previousPathForThesisPageAtom, null]]);
-  return (
-    <Suspense fallback="Loading...">
-      <GoBackBarInner buttonText={buttonText} className={className} />
-    </Suspense>
-  );
-}
-
-function GoBackBarInner({ buttonText, className }: TGoBackBarProps) {
-  const previousPath = useAtomValue(previousPathForThesisPageAtom);
+export default function GoBackBar({
+  buttonText,
+  className,
+  defaultPath,
+}: TGoBackBarProps) {
+  const previousPath = useAtomValue(previousPathAtom);
 
   return (
-    previousPath && (
-      <div className={cn("w-full flex items-center justify-center", className)}>
-        {previousPath && (
-          <BackButton buttonText={buttonText} href={previousPath} />
-        )}
-      </div>
-    )
+    <div className={cn("w-full flex items-center justify-center", className)}>
+      <BackButton buttonText={buttonText} href={previousPath || defaultPath} />
+    </div>
   );
 }

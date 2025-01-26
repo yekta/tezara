@@ -242,7 +242,11 @@ export default async function Page({ params }: Props) {
         </div>
       )}
       <NavigationSection id={thesis.id} className="md:hidden py-4" />
-      <GoBackBar buttonText="Geri Dön" className="pb-4 -mt-2 md:mt-6" />
+      <GoBackBar
+        defaultPath="/search"
+        buttonText="Geri Dön"
+        className="pb-4 -mt-2 md:mt-6"
+      />
     </div>
   );
 }

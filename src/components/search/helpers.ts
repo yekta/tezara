@@ -20,3 +20,7 @@ function addToArray<T>(arr: T[], item: T) {
   if (!arr) return [item];
   return [...arr, item];
 }
+
+export function getThesisRowId(thesisId: number) {
+  return `thesis-${thesisId}`;
+}

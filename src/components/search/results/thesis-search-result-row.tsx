@@ -10,15 +10,18 @@ import ThesisTypeIcon, {
   getThesisTypeColorClassName,
 } from "@/components/icons/sets/thesis-type";
 import UserPenIcon from "@/components/icons/user-pen";
-import { cleanAdvisors } from "@/components/search/helpers";
+import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
+import { cleanAdvisors, getThesisRowId } from "@/components/search/helpers";
 import {
   Button,
   LinkButton,
   minButtonSizeEnforcerClassName,
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
+import { previousPathAtom } from "@/lib/store/main";
 import { TThesis } from "@/server/meili/types";
-import Link from "next/link";
+import { useSetAtom } from "jotai";
+import Link, { LinkProps } from "next/link";
 
 type Props =
   | (
@@ -30,21 +33,39 @@ type Props =
           thesis?: null;
           isPlaceholder: true;
         }
-    ) & { className?: string; disableUniversityLink?: boolean };
+    ) & {
+      className?: string;
+      disableUniversityLink?: boolean;
+      pagePathname: string;
+    };
 
 const noTitle = "Başlık Yok";
 const noTranslatedTitle = "Başlık çevirisi yok";
 const noAuthor = "Yazar Bilgisi Yok";
 
-export default function ThesisSearchResultRow({
+export default function ThesisSearchResultRow_({
   thesis,
   isPlaceholder,
   className,
   disableUniversityLink,
+  pagePathname,
 }: Props) {
+  const [, searchParamsStr] = useSearchParamsClientOnly();
+  const setPreviousPath = useSetAtom(previousPathAtom);
+  const hash = thesis ? `#${getThesisRowId(thesis.id)}` : "";
+  const setPrevious = () => {
+    setPreviousPath(`${pagePathname}${searchParamsStr}${hash}`);
+  };
+
+  const thesisLinkProps: LinkProps = {
+    href: `/thesis/${thesis?.id}`,
+    prefetch: false,
+    onClick: setPrevious,
+  };
+
   return (
     <li
-      id={thesis ? `thesis-${thesis.id}` : undefined}
+      id={thesis ? getThesisRowId(thesis.id) : undefined}
       data-placeholder={isPlaceholder ? true : undefined}
       className={cn(
         "pt-3.5 pb-5 smpt-4 sm:pb-5.5 px-1 last-of-type:border-b-0 border-b border-foreground/10 flex flex-col sm:flex-row sm:px-0 sm:gap-4 items-start gap-2 group/row",
@@ -64,8 +85,7 @@ export default function ThesisSearchResultRow({
         ) : (
           <LinkButton
             variant="ghost"
-            href={`/thesis/${thesis.id}`}
-            prefetch={false}
+            {...thesisLinkProps}
             className="sm:min-w-14 flex shrink flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md"
           >
             <p className="text-left sm:text-right flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
@@ -116,8 +136,7 @@ export default function ThesisSearchResultRow({
           </div>
         ) : (
           <Link
-            prefetch={false}
-            href={`/thesis/${thesis.id}`}
+            {...thesisLinkProps}
             className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5"
           >
             {thesis.title_original || noTitle}
@@ -236,6 +255,7 @@ export default function ThesisSearchResultRow({
             <Link
               prefetch={false}
               href={`/university/${thesis.university}`}
+              onClick={setPrevious}
               className={cn(
                 "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
                 "not-touch:hover:bg-foreground/16 active:bg-foreground/16",

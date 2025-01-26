@@ -2,6 +2,7 @@
 
 import { useUniversitiesPage } from "@/app/universities/_components/universities-page-provider";
 import { universitiesRoute } from "@/app/universities/constants/main";
+import getUniversityCardId from "@/app/universities/helpers";
 import CalendarIcon from "@/components/icons/calendar";
 import FolderClosedIcon from "@/components/icons/folder-closed";
 import GlobeIcon from "@/components/icons/globe";
@@ -9,12 +10,12 @@ import KeyRoundIcon from "@/components/icons/key-round";
 import LandmarkIcon from "@/components/icons/landmark";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import { SearchIcon } from "@/components/icons/search-icon";
+import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { Button, LinkButton } from "@/components/ui/button";
-import { previousPathForUniversitiesPageAtom } from "@/lib/store/main";
+import { previousPathAtom } from "@/lib/store/main";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 import { useSetAtom } from "jotai";
 import { TriangleAlertIcon } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { FC } from "react";
 
 export default function UniversitiesCardsGrid() {
@@ -64,26 +65,26 @@ export default function UniversitiesCardsGrid() {
   );
 }
 
-function UniversityCard({
-  university,
-  isPlaceholder,
-}:
+type TUniversityCardProps =
   | {
       university: AppRouterOutputs["main"]["getUniversities"]["result"][0];
       isPlaceholder?: false;
     }
-  | { university?: null; isPlaceholder: true }) {
+  | {
+      university?: null;
+      isPlaceholder: true;
+    };
+
+function UniversityCard({ university, isPlaceholder }: TUniversityCardProps) {
   const Component = isPlaceholder ? Button : LinkButton;
 
-  const searchParams = useSearchParams();
-  const searchParamsStr = searchParams.toString();
-  const setPreviousPathForUniversityPage = useSetAtom(
-    previousPathForUniversitiesPageAtom
-  );
+  const [, searchParamsStr] = useSearchParamsClientOnly();
+  const setPreviousPath = useSetAtom(previousPathAtom);
+  const hash = university ? `#${getUniversityCardId(university)}` : "";
 
   return (
     <li
-      id={university ? university.name : undefined}
+      id={university ? getUniversityCardId(university) : undefined}
       data-placeholder={isPlaceholder ? true : undefined}
       className="w-full flex items-start justify-start md:w-1/2 lg:w-1/3 p-1 group/item"
     >
@@ -95,11 +96,7 @@ function UniversityCard({
         }
         onClick={() => {
           if (!isPlaceholder) {
-            setPreviousPathForUniversityPage(
-              `${universitiesRoute}${
-                searchParamsStr ? `?${searchParamsStr}` : ""
-              }${"#" + university.name}`
-            );
+            setPreviousPath(`${universitiesRoute}${searchParamsStr}${hash}`);
           }
         }}
         disabled={isPlaceholder}

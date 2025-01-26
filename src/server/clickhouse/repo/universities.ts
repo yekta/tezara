@@ -54,7 +54,7 @@ export async function getTotalUniversityCount() {
   return Number(data[0].total_count);
 }
 
-type TUniversity = {
+export type TUniversity = {
   name: string;
   thesis_count: number;
   language_count: number;

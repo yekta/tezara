@@ -12,7 +12,11 @@ export default async function Layout({ params, children }: Props) {
 
   return (
     <div className="w-full flex flex-col items-center flex-1">
-      <GoBackBar buttonText="Geri Dön" className="-mb-3 md:mb-0" />
+      <GoBackBar
+        defaultPath="/search"
+        buttonText="Geri Dön"
+        className="-mb-3 md:mb-0"
+      />
       <div className="w-full pt-4 flex-1 relative flex flex-col md:flex-row md:justify-center px-5 md:px-3 lg:px-5">
         {/* Md left */}
         <Sidebar

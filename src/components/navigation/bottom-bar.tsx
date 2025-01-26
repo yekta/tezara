@@ -14,7 +14,7 @@ export default function BottomBar({ className }: Props) {
       )}
     >
       <div className="w-full h-full flex p-1">
-        <NavbarTabs className="w-full" classNameTab="flex-1" />
+        <NavbarTabs className="w-full" classNameTab="flex-1 rounded-lg" />
       </div>
     </nav>
   );

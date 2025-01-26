@@ -1,6 +1,7 @@
+import GoBackBar from "@/app/thesis/[id]/go-back-bar";
+import { universitiesRoute } from "@/app/universities/constants/main";
 import LanguagesChart from "@/app/university/[name]/_components/languages-chart";
 import PopularSubjectsChart from "@/app/university/[name]/_components/popular-subjects-chart";
-import PreviousPageBar from "@/app/university/[name]/_components/previous-page-bar";
 import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";
 import ThesisTypesChart from "@/app/university/[name]/_components/thesis-types-chart";
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
@@ -48,7 +49,11 @@ export default async function Page({ params }: Props) {
 
   return (
     <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
-      <PreviousPageBar />
+      <GoBackBar
+        className="justify-start px-1.5"
+        defaultPath={universitiesRoute}
+        buttonText="Geri Dön"
+      />
       {/* Title */}
       <div className="w-full flex flex-col px-4 pt-3">
         <div className="w-full flex items-center flex-wrap gap-1.5">
@@ -173,10 +178,10 @@ export default async function Page({ params }: Props) {
           disableUniversityLink
         />
       </div>
-      <PreviousPageBar
-        buttonVariant="default"
-        buttonSize="default"
-        className="justify-center pt-5 sm:pt-6"
+      <GoBackBar
+        buttonText="Geri Dön"
+        defaultPath={universitiesRoute}
+        className="justify-center pt-5 sm:pt-6 px-1.5"
       />
     </div>
   );

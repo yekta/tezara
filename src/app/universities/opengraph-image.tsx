@@ -68,7 +68,7 @@ export default async function Image() {
             lineHeight: 1.2,
             marginTop: 36,
             fontWeight: 700,
-            letterSpacing: -4,
+            letterSpacing: -3,
             ...defaultParagraphClassName,
           }}
         >

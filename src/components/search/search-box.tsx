@@ -387,6 +387,11 @@ export default function SearchBox({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (isTouchScreen) return;
+      if (window.location.hash) {
+        const id = window.location.hash.slice(1);
+        const el = document.getElementById(id);
+        if (el) return;
+      }
       focusToMainInput();
     });
     return () => clearTimeout(timeoutId);

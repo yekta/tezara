@@ -1,7 +1,8 @@
 import PenToolIcon from "@/components/icons/pen-tool";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
-import { env } from "@/lib/env";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { CSSProperties } from "react";
 
 type Props = {
@@ -75,15 +76,17 @@ export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
 }
 
 export async function getOpengraphFonts() {
-  const fontBold = fetch(
-    `${env.NEXT_PUBLIC_SITE_URL}/static/fonts/DMSansBold.ttf`
-  ).then((r) => r.arrayBuffer());
-  const fontSemiBold = fetch(
-    `${env.NEXT_PUBLIC_SITE_URL}/static/fonts/DMSansSemiBold.ttf`
-  ).then((r) => r.arrayBuffer());
-  const fontMedium = fetch(
-    `${env.NEXT_PUBLIC_SITE_URL}/static/fonts/DMSansMedium.ttf`
-  ).then((r) => r.arrayBuffer());
+  const getFontFile = async (path: string) => {
+    const data = await readFile(
+      join(process.cwd(), `public/static/fonts/${path}`)
+    );
+    const buffer = Uint8Array.from(data).buffer;
+    return buffer;
+  };
+
+  const fontBold = getFontFile(`DMSansBold.ttf`);
+  const fontSemiBold = getFontFile(`DMSansSemiBold.ttf`);
+  const fontMedium = getFontFile(`DMSansMedium.ttf`);
 
   const [fontBoldData, fontSemiBoldData, fontMediumData] = await Promise.all([
     fontBold,
