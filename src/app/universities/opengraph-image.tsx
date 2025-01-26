@@ -44,8 +44,8 @@ export default async function Image() {
       >
         <LandmarkIcon
           style={{
-            width: 230,
-            height: 230,
+            width: 256,
+            height: 256,
             color: foreground,
             position: "absolute",
             opacity: 0.15,
@@ -68,6 +68,7 @@ export default async function Image() {
             lineHeight: 1.2,
             marginTop: 36,
             fontWeight: 700,
+            letterSpacing: -4,
             ...defaultParagraphClassName,
           }}
         >
