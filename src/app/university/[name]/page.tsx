@@ -1,5 +1,6 @@
 import LanguagesChart from "@/app/university/[name]/_components/languages-chart";
 import PopularSubjectsChart from "@/app/university/[name]/_components/popular-subjects-chart";
+import PreviousPageBar from "@/app/university/[name]/_components/previous-page-bar";
 import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";
 import ThesisTypesChart from "@/app/university/[name]/_components/thesis-types-chart";
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
@@ -21,6 +22,8 @@ type Props = {
   params: Promise<{ name: string }>;
 };
 
+const locale = "tr";
+
 export default async function Page({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
@@ -36,19 +39,23 @@ export default async function Page({ params }: Props) {
     popularSubjectsChartData,
     thesisTypes,
     lastThesesRes,
+    maxThesisYear,
+    minThesisYear,
+    mostPopularThesisType,
   } = await cachedGetPageData({
     name: parsedName,
   });
 
   return (
-    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:px-8 pb-32">
+    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
+      <PreviousPageBar />
       {/* Title */}
-      <div className="w-full flex flex-col px-4">
+      <div className="w-full flex flex-col px-4 pt-3">
         <div className="w-full flex items-center flex-wrap gap-1.5">
-          <h1 className="max-w-full font-bold text-3xl text-balance leading-tight pr-1">
+          <h1 className="shrink min-w-0 font-bold text-3xl text-balance leading-tight pr-1">
             {parsedName}
           </h1>
-          <p className="bg-foreground/10 rounded-full font-semibold text-sm px-2.5 py-0.5">
+          <p className="shrink min-w-0 bg-foreground/10 rounded-full leading-tight font-semibold text-sm px-2.5 py-0.75">
             {minYear}-{maxYear}
           </p>
         </div>
@@ -63,6 +70,62 @@ export default async function Page({ params }: Props) {
           />
         </div>
       </div>
+      <p className="w-full px-4 mt-7 leading-relaxed text-base md:text-lg">
+        <span className="font-semibold">{parsedName}</span> bünyesinde,{" "}
+        <span className="font-semibold">
+          {minYear}-{maxYear}
+        </span>{" "}
+        yılları arasında{" "}
+        <span className="font-semibold">
+          {subjects.size.toLocaleString(locale)}
+        </span>{" "}
+        farklı konuda toplam{" "}
+        <span className="font-semibold">
+          {thesesCount.toLocaleString(locale)}
+        </span>{" "}
+        tez yazılmıştır. Yazarlar tarafından{" "}
+        <span className="font-semibold">
+          {languages.size.toLocaleString(locale)}
+        </span>{" "}
+        farklı dil ve{" "}
+        <span className="font-semibold">
+          {keywords.size.toLocaleString(locale)}
+        </span>{" "}
+        farklı anahtar kelime kullanılmıştır. En çok tez{" "}
+        <span className="font-semibold">{maxThesisYear.year}</span> yılında
+        yazılırken (
+        <span className="font-semibold">
+          {maxThesisYear.count.toLocaleString(locale)}
+        </span>{" "}
+        tez), en az tez{" "}
+        <span className="font-semibold">{minThesisYear.year}</span> yılında
+        yazılmıştır (
+        <span className="font-semibold">
+          {minThesisYear.count.toLocaleString(locale)}
+        </span>{" "}
+        tez).{" "}
+        {popularSubjectsChartData && popularSubjectsChartData.length > 0 && (
+          <>
+            Yazarlar tarafından en çok tercih edilen konu {'"'}
+            <span className="font-semibold">
+              {popularSubjectsChartData[0].keyword}
+            </span>
+            {'"'} iken (
+            <span className="font-semibold">
+              {popularSubjectsChartData[0].count.toLocaleString(locale)}
+            </span>{" "}
+            tez), en çok tercih edilen tez türü ise{" "}
+            <span className="font-bold">
+              {mostPopularThesisType.thesis_type.toLowerCase()}
+            </span>{" "}
+            tezidir (
+            <span className="font-bold">
+              {mostPopularThesisType.count.toLocaleString(locale)}
+            </span>{" "}
+            tez).
+          </>
+        )}
+      </p>
       <ThesesCountsByYearsChart
         className="pt-8"
         chartData={thesesCountsByYearsChartData}
@@ -110,6 +173,11 @@ export default async function Page({ params }: Props) {
           disableUniversityLink
         />
       </div>
+      <PreviousPageBar
+        buttonVariant="default"
+        buttonSize="default"
+        className="justify-center pt-8"
+      />
     </div>
   );
 }
@@ -127,7 +195,7 @@ function Stat({
     <div className="flex items-center gap-1 leading-tight pr-3 text-muted-foreground">
       <Icon className="inline size-4 shrink-0" />
       <p className="font-bold shrink min-w-0">
-        {value.toLocaleString()}
+        {value.toLocaleString(locale)}
         <span className="font-medium"> {label}</span>
       </p>
     </div>

@@ -4,7 +4,13 @@ import { sc, siteTitle } from "@/lib/constants";
 import Link from "next/link";
 import { ReactNode } from "react";
 
-export default async function Footer({ className }: { className?: string }) {
+export default async function Footer({
+  className,
+  classNameInner,
+}: {
+  className?: string;
+  classNameInner?: string;
+}) {
   return (
     <footer
       className={cn(
@@ -13,9 +19,10 @@ export default async function Footer({ className }: { className?: string }) {
       )}
     >
       <div
-        className="w-full flex items-center justify-between overflow-hidden p-3 md:p-2
-          pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:pb-[calc(env(safe-area-inset-bottom)+0.5rem)] 
-          gap-6 ring-1 ring-border"
+        className={cn(
+          "w-full flex items-center justify-between overflow-hidden p-3 md:p-2 gap-6 border-t",
+          classNameInner
+        )}
       >
         <div className="items-center justify-end gap-1.75 hidden md:flex">
           <div className="size-8.5 shrink-0" />

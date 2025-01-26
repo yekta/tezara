@@ -145,6 +145,15 @@ async function getPageData({ name }: { name: string }) {
   let minYear = Infinity;
   let maxYear = -Infinity;
   let thesesCount = 0;
+  const minThesisYear = {
+    year: 2025,
+    count: Infinity,
+  };
+  const maxThesisYear = {
+    year: 2025,
+    count: -Infinity,
+  };
+
   const languages = new Map<string, number>(
     languagesData.map(({ language, count }) => [language, Number(count)])
   );
@@ -170,6 +179,16 @@ async function getPageData({ name }: { name: string }) {
       maxYear = year;
     }
 
+    if (countAsNumber < minThesisYear.count) {
+      minThesisYear.year = year;
+      minThesisYear.count = countAsNumber;
+    }
+
+    if (countAsNumber > maxThesisYear.count) {
+      maxThesisYear.year = year;
+      maxThesisYear.count = countAsNumber;
+    }
+
     if (!thesesCountsByYears[year]) {
       thesesCountsByYears[year] = {};
     }
@@ -193,6 +212,20 @@ async function getPageData({ name }: { name: string }) {
     }
   );
 
+  let mostPopularThesisType = {
+    thesis_type: "Yüksek Lisans",
+    count: -Infinity,
+  };
+
+  for (const [thesis_type, count] of thesisTypes.entries()) {
+    if (count > mostPopularThesisType.count) {
+      mostPopularThesisType = {
+        thesis_type,
+        count,
+      };
+    }
+  }
+
   const popularSubjectsChartData = Array.from(subjects.entries())
     .map(([keyword, count]) => ({
       keyword,
@@ -212,5 +245,8 @@ async function getPageData({ name }: { name: string }) {
     thesisTypes,
     thesesCount,
     lastThesesRes,
+    maxThesisYear,
+    minThesisYear,
+    mostPopularThesisType,
   };
 }

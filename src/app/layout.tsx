@@ -16,6 +16,7 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
+import BottomBar from "@/components/navigation/bottom-bar";
 
 const sans = localFont({
   src: "./fonts/DMSansVF.woff2",
@@ -70,9 +71,14 @@ export default async function RootLayout({
             height={2}
           />
           <Navbar />
-          <div className="pointer-events-none h-12 md:h-13 w-full" />
+          <div className="pointer-events-none h-13 sm:h-16 w-full" />
           {children}
-          <Footer />
+          <Footer
+            classNameInner="sm:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:pb-[calc(env(safe-area-inset-bottom)+0.5rem)] "
+            className="bottom-[calc(env(safe-area-inset-bottom)+3rem)] sm:bottom-0"
+          />
+          <BottomBar className="h-[calc(env(safe-area-inset-bottom)+3rem)] pb-[env(safe-area-inset-bottom)] sm:hidden" />
+          <div className="h-[calc(env(safe-area-inset-bottom)+3rem)] sm:hidden" />
           <Toaster
             position="top-right"
             icons={{

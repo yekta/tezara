@@ -58,7 +58,7 @@ input[type="search"] {
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --background-hover: 0 0% 96%;
+    --background-hover: 0 0% 95%;
     --foreground: 250 25% 4%;
     --card: 0 0% 100%;
     --card-foreground: 250 25% 4%;
@@ -81,7 +81,7 @@ input[type="search"] {
     --success-foreground: 0 0% 100%;
     --shadow: 0 0% 0%;
     --border: 250 20% 85%;
-    --input: 250 20% 85%;
+    --input: 0 0% 96%;
     --ring: 250 25% 4%;
     --banano: 35 100% 25%;
     --nano: 250 80% 25%;

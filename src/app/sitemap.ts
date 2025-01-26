@@ -17,17 +17,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 1,
     },
-    /* {
-      url: `${env.NEXT_PUBLIC_SITE_URL}/university`,
+    {
+      url: `${env.NEXT_PUBLIC_SITE_URL}/universities`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
-    } ,
+    } /* ,
     {
       url: `${env.NEXT_PUBLIC_SITE_URL}/thesis`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
-    }, */
+    }, */,
   ];
 }

@@ -12,15 +12,8 @@ export async function getUniversities({
   const offset = (page - 1) * perPage;
   const res = await clickhouse.query({
     query: sql`
-        WITH total_count AS (
-            SELECT count(*) AS c
-            FROM universities
-        )
-        SELECT
-            u.*,
-            total_count.c AS total_count
-        FROM universities AS u
-        CROSS JOIN total_count
+        SELECT *
+        FROM universities
         ORDER BY thesis_count DESC
         LIMIT {limit: UInt32} OFFSET {offset: UInt32}
       `.text,
@@ -43,6 +36,22 @@ export async function getUniversities({
     };
   }) as TUniversity[];
   return data;
+}
+
+export async function getTotalUniversityCount() {
+  const res = await clickhouse.query({
+    query: sql`
+        SELECT count() as total_count
+        FROM universities
+      `.text,
+    format: "JSON",
+  });
+  const resJson = await res.json();
+  const data = resJson.data as { total_count: string }[];
+  if (data.length === 0) {
+    throw new Error("No data found");
+  }
+  return Number(data[0].total_count);
 }
 
 type TUniversity = {

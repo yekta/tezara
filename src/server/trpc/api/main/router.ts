@@ -1,4 +1,7 @@
-import { getUniversities } from "@/server/clickhouse/repo/universities";
+import {
+  getTotalUniversityCount,
+  getUniversities,
+} from "@/server/clickhouse/repo/universities";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/setup/trpc";
 import { z } from "zod";
 
@@ -10,8 +13,17 @@ export const mainRouter = createTRPCRouter({
       })
     )
     .query(async function ({ input: { page } }) {
-      const result = await getUniversities({ page, perPage: 30 });
+      const perPage = 30;
+      const [result, total] = await Promise.all([
+        getUniversities({ page, perPage }),
+        getTotalUniversityCount(),
+      ]);
+      const maxPage = Math.ceil(total / perPage);
 
-      return result;
+      return {
+        result,
+        maxPage,
+        totalCount: total,
+      };
     }),
 });

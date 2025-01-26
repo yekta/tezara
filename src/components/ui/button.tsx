@@ -22,7 +22,7 @@ const buttonVariants = cva(
         success:
           "bg-success text-success-foreground not-touch:hover:bg-success/85 active:bg-success/85",
         outline:
-          "border border-input bg-background not-touch:hover:bg-border active:bg-border not-touch:hover:text-foreground active:text-foreground",
+          "border border-border bg-background not-touch:hover:bg-border active:bg-border not-touch:hover:text-foreground active:text-foreground",
         "warning-outline":
           "border border-warning/25 bg-background not-touch:hover:bg-warning/20 active:bg-warning/20 not-touch:hover:border-warning/0 active:border-warning/0 text-warning not-touch:hover:text-warning active:text-warning",
         secondary:
