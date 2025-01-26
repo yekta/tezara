@@ -79,7 +79,7 @@ export default async function Page({ params }: Props) {
       >
         {thesis?.title_translated || noTranslatedTitle}
       </h2>
-      <div className="mt-6 flex flex-wrap items-start justify-start gap-1.5">
+      <div className="pt-4 flex flex-wrap items-start justify-start gap-1.5">
         {thesis.pdf_url ? (
           <LinkButton
             href={thesis.pdf_url}
@@ -96,17 +96,17 @@ export default async function Page({ params }: Props) {
             <p className="shrink min-w-0">PDF Yok</p>
           </Button>
         )}
-        <Button size="sm" variant="success" disabled>
+        {/* <Button size="sm" variant="success" disabled>
           <FileExtensionIcon className="size-5 -ml-1.5" variant="csv" />
           <p className="shrink min-w-0">Tablo İndir</p>
         </Button>
         <Button size="sm" disabled>
           <FileExtensionIcon className="size-5 -ml-1.5" variant="json" />
           <p className="shrink min-w-0">JSON İndir</p>
-        </Button>
+        </Button> */}
       </div>
       {/* Details */}
-      <div id="details" className="w-full flex flex-col text-sm mt-6">
+      <div id="details" className="w-full flex flex-col text-sm pt-4">
         <Divider />
         <p id="thesis_id_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Tez No: </span>
@@ -140,21 +140,7 @@ export default async function Page({ params }: Props) {
           </span>
         </p>
         <Divider />
-        <p id="year_section" className="leading-snug">
-          <span className="font-medium text-muted-foreground">Yıl: </span>
-          <span className="font-bold" id="year">
-            {thesis.year}
-          </span>
-        </p>
-        <Divider />
-        <p id="language_section" className="leading-snug">
-          <span className="font-medium text-muted-foreground">Dil: </span>
-          <span className="font-bold" id="language_name">
-            {thesis.language}
-          </span>
-        </p>
-        <Divider />
-        <p id="advisor_names_section" className="leading-snug">
+        <p id="subjects_section" className="leading-snug">
           <span className="font-medium text-muted-foreground">Konu: </span>
           <span className="font-bold" id="advisor_names">
             {thesis.subjects && thesis.subjects.length > 1
@@ -169,6 +155,40 @@ export default async function Page({ params }: Props) {
                   .map((i) => i.name)
                   .join(", ")
               : notAvailable}
+          </span>
+        </p>
+        <Divider />
+        <p id="keywords_section" className="leading-snug">
+          <span className="font-medium text-muted-foreground">
+            Anahtar Kelimeler:{" "}
+          </span>
+          <span className="font-bold" id="advisor_names">
+            {thesis.keywords && thesis.keywords.length > 1
+              ? thesis.keywords
+                  .sort((a, b) => {
+                    if (a.language === "Turkish" && b.language === "English")
+                      return -1;
+                    if (a.language === "English" && b.language === "Turkish")
+                      return 1;
+                    return 0;
+                  })
+                  .map((i) => i.name)
+                  .join(", ")
+              : notAvailable}
+          </span>
+        </p>
+        <Divider />
+        <p id="year_section" className="leading-snug">
+          <span className="font-medium text-muted-foreground">Yıl: </span>
+          <span className="font-bold" id="year">
+            {thesis.year}
+          </span>
+        </p>
+        <Divider />
+        <p id="language_section" className="leading-snug">
+          <span className="font-medium text-muted-foreground">Dil: </span>
+          <span className="font-bold" id="language_name">
+            {thesis.language}
           </span>
         </p>
         <Divider />
