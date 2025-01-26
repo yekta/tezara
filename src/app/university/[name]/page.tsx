@@ -47,7 +47,7 @@ export default async function Page({ params }: Props) {
   });
 
   return (
-    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
+    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-25 md:pb-21">
       <PreviousPageBar />
       {/* Title */}
       <div className="w-full flex flex-col px-4 pt-3">
