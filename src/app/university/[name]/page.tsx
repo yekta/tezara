@@ -53,7 +53,7 @@ export default async function Page({ params }: Props) {
       <div className="w-full flex flex-col px-4 pt-3">
         <div className="w-full flex items-center flex-wrap gap-1.5">
           <h1 className="shrink min-w-0 font-bold text-3xl text-balance leading-tight pr-1">
-            {parsedName}
+            {parsedName} Tez İstatistikleri
           </h1>
           <p className="shrink min-w-0 bg-foreground/10 rounded-full leading-tight font-semibold text-sm px-2.5 py-0.75">
             {minYear}-{maxYear}
