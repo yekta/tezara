@@ -1,7 +1,6 @@
-import { clickhouse } from "@/server/clickhouse/constants";
+import { getUniversityStats } from "@/server/clickhouse/repo/university";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
-import sql from "sql-template-tag";
 import { cache } from "react";
 
 export const cachedGetPageData = cache(({ name }: { name: string }) =>
@@ -9,79 +8,7 @@ export const cachedGetPageData = cache(({ name }: { name: string }) =>
 );
 
 async function getPageData({ name }: { name: string }) {
-  const thesisCountsByYearsPromise = clickhouse
-    .query({
-      query: sql`
-      SELECT
-        year,
-        thesis_type,
-        count() as count
-      FROM theses
-      WHERE university = {university: String}
-      GROUP BY year, thesis_type
-      ORDER BY year ASC
-    `.text,
-      query_params: {
-        university: name,
-      },
-      format: "JSON",
-    })
-    .then((res) => res.json());
-
-  const languagesPromise = clickhouse
-    .query({
-      query: sql`
-      SELECT
-        language,
-        count() as count
-      FROM theses
-      WHERE university = {university: String}
-      GROUP BY language
-      ORDER BY count DESC
-    `.text,
-      query_params: {
-        university: name,
-      },
-      format: "JSON",
-    })
-    .then((res) => res.json());
-
-  const subjectsPromise = clickhouse
-    .query({
-      query: sql`
-        SELECT 
-            subject_name,
-            count AS count
-        FROM thesis_subject_stats
-        WHERE university = {university: String}
-        AND subject_language = 'Turkish'
-        ORDER BY count DESC
-      `.text,
-      query_params: {
-        university: name,
-      },
-      format: "JSON",
-    })
-    .then((res) => res.json());
-
-  const keywordsPromise = clickhouse
-    .query({
-      query: sql`
-        SELECT 
-            keyword_name,
-            count AS count
-        FROM thesis_keyword_stats
-        WHERE university = {university: String}
-        AND keyword_language = 'Turkish'
-        ORDER BY count DESC
-      `.text,
-      query_params: {
-        university: name,
-      },
-      format: "JSON",
-    })
-    .then((res) => res.json());
-
+  const statsQueryPromise = getUniversityStats({ name });
   const lastThesesPromise = searchTheses({
     q: "",
     hits_per_page: 10,
@@ -101,17 +28,8 @@ async function getPageData({ name }: { name: string }) {
   });
 
   const start = performance.now();
-  const [
-    thesisCountsByYearsRes,
-    languagesRes,
-    subjectsRes,
-    keywordsRes,
-    lastThesesRes,
-  ] = await Promise.all([
-    thesisCountsByYearsPromise,
-    languagesPromise,
-    subjectsPromise,
-    keywordsPromise,
+  const [statsQueryRes, lastThesesRes] = await Promise.all([
+    statsQueryPromise,
     lastThesesPromise,
   ]);
   console.log(
@@ -120,26 +38,8 @@ async function getPageData({ name }: { name: string }) {
     ).toLocaleString()}ms`
   );
 
-  const thesisCountsByYearsData = thesisCountsByYearsRes.data as {
-    year: number;
-    thesis_type: string;
-    count: string;
-  }[];
-
-  const languagesData = languagesRes.data as {
-    language: string;
-    count: string;
-  }[];
-
-  const subjectsData = subjectsRes.data as {
-    subject_name: string;
-    count: string;
-  }[];
-
-  const keywordsData = keywordsRes.data as {
-    keyword_name: string;
-    count: string;
-  }[];
+  const { thesisCountsByYearsData, languagesData, subjectsData, keywordsData } =
+    statsQueryRes;
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
   let minYear = Infinity;

@@ -1,7 +1,7 @@
 import {
   getTotalUniversityCount,
   getUniversities,
-} from "@/server/clickhouse/repo/universities";
+} from "@/server/clickhouse/repo/university";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/setup/trpc";
 import { z } from "zod";
 
