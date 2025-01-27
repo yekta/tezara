@@ -566,8 +566,8 @@ export default function SearchBox({
                 label="Arama Alanlarını Seç"
                 className="w-full"
                 triggerOnClick={() => {
-                  umami.capture("Attributes to Search On Clicked");
-                  posthog.capture("Attributes to Search On Clicked");
+                  umami.capture("Search On Filter Clicked");
+                  posthog.capture("Search On Filter Clicked");
                 }}
                 Icon={SearchCheckIcon}
                 commandButtonText={
