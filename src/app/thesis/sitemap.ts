@@ -45,6 +45,7 @@ async function getTheses({ page }: { page: number }) {
     thesis_types: [],
     year_gte: null,
     year_lte: null,
+    search_on: [],
     attributes_to_retrieve: ["id"],
     attributes_to_not_retrieve: undefined,
     client: meiliAdmin,
