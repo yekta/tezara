@@ -563,7 +563,7 @@ export default function SearchBox({
             {/* Search On */}
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
-                label="Arama Alanlarını Seç"
+                label="Arama Alanı Seç"
                 className="w-full"
                 triggerOnClick={() => {
                   umami.capture("Search On Filter Clicked");
@@ -573,7 +573,7 @@ export default function SearchBox({
                 commandButtonText={
                   <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
-                      Arama Alanları
+                      Arama Alanı
                     </p>
                     {searchOnQP && searchOnQP.length > 0 && (
                       <FilterCountChip>

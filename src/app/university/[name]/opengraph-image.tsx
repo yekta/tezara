@@ -33,7 +33,7 @@ export default async function Image({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
 
-  const { thesesCount, subjects, keywords, languages } =
+  const { thesesCount, subjects, universityStats, languages } =
     await cachedGetPageData({
       name: parsedName,
     });
@@ -111,7 +111,7 @@ export default async function Image({ params }: Props) {
           <Stat label="Konular" value={subjects.size} Icon={FolderClosedIcon} />
           <Stat
             label="Anahtar Kelime"
-            value={keywords.size}
+            value={universityStats.keyword_count_turkish}
             Icon={KeyRoundIcon}
           />
         </div>

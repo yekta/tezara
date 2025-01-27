@@ -139,12 +139,12 @@ function UniversityCard({ university, isPlaceholder }: TUniversityCardProps) {
             Icon={GlobeIcon}
           />
           <Stat
-            value={isPlaceholder ? 100 : university.turkish_subject_count}
+            value={isPlaceholder ? 100 : university.subject_count_turkish}
             label="Konular"
             Icon={FolderClosedIcon}
           />
           <Stat
-            value={isPlaceholder ? 1000 : university.turkish_keyword_count}
+            value={isPlaceholder ? 1000 : university.keyword_count_turkish}
             label="Anahtar Kelime"
             Icon={KeyRoundIcon}
           />

@@ -1,4 +1,7 @@
-import { getUniversityStats } from "@/server/clickhouse/repo/university";
+import {
+  getUniversity,
+  getUniversityStats,
+} from "@/server/clickhouse/repo/university";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import { cache } from "react";
@@ -20,17 +23,20 @@ async function getPageData({ name }: { name: string }) {
     advisors: [],
     authors: [],
     thesis_types: [],
+    search_on: [],
     attributes_to_retrieve: undefined,
     attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
     year_gte: null,
     year_lte: null,
     client: meiliAdmin,
   });
+  const universityStatsPromise = getUniversity({ name });
 
   const start = performance.now();
-  const [statsQueryRes, lastThesesRes] = await Promise.all([
+  const [statsQueryRes, lastThesesRes, universityStats] = await Promise.all([
     statsQueryPromise,
     lastThesesPromise,
+    universityStatsPromise,
   ]);
   console.log(
     `/university/[name]:getPageData("${name}") | ${Math.round(
@@ -38,7 +44,7 @@ async function getPageData({ name }: { name: string }) {
     ).toLocaleString()}ms`
   );
 
-  const { thesisCountsByYearsData, languagesData, subjectsData, keywordsData } =
+  const { thesisCountsByYearsData, languagesData, subjectsData } =
     statsQueryRes;
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
@@ -59,9 +65,6 @@ async function getPageData({ name }: { name: string }) {
   );
   const subjects = new Map<string, number>(
     subjectsData.map(({ subject_name, count }) => [subject_name, Number(count)])
-  );
-  const keywords = new Map<string, number>(
-    keywordsData.map(({ keyword_name, count }) => [keyword_name, Number(count)])
   );
   const thesisTypes = new Map<string, number>();
 
@@ -137,7 +140,7 @@ async function getPageData({ name }: { name: string }) {
   return {
     thesesCountsByYearsChartData,
     popularSubjectsChartData,
-    keywords,
+    universityStats,
     subjects,
     languages,
     minYear,

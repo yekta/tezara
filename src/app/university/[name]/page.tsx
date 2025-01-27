@@ -33,7 +33,7 @@ export default async function Page({ params }: Props) {
     thesesCount,
     languages,
     subjects,
-    keywords,
+    universityStats,
     minYear,
     maxYear,
     thesesCountsByYearsChartData,
@@ -69,7 +69,7 @@ export default async function Page({ params }: Props) {
           <Stat value={languages.size} label="Dil" Icon={GlobeIcon} />
           <Stat value={subjects.size} label="Konular" Icon={FolderClosedIcon} />
           <Stat
-            value={keywords.size}
+            value={universityStats.keyword_count_turkish}
             label="Anahtar Kelime"
             Icon={KeyRoundIcon}
           />
@@ -94,7 +94,7 @@ export default async function Page({ params }: Props) {
         </span>{" "}
         farklı dil ve{" "}
         <span className="font-semibold">
-          {keywords.size.toLocaleString(locale)}
+          {universityStats.keyword_count_turkish.toLocaleString(locale)}
         </span>{" "}
         farklı anahtar kelime kullanılmıştır. En çok tez{" "}
         <span className="font-semibold">{maxThesisYear.year}</span> yılında
@@ -233,8 +233,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const locale = "tr";
-  const { keywords, subjects, languages, minYear, maxYear, thesesCount } =
-    await cachedGetPageData({ name: parsedName });
+  const {
+    universityStats,
+    subjects,
+    languages,
+    minYear,
+    maxYear,
+    thesesCount,
+  } = await cachedGetPageData({ name: parsedName });
   const title = `${parsedName} Tez İstatistikleri | ${titleSuffix}`;
   const description = `${parsedName} bünyesinde ${minYear}-${maxYear} yılları arasında ${subjects.size.toLocaleString(
     locale
@@ -242,7 +248,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     locale
   )} tez üretilmiş. ${languages.size.toLocaleString(
     locale
-  )} farklı dil ve ${keywords.size.toLocaleString(
+  )} farklı dil ve ${universityStats.keyword_count_turkish.toLocaleString(
     locale
   )} farklı anahtar kelime kullanılmış.`;
 

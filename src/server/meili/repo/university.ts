@@ -14,7 +14,7 @@ export async function getUniversities({ client }: { client: MeiliSearch }) {
   const hits = [...result.hits];
   hits.sort(
     boostedStringSort({
-      hinder: ["(Beirut Islamic University) جامعة بيروت الإسلامية"],
+      hinder: [(v) => v.startsWith("(")],
       field: "name",
     })
   );

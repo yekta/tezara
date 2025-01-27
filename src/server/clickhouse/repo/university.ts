@@ -39,6 +39,27 @@ export async function getUniversities({
   return data;
 }
 
+export async function getUniversity({ name }: { name: string }) {
+  const res = await clickhouse.query({
+    query: sql`
+        SELECT *
+        FROM universities
+        WHERE name = {name:String}
+        LIMIT 1
+      `.text,
+    query_params: {
+      name,
+    },
+    format: "JSON",
+  });
+  const resJson = await res.json();
+  const data = resJson.data as TUniversity[];
+  if (data.length === 0) {
+    throw new Error("No data found");
+  }
+  return data[0];
+}
+
 export async function getTotalUniversityCount() {
   const res = await clickhouse.query({
     query: sql`
@@ -98,21 +119,6 @@ export async function getUniversityStats({ name }: { name: string }) {
         WHERE university = {university:String}
           AND subject_language = 'Turkish'
         GROUP BY subject_name
-  
-        UNION ALL
-  
-        SELECT
-            'keyword'     AS data_group,
-            NULL          AS year,
-            NULL          AS thesis_type,
-            NULL          AS language,
-            NULL          AS subject_name,
-            keyword_name,
-            sum(count)    AS count
-        FROM thesis_keyword_stats
-        WHERE university = {university:String}
-          AND keyword_language = 'Turkish'
-        GROUP BY keyword_name
       `.text,
     query_params: {
       university: name,
@@ -120,13 +126,12 @@ export async function getUniversityStats({ name }: { name: string }) {
     format: "JSON",
   });
   const resJson = await res.json();
-  const { thesisCountsByYearsData, languagesData, subjectsData, keywordsData } =
+  const { thesisCountsByYearsData, languagesData, subjectsData } =
     parseStatsQueryRes(resJson);
   return {
     thesisCountsByYearsData,
     languagesData,
     subjectsData,
-    keywordsData,
   };
 }
 
@@ -139,10 +144,10 @@ export type TUniversity = {
   institute_count: number;
   department_count: number;
   branch_count: number;
-  turkish_keyword_count: number;
-  turkish_subject_count: number;
-  english_keyword_count: number;
-  english_subject_count: number;
+  keyword_count_turkish: number;
+  subject_count_turkish: number;
+  keyword_count_english: number;
+  subject_count_english: number;
   year_start: number;
   year_end: number;
   total_count: number;
@@ -212,7 +217,6 @@ function parseStatsQueryRes(response: ResponseJSON<unknown>): QueryStatsParsed {
     thesisCountsByYearsData,
     languagesData,
     subjectsData,
-    keywordsData,
   };
 }
 
@@ -220,7 +224,6 @@ export type QueryStatsParsed = {
   thesisCountsByYearsData: ThesisCountsByYearsRow[];
   languagesData: LanguagesRow[];
   subjectsData: SubjectsRow[];
-  keywordsData: KeywordsRow[];
 };
 
 export type ThesisCountsByYearsRow = {
