@@ -155,10 +155,10 @@ export async function searchTheses({
       attributesToSearchOn.push("abstract_translated");
     }
     if (search_on.includes("subjects")) {
-      attributesToSearchOn.push("subjects");
+      attributesToSearchOn.push("subjects.name");
     }
     if (search_on.includes("keywords")) {
-      attributesToSearchOn.push("keywords");
+      attributesToSearchOn.push("keywords.name");
     }
     if (search_on.includes("author")) {
       attributesToSearchOn.push("author");
