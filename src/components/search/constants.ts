@@ -44,7 +44,7 @@ const parseAsStringEnum = isServer
   : parseAsStringEnumClient;
 
 // DONT FORGET TO ADD EACH VALUE TO client.ts as well
-export const searchLikePageParams = {
+export const searchLikePageParamParsers = {
   q: parseAsString.withDefault(""),
   languages: parseAsArrayOf(parseAsString).withDefault([]),
   universities: parseAsArrayOf(parseAsString).withDefault([]),
@@ -61,15 +61,22 @@ export const searchLikePageParams = {
   ).withDefault([]),
 };
 
-export const cachedSearchLikePageSearchParams =
-  createSearchParamsCache(searchLikePageParams);
+export const cachedSearchLikePageSearchParams = createSearchParamsCache(
+  searchLikePageParamParsers
+);
 
-export type TSearchLikePageParams = inferParserType<
-  typeof searchLikePageParams
+export type TSearchLikePageParamParsers = inferParserType<
+  typeof searchLikePageParamParsers
 >;
 
+type TSearchLikPageParamKeys = keyof TSearchLikePageParamParsers;
+
+export const searchLikePageParamKeys = Object.fromEntries(
+  Object.entries(searchLikePageParamParsers).map(([key]) => [key, key])
+) as Record<TSearchLikPageParamKeys, TSearchLikPageParamKeys>;
+
 export type TSearchLikePageParamsSearchProps = Omit<
-  TSearchLikePageParams,
+  TSearchLikePageParamParsers,
   "advanced"
 >;
 

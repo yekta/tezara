@@ -5,15 +5,19 @@ type TUmamiTrackFunction = (
   props?: Record<string, string | number>
 ) => void;
 
-type TUmami = {
+type TUmamiOriginal = {
   track: TUmamiTrackFunction;
 };
 
 type TWindow = {
-  umami?: TUmami;
+  umami?: TUmamiOriginal;
 };
 
-export const useUmami = () => {
+export type TUmami = {
+  capture: TUmamiTrackFunction;
+};
+
+export const useUmami: () => { capture: TUmamiTrackFunction } = () => {
   const umamiTrackFunction = useCallback<TUmamiTrackFunction>(
     (event, props) => {
       if (

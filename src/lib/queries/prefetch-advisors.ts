@@ -1,7 +1,7 @@
 import "server-only";
 
 import { meiliAdmin } from "@/server/meili/constants-server";
-import { searchAdvisors } from "@/server/meili/repo/advisors";
+import { searchAdvisors } from "@/server/meili/repo/advisor";
 import { QueryClient } from "@tanstack/react-query";
 
 export const prefetchAdvisors = async ({

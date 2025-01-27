@@ -3,7 +3,7 @@ import {
   getSearchThesesQueryKey,
   HITS_PER_PAGE_DEFAULT,
 } from "@/components/search/constants";
-import SearchBox from "@/components/search/search-box";
+import SearchBox from "@/components/search/search-box/search-box";
 import SearchResults from "@/components/search/results/search-results";
 import SearchResultsProvider from "@/components/search/results/search-results-provider";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
@@ -92,9 +92,9 @@ export default async function Page({ searchParams }: Props) {
       <div className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-32">
         <SearchResultsProvider>
           <SearchBox
-            languages={languagesData.hits}
-            universities={universitiesData.hits}
-            thesisTypes={thesisTypesData.hits}
+            languagesData={languagesData.hits}
+            universitiesData={universitiesData.hits}
+            thesisTypesData={thesisTypesData.hits}
             variant="search"
           />
           <SearchResults />

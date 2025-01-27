@@ -5,7 +5,7 @@ import {
   HITS_PER_PAGE_BULK,
   HITS_PER_PAGE_DEFAULT,
   PAGE_DEFAULT,
-  searchLikePageParams,
+  searchLikePageParamParsers,
 } from "@/components/search/constants";
 import { useEffectAfterCurrentPageMount } from "@/lib/hooks/use-effect-after-current-page-mount";
 import { meili } from "@/server/meili/constants-client";
@@ -44,35 +44,47 @@ export const SearchResultsProvider: React.FC<{
   const pathname = usePathname();
   const isSearchResultsPath = pathname.startsWith("/search");
 
-  const [query] = useQueryState("q", searchLikePageParams.q);
+  const [query] = useQueryState("q", searchLikePageParamParsers.q);
   const [languages] = useQueryState(
     "languages",
-    searchLikePageParams["languages"]
+    searchLikePageParamParsers["languages"]
   );
   const [universities] = useQueryState(
     "universities",
-    searchLikePageParams["universities"]
+    searchLikePageParamParsers["universities"]
   );
   const [departments] = useQueryState(
     "departments",
-    searchLikePageParams["departments"]
+    searchLikePageParamParsers["departments"]
   );
   const [advisors] = useQueryState(
     "advisors",
-    searchLikePageParams["advisors"]
+    searchLikePageParamParsers["advisors"]
   );
-  const [authors] = useQueryState("authors", searchLikePageParams["advisors"]);
+  const [authors] = useQueryState(
+    "authors",
+    searchLikePageParamParsers["advisors"]
+  );
   const [thesisTypes] = useQueryState(
     "thesis_types",
-    searchLikePageParams["thesis_types"]
+    searchLikePageParamParsers["thesis_types"]
   );
-  const [yearLte] = useQueryState("year_lte", searchLikePageParams["year_lte"]);
-  const [yearGte] = useQueryState("year_gte", searchLikePageParams["year_gte"]);
+  const [yearLte] = useQueryState(
+    "year_lte",
+    searchLikePageParamParsers["year_lte"]
+  );
+  const [yearGte] = useQueryState(
+    "year_gte",
+    searchLikePageParamParsers["year_gte"]
+  );
   const [searchOn] = useQueryState(
     "search_on",
-    searchLikePageParams["search_on"]
+    searchLikePageParamParsers["search_on"]
   );
-  const [page, setPage] = useQueryState("page", searchLikePageParams["page"]);
+  const [page, setPage] = useQueryState(
+    "page",
+    searchLikePageParamParsers["page"]
+  );
 
   useEffectAfterCurrentPageMount(() => {
     if (page === PAGE_DEFAULT) return;

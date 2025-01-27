@@ -1,7 +1,7 @@
 import "server-only";
 
 import { meiliAdmin } from "@/server/meili/constants-server";
-import { searchDepartments } from "@/server/meili/repo/departments";
+import { searchDepartments } from "@/server/meili/repo/department";
 import { QueryClient } from "@tanstack/react-query";
 
 export const prefetchDepartments = async ({

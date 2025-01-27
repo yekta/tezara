@@ -1,9 +1,9 @@
 import Logo from "@/components/logo/logo";
 import { cachedSearchLikePageSearchParams } from "@/components/search/constants";
-import SearchBox from "@/components/search/search-box";
+import SearchBox from "@/components/search/search-box/search-box";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
 import { meili } from "@/server/meili/constants-client";
-import { searchAdvisors } from "@/server/meili/repo/advisors";
+import { searchAdvisors } from "@/server/meili/repo/advisor";
 import { getLanguages } from "@/server/meili/repo/language";
 import { getThesisTypes } from "@/server/meili/repo/thesis-type";
 import { getUniversities } from "@/server/meili/repo/university";
@@ -45,9 +45,9 @@ export default async function Home({ searchParams }: Props) {
             <Logo variant="full" className="w-32 max-w-full h-auto" />
           </div>
           <SearchBox
-            languages={languages.hits}
-            universities={universities.hits}
-            thesisTypes={thesisTypes.hits}
+            languagesData={languages.hits}
+            universitiesData={universities.hits}
+            thesisTypesData={thesisTypes.hits}
             className="mt-6"
             variant="home"
           />
