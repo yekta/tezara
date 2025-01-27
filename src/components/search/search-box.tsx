@@ -39,6 +39,7 @@ import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarArrowDownIcon,
+  CalendarArrowUpIcon,
   ChevronUpIcon,
   GlobeIcon,
   LoaderIcon,
@@ -637,11 +638,11 @@ export default function SearchBox({
                 }}
               >
                 <SelectTrigger
-                  aria-label="Başlangıç Yılı"
+                  aria-label="Minimum Yılı Seç"
                   className="flex-1 py-2 rounded-r-none -mr-[0.5px]"
                   classNameInnerContainer="flex items-center -ml-0.5"
                 >
-                  <CalendarArrowDownIcon className="size-4 shrink-0" />
+                  <CalendarArrowUpIcon className="size-4 shrink-0" />
                   <SelectValue placeholder="Yıl >=">
                     <div className="flex shrink min-w-0 items-center gap-0.5 overflow-hidden">
                       <p className="shrink min-w-0 overflow-hidden overflow-ellipsis">
@@ -700,7 +701,7 @@ export default function SearchBox({
                 }}
               >
                 <SelectTrigger
-                  aria-label="Bitiş Yılı"
+                  aria-label="Maksimum Yılı Seç"
                   className="flex-1 py-2 rounded-l-none -ml-[0.5px]"
                   classNameInnerContainer="flex items-center -ml-0.5"
                 >
