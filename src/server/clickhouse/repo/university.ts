@@ -137,20 +137,20 @@ export async function getUniversityStats({ name }: { name: string }) {
 
 export type TUniversity = {
   name: string;
-  thesis_count: number;
-  language_count: number;
-  author_count: number;
-  thesis_type_count: number;
-  institute_count: number;
-  department_count: number;
-  branch_count: number;
-  keyword_count_turkish: number;
-  subject_count_turkish: number;
-  keyword_count_english: number;
-  subject_count_english: number;
-  year_start: number;
-  year_end: number;
-  total_count: number;
+  thesis_count: string;
+  language_count: string;
+  author_count: string;
+  thesis_type_count: string;
+  institute_count: string;
+  department_count: string;
+  branch_count: string;
+  keyword_count_turkish: string;
+  subject_count_turkish: string;
+  keyword_count_english: string;
+  subject_count_english: string;
+  year_start: string;
+  year_end: string;
+  total_count: string;
 };
 
 function parseStatsQueryRes(response: ResponseJSON<unknown>): QueryStatsParsed {
