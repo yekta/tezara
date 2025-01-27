@@ -46,7 +46,7 @@ export default function ThesesCountsByYearsChart({
             <BarChart
               accessibilityLayer
               data={chartData}
-              margin={{ left: 16, right: 16, top: 8, bottom: 8 }}
+              margin={{ left: 16, right: 16, top: 16, bottom: 16 }}
             >
               <XAxis
                 dataKey="year"
@@ -68,7 +68,7 @@ export default function ThesesCountsByYearsChart({
               })}
             </BarChart>
           </ChartContainer>
-          <div className="w-full flex items-center justify-center flex-wrap gap-1 pt-1 pb-4 px-4">
+          <div className="w-full flex items-center justify-center flex-wrap gap-1 pb-4 px-4">
             {dataKeys.map((k) => (
               <div
                 key={k}

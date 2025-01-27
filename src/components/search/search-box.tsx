@@ -432,11 +432,12 @@ export default function SearchBox({
         </div>
         <Input
           aria-label="Ara"
+          fadeOnDisabled={false}
           id="main-search-input"
           type="search"
           enterKeyHint="search"
           disabled={isPendingPush}
-          className="w-full pl-8.5 pr-12 bg-background-hover"
+          className="w-full pl-8.5 pr-12"
           placeholder="Tez, yazar, veya danışman ara..."
           value={queryInputValue}
           onChange={(e) => setQueryInputValue(e.target.value)}

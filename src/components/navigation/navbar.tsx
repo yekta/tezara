@@ -10,7 +10,7 @@ export default async function Navbar({}: { className?: string }) {
   return (
     <NavbarWrapper>
       <div className="flex flex-1 min-w-0">
-        <div className="flex shrink-0 flex-wrap items-center justify-start gap-1.25 md:gap-1.5">
+        <div className="flex shrink-0 flex-wrap items-center justify-start gap-1.5">
           <NavigationMenuItem asChild>
             <LinkButton
               aria-label="Home"

@@ -109,15 +109,13 @@ function UniversityCard({ university, isPlaceholder }: TUniversityCardProps) {
             className="size-4 inline shrink-0 -ml-0.5 mt-0.5 group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
             group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
           />
-          <div className="shrink min-w-0 gap-0.5 flex flex-col items-start">
-            <h2
-              className="shrink min-w-0 text-left text-balance leading-tight font-bold
+          <h2
+            className="shrink min-w-0 text-left text-balance leading-tight font-bold
               group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
               group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
-            >
-              {isPlaceholder ? "İstanbul Üniversitesi" : university.name}
-            </h2>
-          </div>
+          >
+            {isPlaceholder ? "İstanbul Üniversitesi" : university.name}
+          </h2>
         </div>
         <div className="w-full text-sm gap-2 flex flex-wrap">
           <Stat

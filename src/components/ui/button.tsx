@@ -11,7 +11,7 @@ export const minButtonSizeEnforcerClassName =
   "before:w-full before:h-full before:min-w-[44px] before:min-h-[44px] before:z-[-1] before:bg-transparent before:absolute before:-translate-y-1/2 before:top-1/2 before:-translate-x-1/2 before:left-1/2";
 
 const buttonVariants = cva(
-  "relative text-center leading-tight max-w-full inline-flex items-center select-none z-0 touch-manipulation justify-center gap-1.5 rounded-full font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "relative text-center leading-tight max-w-full inline-flex items-center select-none z-0 touch-manipulation justify-center gap-1.5 rounded-full font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -57,8 +57,8 @@ const buttonVariants = cva(
         loading: "opacity-75 disabled:opacity-75",
       },
       fadeOnDisabled: {
-        default: "",
-        false: "disabled:opacity-100",
+        default: "disabled:opacity-50",
+        false: "",
       },
       forceMinSize: {
         default: minButtonSizeEnforcerClassName,
@@ -118,11 +118,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           buttonVariants({
             variant,
             size,
-            className,
             state,
             fadeOnDisabled,
             focusVariant,
             forceMinSize,
+            className,
           })
         )}
         ref={ref}
