@@ -15,6 +15,8 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+export const revalidate = 3600;
+
 export default async function Page({ params }: Props) {
   const { id } = await params;
   const idNumber = parseInt(Number(id).toString());
@@ -80,7 +82,7 @@ export default async function Page({ params }: Props) {
       >
         {thesis?.title_translated || noTranslatedTitle}
       </h2>
-      <div className="pt-4 flex flex-wrap items-start justify-start gap-1.5">
+      <div className="pt-4.5 flex flex-wrap items-start justify-start gap-1.5">
         {thesis.pdf_url ? (
           <LinkButton
             href={thesis.pdf_url}
