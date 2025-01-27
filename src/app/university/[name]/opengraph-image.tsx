@@ -111,7 +111,7 @@ export default async function Image({ params }: Props) {
           <Stat label="Konular" value={subjects.size} Icon={FolderClosedIcon} />
           <Stat
             label="Anahtar Kelime"
-            value={universityStats.keyword_count_turkish}
+            value={Number(universityStats.keyword_count_turkish)}
             Icon={KeyRoundIcon}
           />
         </div>
