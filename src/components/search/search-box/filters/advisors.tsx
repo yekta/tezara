@@ -9,7 +9,7 @@ import MultiSelectCombobox from "@/components/search/multi-select-combobox";
 import {
   isNonEmpty,
   optionsPlaceholder,
-} from "@/components/search/search-box/fields/helpers";
+} from "@/components/search/search-box/filters/helpers";
 import useDebounceIf from "@/lib/hooks/use-debounce-if";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { meili } from "@/server/meili/constants-client";
