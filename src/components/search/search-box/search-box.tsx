@@ -197,10 +197,6 @@ export default function SearchBox({
     : false;
   const isPendingOrFetchingResults = isPendingResults || isFetchingResults;
 
-  useEffect(() => {
-    console.log("isPendingOrFetchingResults", isPendingOrFetchingResults);
-  }, [isPendingOrFetchingResults]);
-
   return (
     <form
       onSubmit={onSubmit}
