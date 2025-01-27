@@ -61,19 +61,18 @@ async function getPageData({ name }: { name: string }) {
   };
 
   const languages = new Map<string, number>(
-    languagesData.map(({ language, count }) => [language, Number(count)])
+    languagesData.map(({ language, count }) => [language, count])
   );
   const subjects = new Map<string, number>(
-    subjectsData.map(({ subject_name, count }) => [subject_name, Number(count)])
+    subjectsData.map(({ subject_name, count }) => [subject_name, count])
   );
   const thesisTypes = new Map<string, number>();
 
   thesisCountsByYearsData.forEach(({ year, thesis_type, count }) => {
-    const countAsNumber = Number(count);
     const thesisTypeCount = thesisTypes.get(thesis_type) || 0;
-    thesisTypes.set(thesis_type, thesisTypeCount + countAsNumber);
+    thesisTypes.set(thesis_type, thesisTypeCount + count);
 
-    thesesCount += countAsNumber;
+    thesesCount += count;
 
     if (year < minYear) {
       minYear = year;
@@ -82,14 +81,14 @@ async function getPageData({ name }: { name: string }) {
       maxYear = year;
     }
 
-    if (countAsNumber < minThesisYear.count) {
+    if (count < minThesisYear.count) {
       minThesisYear.year = year;
-      minThesisYear.count = countAsNumber;
+      minThesisYear.count = count;
     }
 
-    if (countAsNumber > maxThesisYear.count) {
+    if (count > maxThesisYear.count) {
       maxThesisYear.year = year;
-      maxThesisYear.count = countAsNumber;
+      maxThesisYear.count = count;
     }
 
     if (!thesesCountsByYears[year]) {
@@ -100,7 +99,7 @@ async function getPageData({ name }: { name: string }) {
       thesesCountsByYears[year][thesis_type] = 0;
     }
 
-    thesesCountsByYears[year][thesis_type] += countAsNumber;
+    thesesCountsByYears[year][thesis_type] += count;
   });
 
   const thesesCountsByYearsChartData: { [key: string]: string }[] = Array.from(

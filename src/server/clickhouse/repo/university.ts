@@ -25,6 +25,7 @@ export async function getUniversities({
     format: "JSON",
   });
   const resJson = await res.json();
+
   const data = resJson.data.map((d) => {
     const { name, ...rest } = d as Record<string, string>;
     const obj: Record<string, number> = {};
@@ -35,8 +36,27 @@ export async function getUniversities({
       name,
       ...obj,
     };
-  }) as TUniversity[];
-  return data;
+  }) as TUniversityUnparsed[];
+
+  const dataParsed: TUniversity[] = data.map((d) => ({
+    name: d.name,
+    thesis_count: Number(d.thesis_count),
+    language_count: Number(d.language_count),
+    author_count: Number(d.author_count),
+    thesis_type_count: Number(d.thesis_type_count),
+    institute_count: Number(d.institute_count),
+    department_count: Number(d.department_count),
+    branch_count: Number(d.branch_count),
+    keyword_count_turkish: Number(d.keyword_count_turkish),
+    subject_count_turkish: Number(d.subject_count_turkish),
+    keyword_count_english: Number(d.keyword_count_english),
+    subject_count_english: Number(d.subject_count_english),
+    year_start: Number(d.year_start),
+    year_end: Number(d.year_end),
+    total_count: Number(d.total_count),
+  }));
+
+  return dataParsed;
 }
 
 export async function getUniversity({ name }: { name: string }) {
@@ -53,11 +73,29 @@ export async function getUniversity({ name }: { name: string }) {
     format: "JSON",
   });
   const resJson = await res.json();
-  const data = resJson.data as TUniversity[];
+  const data = resJson.data as TUniversityUnparsed[];
   if (data.length === 0) {
     throw new Error("No data found");
   }
-  return data[0];
+  const item = data[0];
+  const itemParsed: TUniversity = {
+    name: item.name,
+    author_count: Number(item.author_count),
+    branch_count: Number(item.branch_count),
+    department_count: Number(item.department_count),
+    institute_count: Number(item.institute_count),
+    keyword_count_english: Number(item.keyword_count_english),
+    keyword_count_turkish: Number(item.keyword_count_turkish),
+    language_count: Number(item.language_count),
+    subject_count_english: Number(item.subject_count_english),
+    subject_count_turkish: Number(item.subject_count_turkish),
+    thesis_count: Number(item.thesis_count),
+    thesis_type_count: Number(item.thesis_type_count),
+    total_count: Number(item.total_count),
+    year_end: Number(item.year_end),
+    year_start: Number(item.year_start),
+  };
+  return itemParsed;
 }
 
 export async function getTotalUniversityCount() {
@@ -135,7 +173,7 @@ export async function getUniversityStats({ name }: { name: string }) {
   };
 }
 
-export type TUniversity = {
+export type TUniversityUnparsed = {
   name: string;
   thesis_count: string;
   language_count: string;
@@ -151,6 +189,24 @@ export type TUniversity = {
   year_start: string;
   year_end: string;
   total_count: string;
+};
+
+export type TUniversity = {
+  name: string;
+  thesis_count: number;
+  language_count: number;
+  author_count: number;
+  thesis_type_count: number;
+  institute_count: number;
+  department_count: number;
+  branch_count: number;
+  keyword_count_turkish: number;
+  subject_count_turkish: number;
+  keyword_count_english: number;
+  subject_count_english: number;
+  year_start: number;
+  year_end: number;
+  total_count: number;
 };
 
 function parseStatsQueryRes(response: ResponseJSON<unknown>): QueryStatsParsed {

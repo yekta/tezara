@@ -65,11 +65,23 @@ export default async function Page({ params }: Props) {
           </p>
         </div>
         <div className="w-full flex flex-wrap items-center mt-3 md:mt-2 gap-1.5">
-          <Stat value={thesesCount} label="Tez" Icon={ScrollTextIcon} />
-          <Stat value={languages.size} label="Dil" Icon={GlobeIcon} />
-          <Stat value={subjects.size} label="Konular" Icon={FolderClosedIcon} />
           <Stat
-            value={Number(universityStats.keyword_count_turkish)}
+            value={universityStats.thesis_count}
+            label="Tez"
+            Icon={ScrollTextIcon}
+          />
+          <Stat
+            value={universityStats.language_count}
+            label="Dil"
+            Icon={GlobeIcon}
+          />
+          <Stat
+            value={universityStats.subject_count_turkish}
+            label="Konular"
+            Icon={FolderClosedIcon}
+          />
+          <Stat
+            value={universityStats.keyword_count_turkish}
             label="Anahtar Kelime"
             Icon={KeyRoundIcon}
           />
@@ -94,7 +106,7 @@ export default async function Page({ params }: Props) {
         </span>{" "}
         farklı dil ve{" "}
         <span className="font-semibold">
-          {Number(universityStats.keyword_count_turkish).toLocaleString(locale)}
+          {universityStats.keyword_count_turkish.toLocaleString(locale)}
         </span>{" "}
         farklı anahtar kelime kullanılmıştır. En çok tez{" "}
         <span className="font-semibold">{maxThesisYear.year}</span> yılında
@@ -248,9 +260,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     locale
   )} tez üretilmiş. ${languages.size.toLocaleString(
     locale
-  )} farklı dil ve ${Number(
-    universityStats.keyword_count_turkish
-  ).toLocaleString(locale)} farklı anahtar kelime kullanılmış.`;
+  )} farklı dil ve ${universityStats.keyword_count_turkish.toLocaleString(
+    locale
+  )} farklı anahtar kelime kullanılmış.`;
 
   return {
     title,
