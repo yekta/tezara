@@ -97,6 +97,8 @@ input[type="search"] {
     --chart-9: 270 60% 30%;
     --chart-10: 20 90% 30%;
 
+    --top-loader: 165 100% 30%;
+
     --index-fear: 0 100% 70%;
     --index-neutral: 50 100% 60%;
     --index-greed: 120 50% 55%;
@@ -147,6 +149,7 @@ input[type="search"] {
     --ring: 250 50% 92%;
     --banano: 50 80% 50%;
     --nano: 200 90% 55%;
+
     --chart-1: 200 90% 55%;
     --chart-2: 130 80% 70%;
     --chart-3: 275 90% 75%;
@@ -157,6 +160,9 @@ input[type="search"] {
     --chart-8: 320 60% 60%;
     --chart-9: 250 100% 75%;
     --chart-10: 40 80% 65%;
+
+    --top-loader: 160 90% 60%;
+
     --index-fear: 0 60% 60%;
     --index-neutral: 50 75% 60%;
     --index-greed: 120 40% 60%;

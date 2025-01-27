@@ -1,4 +1,5 @@
 import NavbarTabs from "@/components/navigation/navbar-tabs";
+import TopLoader from "@/components/navigation/top-loader";
 import { cn } from "@/components/ui/utils";
 
 type Props = {
@@ -16,6 +17,7 @@ export default function BottomBar({ className }: Props) {
       <div className="w-full h-full flex p-1">
         <NavbarTabs className="w-full" classNameTab="flex-1 rounded-lg" />
       </div>
+      <TopLoader />
     </nav>
   );
 }

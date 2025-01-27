@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { usePathname } from "next/navigation";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 type Props = {
   className?: string;
@@ -19,24 +19,34 @@ type Props = {
 type TTab = {
   label: string;
   href: string;
-  pathname: string;
   Icon: FC<{ className?: string }>;
 };
 
 export default function NavbarTabs({ className, classNameTab }: Props) {
   const pathname = usePathname();
-  const isOnPath = (href: string) =>
-    pathname === href || pathname.startsWith(href);
-
   const tabs: TTab[] = [
-    { label: "Ara", pathname: "/search", href: "/search", Icon: SearchIcon },
+    { label: "Ara", href: "/search", Icon: SearchIcon },
     {
       label: "Üniversiteler",
-      pathname: universitiesRoute,
       href: universitiesRoute,
       Icon: LandmarkIcon,
     },
   ];
+
+  const isActive = (href: string) => (lastClickedTab === href ? true : false);
+  const isTab = (pathname: string) => tabs.some((tab) => tab.href === pathname);
+
+  const [lastClickedTab, setLastClickedTab] = useState<string | null>(
+    isTab(pathname) ? pathname : null
+  );
+
+  useEffect(() => {
+    if (isTab(pathname)) {
+      setLastClickedTab(pathname);
+    } else {
+      setLastClickedTab(null);
+    }
+  }, [pathname]);
 
   return (
     <div className={cn("flex h-full shrink min-w-0 items-center", className)}>
@@ -44,9 +54,10 @@ export default function NavbarTabs({ className, classNameTab }: Props) {
         <LinkButton
           variant="ghost"
           size="sm"
-          data-active={isOnPath(tab.pathname) ? true : undefined}
+          data-active={isActive(tab.href) ? true : undefined}
           key={tab.href}
           href={tab.href}
+          onClick={() => setLastClickedTab(tab.href)}
           className={cn(
             `${minButtonSizeEnforcerClassName} py-1.5 z-10 pointer-events-auto relative text-sm text-muted-foreground data-[active]:text-foreground
             shrink min-w-0 rounded-full h-full flex items-center justify-center

@@ -1,5 +1,7 @@
+import BottomBar from "@/components/navigation/bottom-bar";
 import Footer from "@/components/navigation/footer";
 import Navbar from "@/components/navigation/navbar";
+import TopLoader from "@/components/navigation/top-loader";
 import Providers from "@/components/providers/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { siteDescription, siteTagline, siteTitle } from "@/lib/constants";
@@ -14,9 +16,7 @@ import {
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
-import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
-import BottomBar from "@/components/navigation/bottom-bar";
 
 const sans = localFont({
   src: "./fonts/DMSansVF.woff2",
@@ -63,13 +63,7 @@ export default async function RootLayout({
         className={`${sans.variable} ${mono.variable} w-full flex flex-col min-h-[100svh] relative items-center bg-background text-foreground antialiased break-words`}
       >
         <Providers>
-          <NextTopLoader
-            zIndex={9999}
-            showSpinner={false}
-            color="hsl(var(--primary))"
-            shadow={false}
-            height={2}
-          />
+          <TopLoader />
           <Navbar />
           <div className="pointer-events-none h-13 sm:h-16 w-full" />
           {children}

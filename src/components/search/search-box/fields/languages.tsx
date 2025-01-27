@@ -23,8 +23,6 @@ export default function LanguagesField({ languagesData }: Props) {
     searchLikePageParamParsers.languages
   );
 
-  console.log("rendering languages field");
-
   const umami = useUmami();
   const posthog = usePostHog();
 
