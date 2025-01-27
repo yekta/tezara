@@ -46,6 +46,7 @@ export default function NavbarTabs({ className, classNameTab }: Props) {
     } else {
       setLastClickedTab(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return (
