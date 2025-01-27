@@ -49,6 +49,7 @@ export default async function Page({ params }: Props) {
       sort: undefined,
       year_gte: null,
       year_lte: null,
+      search_on: [],
       attributes_to_retrieve: undefined,
       attributes_to_not_retrieve: undefined,
       client: meiliAdmin,
@@ -141,7 +142,7 @@ export default async function Page({ params }: Props) {
         </p>
         <Divider />
         <p id="subjects_section" className="leading-snug">
-          <span className="font-medium text-muted-foreground">Konu: </span>
+          <span className="font-medium text-muted-foreground">Konular: </span>
           <span className="font-bold" id="advisor_names">
             {thesis.subjects && thesis.subjects.length > 1
               ? thesis.subjects

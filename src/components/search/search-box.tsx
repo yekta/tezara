@@ -8,7 +8,10 @@ import PenToolIcon from "@/components/icons/pen-tool";
 import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
 import UserPenIcon from "@/components/icons/user-pen";
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
-import { searchLikePageParams } from "@/components/search/constants/client";
+import {
+  searchLikePageParams,
+  TAttributesToSearchOn,
+} from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
@@ -40,6 +43,7 @@ import {
   GlobeIcon,
   LoaderIcon,
   ScrollTextIcon,
+  SearchCheckIcon,
   SearchIcon,
   SettingsIcon,
   XIcon,
@@ -73,31 +77,6 @@ export default function SearchBox({
   className,
   variant,
 }: Props) {
-  const languageOptions = useMemo(
-    () =>
-      languages.map((l) => ({
-        value: l.name,
-        label: l.name,
-      })),
-    [languages]
-  );
-  const universityOptions = useMemo(
-    () =>
-      universities.map((u) => ({
-        value: u.name,
-        label: u.name,
-      })),
-    [universities]
-  );
-  const thesisTypeOptions = useMemo(
-    () =>
-      thesisTypes.map((t) => ({
-        value: t.name,
-        label: t.name,
-      })),
-    [thesisTypes]
-  );
-
   const umami = useUmami();
   const posthog = usePostHog();
 
@@ -182,6 +161,10 @@ export default function SearchBox({
     "authors",
     searchLikePageParams["authors"]
   );
+  const [searchOnQP, setAttributesToSearchOnQP] = useQueryState(
+    "search_on",
+    searchLikePageParams["search_on"]
+  );
   const [thesisTypesQP, setThesisTypesQP] = useQueryState(
     "thesis_types",
     searchLikePageParams["thesis_types"]
@@ -219,7 +202,7 @@ export default function SearchBox({
     useDebounceIf("", isNonEmpty, 150);
 
   const {
-    data: advisorOptions,
+    data: advisorsData,
     isPending: isPendingAdvisors,
     isFetching: isFetchingAdvisors,
     isError: isErrorAdvisors,
@@ -239,7 +222,7 @@ export default function SearchBox({
   });
 
   const {
-    data: authorOptions,
+    data: authorsData,
     isPending: isPendingAuthors,
     isFetching: isFetchingAuthors,
     isError: isErrorAuthors,
@@ -259,7 +242,7 @@ export default function SearchBox({
   });
 
   const {
-    data: departmentOptions,
+    data: departmentsData,
     isPending: isPendingDepartments,
     isFetching: isFetchingDepartments,
     isError: isErrorDepartments,
@@ -277,6 +260,54 @@ export default function SearchBox({
       }),
     placeholderData: (prev) => prev,
   });
+  const languageOptions = useMemo(
+    () =>
+      languages.map((l) => ({
+        value: l.name,
+        label: l.name,
+      })),
+    [languages]
+  );
+  const universityOptions = useMemo(
+    () =>
+      universities.map((u) => ({
+        value: u.name,
+        label: u.name,
+      })),
+    [universities]
+  );
+  const thesisTypeOptions = useMemo(
+    () =>
+      thesisTypes.map((t) => ({
+        value: t.name,
+        label: t.name,
+      })),
+    [thesisTypes]
+  );
+  const advisorOptions = useMemo(
+    () =>
+      advisorsData?.hits.map((a) => ({
+        value: a.name,
+        label: a.name,
+      })) || null,
+    [advisorsData]
+  );
+  const authorOptions = useMemo(
+    () =>
+      authorsData?.hits.map((a) => ({
+        value: a.name,
+        label: a.name,
+      })) || null,
+    [authorsData]
+  );
+  const departmentOptions = useMemo(
+    () =>
+      departmentsData?.hits.map((d) => ({
+        value: d.name,
+        label: d.name,
+      })) || null,
+    [departmentsData]
+  );
 
   const totalSelectedFilters = useMemo(() => {
     let total = 0;
@@ -288,6 +319,7 @@ export default function SearchBox({
     if (thesisTypesQP) total += thesisTypesQP.length;
     if (yearLteQP !== null && yearLteQP !== undefined) total += 1;
     if (yearGteQP !== null && yearGteQP !== undefined) total += 1;
+    if (searchOnQP) total += searchOnQP.length;
     return total;
   }, [
     languagesQP,
@@ -298,6 +330,7 @@ export default function SearchBox({
     thesisTypesQP,
     yearGteQP,
     yearLteQP,
+    searchOnQP,
   ]);
 
   useHotkeys("mod+k", () => {
@@ -361,6 +394,7 @@ export default function SearchBox({
   const clearAuthors = () => setAuthorsQP([]);
   const clearLanguages = () => setLanguagesQP([]);
   const clearThesisTypes = () => setThesisTypesQP([]);
+  const clearSearchOn = () => setAttributesToSearchOnQP([]);
 
   const clearYearGte = () => {
     setYearGteQP(null);
@@ -380,6 +414,7 @@ export default function SearchBox({
     clearThesisTypes();
     clearYearGte();
     clearYearLte();
+    clearSearchOn();
   };
 
   const isTouchScreen = useIsTouchscreen();
@@ -525,6 +560,53 @@ export default function SearchBox({
         {/* Advanced settings */}
         {advancedSearchQP && (
           <div className="w-full max-w-3xl flex justify-center flex-wrap pt-2">
+            {/* Search On */}
+            <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
+              <MultiSelectCombobox
+                label="Arama Alanlarını Seç"
+                className="w-full"
+                triggerOnClick={() => {
+                  umami.capture("Attributes to Search On Clicked");
+                  posthog.capture("Attributes to Search On Clicked");
+                }}
+                Icon={SearchCheckIcon}
+                commandButtonText={
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                    <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                      Arama Alanları
+                    </p>
+                    {searchOnQP && searchOnQP.length > 0 && (
+                      <FilterCountChip>
+                        {searchOnQP.length.toLocaleString()}
+                      </FilterCountChip>
+                    )}
+                  </div>
+                }
+                commandInputPlaceholder="Alan bul..."
+                commandEmptyText="Eşleşen yok"
+                isItemSelected={(value) => {
+                  if (!searchOnQP) return false;
+                  return searchOnQP.includes(value as TAttributesToSearchOn);
+                }}
+                items={searchOnOptions}
+                onClearButtonClick={clearSearchOn}
+                clearLength={searchOnQP?.length}
+                onSelect={(label) => {
+                  const matchingOption = searchOnOptions.find(
+                    (o) => o.label === label
+                  );
+                  if (!matchingOption) return;
+                  const newValue = toggleInArray(
+                    searchOnQP,
+                    matchingOption.value
+                  );
+                  if (searchOnQP.join(",") !== newValue.join(",")) {
+                    setAttributesToSearchOnQP(newValue);
+                  }
+                }}
+              />
+            </div>
+            {/* Year Filters */}
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1 flex items-center">
               {/* Year Gte */}
               <Select
@@ -653,6 +735,7 @@ export default function SearchBox({
                 </SelectContent>
               </Select>
             </div>
+            {/* University */}
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
                 label="Üniversite Bazlı Filterele"
@@ -688,6 +771,7 @@ export default function SearchBox({
                 }}
               />
             </div>
+            {/* Institute */}
             <div className="w-full sm:w-1/2 md:w-1/3 px-1 py-1">
               <MultiSelectCombobox
                 commandFilter={() => 1}
@@ -707,16 +791,12 @@ export default function SearchBox({
                 hasNext={
                   !isPendingDepartments &&
                   !isErrorDepartments &&
-                  departmentOptions.totalPages > 1
+                  departmentOptions !== null &&
+                  departmentsData.totalPages > 1
                 }
                 toLoadMoreText={"Diğerleri için arama yap"}
                 items={
-                  departmentOptions
-                    ? departmentOptions?.hits.map((i) => ({
-                        label: i.name,
-                        value: i.name,
-                      }))
-                    : optionsPlaceholder
+                  departmentOptions ? departmentOptions : optionsPlaceholder
                 }
                 commandButtonText={
                   <div className="flex-1 min-w-0 flex items-center gap-1.5">
@@ -836,17 +916,11 @@ export default function SearchBox({
                 hasNext={
                   !isPendingAuthors &&
                   !isErrorAuthors &&
-                  authorOptions.totalPages > 1
+                  authorOptions !== null &&
+                  authorsData.totalPages > 1
                 }
                 toLoadMoreText={"Diğerleri için arama yap"}
-                items={
-                  authorOptions
-                    ? authorOptions?.hits.map((i) => ({
-                        label: i.name,
-                        value: i.name,
-                      }))
-                    : optionsPlaceholder
-                }
+                items={authorOptions ? authorOptions : optionsPlaceholder}
                 commandButtonText={
                   <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
@@ -892,17 +966,11 @@ export default function SearchBox({
                 hasNext={
                   !isPendingAdvisors &&
                   !isErrorAdvisors &&
-                  advisorOptions.totalPages > 1
+                  advisorOptions !== null &&
+                  advisorsData.totalPages > 1
                 }
                 toLoadMoreText={"Diğerleri için arama yap"}
-                items={
-                  advisorOptions
-                    ? advisorOptions?.hits.map((i) => ({
-                        label: i.name,
-                        value: i.name,
-                      }))
-                    : optionsPlaceholder
-                }
+                items={advisorOptions ? advisorOptions : optionsPlaceholder}
                 commandButtonText={
                   <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
@@ -935,3 +1003,30 @@ export default function SearchBox({
     </form>
   );
 }
+
+const searchOnOptions: { value: TAttributesToSearchOn; label: string }[] = [
+  {
+    value: "title",
+    label: "Başlık",
+  },
+  {
+    value: "abstract",
+    label: "Özet",
+  },
+  {
+    value: "subjects",
+    label: "Konular",
+  },
+  {
+    value: "keywords",
+    label: "Anahtar Kelimeler",
+  },
+  {
+    value: "author",
+    label: "Yazar",
+  },
+  {
+    value: "advisors",
+    label: "Danışmanlar",
+  },
+];

@@ -67,7 +67,7 @@ export default async function Page({ params }: Props) {
         <div className="w-full flex flex-wrap items-center mt-3 md:mt-2 gap-1.5">
           <Stat value={thesesCount} label="Tez" Icon={ScrollTextIcon} />
           <Stat value={languages.size} label="Dil" Icon={GlobeIcon} />
-          <Stat value={subjects.size} label="Konu" Icon={FolderClosedIcon} />
+          <Stat value={subjects.size} label="Konular" Icon={FolderClosedIcon} />
           <Stat
             value={keywords.size}
             label="Anahtar Kelime"

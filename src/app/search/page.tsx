@@ -1,8 +1,8 @@
-import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
 import {
+  cachedSearchLikePageSearchParams,
   getSearchThesesQueryKey,
   HITS_PER_PAGE_DEFAULT,
-} from "@/components/search/constants/shared";
+} from "@/components/search/constants";
 import SearchBox from "@/components/search/search-box";
 import SearchResults from "@/components/search/results/search-results";
 import SearchResultsProvider from "@/components/search/results/search-results-provider";
@@ -33,6 +33,7 @@ export default async function Page({ searchParams }: Props) {
     advisors,
     year_gte,
     year_lte,
+    search_on,
     page,
   } = await cachedSearchLikePageSearchParams.parse(searchParams);
 
@@ -48,6 +49,7 @@ export default async function Page({ searchParams }: Props) {
     year_gte,
     year_lte,
     page,
+    search_on,
     hits_per_page: HITS_PER_PAGE_DEFAULT,
     attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
     attributes_to_retrieve: undefined,
@@ -67,9 +69,9 @@ export default async function Page({ searchParams }: Props) {
           departments,
           advisors,
           authors,
-          thesis_types: thesis_types,
-          year_gte: year_gte,
-          year_lte: year_lte,
+          thesis_types,
+          year_gte,
+          year_lte,
           page,
           hits_per_page: HITS_PER_PAGE_DEFAULT,
           sort: undefined,
@@ -77,6 +79,7 @@ export default async function Page({ searchParams }: Props) {
             "abstract_original",
             "abstract_translated",
           ],
+          search_on,
           attributes_to_retrieve: undefined,
           client: meiliAdmin,
         }),

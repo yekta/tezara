@@ -108,7 +108,7 @@ export default async function Image({ params }: Props) {
             marginTop: -28,
           }}
         >
-          <Stat label="Konu" value={subjects.size} Icon={FolderClosedIcon} />
+          <Stat label="Konular" value={subjects.size} Icon={FolderClosedIcon} />
           <Stat
             label="Anahtar Kelime"
             value={keywords.size}

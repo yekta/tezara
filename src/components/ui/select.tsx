@@ -212,7 +212,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative w-full cursor-default font-medium select-none items-center pl-2 pr-8 rounded-sm py-1.5 leading-tight text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative w-full cursor-default font-medium select-none items-center pl-2 pr-8 rounded-md py-2 leading-tight outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       hideTick && "px-2",
       className
     )}

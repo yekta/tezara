@@ -1,4 +1,4 @@
-import { PAGE_DEFAULT } from "@/components/search/constants/shared";
+import { PAGE_DEFAULT } from "@/components/search/constants";
 import { boostedStringSort } from "@/server/meili/helpers";
 import { TAuthor } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";

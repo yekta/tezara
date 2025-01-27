@@ -1,5 +1,5 @@
 import Logo from "@/components/logo/logo";
-import { cachedSearchLikePageSearchParams } from "@/components/search/constants/server";
+import { cachedSearchLikePageSearchParams } from "@/components/search/constants";
 import SearchBox from "@/components/search/search-box";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
 import { meili } from "@/server/meili/constants-client";

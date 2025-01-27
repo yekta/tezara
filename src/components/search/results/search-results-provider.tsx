@@ -1,12 +1,12 @@
 "use client";
 
-import { searchLikePageParams } from "@/components/search/constants/client";
 import {
   getSearchThesesQueryKey,
   HITS_PER_PAGE_BULK,
   HITS_PER_PAGE_DEFAULT,
   PAGE_DEFAULT,
-} from "@/components/search/constants/shared";
+  searchLikePageParams,
+} from "@/components/search/constants";
 import { useEffectAfterCurrentPageMount } from "@/lib/hooks/use-effect-after-current-page-mount";
 import { meili } from "@/server/meili/constants-client";
 import { searchTheses, TSearchThesesResult } from "@/server/meili/repo/thesis";
@@ -68,6 +68,10 @@ export const SearchResultsProvider: React.FC<{
   );
   const [yearLte] = useQueryState("year_lte", searchLikePageParams["year_lte"]);
   const [yearGte] = useQueryState("year_gte", searchLikePageParams["year_gte"]);
+  const [searchOn] = useQueryState(
+    "search_on",
+    searchLikePageParams["search_on"]
+  );
   const [page, setPage] = useQueryState("page", searchLikePageParams["page"]);
 
   useEffectAfterCurrentPageMount(() => {
@@ -83,6 +87,7 @@ export const SearchResultsProvider: React.FC<{
     departments,
     advisors,
     authors,
+    searchOn,
   ]);
 
   const queryKey = getSearchThesesQueryKey({
@@ -95,6 +100,7 @@ export const SearchResultsProvider: React.FC<{
     thesis_types: thesisTypes,
     year_gte: yearGte,
     year_lte: yearLte,
+    search_on: searchOn,
     hits_per_page: HITS_PER_PAGE_DEFAULT,
     attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
     attributes_to_retrieve: undefined,
@@ -116,6 +122,7 @@ export const SearchResultsProvider: React.FC<{
         sort: undefined,
         hits_per_page: HITS_PER_PAGE_DEFAULT,
         page: page,
+        search_on: searchOn,
         attributes_to_not_retrieve: [
           "abstract_original",
           "abstract_translated",
@@ -139,6 +146,7 @@ export const SearchResultsProvider: React.FC<{
       thesis_types: thesisTypes,
       year_gte: yearGte,
       year_lte: yearLte,
+      search_on: searchOn,
       hits_per_page: HITS_PER_PAGE_BULK,
       attributes_to_not_retrieve: undefined,
       attributes_to_retrieve: undefined,

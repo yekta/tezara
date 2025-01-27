@@ -1,7 +1,7 @@
 import {
   PAGE_DEFAULT,
   TSearchLikePageParamsSearchProps,
-} from "@/components/search/constants/shared";
+} from "@/components/search/constants";
 import {
   allThesisAttributes,
   TThesisAttribute,
@@ -40,6 +40,7 @@ export async function searchTheses({
   page = PAGE_DEFAULT,
   attributes_to_retrieve,
   attributes_to_not_retrieve,
+  search_on,
 }: {
   sort: string[] | undefined;
   hits_per_page: number | undefined;
@@ -143,12 +144,38 @@ export async function searchTheses({
   const _sort =
     sort && sort.length > 0 ? sort : !q ? ["year:desc", "id:desc"] : undefined;
 
+  const attributesToSearchOn = [];
+  if (search_on?.length > 0) {
+    if (search_on.includes("title")) {
+      attributesToSearchOn.push("title_original");
+      attributesToSearchOn.push("title_translated");
+    }
+    if (search_on.includes("abstract")) {
+      attributesToSearchOn.push("abstract_original");
+      attributesToSearchOn.push("abstract_translated");
+    }
+    if (search_on.includes("subjects")) {
+      attributesToSearchOn.push("subjects");
+    }
+    if (search_on.includes("keywords")) {
+      attributesToSearchOn.push("keywords");
+    }
+    if (search_on.includes("author")) {
+      attributesToSearchOn.push("author");
+    }
+    if (search_on.includes("advisors")) {
+      attributesToSearchOn.push("advisors");
+    }
+  }
+
   const result = await index.search(q, {
     filter: filter ?? undefined,
     hitsPerPage: hits_per_page,
     page,
     sort: _sort,
     attributesToRetrieve: attributes_to_retrieve,
+    attributesToSearchOn:
+      attributesToSearchOn.length > 0 ? attributesToSearchOn : undefined,
   });
   return result;
 }
