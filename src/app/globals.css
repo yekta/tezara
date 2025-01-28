@@ -24,6 +24,11 @@ button:focus {
   font-family: var(--font-sans);
 }
 
+.font-icon {
+  font-family: var(--font-icon);
+  font-weight: 400;
+}
+
 .font-currency {
   font-family: var(--font-currency);
 }
@@ -185,6 +190,67 @@ input[type="search"] {
     --opacity-shadow: 0.75;
   }
 }
+
+.icon-calendar:before {
+  content: "\e800";
+} /* '' */
+.icon-csv:before {
+  content: "\e801";
+} /* '' */
+.icon-trophy:before {
+  content: "\e802";
+} /* '' */
+.icon-syringe:before {
+  content: "\e803";
+} /* '' */
+.icon-user:before {
+  content: "\e804";
+} /* '' */
+.icon-key-round:before {
+  content: "\e805";
+} /* '' */
+.icon-teeth:before {
+  content: "\e806";
+} /* '' */
+.icon-scroll-text:before {
+  content: "\e807";
+} /* '' */
+.icon-user-pen:before {
+  content: "\e808";
+} /* '' */
+.icon-test-tube-diagonal:before {
+  content: "\e809";
+} /* '' */
+.icon-pdf-x:before {
+  content: "\e80a";
+} /* '' */
+.icon-pen-tool:before {
+  content: "\e80b";
+} /* '' */
+.icon-pill:before {
+  content: "\e80c";
+} /* '' */
+.icon-brush:before {
+  content: "\e80d";
+} /* '' */
+.icon-landmark:before {
+  content: "\e80e";
+} /* '' */
+.icon-globe:before {
+  content: "\e80f";
+} /* '' */
+.icon-pdf:before {
+  content: "\e810";
+} /* '' */
+.icon-folder-closed:before {
+  content: "\e811";
+} /* '' */
+.icon-graduation-cap:before {
+  content: "\e812";
+} /* '' */
+.icon-building:before {
+  content: "\e813";
+} /* '' */
 
 @layer base {
   * {

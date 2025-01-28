@@ -28,6 +28,11 @@ const mono = localFont({
   variable: "--font-mono",
   weight: "100 900",
 });
+const icon = localFont({
+  src: "./fonts/Icons.woff2",
+  variable: "--font-icon",
+  weight: "400",
+});
 
 const title = `${siteTitle} | ${siteTagline}`;
 
@@ -60,7 +65,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${sans.variable} ${mono.variable} w-full flex flex-col min-h-[100svh] relative items-center bg-background text-foreground antialiased break-words`}
+        className={`${sans.variable} ${mono.variable} ${icon.variable} w-full flex flex-col min-h-[100svh] relative items-center bg-background text-foreground antialiased break-words`}
       >
         <Providers>
           <TopLoader />

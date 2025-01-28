@@ -1,15 +1,9 @@
 "use client";
 
-import BuildingIcon from "@/components/icons/building";
-import CalendarIcon from "@/components/icons/calendar";
-import LandmarkIcon from "@/components/icons/landmark";
 import LanguageIcon from "@/components/icons/language";
-import PenToolIcon from "@/components/icons/pen-tool";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
-import ThesisTypeIcon, {
-  getThesisTypeColorClassName,
-} from "@/components/icons/sets/thesis-type";
-import UserPenIcon from "@/components/icons/user-pen";
+import { getThesisTypeColorClassName } from "@/components/icons/sets/thesis-type";
+import ThesisTypeIconWithFont from "@/components/icons/sets/thesis-type-with-font";
 import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { cleanAdvisors, getThesisRowId } from "@/components/search/helpers";
 import {
@@ -22,6 +16,7 @@ import { previousPathAtom } from "@/lib/store/main";
 import { TThesis } from "@/server/meili/types";
 import { useSetAtom } from "jotai";
 import Link, { LinkProps } from "next/link";
+import { ReactNode } from "react";
 
 type Props =
   | (
@@ -129,7 +124,7 @@ export default function ThesisRow({
           </Button>
         )}
       </div>
-      <div className="flex-1 min-w-0 flex flex-col items-start -mt-1 sm:-mt-0.5">
+      <div className="w-full min-w-0 flex flex-col items-start -mt-1 sm:-mt-0.5">
         {isPlaceholder ? (
           <div className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight bg-foreground text-transparent animate-skeleton py-0.5 rounded-md">
             Başlık yükleniyor................................
@@ -153,44 +148,29 @@ export default function ThesisRow({
             ? "Başlık çevirisi yükleniyor..."
             : thesis.title_translated || noTranslatedTitle}
         </p>
-        <div className="w-full flex mt-2 justify-start items-center gap-1">
-          {!isPlaceholder && thesis.author && (
-            <PenToolIcon className="size-4 shrink-0" />
-          )}
-          <p
-            className="shrink min-w-0 text-base leading-snug
-              group-data-[placeholder]/row:text-transparent
-              group-data-[placeholder]/row:bg-muted-foreground
-              group-data-[placeholder]/row:animate-skeleton
-              group-data-[placeholder]/row:rounded-md"
-          >
-            {isPlaceholder ? "Yazar yükleniyor..." : thesis.author || noAuthor}
-          </p>
-        </div>
+        <p
+          className="w-full mt-2 min-w-0 text-base leading-snug group-data-[placeholder]/row:text-transparent
+          group-data-[placeholder]/row:bg-muted-foreground group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:rounded-md"
+        >
+          <span className="font-icon icon-pen-tool mr-1" />
+          {isPlaceholder ? "Yazar yükleniyor..." : thesis.author || noAuthor}
+        </p>
         {/* Chips */}
         <div className="w-full flex flex-wrap mt-3 gap-1.5">
-          <div
-            className={cn(
-              "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1",
-              "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground",
-              getThesisTypeColorClassName({
-                variant: isPlaceholder ? null : thesis.thesis_type,
-              })
-            )}
+          <p
+            className={`${getThesisTypeColorClassName({
+              variant: isPlaceholder ? null : thesis.thesis_type,
+            })} px-2 py-1 rounded-full shrink min-w-0 border group-data-[placeholder]/row:animate-skeleton 
+            group-data-[placeholder]/row:bg-muted-more-foreground text-sm leading-none font-medium group-data-[placeholder]/row:text-transparent`}
           >
             {!isPlaceholder && (
-              <ThesisTypeIcon
+              <ThesisTypeIconWithFont
                 variant={thesis.thesis_type}
-                className="size-3.5 -ml-0.5 -my-2 shrink-0"
+                className="-ml-0.5 font-normal mr-1"
               />
             )}
-            <p
-              className="shrink min-w-0 text-sm leading-none font-medium
-              group-data-[placeholder]/row:text-transparent"
-            >
-              {isPlaceholder ? "Yükleniyor..." : thesis.thesis_type}
-            </p>
-          </div>
+            {isPlaceholder ? "Yükleniyor..." : thesis.thesis_type}
+          </p>
           <div
             className={cn(
               "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
@@ -200,7 +180,7 @@ export default function ThesisRow({
             {!isPlaceholder && (
               <LanguageIcon
                 variant={thesis.language}
-                className="size-3.5 -ml-0.75 -my-2 rounded-full overflow-hidden shrink-0"
+                className="size-4 -ml-1 -my-3 rounded-full overflow-hidden shrink-0"
               />
             )}
             <p
@@ -210,117 +190,59 @@ export default function ThesisRow({
               {isPlaceholder ? "Yükleniyor..." : thesis.language}
             </p>
           </div>
-          <div
-            className={cn(
-              "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-              "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground"
-            )}
-          >
-            {!isPlaceholder && (
-              <CalendarIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
-            )}
-            <p
-              className="shrink min-w-0 text-sm leading-none font-medium
-              group-data-[placeholder]/row:text-transparent"
-            >
-              {isPlaceholder ? "Yükleniyor..." : thesis.year}
-            </p>
-          </div>
-          {isPlaceholder ? (
-            <div
-              className={cn(
-                "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-                "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground",
-                minButtonSizeEnforcerClassName
-              )}
-            >
-              <p
-                className="shrink min-w-0 text-sm leading-none font-medium
-                group-data-[placeholder]/row:text-transparent"
-              >
-                Yükleniyor...
-              </p>
-            </div>
-          ) : disableUniversityLink ? (
-            <div
-              className="px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center 
-              gap-1 bg-foreground/8 border-foreground/12 text-foreground"
-            >
-              <LandmarkIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
-              <p className="shrink min-w-0 text-sm leading-none font-medium">
-                {thesis.university}
-              </p>
-            </div>
+          <Chip classNameIcon="icon-calendar">
+            {isPlaceholder ? "Yükleniyor..." : thesis.year}
+          </Chip>
+          {isPlaceholder || disableUniversityLink ? (
+            <Chip classNameIcon="icon-landmark">
+              {isPlaceholder ? "Yükleniyor..." : thesis.university}
+            </Chip>
           ) : (
             <Link
               prefetch={false}
               href={`/university/${thesis.university}`}
               onClick={setPrevious}
-              className={cn(
-                "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-                "not-touch:hover:bg-foreground/16 active:bg-foreground/16",
-                "focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                minButtonSizeEnforcerClassName
-              )}
+              className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-full z-0 relative shrink min-w-0 border bg-foreground/8 
+                border-foreground/12 text-foreground not-touch:hover:bg-foreground/16 active:bg-foreground/16
+                focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background text-sm leading-none font-medium`}
             >
-              <LandmarkIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
-              <p className="shrink min-w-0 text-sm leading-none font-medium">
-                {thesis.university}
-              </p>
+              <span className="font-icon icon-landmark -ml-0.5 mr-1" />
+              {thesis.university}
             </Link>
           )}
-          {thesis?.department &&
-            (isPlaceholder ? (
-              <div
-                className={cn(
-                  "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-                  "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground",
-                  minButtonSizeEnforcerClassName
-                )}
-              >
-                <p
-                  className="shrink min-w-0 text-sm leading-none font-medium
-                  group-data-[placeholder]/row:text-transparent"
-                >
-                  Yükleniyor...
-                </p>
-              </div>
-            ) : (
-              <div
-                className={cn(
-                  "px-2 py-1 rounded-full z-0 relative shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-                  minButtonSizeEnforcerClassName
-                )}
-              >
-                <BuildingIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
-                <p className="shrink min-w-0 text-sm leading-none font-medium">
-                  {thesis.department}
-                </p>
-              </div>
-            ))}
+          {(isPlaceholder || thesis?.department) && (
+            <Chip classNameIcon="icon-building">
+              {isPlaceholder ? "Yükleniyor..." : thesis.department}
+            </Chip>
+          )}
           {cleanAdvisors(thesis?.advisors || ["Yükleniyor..."]).map(
             (advisor, index) => (
-              <div
-                key={`${advisor}-${index}`}
-                className={cn(
-                  "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
-                  "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground"
-                )}
-              >
-                {!isPlaceholder && (
-                  <UserPenIcon className="size-3.5 -ml-0.75 -my-2 shrink-0" />
-                )}
-                <p
-                  className="shrink min-w-0 text-sm leading-none font-medium
-                  group-data-[placeholder]/row:text-transparent"
-                >
-                  {advisor}
-                </p>
-              </div>
+              <Chip classNameIcon="icon-user-pen" key={`${advisor}-${index}`}>
+                {advisor}
+              </Chip>
             )
           )}
         </div>
       </div>
     </li>
+  );
+}
+
+function Chip({
+  classNameIcon,
+  children,
+}: {
+  classNameIcon: string;
+  children: ReactNode;
+}) {
+  return (
+    <p
+      className="px-2 py-1 rounded-full shrink min-w-0 border bg-foreground/8 border-foreground/12 
+      text-foreground group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground
+      text-sm leading-none font-medium group-data-[placeholder]/row:text-transparent"
+    >
+      <span className={`${classNameIcon} font-icon -ml-0.5 mr-1`} />
+      {children}
+    </p>
   );
 }

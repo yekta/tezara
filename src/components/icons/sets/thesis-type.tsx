@@ -10,7 +10,7 @@ import { ComponentProps } from "react";
 
 const defaultClassName = "size-5 shrink-0";
 
-type TVariant =
+export type TVariant =
   | "Yüksek Lisans"
   | "Doktora"
   | "Tıpta Uzmanlık"

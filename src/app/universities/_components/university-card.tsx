@@ -1,17 +1,10 @@
 import { universitiesRoute } from "@/app/universities/constants/main";
 import getUniversityCardId from "@/app/universities/helpers";
-import CalendarIcon from "@/components/icons/calendar";
-import FolderClosedIcon from "@/components/icons/folder-closed";
-import GlobeIcon from "@/components/icons/globe";
-import KeyRoundIcon from "@/components/icons/key-round";
-import LandmarkIcon from "@/components/icons/landmark";
-import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { Button, LinkButton } from "@/components/ui/button";
 import { previousPathAtom } from "@/lib/store/main";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 import { useSetAtom } from "jotai";
-import { FC } from "react";
 
 type TUniversityCardProps =
   | {
@@ -55,19 +48,14 @@ export default function UniversityCard({
         fadeOnDisabled={false}
         className="w-full min-h-48 active:bg-background-hover not-touch:hover:bg-background-hover flex flex-col gap-6 rounded-xl px-4 pt-3.5 pb-4 items-start justify-start"
       >
-        <div className="w-full flex-1 flex items-start justify-start gap-1.5">
-          <LandmarkIcon
-            className="size-4 inline shrink-0 -ml-0.25 mt-0.5 group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
-            group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
-          />
-          <h2
-            className="shrink min-w-0 text-left text-balance leading-tight font-bold
-              group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
-              group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
-          >
-            {isPlaceholder ? "İstanbul Üniversitesi" : university.name}
-          </h2>
-        </div>
+        <h2
+          className="w-full flex-1 shrink min-w-0 text-left text-balance leading-tight font-bold
+          group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
+          group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
+        >
+          <span className="font-icon icon-landmark mr-1 -ml-0.25" />
+          {isPlaceholder ? "İstanbul Üniversitesi" : university.name}
+        </h2>
         <div className="w-full text-sm gap-2 flex flex-wrap">
           <Stat
             value={
@@ -76,28 +64,28 @@ export default function UniversityCard({
                 : `${university.year_start}-${university.year_end}`
             }
             label="Tez Yılları"
-            Icon={CalendarIcon}
+            classNameIcon="icon-calendar"
             hideLabel
           />
           <Stat
             value={isPlaceholder ? 1000 : university.thesis_count}
             label="Tez"
-            Icon={ScrollTextIcon}
+            classNameIcon="icon-scroll-text"
           />
           <Stat
             value={isPlaceholder ? 8 : university.language_count}
             label="Dil"
-            Icon={GlobeIcon}
+            classNameIcon="icon-globe"
           />
           <Stat
             value={isPlaceholder ? 100 : university.subject_count_turkish}
             label="Konu"
-            Icon={FolderClosedIcon}
+            classNameIcon="icon-folder-closed"
           />
           <Stat
             value={isPlaceholder ? 1000 : university.keyword_count_turkish}
             label="Anahtar Kelime"
-            Icon={KeyRoundIcon}
+            classNameIcon="icon-key-round"
           />
         </div>
       </Component>
@@ -108,30 +96,23 @@ export default function UniversityCard({
 function Stat({
   value,
   label,
-  Icon,
+  classNameIcon,
   hideLabel,
 }: {
   value: number | string;
   label: string;
-  Icon: FC<{ className?: string }>;
+  classNameIcon: string;
   hideLabel?: boolean;
 }) {
   return (
-    <div
+    <p
       aria-label={label}
-      className="flex shrink pr-1.5 min-w-0 items-center gap-0.75 leading-tight text-muted-foreground"
+      className="shrink min-w-0 pr-1.5 items-center leading-tight text-muted-foreground font-bold text-left group-data-[placeholder]/item:animate-skeleton 
+      group-data-[placeholder]/item:text-transparent group-data-[placeholder]/item:bg-muted-foreground group-data-[placeholder]/item:rounded"
     >
-      <Icon
-        className="inline size-3.5 shrink-0 group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
-        group-data-[placeholder]/item:bg-muted-foreground group-data-[placeholder]/item:rounded"
-      />
-      <p
-        className="font-bold shrink min-w-0 text-left group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
-        group-data-[placeholder]/item:bg-muted-foreground group-data-[placeholder]/item:rounded"
-      >
-        {typeof value === "number" ? value.toLocaleString() : value}
-        {!hideLabel && <span className="font-medium"> {label}</span>}
-      </p>
-    </div>
+      <span className={`${classNameIcon} font-icon mr-0.75`} />
+      {typeof value === "number" ? value.toLocaleString() : value}
+      {!hideLabel && <span className="font-medium">{` ${label}`}</span>}
+    </p>
   );
 }
