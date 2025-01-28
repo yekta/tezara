@@ -43,7 +43,7 @@ const noTitle = "Başlık Yok";
 const noTranslatedTitle = "Başlık çevirisi yok";
 const noAuthor = "Yazar Bilgisi Yok";
 
-export default function ThesisSearchResultRow_({
+export default function ThesisRow({
   thesis,
   isPlaceholder,
   className,

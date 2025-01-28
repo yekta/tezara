@@ -5,7 +5,7 @@ import PopularSubjectsChart from "@/app/university/[name]/_components/popular-su
 import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";
 import ThesisTypesChart from "@/app/university/[name]/_components/thesis-types-chart";
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
-import ThesisSearchResultRowList from "@/components/search/results/thesis-search-result-row-list";
+import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
@@ -183,7 +183,7 @@ export default async function Page({ params }: Props) {
       </div>
       <div className="w-full flex flex-col pt-8">
         <h2 className="font-bold px-4 text-xl">Son 10 Tez</h2>
-        <ThesisSearchResultRowList
+        <ThesisRowList
           data={lastThesesRes}
           className="w-full flex flex-col px-3 pt-4"
           classNameRow="first-of-type:border-t last-of-type:border-b"

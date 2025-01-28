@@ -1,6 +1,6 @@
 "use client";
 
-import ThesisSearchResultRow from "@/components/search/results/thesis-search-result-row";
+import ThesisRow from "@/components/search/results/thesis-row";
 import { cn } from "@/components/ui/utils";
 import { TSearchThesesResult } from "@/server/meili/repo/thesis";
 import { usePathname } from "next/navigation";
@@ -12,7 +12,7 @@ type Props = {
   data: TSearchThesesResult | undefined;
 };
 
-export default function ThesisSearchResultRowList({
+export default function ThesisRowList({
   data,
   disableUniversityLink,
   className,
@@ -23,7 +23,7 @@ export default function ThesisSearchResultRowList({
     <ol className={cn("w-full flex-1 flex flex-col", className)}>
       {data
         ? data.hits.map((i, index) => (
-            <ThesisSearchResultRow
+            <ThesisRow
               className={classNameRow}
               pagePathname={pathname}
               disableUniversityLink={disableUniversityLink}
@@ -32,7 +32,7 @@ export default function ThesisSearchResultRowList({
             />
           ))
         : Array.from({ length: 20 }).map((i, index) => (
-            <ThesisSearchResultRow
+            <ThesisRow
               className={classNameRow}
               pagePathname={pathname}
               disableUniversityLink={disableUniversityLink}

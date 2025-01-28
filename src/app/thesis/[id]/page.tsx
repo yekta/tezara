@@ -1,7 +1,7 @@
 import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
 import GoBackBar from "@/app/thesis/[id]/go-back-bar";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
-import ThesisSearchResultRowList from "@/components/search/results/thesis-search-result-row-list";
+import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
@@ -292,7 +292,7 @@ export default async function Page({ params }: Props) {
       {similarTheses && (
         <div id="similar_theses_section" className="w-full flex flex-col">
           <h3 className="font-bold text-xl">Benzer Tezler</h3>
-          <ThesisSearchResultRowList
+          <ThesisRowList
             data={similarTheses}
             className="w-full flex flex-col pt-4"
             classNameRow="first-of-type:border-t last-of-type:border-b"

@@ -4,7 +4,7 @@ import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import PaginationBar from "@/components/navigation/pagination-bar";
 import { formatForDownload } from "@/components/search/format-for-download";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
-import ResultsSection from "@/components/search/results/thesis-search-result-row-list";
+import ResultsSection from "@/components/search/results/thesis-row-list";
 import { Button } from "@/components/ui/button";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { Parser } from "@json2csv/plainjs";
