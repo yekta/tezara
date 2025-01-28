@@ -30,13 +30,19 @@ export default async function Page({ params }: Props) {
   let similarTheses: Awaited<ReturnType<typeof searchTheses>> | null = null;
 
   try {
+    const start = performance.now();
     thesis = await getThesis({ id: idNumber, client: meiliAdmin });
+    const end = performance.now();
+    console.log(
+      `/thesis/[id]:getThesis(${idNumber}) | ${Math.round(end - start)}ms`
+    );
   } catch (error) {
     console.error(`Failed to fetch thesis ID: ${idNumber}`, error);
     return notFound();
   }
   if (!thesis) return notFound();
 
+  const start = performance.now();
   try {
     similarTheses = await searchTheses({
       q: thesis.title_original || thesis.title_translated || "",
@@ -62,6 +68,10 @@ export default async function Page({ params }: Props) {
   } catch (error) {
     console.log("Failed to fetch similar theses.", error);
   }
+  const end = performance.now();
+  console.log(
+    `/thesis/[id]:getSimilarTheses(${idNumber}) | ${Math.round(end - start)}ms`
+  );
 
   const noAbstractText = "Özet yok.";
   const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
