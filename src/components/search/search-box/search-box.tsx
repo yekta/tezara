@@ -49,7 +49,7 @@ export default function SearchBox({
 
   const pushToSearch = async (q: string) => {
     const params = new URLSearchParams(window.location.search);
-    params.set("q", q);
+    if (q) params.set("q", q);
     const paramStr = params.toString();
     await asyncPush(`${searchRoute}${paramStr ? `?${paramStr}` : ""}`);
   };
