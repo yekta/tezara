@@ -119,23 +119,29 @@ export default async function Page({ params }: Props) {
         </Button> */}
       </div>
       {/* Details */}
-      <div id="details" className="w-full flex flex-col text-sm pt-4">
-        <Divider />
-        <p id="thesis_id_section" className="leading-snug">
+      <ol id="details" className="w-full flex flex-col text-sm pt-6">
+        <li
+          id="thesis_id_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Tez No: </span>
           <span className="font-bold" id="thesis_id">
             {thesis.id}
           </span>
-        </p>
-        <Divider />
-        <p id="author_section" className="leading-snug">
+        </li>
+        <li
+          id="author_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Yazar: </span>
           <span className="font-bold" id="author_name">
             {thesis.author}
           </span>
-        </p>
-        <Divider />
-        <p id="advisor_names_section" className="leading-snug">
+        </li>
+        <li
+          id="advisor_names_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">
             Danışmanlar:{" "}
           </span>
@@ -144,16 +150,20 @@ export default async function Page({ params }: Props) {
               ? notAvailable
               : thesis.advisors.map((advisor) => advisor).join(", ")}
           </span>
-        </p>
-        <Divider />
-        <p id="thesis_type_section" className="leading-snug">
+        </li>
+        <li
+          id="thesis_type_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Tez Türü: </span>
           <span className="font-bold" id="thesis_type">
             {thesis.thesis_type || notAvailable}
           </span>
-        </p>
-        <Divider />
-        <p id="subjects_section" className="leading-snug">
+        </li>
+        <li
+          id="subjects_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Konular: </span>
           <span className="font-bold" id="advisor_names">
             {thesis.subjects && thesis.subjects.length > 1
@@ -169,9 +179,11 @@ export default async function Page({ params }: Props) {
                   .join(", ")
               : notAvailable}
           </span>
-        </p>
-        <Divider />
-        <p id="keywords_section" className="leading-snug">
+        </li>
+        <li
+          id="keywords_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">
             Anahtar Kelimeler:{" "}
           </span>
@@ -189,68 +201,81 @@ export default async function Page({ params }: Props) {
                   .join(", ")
               : notAvailable}
           </span>
-        </p>
-        <Divider />
-        <p id="year_section" className="leading-snug">
+        </li>
+        <li
+          id="year_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Yıl: </span>
           <span className="font-bold" id="year">
             {thesis.year}
           </span>
-        </p>
-        <Divider />
-        <p id="language_section" className="leading-snug">
+        </li>
+        <li
+          id="language_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Dil: </span>
           <span className="font-bold" id="language_name">
             {thesis.language}
           </span>
-        </p>
-        <Divider />
-        <p id="university_section" className="leading-snug">
+        </li>
+        <li
+          id="university_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">
             Üniversite:{" "}
           </span>
           <span className="font-bold" id="university_name">
             {thesis.university}
           </span>
-        </p>
-        <Divider />
-        <p id="institute_section" className="leading-snug">
+        </li>
+        <li
+          id="institute_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">Enstitü: </span>
           <span className="font-bold" id="institute_name">
             {thesis.institute || notAvailable}
           </span>
-        </p>
-        <Divider />
-        <p id="department_section" className="leading-snug">
+        </li>
+        <li
+          id="department_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">
             Ana Bilim Dalı:{" "}
           </span>
           <span className="font-bold" id="department_name">
             {thesis.department || notAvailable}
           </span>
-        </p>
-        <Divider />
-        <p id="branch_section" className="leading-snug">
+        </li>
+        <li
+          id="branch_section"
+          className="leading-snug py-2 border-t border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">
             Bilim Dalı:{" "}
           </span>
           <span className="font-bold" id="branch_name">
             {thesis.branch || notAvailable}
           </span>
-        </p>
-        <Divider />
-        <p id="page_count_section" className="leading-snug">
+        </li>
+        <li
+          id="page_count_section"
+          className="leading-snug py-2 border-t border-b border-foreground/10"
+        >
           <span className="font-medium text-muted-foreground">
             Sayfa Sayısı:{" "}
           </span>
           <span className="font-bold" id="page_count">
             {thesis.page_count || notAvailable}
           </span>
-        </p>
-        <Divider />
-      </div>
+        </li>
+      </ol>
       {/* Abstract */}
-      <div id="abstract_section" className="pt-6">
+      <div id="abstract_section" className="pt-8">
         <h3 className="font-bold text-xl">Özet</h3>
         <p id="abstract" className="pt-3 text-lg">
           {thesis.abstract_original || noAbstractText}
