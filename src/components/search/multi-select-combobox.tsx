@@ -130,9 +130,9 @@ export default function MultiSelectCombobox({
               onClick={onClearButtonClick}
               variant="warning-outline"
               type="button"
-              className="flex px-2.5 rounded-lg rounded-l-none  justify-start gap-1.5 py-2 text-warning"
+              className="w-9.5 h-full p-0 overflow-hidden flex items-center justify-center rounded-lg rounded-l-none gap-1.5 text-warning"
             >
-              <BroomIcon className="size-4 -my-1" />
+              <BroomIcon className="size-5" />
             </Button>
           </div>
         )}
