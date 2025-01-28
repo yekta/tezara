@@ -110,22 +110,25 @@ export default function SearchBox({
   }, [isTouchScreen]);
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className={cn("w-full group/form flex flex-col items-center", className)}
-    >
-      <SearchInput variant={variant} isPendingPush={isPendingPush} />
-      <div className="w-full flex flex-col items-center group pt-3">
-        <ButtonsSection isPendingPush={isPendingPush} />
-        <SearchLikePageQueryParamsProvider>
+    <SearchLikePageQueryParamsProvider>
+      <form
+        onSubmit={onSubmit}
+        className={cn(
+          "w-full group/form flex flex-col items-center",
+          className
+        )}
+      >
+        <SearchInput variant={variant} isPendingPush={isPendingPush} />
+        <div className="w-full flex flex-col items-center group pt-3">
+          <ButtonsSection isPendingPush={isPendingPush} />
           <AdvancedFiltersSection
             className="pt-2"
             universitiesData={universitiesData}
             languagesData={languagesData}
             thesisTypesData={thesisTypesData}
           />
-        </SearchLikePageQueryParamsProvider>
-      </div>
-    </form>
+        </div>
+      </form>
+    </SearchLikePageQueryParamsProvider>
   );
 }
