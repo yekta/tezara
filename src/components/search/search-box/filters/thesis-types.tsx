@@ -1,15 +1,11 @@
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
-import {
-  searchLikePageParamKeys,
-  searchLikePageParamParsers,
-} from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useMemo } from "react";
 
@@ -18,10 +14,7 @@ type Props = {
 };
 
 export default function ThesisTypesField({ thesisTypesData }: Props) {
-  const [thesisTypes, setThesisTypes] = useQueryState(
-    searchLikePageParamKeys.thesis_types,
-    searchLikePageParamParsers.thesis_types
-  );
+  const [thesisTypes, setThesisTypes] = useSearchLikePageParam.thesis_types();
 
   const umami = useUmami();
   const posthog = usePostHog();

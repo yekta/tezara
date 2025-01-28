@@ -1,19 +1,15 @@
 import { SearchIcon } from "@/components/icons/search-icon";
-import {
-  searchLikePageParamKeys,
-  searchLikePageParamParsers,
-} from "@/components/search/constants";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import {
   focusToMainInput,
   mainSearchInputId,
 } from "@/components/search/search-box/helpers";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { LoaderIcon, XIcon } from "lucide-react";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
@@ -29,10 +25,7 @@ export default function SearchInput({
   variant,
   isPendingPush,
 }: Props) {
-  const [query, setQuery] = useQueryState(
-    searchLikePageParamKeys.q,
-    searchLikePageParamParsers.q
-  );
+  const [query, setQuery] = useSearchLikePageParam.q();
   const debouncedSetQueryQP = useDebounceCallback(setQuery, 150);
   const [queryInputValue, setQueryInputValue] = useState(query);
 

@@ -1,15 +1,11 @@
 import GlobeIcon from "@/components/icons/globe";
 import LanguageIcon from "@/components/icons/language";
-import {
-  searchLikePageParamKeys,
-  searchLikePageParamParsers,
-} from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useMemo } from "react";
 
@@ -18,10 +14,7 @@ type Props = {
 };
 
 export default function LanguagesField({ languagesData }: Props) {
-  const [languages, setLanguages] = useQueryState(
-    searchLikePageParamKeys.languages,
-    searchLikePageParamParsers.languages
-  );
+  const [languages, setLanguages] = useSearchLikePageParam.languages();
 
   const umami = useUmami();
   const posthog = usePostHog();

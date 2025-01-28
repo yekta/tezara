@@ -69,11 +69,11 @@ export type TSearchLikePageParamParsers = inferParserType<
   typeof searchLikePageParamParsers
 >;
 
-type TSearchLikPageParamKeys = keyof TSearchLikePageParamParsers;
+export type TSearchLikePageParamKeys = keyof TSearchLikePageParamParsers;
 
 export const searchLikePageParamKeys = Object.fromEntries(
   Object.entries(searchLikePageParamParsers).map(([key]) => [key, key])
-) as Record<TSearchLikPageParamKeys, TSearchLikPageParamKeys>;
+) as Record<TSearchLikePageParamKeys, TSearchLikePageParamKeys>;
 
 export type TSearchLikePageParamsSearchProps = Omit<
   TSearchLikePageParamParsers,

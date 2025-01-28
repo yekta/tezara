@@ -1,8 +1,4 @@
 import BuildingIcon from "@/components/icons/building";
-import {
-  searchLikePageParamParsers,
-  searchLikePageParamKeys,
-} from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
@@ -10,20 +6,17 @@ import {
   isNonEmpty,
   optionsPlaceholder,
 } from "@/components/search/search-box/filters/helpers";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import useDebounceIf from "@/lib/hooks/use-debounce-if";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { meili } from "@/server/meili/constants-client";
 import { searchDepartments } from "@/server/meili/repo/department";
 import { useQuery } from "@tanstack/react-query";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useMemo } from "react";
 
 export default function DepartmentsField() {
-  const [departments, setDepartments] = useQueryState(
-    searchLikePageParamKeys.departments,
-    searchLikePageParamParsers.departments
-  );
+  const [departments, setDepartments] = useSearchLikePageParam.departments();
   const [queryDepartments, setQueryDepartments, debouncedQueryDepartments] =
     useDebounceIf("", isNonEmpty, 150);
 

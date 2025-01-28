@@ -1,54 +1,23 @@
 import BroomIcon from "@/components/icons/broom";
-import {
-  searchLikePageParamKeys,
-  searchLikePageParamParsers,
-} from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { Button } from "@/components/ui/button";
 import { yearGteKeyAtom, yearLteKeyAtom } from "@/lib/store/main";
 import { useSetAtom } from "jotai";
-import { useQueryState } from "nuqs";
 import { useMemo } from "react";
 
 const clearButtonText = "Temizle";
 
 export default function ClearFiltersButton() {
-  const [languages, setLanguages] = useQueryState(
-    searchLikePageParamKeys.languages,
-    searchLikePageParamParsers.languages
-  );
-  const [universities, setUniversities] = useQueryState(
-    searchLikePageParamKeys.universities,
-    searchLikePageParamParsers.universities
-  );
-  const [departments, setDepartments] = useQueryState(
-    searchLikePageParamKeys.departments,
-    searchLikePageParamParsers.departments
-  );
-  const [advisors, setAdvisors] = useQueryState(
-    searchLikePageParamKeys.advisors,
-    searchLikePageParamParsers.advisors
-  );
-  const [authors, setAuthors] = useQueryState(
-    searchLikePageParamKeys.authors,
-    searchLikePageParamParsers.authors
-  );
-  const [thesisTypes, setThesisTypes] = useQueryState(
-    searchLikePageParamKeys.thesis_types,
-    searchLikePageParamParsers.thesis_types
-  );
-  const [yearGte, setYearsGte] = useQueryState(
-    searchLikePageParamKeys.year_gte,
-    searchLikePageParamParsers.year_gte
-  );
-  const [yearLte, setYearLte] = useQueryState(
-    searchLikePageParamKeys.year_lte,
-    searchLikePageParamParsers.year_lte
-  );
-  const [searchOn, setSearchOn] = useQueryState(
-    searchLikePageParamKeys.search_on,
-    searchLikePageParamParsers.search_on
-  );
+  const [languages, setLanguages] = useSearchLikePageParam.languages();
+  const [universities, setUniversities] = useSearchLikePageParam.universities();
+  const [departments, setDepartments] = useSearchLikePageParam.departments();
+  const [advisors, setAdvisors] = useSearchLikePageParam.advisors();
+  const [authors, setAuthors] = useSearchLikePageParam.authors();
+  const [thesisTypes, setThesisTypes] = useSearchLikePageParam.thesis_types();
+  const [yearGte, setYearsGte] = useSearchLikePageParam.year_gte();
+  const [yearLte, setYearLte] = useSearchLikePageParam.year_lte();
+  const [searchOn, setSearchOn] = useSearchLikePageParam.search_on();
 
   const totalSelectedFilters = useMemo(() => {
     let total = 0;

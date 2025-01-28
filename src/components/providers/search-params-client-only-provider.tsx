@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useRef,
+  useMemo,
 } from "react";
 
 type TSearchParamsClientOnlyContext = {
@@ -43,10 +44,13 @@ export function SearchParamsClientOnlyProvider({
     return () => observer.disconnect();
   }, []);
 
+  const value = useMemo(
+    () => ({ searchParams, searchParamsString }),
+    [searchParams, searchParamsString]
+  );
+
   return (
-    <SearchParamsClientOnlyContext.Provider
-      value={{ searchParams, searchParamsString }}
-    >
+    <SearchParamsClientOnlyContext.Provider value={value}>
       {children}
     </SearchParamsClientOnlyContext.Provider>
   );

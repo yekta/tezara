@@ -7,6 +7,7 @@ import {
   focusToMainInput,
   mainSearchInputId,
 } from "@/components/search/search-box/helpers";
+import { SearchLikePageQueryParamsProvider } from "@/components/search/search-box/query-param-provider";
 import SearchInput from "@/components/search/search-box/search-input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
@@ -116,12 +117,14 @@ export default function SearchBox({
       <SearchInput variant={variant} isPendingPush={isPendingPush} />
       <div className="w-full flex flex-col items-center group pt-3">
         <ButtonsSection isPendingPush={isPendingPush} />
-        <AdvancedFiltersSection
-          className="pt-2"
-          universitiesData={universitiesData}
-          languagesData={languagesData}
-          thesisTypesData={thesisTypesData}
-        />
+        <SearchLikePageQueryParamsProvider>
+          <AdvancedFiltersSection
+            className="pt-2"
+            universitiesData={universitiesData}
+            languagesData={languagesData}
+            thesisTypesData={thesisTypesData}
+          />
+        </SearchLikePageQueryParamsProvider>
       </div>
     </form>
   );

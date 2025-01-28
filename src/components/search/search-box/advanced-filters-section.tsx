@@ -1,7 +1,3 @@
-import {
-  searchLikePageParamKeys,
-  searchLikePageParamParsers,
-} from "@/components/search/constants";
 import AdvisorsField from "@/components/search/search-box/filters/advisors";
 import AuthorsField from "@/components/search/search-box/filters/authors";
 import DepartmentsField from "@/components/search/search-box/filters/departments";
@@ -10,11 +6,11 @@ import SearchOnField from "@/components/search/search-box/filters/search-on";
 import ThesisTypesField from "@/components/search/search-box/filters/thesis-types";
 import UniversitiesField from "@/components/search/search-box/filters/universities";
 import YearsField from "@/components/search/search-box/filters/years";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { cn } from "@/components/ui/utils";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
-import { useQueryState } from "nuqs";
 
 type Props = {
   className?: string;
@@ -29,12 +25,9 @@ export default function AdvancedFiltersSection({
   languagesData,
   thesisTypesData,
 }: Props) {
-  const [advancedSearch] = useQueryState(
-    searchLikePageParamKeys.advanced,
-    searchLikePageParamParsers.advanced
-  );
+  const [advanced] = useSearchLikePageParam.advanced();
   return (
-    advancedSearch && (
+    advanced && (
       <div
         className={cn(
           "w-full max-w-3xl flex justify-center flex-wrap",

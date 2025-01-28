@@ -1,22 +1,15 @@
-import {
-  searchLikePageParamParsers,
-  searchLikePageParamKeys,
-  TAttributesToSearchOn,
-} from "@/components/search/constants";
+import { TAttributesToSearchOn } from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { SearchCheckIcon } from "lucide-react";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import { useCallback } from "react";
 
 export default function SearchOnField() {
-  const [searchOn, setSearchOn] = useQueryState(
-    searchLikePageParamKeys.search_on,
-    searchLikePageParamParsers.search_on
-  );
+  const [searchOn, setSearchOn] = useSearchLikePageParam.search_on();
 
   const umami = useUmami();
   const posthog = usePostHog();

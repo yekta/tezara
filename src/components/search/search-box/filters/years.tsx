@@ -1,8 +1,5 @@
 import BroomIcon from "@/components/icons/broom";
-import {
-  searchLikePageParamKeys,
-  searchLikePageParamParsers,
-} from "@/components/search/constants";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import {
   Select,
   SelectContent,
@@ -14,7 +11,6 @@ import { useUmami } from "@/lib/hooks/use-umami";
 import { yearGteKeyAtom, yearLteKeyAtom } from "@/lib/store/main";
 import { useAtom } from "jotai";
 import { CalendarArrowDownIcon, CalendarArrowUpIcon } from "lucide-react";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 
 const clearButtonText = "Temizle";
@@ -27,15 +23,8 @@ const yearOptions = Array.from({ length: maxYear - minYear + 1 }, (_, i) => ({
 }));
 
 export default function YearsField() {
-  const [yearGte, setYearGte] = useQueryState(
-    searchLikePageParamKeys.year_gte,
-    searchLikePageParamParsers.year_gte
-  );
-
-  const [yearLte, setYearLte] = useQueryState(
-    searchLikePageParamKeys.year_lte,
-    searchLikePageParamParsers.year_lte
-  );
+  const [yearGte, setYearGte] = useSearchLikePageParam.year_gte();
+  const [yearLte, setYearLte] = useSearchLikePageParam.year_lte();
 
   const [yearGteKey, setYearGteKey] = useAtom(yearGteKeyAtom);
   const [yearLteKey, setYearLteKey] = useAtom(yearLteKeyAtom);

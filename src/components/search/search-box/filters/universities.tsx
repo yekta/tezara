@@ -1,14 +1,10 @@
 import LandmarkIcon from "@/components/icons/landmark";
-import {
-  searchLikePageParamParsers,
-  searchLikePageParamKeys,
-} from "@/components/search/constants";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
+import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
-import { useQueryState } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useMemo } from "react";
 
@@ -17,10 +13,7 @@ type Props = {
 };
 
 export default function UniversitiesField({ universitiesData }: Props) {
-  const [universities, setUniversities] = useQueryState(
-    searchLikePageParamKeys.universities,
-    searchLikePageParamParsers.universities
-  );
+  const [universities, setUniversities] = useSearchLikePageParam.universities();
 
   const umami = useUmami();
   const posthog = usePostHog();
