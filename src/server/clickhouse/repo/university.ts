@@ -186,7 +186,7 @@ export async function getUniversityStats({ name }: { name: string }) {
           subject_name,
           NULL          AS keyword_name,
           sum(count)    AS count
-      FROM thesis_subject_stats
+      FROM thesis_subjects_by_university
       WHERE university = {university:String}
         AND subject_language = 'Turkish'
       GROUP BY subject_name
