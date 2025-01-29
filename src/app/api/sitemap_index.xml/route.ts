@@ -1,4 +1,6 @@
-import { generateSitemaps as generateThesisSitemaps } from "@/app/thesis/sitemap";
+import { thesesRoute } from "@/app/theses/_components/constants";
+import { generateSitemaps as generateThesisSitemaps } from "@/app/theses/sitemap";
+import { universitiesRoute } from "@/app/universities/_components/constants";
 import { env } from "@/lib/env";
 
 export const revalidate = 3600; // cache for 1 hour
@@ -29,8 +31,8 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       ${getSitemapString("sitemap", "/")}
-      ${getSitemapString("sitemap", "/university")}
-      ${getSitemapsString(thesisSitemaps, "/thesis/sitemap")}
+      ${getSitemapString("sitemap", `${universitiesRoute}`)}
+      ${getSitemapsString(thesisSitemaps, `${thesesRoute}/sitemap`)}
     </sitemapindex>
   `;
 

@@ -1,20 +1,23 @@
 "use client";
 
+import { thesesRoute } from "@/app/theses/_components/constants";
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { cn } from "@/components/ui/utils";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { usePostHog } from "posthog-js/react";
 
-export default function NavigationSection({
+export default function Sidebar({
   className,
-  id,
+  currentThesisId,
+  side,
 }: {
   className?: string;
-  id: number;
+  currentThesisId: number;
+  side: "start" | "end";
 }) {
-  const idNumber = parseInt(Number(id).toString());
-  const currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
-  const disabled = currentThesisId <= 1;
+  const idNumber = parseInt(Number(currentThesisId).toString());
+  const _currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
+  const disabled = side === "start" ? _currentThesisId <= 1 : false;
 
   const umami = useUmami();
   const posthog = usePostHog();
@@ -31,28 +34,23 @@ export default function NavigationSection({
 
   return (
     <nav
+      data-side={side}
       className={cn(
-        "w-full flex items-center justify-between gap-4",
+        "shrink-0 max-w-48 flex flex-col sticky top-14 h-[calc(100svh-6rem)]",
         className
       )}
     >
       <NextPrevButton
         disabled={disabled}
-        variant="prev"
-        href={`/thesis/${currentThesisId - 1}`}
-        className="-ml-3.5"
-        onClick={() => sendEvent(currentThesisId - 1)}
+        variant={side === "start" ? "prev" : "next"}
+        href={`${thesesRoute}/${
+          _currentThesisId + (side === "start" ? -1 : 1)
+        }`}
+        onClick={() =>
+          sendEvent(_currentThesisId + (side === "start" ? -1 : 1))
+        }
       >
-        Önceki Tez
-      </NextPrevButton>
-      <NextPrevButton
-        disabled={disabled}
-        variant="next"
-        href={`/thesis/${currentThesisId + 1}`}
-        className="-mr-3.5"
-        onClick={() => sendEvent(currentThesisId + 1)}
-      >
-        Sonraki Tez
+        {side === "start" ? "Önceki Tez" : "Sonraki Tez"}
       </NextPrevButton>
     </nav>
   );

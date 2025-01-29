@@ -1,4 +1,4 @@
-import { cachedGetPageData } from "@/app/university/[name]/helpers";
+import { cachedGetPageData } from "@/app/universities/[name]/helpers";
 import {
   background,
   DefaultOpenGraphResponse,

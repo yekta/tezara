@@ -1,6 +1,6 @@
 "use client";
 
-import BackButton from "@/app/thesis/[id]/go-back-button";
+import BackButton from "@/app/theses/[id]/go-back-button";
 import { cn } from "@/components/ui/utils";
 import { previousPathAtom } from "@/lib/store/main";
 import { useAtomValue } from "jotai";

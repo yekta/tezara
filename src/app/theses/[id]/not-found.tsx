@@ -1,6 +1,6 @@
 "use client";
 
-import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
+import NavigationSection from "@/app/theses/[id]/_components/NavigationSection";
 import { SearchIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 

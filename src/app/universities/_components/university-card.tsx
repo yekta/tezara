@@ -36,7 +36,7 @@ export default function UniversityCard({
         href={
           isPlaceholder
             ? universitiesRoute
-            : `/university/${encodeURIComponent(university.name)}`
+            : `${universitiesRoute}/${encodeURIComponent(university.name)}`
         }
         onClick={() => {
           if (!isPlaceholder) {

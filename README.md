@@ -10,7 +10,7 @@ Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
 - 🟢 Arama sonuçlarını, özetler dahil topluca CSV tablo ve JSON olarak indirebilirsiniz (YÖK sistemindeki 2000 tez sınırına takılmadan).
 
-- 🟢 Her tezin metaveri sayfasına sadece tez no kullanarak `tezara.org/thesis/{Tez No}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/thesis/146683](https://tezara.org/thesis/146683). Bu tez sayfalarından bir önceki ya da bir sonraki teze gidebilir, bu teze benzeyen tezleri sayfanın alt tarafında görebilirsiniz.
+- 🟢 Her tezin metaveri sayfasına sadece tez no kullanarak `tezara.org/theses/{Tez No}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/theses/146683](https://tezara.org/theses/146683). Bu tez sayfalarından bir önceki ya da bir sonraki teze gidebilir, bu teze benzeyen tezleri sayfanın alt tarafında görebilirsiniz.
 
 - 🟢 YÖK'ün sisteminin aksine Tezara'nın tüm fonsiyonları mobil cihazlarda da kolay kullanılabilir.
 
@@ -18,7 +18,7 @@ Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
   - [Gelişmiş Arama Örneği](<https://tezara.org/search?languages=Arap%C3%A7a,%C4%B0ngilizce&thesis-types=Doktora,Y%C3%BCksek+Lisans&universities=Umm+al-Qura+University,Cairo+University+(%D8%AC%D8%A7%D9%85%D8%B9%D8%A9+%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9),Yalova+%C3%9Cniversitesi&advanced=true>)
 
-- 🟢 Her üniversitenin kendi tezlerinin ve istatistiklerinin olduğu sayfalara `tezara.org/university/{Üniversite Adı}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
+- 🟢 Her üniversitenin kendi tezlerinin ve istatistiklerinin olduğu sayfalara `tezara.org/universities/{Üniversite Adı}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/universities/Yalova Üniversitesi](https://tezara.org/universities/Yalova%20%C3%9Cniversitesi).
 
 - 🟢 Tüm üniversitelerin istatistiklerinin bulunduğu dizine şuradan ulaşabilirsiniz: [tezara.org/universities](https://tezara.org/universities)
 
@@ -57,7 +57,7 @@ The differences between Tezara and YÖK's system are as follows:
 
 - 🟢 You can download search results, including abstracts, in bulk as a CSV table and JSON (without the restriction of 2000 thesis in YÖK's system).
 
-- 🟢 You can access the page for each thesis at `tezara.org/thesis/{Thesis ID}` only using the thesis' ID. For example: [tezara.org/thesis/146683](https://tezara.org/thesis/146683). On these pages, you can navigate to the next or the previous thesis. You can also see similar thesis at the bottom of the page.
+- 🟢 You can access the page for each thesis at `tezara.org/theses/{Thesis ID}` only using the thesis' ID. For example: [tezara.org/theses/146683](https://tezara.org/theses/146683). On these pages, you can navigate to the next or the previous thesis. You can also see similar thesis at the bottom of the page.
 
 - 🟢 Unlike YÖK's system, all functions of Tezara can be easily used on mobile devices.
 
@@ -65,7 +65,7 @@ The differences between Tezara and YÖK's system are as follows:
 
   - [Example of Advanced Search](<https://tezara.org/search?languages=Arap%C3%A7a,%C4%B0ngilizce&thesis-types=Doktora,Y%C3%BCksek+Lisans&universities=Umm+al-Qura+University,Cairo+University+(%D8%AC%D8%A7%D9%85%D8%B9%D8%A9+%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9),Yalova+%C3%9Cniversitesi&advanced=true>)
 
-- 🟢 You can access each university's own page with their theses and statistics at `tezara.org/university/{University Name}`. For example: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
+- 🟢 You can access each university's own page with their theses and statistics at `tezara.org/universities/{University Name}`. For example: [tezara.org/universities/Yalova Üniversitesi](https://tezara.org/universities/Yalova%20%C3%9Cniversitesi).
 
 - 🟢 There is a directory which includes statistical summaries for each university: [tezara.org/universities](https://tezara.org/universities)
 

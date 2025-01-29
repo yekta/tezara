@@ -1,4 +1,4 @@
-import { cachedGetPageData } from "@/app/thesis/[id]/helpers";
+import { cachedGetPageData } from "@/app/theses/[id]/helpers";
 import {
   background,
   DefaultOpenGraphResponse,

@@ -1,10 +1,10 @@
-import GoBackBar from "@/app/thesis/[id]/go-back-bar";
+import GoBackBar from "@/app/theses/[id]/go-back-bar";
 import { universitiesRoute } from "@/app/universities/_components/constants";
-import LanguagesChart from "@/app/university/[name]/_components/languages-chart";
-import PopularSubjectsChart from "@/app/university/[name]/_components/popular-subjects-chart";
-import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";
-import ThesisTypesChart from "@/app/university/[name]/_components/thesis-types-chart";
-import { cachedGetPageData } from "@/app/university/[name]/helpers";
+import LanguagesChart from "@/app/universities/[name]/_components/languages-chart";
+import PopularSubjectsChart from "@/app/universities/[name]/_components/popular-subjects-chart";
+import ThesesCountsByYearsChart from "@/app/universities/[name]/_components/theses-counts-by-years-chart";
+import ThesisTypesChart from "@/app/universities/[name]/_components/thesis-types-chart";
+import { cachedGetPageData } from "@/app/universities/[name]/helpers";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";

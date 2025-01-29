@@ -1,5 +1,7 @@
 "use client";
 
+import { thesesRoute } from "@/app/theses/_components/constants";
+import { universitiesRoute } from "@/app/universities/_components/constants";
 import LanguageIcon from "@/components/icons/language";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { getThesisTypeColorClassName } from "@/components/icons/sets/thesis-type";
@@ -53,7 +55,7 @@ export default function ThesisRow({
   };
 
   const thesisLinkProps: LinkProps = {
-    href: `/thesis/${thesis?.id}`,
+    href: `${thesesRoute}/${thesis?.id}`,
     prefetch: false,
     onClick: setPrevious,
   };
@@ -200,7 +202,7 @@ export default function ThesisRow({
           ) : (
             <Link
               prefetch={false}
-              href={`/university/${thesis.university}`}
+              href={`${universitiesRoute}/${thesis.university}`}
               onClick={setPrevious}
               className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-full z-0 relative shrink min-w-0 border bg-foreground/8 
                 border-foreground/12 text-foreground not-touch:hover:bg-foreground/16 active:bg-foreground/16

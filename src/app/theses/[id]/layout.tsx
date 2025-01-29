@@ -1,5 +1,5 @@
-import Sidebar from "@/app/thesis/[id]/_components/Sidebar";
-import GoBackBar from "@/app/thesis/[id]/go-back-bar";
+import Sidebar from "@/app/theses/[id]/_components/Sidebar";
+import GoBackBar from "@/app/theses/[id]/go-back-bar";
 
 type Props = {
   children: React.ReactNode;

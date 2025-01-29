@@ -1,22 +1,21 @@
 "use client";
 
+import { thesesRoute } from "@/app/theses/_components/constants";
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { cn } from "@/components/ui/utils";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { usePostHog } from "posthog-js/react";
 
-export default function Sidebar({
+export default function NavigationSection({
   className,
-  currentThesisId,
-  side,
+  id,
 }: {
   className?: string;
-  currentThesisId: number;
-  side: "start" | "end";
+  id: number;
 }) {
-  const idNumber = parseInt(Number(currentThesisId).toString());
-  const _currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
-  const disabled = side === "start" ? _currentThesisId <= 1 : false;
+  const idNumber = parseInt(Number(id).toString());
+  const currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
+  const disabled = currentThesisId <= 1;
 
   const umami = useUmami();
   const posthog = usePostHog();
@@ -33,21 +32,28 @@ export default function Sidebar({
 
   return (
     <nav
-      data-side={side}
       className={cn(
-        "shrink-0 max-w-48 flex flex-col sticky top-14 h-[calc(100svh-6rem)]",
+        "w-full flex items-center justify-between gap-4",
         className
       )}
     >
       <NextPrevButton
         disabled={disabled}
-        variant={side === "start" ? "prev" : "next"}
-        href={`/thesis/${_currentThesisId + (side === "start" ? -1 : 1)}`}
-        onClick={() =>
-          sendEvent(_currentThesisId + (side === "start" ? -1 : 1))
-        }
+        variant="prev"
+        href={`${thesesRoute}/${currentThesisId - 1}`}
+        className="-ml-3.5"
+        onClick={() => sendEvent(currentThesisId - 1)}
       >
-        {side === "start" ? "Önceki Tez" : "Sonraki Tez"}
+        Önceki Tez
+      </NextPrevButton>
+      <NextPrevButton
+        disabled={disabled}
+        variant="next"
+        href={`${thesesRoute}/${currentThesisId + 1}`}
+        className="-mr-3.5"
+        onClick={() => sendEvent(currentThesisId + 1)}
+      >
+        Sonraki Tez
       </NextPrevButton>
     </nav>
   );

@@ -67,3 +67,10 @@ export type TLanguage = {
   id: string;
   name: string;
 };
+
+export type TSubjectOrKeywordLanguage = z.infer<typeof LanguageEnum>;
+export type TSubject = {
+  id: string;
+  name: string;
+  language: TSubjectOrKeywordLanguage;
+};

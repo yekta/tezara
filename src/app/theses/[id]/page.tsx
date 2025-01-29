@@ -1,5 +1,6 @@
-import NavigationSection from "@/app/thesis/[id]/_components/NavigationSection";
-import GoBackBar from "@/app/thesis/[id]/go-back-bar";
+import NavigationSection from "@/app/theses/[id]/_components/NavigationSection";
+import GoBackBar from "@/app/theses/[id]/go-back-bar";
+import { thesesRoute } from "@/app/theses/_components/constants";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -34,7 +35,9 @@ export default async function Page({ params }: Props) {
     thesis = await getThesis({ id: idNumber, client: meiliAdmin });
     const end = performance.now();
     console.log(
-      `/thesis/[id]:getThesis(${idNumber}) | ${Math.round(end - start)}ms`
+      `${thesesRoute}/[id]:getThesis(${idNumber}) | ${Math.round(
+        end - start
+      )}ms`
     );
   } catch (error) {
     console.error(`Failed to fetch thesis ID: ${idNumber}`, error);
@@ -70,7 +73,9 @@ export default async function Page({ params }: Props) {
   }
   const end = performance.now();
   console.log(
-    `/thesis/[id]:getSimilarTheses(${idNumber}) | ${Math.round(end - start)}ms`
+    `${thesesRoute}/[id]:getSimilarTheses(${idNumber}) | ${Math.round(
+      end - start
+    )}ms`
   );
 
   const noAbstractText = "Özet yok.";

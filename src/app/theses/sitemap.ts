@@ -1,3 +1,4 @@
+import { thesesRoute } from "@/app/theses/_components/constants";
 import { env } from "@/lib/env";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
@@ -22,7 +23,7 @@ export default async function sitemap({
   const data = await getTheses({ page: idNumber });
 
   const theses: MetadataRoute.Sitemap = data.hits.map((t) => ({
-    url: `${env.NEXT_PUBLIC_SITE_URL}/thesis/${t.id}`,
+    url: `${env.NEXT_PUBLIC_SITE_URL}${thesesRoute}/${t.id}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
     priority: 1,

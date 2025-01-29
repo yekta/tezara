@@ -1,3 +1,4 @@
+import { universitiesRoute } from "@/app/universities/_components/constants";
 import {
   getUniversity,
   getUniversityStats,
@@ -39,7 +40,7 @@ async function getPageData({ name }: { name: string }) {
     universityStatsPromise,
   ]);
   console.log(
-    `/university/[name]:getPageData("${name}") | ${Math.round(
+    `${universitiesRoute}/[name]:getPageData("${name}") | ${Math.round(
       performance.now() - start
     ).toLocaleString()}ms`
   );
