@@ -20,6 +20,8 @@ Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
 - 🟢 Her üniversitenin kendi tezlerinin ve istatistiklerinin olduğu sayfalara `tezara.org/university/{Üniversite Adı}` adresinden ulaşabilirsiniz. Örneğin: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
 
+- 🟢 Tüm üniversitelerin istatistiklerinin bulunduğu dizine şuradan ulaşabilirsiniz: [tezara.org/universities](https://tezara.org/universities)
+
 - 🟢 YÖK'ün verisi elimden geldiğince temizlenmiştir:
 
   - Örneğin onların sisteminde şu şekilde bir yazar adı görebilirsiniz: `HURİYE ELÇİNhttp://172.16.2.31:8041/UlusalTezMerkezi/YonetimPaneli/tezDetay.jsp?sira=1215 POLAT`
@@ -64,6 +66,8 @@ The differences between Tezara and YÖK's system are as follows:
   - [Example of Advanced Search](<https://tezara.org/search?languages=Arap%C3%A7a,%C4%B0ngilizce&thesis-types=Doktora,Y%C3%BCksek+Lisans&universities=Umm+al-Qura+University,Cairo+University+(%D8%AC%D8%A7%D9%85%D8%B9%D8%A9+%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9),Yalova+%C3%9Cniversitesi&advanced=true>)
 
 - 🟢 You can access each university's own page with their theses and statistics at `tezara.org/university/{University Name}`. For example: [tezara.org/university/Yalova Üniversitesi](https://tezara.org/university/Yalova%20%C3%9Cniversitesi).
+
+- 🟢 There is a directory which includes statistical summaries for each university: [tezara.org/universities](https://tezara.org/universities)
 
 - 🟢 I cleaned YÖK's data to the best of my ability:
 
