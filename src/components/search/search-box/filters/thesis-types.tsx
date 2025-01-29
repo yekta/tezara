@@ -3,7 +3,7 @@ import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { usePostHog } from "posthog-js/react";

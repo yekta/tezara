@@ -6,7 +6,7 @@ import SearchOnField from "@/components/search/search-box/filters/search-on";
 import ThesisTypesField from "@/components/search/search-box/filters/thesis-types";
 import UniversitiesField from "@/components/search/search-box/filters/universities";
 import YearsField from "@/components/search/search-box/filters/years";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { cn } from "@/components/ui/utils";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";

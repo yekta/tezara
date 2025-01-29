@@ -1,6 +1,6 @@
 import BroomIcon from "@/components/icons/broom";
 import FilterCountChip from "@/components/search/filter-count-chip";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { Button } from "@/components/ui/button";
 import { yearGteKeyAtom, yearLteKeyAtom } from "@/lib/store/main";
 import { useSetAtom } from "jotai";

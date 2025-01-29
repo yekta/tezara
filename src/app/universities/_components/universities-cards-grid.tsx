@@ -10,31 +10,29 @@ export default function UniversitiesCardsGrid() {
   const universities = data?.result;
   const isHardError = !isPending && isError;
 
-  return (
+  return isHardError ? (
+    <li className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
+      <TriangleAlertIcon className="size-7" />
+      <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
+        Birşeyler ters gitti
+      </p>
+    </li>
+  ) : !isHardError &&
+    universities &&
+    universities.length === 0 &&
+    !isPending ? (
+    <li className="w-full py-12 flex-1 flex flex-col items-center justify-center text-muted-foreground text-sm">
+      <SearchIcon className="size-7" />
+      <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
+        Eşleşen yok
+      </p>
+    </li>
+  ) : (
     <ol
       data-pending={isPending ? true : undefined}
       data-error={isHardError ? true : undefined}
       className="w-full flex flex-wrap content-start justify-start flex-1 px-1 py-1"
     >
-      {isHardError && (
-        <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
-          <TriangleAlertIcon className="size-7" />
-          <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
-            Birşeyler ters gitti
-          </p>
-        </div>
-      )}
-      {!isHardError &&
-        universities &&
-        universities.length === 0 &&
-        !isPending && (
-          <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-muted-foreground text-sm">
-            <SearchIcon className="size-7" />
-            <p className="w-full text-balance text-center mt-1.5 font-semibold leading-tight">
-              Eşleşen yok
-            </p>
-          </div>
-        )}
       {!isHardError && universities
         ? universities.map((university, index) => (
             <UniversityCard

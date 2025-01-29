@@ -1,8 +1,10 @@
+import { cachedUniversitiesPageSearchParams } from "@/app/universities/_components/constants";
+import { UniversitiesPageQueryParamProvider } from "@/app/universities/_components/query-param-provider";
+import SearchInput from "@/app/universities/_components/search-input";
 import UniversitiesCardsGrid from "@/app/universities/_components/universities-cards-grid";
 import UniversitiesCountChip from "@/app/universities/_components/universities-count-chip";
 import UniversitiesPageProvider from "@/app/universities/_components/universities-page-provider";
 import UniversitiesPaginationBar from "@/app/universities/_components/universities-pagination-bar";
-import { cachedUniversitiesPageSearchParams } from "@/app/universities/constants/server";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { apiServer, HydrateClient } from "@/server/trpc/setup/server";
@@ -13,10 +15,13 @@ type Props = {
 };
 
 export default async function Page({ searchParams }: Props) {
-  const { page } = await cachedUniversitiesPageSearchParams.parse(searchParams);
+  const { page, q } = await cachedUniversitiesPageSearchParams.parse(
+    searchParams
+  );
   const start = performance.now();
   await apiServer.main.getUniversities.prefetch({
     page,
+    q,
   });
   console.log(
     `/universities:getUniversities(${page}) | ${Math.round(
@@ -26,26 +31,31 @@ export default async function Page({ searchParams }: Props) {
 
   return (
     <HydrateClient>
-      <UniversitiesPageProvider>
-        <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
-          {/* Title */}
-          <div className="w-full flex flex-col px-4">
-            <div className="w-full flex items-center flex-wrap gap-1.5">
-              <h1 className="shrink min-w-0 font-bold text-3xl text-balance leading-tight pr-1">
-                Üniversiteler
-              </h1>
-              <UniversitiesCountChip />
+      <UniversitiesPageQueryParamProvider>
+        <UniversitiesPageProvider>
+          <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
+            {/* Title */}
+            <div className="w-full flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="w-full sm:w-1/2 flex flex-wrap items-center gap-1.5 px-4">
+                <h1 className="shrink min-w-0 font-bold text-3xl text-balance leading-tight pr-1">
+                  Üniversiteler
+                </h1>
+                <UniversitiesCountChip className="mt-0.75" />
+              </div>
+              <div className="flex-1 min-w-0 flex justify-end -my-2 px-2 pt-2">
+                <SearchInput />
+              </div>
+            </div>
+            <div className="w-full px-2 pt-4">
+              <UniversitiesPaginationBar className="px-1.5" />
+            </div>
+            <UniversitiesCardsGrid />
+            <div className="w-full px-2">
+              <UniversitiesPaginationBar className="px-1.5" />
             </div>
           </div>
-          <div className="w-full px-2 pt-4">
-            <UniversitiesPaginationBar className="px-1.5" />
-          </div>
-          <UniversitiesCardsGrid />
-          <div className="w-full px-2">
-            <UniversitiesPaginationBar className="px-1.5" />
-          </div>
-        </div>
-      </UniversitiesPageProvider>
+        </UniversitiesPageProvider>
+      </UniversitiesPageQueryParamProvider>
     </HydrateClient>
   );
 }

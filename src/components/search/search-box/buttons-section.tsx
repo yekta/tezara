@@ -1,7 +1,7 @@
 import { SearchIcon } from "@/components/icons/search-icon";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ClearFiltersButton from "@/components/search/search-box/clear-filters-button";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { Button } from "@/components/ui/button";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { ChevronUpIcon, LoaderIcon, SettingsIcon } from "lucide-react";

@@ -60,7 +60,7 @@ const hooks = Object.fromEntries(
         const context = useContext(Context);
         if (!context) {
           throw new Error(
-            `SearchLikePageQueryParamsProvider needs to wrap "${key}" hook for it to work.`
+            `SearchLikePageQueryParamProvider needs to wrap "${key}" hook for it to work.`
           );
         }
         return context;
@@ -72,7 +72,7 @@ const hooks = Object.fromEntries(
   [K in TSearchLikePageParamKeys]: () => GetContextValueType<K>;
 };
 
-export function SearchLikePageQueryParamsProvider({
+export function SearchLikePageQueryParamProvider({
   children,
 }: {
   children: React.ReactNode;

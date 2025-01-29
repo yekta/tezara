@@ -6,7 +6,7 @@ import {
   isNonEmpty,
   optionsPlaceholder,
 } from "@/components/search/search-box/filters/helpers";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import useDebounceIf from "@/lib/hooks/use-debounce-if";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { meili } from "@/server/meili/constants-client";

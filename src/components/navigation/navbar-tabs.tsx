@@ -1,6 +1,6 @@
 "use client";
 
-import { universitiesRoute } from "@/app/universities/constants/main";
+import { universitiesRoute } from "@/app/universities/_components/constants";
 import LandmarkIcon from "@/components/icons/landmark";
 import { SearchIcon } from "@/components/icons/search-icon";
 import {

@@ -182,17 +182,23 @@ export const SearchResultsProvider: React.FC<{
 
   const totalPages = searchThesesQuery.data?.totalPages;
 
-  const hasPrev = totalPages ? page > 1 && totalPages > 1 : false;
+  const hasPrev = totalPages !== undefined ? page > 1 : false;
   const hasNext =
-    page <= 0 ? true : totalPages ? page < totalPages && totalPages > 1 : false;
+    page <= 0
+      ? true
+      : totalPages !== undefined
+      ? page < totalPages && totalPages > 1
+      : false;
 
   const prevPage =
-    hasPrev && totalPages ? Math.min(totalPages, page - 1) : undefined;
+    hasPrev && totalPages !== undefined
+      ? Math.min(Math.max(totalPages, 1), page - 1)
+      : undefined;
   const nextPage =
     page <= 0
       ? 1
-      : hasNext && totalPages
-      ? Math.min(totalPages, Math.max(1, page + 1))
+      : hasNext && totalPages !== undefined
+      ? Math.min(Math.max(totalPages, 1), Math.max(1, page + 1))
       : undefined;
 
   const goToPrevPage = () => {

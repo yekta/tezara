@@ -1,5 +1,5 @@
 import GoBackBar from "@/app/thesis/[id]/go-back-bar";
-import { universitiesRoute } from "@/app/universities/constants/main";
+import { universitiesRoute } from "@/app/universities/_components/constants";
 import LanguagesChart from "@/app/university/[name]/_components/languages-chart";
 import PopularSubjectsChart from "@/app/university/[name]/_components/popular-subjects-chart";
 import ThesesCountsByYearsChart from "@/app/university/[name]/_components/theses-counts-by-years-chart";

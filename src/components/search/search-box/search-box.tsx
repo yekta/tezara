@@ -7,7 +7,7 @@ import {
   focusToMainInput,
   mainSearchInputId,
 } from "@/components/search/search-box/helpers";
-import { SearchLikePageQueryParamsProvider } from "@/components/search/search-box/query-param-provider";
+import { SearchLikePageQueryParamProvider } from "@/components/search/query-param-provider";
 import SearchInput from "@/components/search/search-box/search-input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
@@ -110,7 +110,7 @@ export default function SearchBox({
   }, [isTouchScreen]);
 
   return (
-    <SearchLikePageQueryParamsProvider>
+    <SearchLikePageQueryParamProvider>
       <form
         onSubmit={onSubmit}
         className={cn(
@@ -129,6 +129,6 @@ export default function SearchBox({
           />
         </div>
       </form>
-    </SearchLikePageQueryParamsProvider>
+    </SearchLikePageQueryParamProvider>
   );
 }

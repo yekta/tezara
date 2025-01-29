@@ -18,7 +18,7 @@ export async function getUniversities({
     SELECT *
     FROM universities
   `;
-  let query_params: Record<string, number | string[]> = {
+  const query_params: Record<string, number | string[]> = {
     limit,
     offset,
   };
@@ -122,7 +122,7 @@ export async function getTotalUniversityCount({ q }: { q?: string }) {
     SELECT count() as total_count
     FROM universities
   `;
-  let query_params: Record<string, string[]> = {};
+  const query_params: Record<string, string[]> = {};
   let searchResults: string[] | null = null;
   if (q) {
     const res = await searchUniversities({ q, client: meiliAdmin });

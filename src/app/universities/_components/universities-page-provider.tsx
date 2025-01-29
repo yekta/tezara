@@ -1,10 +1,11 @@
 "use client";
 
-import { universitiesPageParams } from "@/app/universities/constants/client";
+import { useUniversitiesPageParam } from "@/app/universities/_components/query-param-provider";
+import { PAGE_DEFAULT } from "@/components/search/constants";
+import { useEffectAfterCurrentPageMount } from "@/lib/hooks/use-effect-after-current-page-mount";
 import { TSearchThesesResult } from "@/server/meili/repo/thesis";
 import { AppRouterOutputs, AppRouterQueryResult } from "@/server/trpc/api/root";
 import { api } from "@/server/trpc/setup/react";
-import { useQueryState } from "nuqs";
 import React, { createContext, ReactNode, useContext } from "react";
 
 type TUniversitiesPageContext = AppRouterQueryResult<
@@ -30,29 +31,42 @@ export const UniversitiesPageProvider: React.FC<{
   initialData?: TSearchThesesResult;
   children: ReactNode;
 }> = ({ children }) => {
-  const [page, setPage] = useQueryState("page", universitiesPageParams["page"]);
+  const [page, setPage] = useUniversitiesPageParam.page();
+  const [query] = useUniversitiesPageParam.q();
 
-  const query = api.main.getUniversities.useQuery(
+  const universitiesQuery = api.main.getUniversities.useQuery(
     {
       page,
+      q: query,
     },
     {
       placeholderData: (prev) => prev,
     }
   );
 
-  const totalPages = query.data?.maxPage;
-  const hasPrev = totalPages ? page > 1 && totalPages > 1 : false;
+  useEffectAfterCurrentPageMount(() => {
+    if (page === PAGE_DEFAULT) return;
+    setPage(PAGE_DEFAULT);
+  }, [query]);
+
+  const totalPages = universitiesQuery.data?.maxPage;
+  const hasPrev = totalPages !== undefined ? page > 1 : false;
   const hasNext =
-    page <= 0 ? true : totalPages ? page < totalPages && totalPages > 1 : false;
+    page <= 0
+      ? true
+      : totalPages !== undefined
+      ? page < totalPages && totalPages > 1
+      : false;
 
   const prevPage =
-    hasPrev && totalPages ? Math.min(totalPages, page - 1) : undefined;
+    hasPrev && totalPages !== undefined
+      ? Math.min(Math.max(totalPages, 1), page - 1)
+      : undefined;
   const nextPage =
     page <= 0
       ? 1
       : hasNext && totalPages
-      ? Math.min(totalPages, Math.max(1, page + 1))
+      ? Math.min(Math.max(totalPages, 1), Math.max(1, page + 1))
       : undefined;
 
   const goToPrevPage = () => {
@@ -72,7 +86,7 @@ export const UniversitiesPageProvider: React.FC<{
   return (
     <UniversitiesPageContext.Provider
       value={{
-        ...query,
+        ...universitiesQuery,
         goToNextPage,
         goToPrevPage,
         goToPage,

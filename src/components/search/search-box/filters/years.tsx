@@ -1,5 +1,5 @@
 import BroomIcon from "@/components/icons/broom";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import {
   Select,
   SelectContent,

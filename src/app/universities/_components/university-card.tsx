@@ -1,5 +1,5 @@
-import { universitiesRoute } from "@/app/universities/constants/main";
-import getUniversityCardId from "@/app/universities/helpers";
+import { universitiesRoute } from "@/app/universities/_components/constants";
+import getUniversityCardId from "@/app/universities/_components/helpers";
 import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { Button, LinkButton } from "@/components/ui/button";
 import { previousPathAtom } from "@/lib/store/main";

@@ -4,7 +4,7 @@ import {
   focusToMainInput,
   mainSearchInputId,
 } from "@/components/search/search-box/helpers";
-import { useSearchLikePageParam } from "@/components/search/search-box/query-param-provider";
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";

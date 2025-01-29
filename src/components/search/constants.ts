@@ -43,7 +43,6 @@ const parseAsStringEnum = isServer
   ? parseAsStringEnumServer
   : parseAsStringEnumClient;
 
-// DONT FORGET TO ADD EACH VALUE TO client.ts as well
 export const searchLikePageParamParsers = {
   q: parseAsString.withDefault(""),
   languages: parseAsArrayOf(parseAsString).withDefault([]),
