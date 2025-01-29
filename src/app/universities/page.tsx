@@ -34,19 +34,19 @@ export default async function Page({ searchParams }: Props) {
       <UniversitiesPageQueryParamProvider>
         <UniversitiesPageProvider>
           <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
-            {/* Title */}
-            <div className="w-full flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Title and search bar */}
+            <div className="w-full flex flex-col sm:flex-row sm:justify-between sm:items-center">
               <div className="w-full sm:w-1/2 flex flex-wrap items-center gap-1.5 px-4">
                 <h1 className="shrink min-w-0 font-bold text-3xl text-balance leading-tight pr-1">
                   Üniversiteler
                 </h1>
                 <UniversitiesCountChip className="mt-0.75" />
               </div>
-              <div className="flex-1 min-w-0 flex justify-end -my-2 px-2 pt-2">
+              <div className="pt-4 sm:pt-0 flex-1 sm:max-w-[50%] lg:max-w-[33.3333%] min-w-0 flex justify-end px-2 sm:pl-1 lg:pl-0 pr-2">
                 <SearchInput />
               </div>
             </div>
-            <div className="w-full px-2 pt-4">
+            <div className="w-full px-2 pt-2 sm:pt-4">
               <UniversitiesPaginationBar className="px-1.5" />
             </div>
             <UniversitiesCardsGrid />

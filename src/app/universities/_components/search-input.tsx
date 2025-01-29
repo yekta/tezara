@@ -48,10 +48,7 @@ export default function SearchInput({ className }: Props) {
 
   return (
     <div
-      className={cn(
-        "relative group/input flex-1 sm:max-w-90 shrink min-w-0",
-        className
-      )}
+      className={cn("relative group/input flex-1 shrink min-w-0", className)}
     >
       <div className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-more-foreground">
         {isPendingOrFetching ? (
