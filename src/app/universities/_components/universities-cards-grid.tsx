@@ -14,7 +14,7 @@ export default function UniversitiesCardsGrid() {
     <ol
       data-pending={isPending ? true : undefined}
       data-error={isHardError ? true : undefined}
-      className="w-full flex flex-wrap flex-1 px-1 py-1"
+      className="w-full flex flex-wrap content-start justify-start flex-1 px-1 py-1"
     >
       {isHardError && (
         <div className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">

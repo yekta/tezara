@@ -10,13 +10,14 @@ export const mainRouter = createTRPCRouter({
     .input(
       z.object({
         page: z.number().min(1),
+        q: z.string().optional(),
       })
     )
-    .query(async function ({ input: { page } }) {
+    .query(async function ({ input: { page, q } }) {
       const perPage = 30;
       const [result, total] = await Promise.all([
-        getUniversities({ page, perPage }),
-        getTotalUniversityCount(),
+        getUniversities({ page, perPage, q }),
+        getTotalUniversityCount({ q }),
       ]);
       const maxPage = Math.ceil(total / perPage);
 

@@ -49,14 +49,14 @@ export default function UniversityCard({
         className="w-full min-h-48 active:bg-background-hover not-touch:hover:bg-background-hover flex flex-col gap-6 rounded-xl px-4 pt-3.5 pb-4 items-start justify-start"
       >
         <h2
-          className="w-full flex-1 shrink min-w-0 text-left text-balance leading-tight font-bold
+          className="w-full shrink min-w-0 text-left text-balance leading-tight font-bold
           group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
           group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
         >
           <span className="font-icon icon-landmark mr-1 -ml-0.25" />
           {isPlaceholder ? "İstanbul Üniversitesi" : university.name}
         </h2>
-        <div className="w-full text-sm gap-2 flex flex-wrap">
+        <div className="w-full text-sm gap-2 flex flex-wrap flex-1 content-end justify-start">
           <Stat
             value={
               isPlaceholder
@@ -107,7 +107,7 @@ function Stat({
   return (
     <p
       aria-label={label}
-      className="shrink min-w-0 pr-1.5 items-center leading-tight text-muted-foreground font-bold text-left group-data-[placeholder]/item:animate-skeleton 
+      className="shrink min-w-0 pr-1.5 leading-tight text-muted-foreground font-bold text-left group-data-[placeholder]/item:animate-skeleton 
       group-data-[placeholder]/item:text-transparent group-data-[placeholder]/item:bg-muted-foreground group-data-[placeholder]/item:rounded"
     >
       <span className={`${classNameIcon} font-icon mr-0.75`} />

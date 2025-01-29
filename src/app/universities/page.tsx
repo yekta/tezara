@@ -27,7 +27,7 @@ export default async function Page({ searchParams }: Props) {
   return (
     <HydrateClient>
       <UniversitiesPageProvider>
-        <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:px-8 pb-32">
+        <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
           {/* Title */}
           <div className="w-full flex flex-col px-4">
             <div className="w-full flex items-center flex-wrap gap-1.5">
@@ -36,9 +36,8 @@ export default async function Page({ searchParams }: Props) {
               </h1>
               <UniversitiesCountChip />
             </div>
-            <div className="w-full flex flex-wrap items-center mt-3 md:mt-2 gap-1.5"></div>
           </div>
-          <div className="w-full px-2 pt-1 md:pt-2">
+          <div className="w-full px-2 pt-4">
             <UniversitiesPaginationBar className="px-1.5" />
           </div>
           <UniversitiesCardsGrid />

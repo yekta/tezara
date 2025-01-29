@@ -1,27 +1,46 @@
 import { clickhouse } from "@/server/clickhouse/constants";
+import { meiliAdmin } from "@/server/meili/constants-server";
+import { searchUniversities } from "@/server/meili/repo/university";
 import { ResponseJSON } from "@clickhouse/client";
-import sql from "sql-template-tag";
 
 export async function getUniversities({
   page,
   perPage,
+  q,
 }: {
   page: number;
   perPage: number;
+  q?: string;
 }) {
   const limit = perPage;
   const offset = (page - 1) * perPage;
+  let query = `
+    SELECT *
+    FROM universities
+  `;
+  let query_params: Record<string, number | string[]> = {
+    limit,
+    offset,
+  };
+  let searchResults: string[] | null = null;
+  if (q) {
+    const res = await searchUniversities({ q, client: meiliAdmin });
+    searchResults = res.hits.map((h) => h.name);
+  }
+  if (searchResults) {
+    query += `
+      WHERE name IN {university_names:Array(String)}
+    `;
+    query_params.university_names = searchResults;
+  }
+  query += `
+    ORDER BY thesis_count DESC
+    LIMIT {limit: UInt32} OFFSET {offset: UInt32}
+  `;
+
   const res = await clickhouse.query({
-    query: sql`
-        SELECT *
-        FROM universities
-        ORDER BY thesis_count DESC
-        LIMIT {limit: UInt32} OFFSET {offset: UInt32}
-      `.text,
-    query_params: {
-      limit,
-      offset,
-    },
+    query,
+    query_params,
     format: "JSON",
   });
   const resJson = await res.json();
@@ -61,12 +80,12 @@ export async function getUniversities({
 
 export async function getUniversity({ name }: { name: string }) {
   const res = await clickhouse.query({
-    query: sql`
-        SELECT *
-        FROM universities
-        WHERE name = {name:String}
-        LIMIT 1
-      `.text,
+    query: `
+      SELECT *
+      FROM universities
+      WHERE name = {name:String}
+      LIMIT 1
+    `,
     query_params: {
       name,
     },
@@ -98,12 +117,26 @@ export async function getUniversity({ name }: { name: string }) {
   return itemParsed;
 }
 
-export async function getTotalUniversityCount() {
+export async function getTotalUniversityCount({ q }: { q?: string }) {
+  let query = `
+    SELECT count() as total_count
+    FROM universities
+  `;
+  let query_params: Record<string, string[]> = {};
+  let searchResults: string[] | null = null;
+  if (q) {
+    const res = await searchUniversities({ q, client: meiliAdmin });
+    searchResults = res.hits.map((h) => h.name);
+  }
+  if (searchResults) {
+    query += `
+      WHERE name IN {university_names:Array(String)}
+    `;
+    query_params.university_names = searchResults;
+  }
   const res = await clickhouse.query({
-    query: sql`
-        SELECT count() as total_count
-        FROM universities
-      `.text,
+    query,
+    query_params,
     format: "JSON",
   });
   const resJson = await res.json();
@@ -116,48 +149,48 @@ export async function getTotalUniversityCount() {
 
 export async function getUniversityStats({ name }: { name: string }) {
   const res = await clickhouse.query({
-    query: sql`
-        SELECT
-            'year_type'   AS data_group,
-            year,
-            thesis_type,
-            NULL          AS language,
-            NULL          AS subject_name,
-            NULL          AS keyword_name,
-            count()       AS count
-        FROM theses
-        WHERE university = {university:String}
-        GROUP BY year, thesis_type
-  
-        UNION ALL
-  
-        SELECT
-            'language'    AS data_group,
-            NULL          AS year,
-            NULL          AS thesis_type,
-            language,
-            NULL          AS subject_name,
-            NULL          AS keyword_name,
-            count()       AS count
-        FROM theses
-        WHERE university = {university:String}
-        GROUP BY language
-  
-        UNION ALL
-  
-        SELECT
-            'subject'     AS data_group,
-            NULL          AS year,
-            NULL          AS thesis_type,
-            NULL          AS language,
-            subject_name,
-            NULL          AS keyword_name,
-            sum(count)    AS count
-        FROM thesis_subject_stats
-        WHERE university = {university:String}
-          AND subject_language = 'Turkish'
-        GROUP BY subject_name
-      `.text,
+    query: `
+      SELECT
+          'year_type'   AS data_group,
+          year,
+          thesis_type,
+          NULL          AS language,
+          NULL          AS subject_name,
+          NULL          AS keyword_name,
+          count()       AS count
+      FROM theses
+      WHERE university = {university:String}
+      GROUP BY year, thesis_type
+
+      UNION ALL
+
+      SELECT
+          'language'    AS data_group,
+          NULL          AS year,
+          NULL          AS thesis_type,
+          language,
+          NULL          AS subject_name,
+          NULL          AS keyword_name,
+          count()       AS count
+      FROM theses
+      WHERE university = {university:String}
+      GROUP BY language
+
+      UNION ALL
+
+      SELECT
+          'subject'     AS data_group,
+          NULL          AS year,
+          NULL          AS thesis_type,
+          NULL          AS language,
+          subject_name,
+          NULL          AS keyword_name,
+          sum(count)    AS count
+      FROM thesis_subject_stats
+      WHERE university = {university:String}
+        AND subject_language = 'Turkish'
+      GROUP BY subject_name
+    `,
     query_params: {
       university: name,
     },

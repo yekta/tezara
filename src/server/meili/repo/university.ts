@@ -23,6 +23,25 @@ export async function getUniversities({ client }: { client: MeiliSearch }) {
   return result;
 }
 
+export async function searchUniversities({
+  q,
+  client,
+}: {
+  q: string;
+  client: MeiliSearch;
+}) {
+  const index = client.index<TUniversity>(indexName);
+  const result = await index.search(q, {
+    page: 1,
+    hitsPerPage: 500,
+    sort: ["name:asc"],
+    attributesToRetrieve: ["name"],
+    attributesToSearchOn: ["name"],
+  });
+
+  return result;
+}
+
 export type TGetUniversitiesResult = Awaited<
   ReturnType<typeof getUniversities>
 >;
