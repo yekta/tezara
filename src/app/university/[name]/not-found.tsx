@@ -1,26 +1,22 @@
-"use client";
-
-import { SearchIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { LinkButton } from "@/components/ui/button";
+import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 export default function NotFound() {
-  const pathname = usePathname();
-  const name = pathname.split("/").pop();
-
   return (
-    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col items-center flex-1 md:pt-2 pb-32">
-      <h1
-        id="title"
-        className="font-semibold text-muted-foreground text-center text-2xl leading-tight"
-      >
-        <span className="font-bold text-foreground">
-          {'"'}
-          {name}
-          {'"'}
-        </span>{" "}
-        bulunamadı.
-      </h1>
-      <SearchIcon className="size-12 text-muted-more-foreground mt-3" />
+    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32 px-3">
+      <div className="w-full flex-1 flex flex-col items-center justify-center border rounded-xl px-4 pt-12 pb-[calc(2.5rem+5vh)]">
+        <SearchIcon className="size-12 text-muted-more-foreground mt-3" />
+        <h1
+          id="title"
+          className="max-w-full pt-3 text-balance min-w-0 font-semibold text-muted-foreground text-center text-2xl leading-tight"
+        >
+          Üniversite bulunamadı
+        </h1>
+        <LinkButton href="/universities" className="mt-5">
+          <ArrowLeftIcon className="size-5 -my-5 -ml-1.5" />
+          <p className="shrink min-w-0">Tüm Üniversiteler</p>
+        </LinkButton>
+      </div>
     </div>
   );
 }

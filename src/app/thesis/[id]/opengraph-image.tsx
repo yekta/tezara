@@ -1,6 +1,7 @@
 import { cachedGetPageData } from "@/app/thesis/[id]/helpers";
-import DefaultOpenGraphImage, {
+import {
   background,
+  DefaultOpenGraphResponse,
   defaultParagraphClassName,
   foreground,
   foregroundMuted,
@@ -31,20 +32,13 @@ export default async function Image({ params }: Props) {
   const { id } = await params;
   let thesis: Awaited<ReturnType<typeof cachedGetPageData>>["thesis"];
 
-  const notFoundResponse = async () =>
-    new ImageResponse(<DefaultOpenGraphImage />, {
-      ...size,
-      // @ts-expect-error - This is fine, they don't export the type so I can't set it
-      fonts: await getOpengraphFonts(),
-    });
-
   try {
     const data = await cachedGetPageData({ id });
     thesis = data.thesis;
-    if (!thesis) return notFoundResponse();
+    if (!thesis) return DefaultOpenGraphResponse();
   } catch (error) {
     console.log(error);
-    return notFoundResponse();
+    return DefaultOpenGraphResponse();
   }
 
   return new ImageResponse(

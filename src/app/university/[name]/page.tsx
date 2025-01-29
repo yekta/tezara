@@ -17,6 +17,7 @@ import {
   ScrollTextIcon,
 } from "lucide-react";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { FC } from "react";
 
 type Props = {
@@ -28,6 +29,18 @@ const locale = "tr";
 export default async function Page({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
+
+  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+
+  try {
+    res = await cachedGetPageData({ name: parsedName });
+  } catch (error) {
+    console.log(error);
+  }
+
+  if (!res) {
+    return notFound();
+  }
 
   const {
     thesesCount,
@@ -43,9 +56,11 @@ export default async function Page({ params }: Props) {
     maxThesisYear,
     minThesisYear,
     mostPopularThesisType,
-  } = await cachedGetPageData({
-    name: parsedName,
-  });
+  } = res;
+
+  if (!universityStats) {
+    return notFound();
+  }
 
   return (
     <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
@@ -232,19 +247,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const parsedName = decodeURIComponent(name);
   const notFoundTitle = `Üniversite Bulunamadı | ${titleSuffix}`;
   const notFoundDescription = `Üniversite ${siteTitle} platformunda mevcut değil.`;
-
-  if (!name) {
-    return {
+  const notFoundResult = {
+    title: notFoundTitle,
+    description: notFoundDescription,
+    twitter: getTwitterMeta({
       title: notFoundTitle,
       description: notFoundDescription,
-      twitter: getTwitterMeta({
-        title: notFoundTitle,
-        description: notFoundDescription,
-      }),
-    };
+    }),
+  };
+  if (!name) {
+    return notFoundResult;
   }
 
   const locale = "tr";
+  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+
+  try {
+    res = await cachedGetPageData({ name: parsedName });
+  } catch (error) {
+    console.log(error);
+  }
+
+  if (!res) {
+    return notFoundResult;
+  }
+
   const {
     universityStats,
     subjects,
@@ -252,7 +279,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     minYear,
     maxYear,
     thesesCount,
-  } = await cachedGetPageData({ name: parsedName });
+  } = res;
+
   const title = `${parsedName} Tez İstatistikleri | ${titleSuffix}`;
   const description = `${parsedName} bünyesinde ${minYear}-${maxYear} yılları arasında ${subjects.size.toLocaleString(
     locale

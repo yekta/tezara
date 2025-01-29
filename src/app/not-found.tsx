@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function NotFound() {
@@ -11,7 +12,10 @@ export default function NotFound() {
             Bulunamadı.
           </p>
           <Button asChild className="mt-5 max-w-full">
-            <Link href="/">Eve Dön</Link>
+            <Link href="/">
+              <ArrowLeftIcon className="size-5 -my-5 -ml-1.5" />
+              <p className="shrink min-w-0">Eve Dön</p>
+            </Link>
           </Button>
         </div>
       </div>

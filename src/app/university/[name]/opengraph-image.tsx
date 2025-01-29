@@ -1,6 +1,7 @@
 import { cachedGetPageData } from "@/app/university/[name]/helpers";
 import {
   background,
+  DefaultOpenGraphResponse,
   defaultParagraphClassName,
   foreground,
   foregroundMuted,
@@ -33,14 +34,22 @@ export default async function Image({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
 
-  const { thesesCount, subjects, universityStats, languages } =
-    await cachedGetPageData({
-      name: parsedName,
-    });
+  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+
+  try {
+    res = await cachedGetPageData({ name: parsedName });
+  } catch (error) {
+    console.log(error);
+  }
+
+  if (!res) {
+    return DefaultOpenGraphResponse();
+  }
+
+  const { thesesCount, subjects, universityStats, languages } = res;
 
   return new ImageResponse(
     (
-      // ImageResponse JSX element
       <div
         style={{
           background: background,

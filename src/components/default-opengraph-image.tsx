@@ -1,6 +1,7 @@
 import PenToolIcon from "@/components/icons/pen-tool";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
+import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CSSProperties } from "react";
@@ -113,4 +114,12 @@ export async function getOpengraphFonts() {
       data: fontMediumData,
     },
   ] as const;
+}
+
+export async function DefaultOpenGraphResponse() {
+  return new ImageResponse(<DefaultOpenGraphImage />, {
+    ...opengraphSize,
+    // @ts-expect-error - This is fine, they don't export the type so I can't set it
+    fonts: await getOpengraphFonts(),
+  });
 }
