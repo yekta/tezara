@@ -125,7 +125,7 @@ input[type="search"] {
 
     --barrier: 0 0% 0%;
     --opacity-barrier: 0.7;
-    --opacity-shadow: 0.08;
+    --opacity-shadow: 0.06;
   }
   .dark {
     --background: 250 25% 4%;
