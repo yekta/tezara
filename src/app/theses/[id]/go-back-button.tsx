@@ -1,5 +1,7 @@
 import { LinkButton, TButtonVariants } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
+import { previousPathAtom } from "@/lib/store/main";
+import { useSetAtom } from "jotai";
 import { ArrowLeftIcon } from "lucide-react";
 
 type Props = {
@@ -17,9 +19,12 @@ export default function BackButton({
   href,
   className,
 }: Props) {
+  const setPreviousPath = useSetAtom(previousPathAtom);
+
   return (
     <LinkButton
       href={href}
+      onClick={() => setPreviousPath(null)}
       variant={variant}
       size={size}
       className={cn("text-muted-foreground", className)}
