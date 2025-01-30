@@ -317,17 +317,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    /* publisher: thesis.university ? thesis.university : undefined,
-    authors: thesis.author
-      ? [
-          {
-            name: thesis.author,
-            url: `${env.NEXT_PUBLIC_SITE_URL}/author/${encodeURIComponent(
-              thesis.author
-            )}`,
-          },
-        ]
-      : [], */
+    publisher: thesis.university,
+    keywords:
+      thesis.keywords.length > 0
+        ? thesis.keywords.map((i) => i.name)
+        : thesis.subjects.length > 0
+        ? thesis.subjects.map((subject) => subject.name)
+        : undefined,
+    authors: {
+      name: thesis.author,
+    },
+    openGraph: {
+      publishedTime: new Date(thesis.year, 5, 15, 14, 0).toISOString(),
+      type: "article",
+      tags:
+        thesis.subjects.length > 0
+          ? thesis.subjects.map((subject) => subject.name)
+          : undefined,
+    },
     twitter: getTwitterMeta({
       title,
       description,
