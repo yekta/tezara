@@ -1,6 +1,9 @@
 import NavigationSection from "@/app/theses/[id]/_components/NavigationSection";
 import GoBackBar from "@/app/theses/[id]/go-back-bar";
 import { thesesRoute } from "@/app/theses/_components/constants";
+import DetailsListItem from "@/app/theses/_components/details-list-item";
+import DetailsListItemSubjects from "@/app/theses/_components/details-list-item-subjects";
+import DetailsListItemUniversity from "@/app/theses/_components/details-list-item-university";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -17,6 +20,12 @@ type Props = {
 };
 
 export const revalidate = 3600;
+
+const noAbstractText = "Özet yok.";
+const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
+const noTitle = "Başlık mevcut değil.";
+const noTranslatedTitle = "Başlık çevirisi mevcut değil.";
+const notAvailable = "Belirtilmemiş.";
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
@@ -79,11 +88,6 @@ export default async function Page({ params }: Props) {
     )}ms`
   );
 
-  const noAbstractText = "Özet yok.";
-  const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
-  const noTitle = "Başlık mevcut değil.";
-  const noTranslatedTitle = "Başlık çevirisi mevcut değil.";
-  const notAvailable = "Belirtilmemiş.";
   return (
     <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32">
       <NavigationSection id={thesis.id} className="md:hidden pb-4" />
@@ -140,38 +144,7 @@ export default async function Page({ params }: Props) {
         <DetailsListItem id="thesis_type_section" title="Tez Türü">
           {thesis.thesis_type || notAvailable}
         </DetailsListItem>
-        <DetailsListItem title="Konular" id="subjects_section">
-          {thesis.subjects && thesis.subjects.length > 1
-            ? thesis.subjects
-                .sort((a, b) => {
-                  if (a.language === "Turkish" && b.language === "English")
-                    return -1;
-                  if (a.language === "English" && b.language === "Turkish")
-                    return 1;
-                  return 0;
-                })
-                .map((i, index) =>
-                  i.language === "Turkish" ? (
-                    <span key={i.name}>
-                      {index === 0 ? "" : ", "}
-                      <LinkButton
-                        className="py-0.25 rounded text-link-chip bg-link-chip/12 px-1.25"
-                        variant="ghost"
-                        target="_blank"
-                        href={`/subjects/${encodeURIComponent(i.name)}`}
-                      >
-                        {i.name}
-                      </LinkButton>
-                    </span>
-                  ) : (
-                    <span key={i.name}>
-                      {index === 0 ? "" : ", "}
-                      {i.name}
-                    </span>
-                  )
-                )
-            : notAvailable}
-        </DetailsListItem>
+        <DetailsListItemSubjects thesis={thesis} />
         <DetailsListItem id="keywords_section" title="Anahtar Kelimeler">
           {thesis.keywords && thesis.keywords.length > 1
             ? thesis.keywords
@@ -192,16 +165,7 @@ export default async function Page({ params }: Props) {
         <DetailsListItem id="language_section" title="Dil">
           {thesis.language}
         </DetailsListItem>
-        <DetailsListItem id="university_section" title="Üniversite">
-          <LinkButton
-            className="py-0.25 rounded text-link-chip bg-link-chip/12 px-1.25"
-            variant="ghost"
-            target="_blank"
-            href={`/university/${encodeURIComponent(thesis.university)}`}
-          >
-            {thesis.university}
-          </LinkButton>
-        </DetailsListItem>
+        <DetailsListItemUniversity thesis={thesis} />
         <DetailsListItem id="institute_section" title="Enstitü">
           {thesis.institute || notAvailable}
         </DetailsListItem>
@@ -251,31 +215,6 @@ export default async function Page({ params }: Props) {
         className="pb-4 -mt-2 md:mt-6"
       />
     </div>
-  );
-}
-
-function DetailsListItem({
-  title,
-  id,
-  className,
-  children,
-}: {
-  title: string;
-  id: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <li
-      id={id}
-      className={cn(
-        "leading-normal py-2 border-t border-foreground/10",
-        className
-      )}
-    >
-      <span className="font-medium text-muted-foreground">{title}: </span>
-      <span className="font-bold">{children}</span>
-    </li>
   );
 }
 
