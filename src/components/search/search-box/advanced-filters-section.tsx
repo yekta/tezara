@@ -11,6 +11,7 @@ import { cn } from "@/components/ui/utils";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
+import FilterChips from "@/components/search/search-box/filter-chips";
 
 type Props = {
   className?: string;
@@ -34,6 +35,7 @@ export default function AdvancedFiltersSection({
           className
         )}
       >
+        <FilterChips className="pt-0.75 pb-2" />
         <FieldWrapper>
           <SearchOnField />
         </FieldWrapper>

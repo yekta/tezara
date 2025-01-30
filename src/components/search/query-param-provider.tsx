@@ -84,10 +84,10 @@ export function SearchLikePageQueryParamProvider({
 
 export const useSearchLikePageParam = hooks;
 
-type GetValueType<K extends TSearchLikePageParamKeys> =
+export type GetValueType<K extends TSearchLikePageParamKeys> =
   TSearchLikePageParamParsers[K];
 
-type GetSetterType<K extends TSearchLikePageParamKeys> = (
+export type GetSetterType<K extends TSearchLikePageParamKeys> = (
   p:
     | TSearchLikePageParamParsers[K]
     | ((value: TSearchLikePageParamParsers[K]) => void)

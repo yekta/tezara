@@ -1,13 +1,13 @@
 "use client";
 
 import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider";
+import { SearchLikePageQueryParamProvider } from "@/components/search/query-param-provider";
 import AdvancedFiltersSection from "@/components/search/search-box/advanced-filters-section";
 import ButtonsSection from "@/components/search/search-box/buttons-section";
 import {
   focusToMainInput,
   mainSearchInputId,
 } from "@/components/search/search-box/helpers";
-import { SearchLikePageQueryParamProvider } from "@/components/search/query-param-provider";
 import SearchInput from "@/components/search/search-box/search-input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";

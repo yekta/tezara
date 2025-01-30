@@ -60,7 +60,10 @@ export default function SearchOnField() {
   );
 }
 
-const searchOnOptions: { value: TAttributesToSearchOn; label: string }[] = [
+const searchOnOptions: {
+  value: TAttributesToSearchOn;
+  label: string;
+}[] = [
   {
     value: "title",
     label: "Başlık",
@@ -86,3 +89,11 @@ const searchOnOptions: { value: TAttributesToSearchOn; label: string }[] = [
     label: "Danışmanlar",
   },
 ];
+
+export const searchOnOptionsMap = searchOnOptions.reduce(
+  (acc, { value, label }) => {
+    acc[value] = label;
+    return acc;
+  },
+  {} as Record<TAttributesToSearchOn, string>
+);

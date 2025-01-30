@@ -7,7 +7,6 @@ import DetailsListItemUniversity from "@/app/theses/_components/details-list-ite
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
-import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
@@ -281,17 +280,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
     }),
   };
-}
-
-function Divider({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "w-full my-2 h-px rounded-full bg-foreground/10",
-        className
-      )}
-    />
-  );
 }
 
 const maxDescriptionLength = 160;

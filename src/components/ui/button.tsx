@@ -62,6 +62,8 @@ const buttonVariants = cva(
       },
       forceMinSize: {
         default: minButtonSizeEnforcerClassName,
+        medium:
+          "before:w-full before:h-full before:min-w-[36px] before:min-h-[36px] before:z-[-1] before:bg-transparent before:absolute before:-translate-y-1/2 before:top-1/2 before:-translate-x-1/2 before:left-1/2",
         false: "",
       },
       focusVariant: {
