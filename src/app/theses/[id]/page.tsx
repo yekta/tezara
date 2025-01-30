@@ -92,12 +92,15 @@ export default async function Page({ params }: Props) {
     <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32">
       <NavigationSection id={thesis.id} className="md:hidden pb-4" />
       {/* Title */}
-      <h1 id="title" className="font-bold text-2xl text-balance leading-tight">
+      <h1
+        id="title_original_section"
+        className="font-bold text-2xl text-balance leading-tight"
+      >
         {thesis?.title_original || noTitle}
       </h1>
       {/* Translated title */}
       <h2
-        id="title_translated"
+        id="title_translated_section"
         className="font-semibold text-lg text-balance text-muted-foreground leading-snug mt-3"
       >
         {thesis?.title_translated || noTranslatedTitle}
@@ -129,7 +132,7 @@ export default async function Page({ params }: Props) {
         </Button> */}
       </div>
       {/* Details */}
-      <ol id="details" className="w-full flex flex-col text-sm pt-6">
+      <ol id="details_section" className="w-full flex flex-col text-sm pt-6">
         <DetailsListItem id="thesis_id_section" title="Tez No">
           {thesis.id}
         </DetailsListItem>
@@ -184,22 +187,21 @@ export default async function Page({ params }: Props) {
         </DetailsListItem>
       </ol>
       {/* Abstract */}
-      <div id="abstract_section" className="pt-8">
+      <div id="abstract_original_section" className="pt-10">
         <h3 className="font-bold text-xl">Özet</h3>
-        <p id="abstract" className="pt-3 text-lg">
+        <p id="abstract" className="pt-2 text-lg">
           {thesis.abstract_original || noAbstractText}
         </p>
       </div>
       {/* Translated abstract */}
-      <div id="abstract_translated_section" className="pt-6">
+      <div id="abstract_translated_section" className="pt-10">
         <h3 className="font-bold text-xl">Özet (Çeviri)</h3>
-        <p id="abstract_translated" className="pt-3 text-lg">
+        <p id="abstract_translated" className="pt-2 text-lg">
           {thesis.abstract_translated || noTranslatedAbstractText}
         </p>
       </div>
-      <Divider className="my-10" />
       {similarTheses && (
-        <div id="similar_theses_section" className="w-full flex flex-col">
+        <div id="similar_theses_section" className="w-full flex flex-col pt-10">
           <h3 className="font-bold text-xl">Benzer Tezler</h3>
           <ThesisRowList
             data={similarTheses}
