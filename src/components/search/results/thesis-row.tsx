@@ -7,7 +7,6 @@ import LanguageIcon from "@/components/icons/language";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { getThesisTypeColorClassName } from "@/components/icons/sets/thesis-type";
 import ThesisTypeIconWithFont from "@/components/icons/sets/thesis-type-with-font";
-import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { cleanAdvisors, getThesisRowId } from "@/components/search/helpers";
 import {
   Button,
@@ -50,11 +49,13 @@ export default function ThesisRow({
   disableSubjectLink,
   pagePathname,
 }: Props) {
-  const [, searchParamsStr] = useSearchParamsClientOnly();
   const setRouteHistory = useSetAtom(routeHistoryAtom);
   const hash = thesis ? `#${getThesisRowId(thesis.id)}` : "";
   const setPrevious = () => {
-    setRouteHistory((p) => [...p, `${pagePathname}${searchParamsStr}${hash}`]);
+    setRouteHistory((p) => [
+      ...p,
+      `${pagePathname}${window.location.search}${hash}`,
+    ]);
   };
 
   const thesisLinkProps: LinkProps = {

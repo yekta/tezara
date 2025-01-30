@@ -1,6 +1,5 @@
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import getUniversityCardId from "@/app/universities/_components/helpers";
-import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { Button, LinkButton } from "@/components/ui/button";
 import { routeHistoryAtom } from "@/lib/store/main";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
@@ -22,7 +21,6 @@ export default function UniversityCard({
 }: TUniversityCardProps) {
   const Component = isPlaceholder ? Button : LinkButton;
 
-  const [, searchParamsStr] = useSearchParamsClientOnly();
   const setRouteHistory = useSetAtom(routeHistoryAtom);
   const hash = university ? `#${getUniversityCardId(university)}` : "";
 
@@ -42,7 +40,7 @@ export default function UniversityCard({
           if (!isPlaceholder) {
             setRouteHistory((p) => [
               ...p,
-              `${universitiesRoute}${searchParamsStr}${hash}`,
+              `${universitiesRoute}${window.location.search}${hash}`,
             ]);
           }
         }}
