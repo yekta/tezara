@@ -17,7 +17,10 @@ export default function UniversitiesCountChip({
     <TriangleAlertIcon className={cn("size-5 text-destructive", className)} />
   ) : (
     <>
-      <Chip className="mr-0.5 my-1" data-pending={isPending ? true : undefined}>
+      <Chip
+        className="mr-0.5 my-0.5"
+        data-pending={isPending ? true : undefined}
+      >
         {isPending || !data ? "1600" : data.totalCount.toLocaleString()}
       </Chip>
       {isFetching && (
