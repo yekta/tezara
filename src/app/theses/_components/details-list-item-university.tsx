@@ -3,7 +3,7 @@
 import DetailsListItem from "@/app/theses/_components/details-list-item";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import { LinkButton } from "@/components/ui/button";
-import { previousPathAtom } from "@/lib/store/main";
+import { routeHistoryAtom } from "@/lib/store/main";
 import { TThesis } from "@/server/meili/types";
 import { useSetAtom } from "jotai";
 import { useCallback } from "react";
@@ -15,13 +15,13 @@ type Props = {
 const id = "university_section";
 
 export default function DetailsListItemUniversity({ thesis }: Props) {
-  const setPreviousPath = useSetAtom(previousPathAtom);
+  const setRouteHistory = useSetAtom(routeHistoryAtom);
 
   const onClick = useCallback(() => {
     const pathname = window.location.pathname;
     const search = window.location.search;
-    setPreviousPath(`${pathname}${search}`);
-  }, [setPreviousPath]);
+    setRouteHistory((p) => [...p, `${pathname}${search}`]);
+  }, [setRouteHistory]);
 
   return (
     <DetailsListItem id={id} title="Üniversite">

@@ -15,7 +15,7 @@ import {
   minButtonSizeEnforcerClassName,
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
-import { previousPathAtom } from "@/lib/store/main";
+import { routeHistoryAtom } from "@/lib/store/main";
 import { TThesis } from "@/server/meili/types";
 import { useSetAtom } from "jotai";
 import Link, { LinkProps } from "next/link";
@@ -51,10 +51,10 @@ export default function ThesisRow({
   pagePathname,
 }: Props) {
   const [, searchParamsStr] = useSearchParamsClientOnly();
-  const setPreviousPath = useSetAtom(previousPathAtom);
+  const setRouteHistory = useSetAtom(routeHistoryAtom);
   const hash = thesis ? `#${getThesisRowId(thesis.id)}` : "";
   const setPrevious = () => {
-    setPreviousPath(`${pagePathname}${searchParamsStr}${hash}`);
+    setRouteHistory((p) => [...p, `${pagePathname}${searchParamsStr}${hash}`]);
   };
 
   const thesisLinkProps: LinkProps = {

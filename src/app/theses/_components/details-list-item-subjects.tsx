@@ -3,7 +3,7 @@
 import { subjectsRoute } from "@/app/subjects/_components/constants";
 import DetailsListItem from "@/app/theses/_components/details-list-item";
 import { LinkButton } from "@/components/ui/button";
-import { previousPathAtom } from "@/lib/store/main";
+import { routeHistoryAtom } from "@/lib/store/main";
 import { TThesis } from "@/server/meili/types";
 import { useSetAtom } from "jotai";
 import { useCallback } from "react";
@@ -16,13 +16,13 @@ const notAvailable = "Belirtilmemiş.";
 const id = "subjects_section";
 
 export default function DetailsListItemSubjects({ thesis }: Props) {
-  const setPreviousPath = useSetAtom(previousPathAtom);
+  const setRouteHistory = useSetAtom(routeHistoryAtom);
 
   const onClick = useCallback(() => {
     const pathname = window.location.pathname;
     const search = window.location.search;
-    setPreviousPath(`${pathname}${search}`);
-  }, [setPreviousPath]);
+    setRouteHistory((p) => [...p, `${pathname}${search}`]);
+  }, [setRouteHistory]);
 
   return (
     <DetailsListItem title="Konular" id={id}>

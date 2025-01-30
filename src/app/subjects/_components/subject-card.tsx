@@ -2,7 +2,7 @@ import { subjectsRoute } from "@/app/subjects/_components/constants";
 import getSubjectCardId from "@/app/subjects/_components/helpers";
 import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { Button, LinkButton } from "@/components/ui/button";
-import { previousPathAtom } from "@/lib/store/main";
+import { routeHistoryAtom } from "@/lib/store/main";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 import { useSetAtom } from "jotai";
 
@@ -23,7 +23,7 @@ export default function SubjectCard({
   const Component = isPlaceholder ? Button : LinkButton;
 
   const [, searchParamsStr] = useSearchParamsClientOnly();
-  const setPreviousPath = useSetAtom(previousPathAtom);
+  const setRouteHistory = useSetAtom(routeHistoryAtom);
   const hash = subject ? `#${getSubjectCardId(subject)}` : "";
 
   return (
@@ -40,7 +40,10 @@ export default function SubjectCard({
         }
         onClick={() => {
           if (!isPlaceholder) {
-            setPreviousPath(`${subjectsRoute}${searchParamsStr}${hash}`);
+            setRouteHistory((p) => [
+              ...p,
+              `${subjectsRoute}${searchParamsStr}${hash}`,
+            ]);
           }
         }}
         disabled={isPlaceholder}

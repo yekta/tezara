@@ -2,7 +2,7 @@
 
 import BackButton from "@/app/theses/[id]/go-back-button";
 import { cn } from "@/components/ui/utils";
-import { previousPathAtom } from "@/lib/store/main";
+import { routeHistoryAtom } from "@/lib/store/main";
 import { useAtomValue } from "jotai";
 
 export type TGoBackBarProps = {
@@ -16,11 +16,18 @@ export default function GoBackBar({
   className,
   defaultPath,
 }: TGoBackBarProps) {
-  const previousPath = useAtomValue(previousPathAtom);
+  const routeHistory = useAtomValue(routeHistoryAtom);
 
   return (
     <div className={cn("w-full flex items-center justify-center", className)}>
-      <BackButton buttonText={buttonText} href={previousPath || defaultPath} />
+      <BackButton
+        buttonText={buttonText}
+        href={
+          routeHistory.length > 0
+            ? routeHistory[routeHistory.length - 1]
+            : defaultPath
+        }
+      />
     </div>
   );
 }
