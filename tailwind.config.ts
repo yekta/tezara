@@ -57,6 +57,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        "link-chip": "hsl(var(--link-chip))",
         shadow: "hsl(var(--shadow))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -126,159 +126,98 @@ export default async function Page({ params }: Props) {
       </div>
       {/* Details */}
       <ol id="details" className="w-full flex flex-col text-sm pt-6">
-        <li
-          id="thesis_id_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Tez No: </span>
-          <span className="font-bold" id="thesis_id">
-            {thesis.id}
-          </span>
-        </li>
-        <li
-          id="author_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Yazar: </span>
-          <span className="font-bold" id="author_name">
-            {thesis.author}
-          </span>
-        </li>
-        <li
-          id="advisor_names_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">
-            Danışmanlar:{" "}
-          </span>
-          <span className="font-bold" id="advisor_names">
-            {!thesis.advisors || thesis.advisors.length < 1
-              ? notAvailable
-              : thesis.advisors.map((advisor) => advisor).join(", ")}
-          </span>
-        </li>
-        <li
-          id="thesis_type_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Tez Türü: </span>
-          <span className="font-bold" id="thesis_type">
-            {thesis.thesis_type || notAvailable}
-          </span>
-        </li>
-        <li
-          id="subjects_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Konular: </span>
-          <span className="font-bold" id="advisor_names">
-            {thesis.subjects && thesis.subjects.length > 1
-              ? thesis.subjects
-                  .sort((a, b) => {
-                    if (a.language === "Turkish" && b.language === "English")
-                      return -1;
-                    if (a.language === "English" && b.language === "Turkish")
-                      return 1;
-                    return 0;
-                  })
-                  .map((i) => i.name)
-                  .join(", ")
-              : notAvailable}
-          </span>
-        </li>
-        <li
-          id="keywords_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">
-            Anahtar Kelimeler:{" "}
-          </span>
-          <span className="font-bold" id="advisor_names">
-            {thesis.keywords && thesis.keywords.length > 1
-              ? thesis.keywords
-                  .sort((a, b) => {
-                    if (a.language === "Turkish" && b.language === "English")
-                      return -1;
-                    if (a.language === "English" && b.language === "Turkish")
-                      return 1;
-                    return 0;
-                  })
-                  .map((i) => i.name)
-                  .join(", ")
-              : notAvailable}
-          </span>
-        </li>
-        <li
-          id="year_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Yıl: </span>
-          <span className="font-bold" id="year">
-            {thesis.year}
-          </span>
-        </li>
-        <li
-          id="language_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Dil: </span>
-          <span className="font-bold" id="language_name">
-            {thesis.language}
-          </span>
-        </li>
-        <li
-          id="university_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">
-            Üniversite:{" "}
-          </span>
-          <span className="font-bold" id="university_name">
+        <DetailsListItem id="thesis_id_section" title="Tez No">
+          {thesis.id}
+        </DetailsListItem>
+        <DetailsListItem id="author_section" title="Yazar">
+          {thesis.author}
+        </DetailsListItem>
+        <DetailsListItem id="advisor_names_section" title="Danışmanlar">
+          {!thesis.advisors || thesis.advisors.length < 1
+            ? notAvailable
+            : thesis.advisors.map((advisor) => advisor).join(", ")}
+        </DetailsListItem>
+        <DetailsListItem id="thesis_type_section" title="Tez Türü">
+          {thesis.thesis_type || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem title="Konular" id="subjects_section">
+          {thesis.subjects && thesis.subjects.length > 1
+            ? thesis.subjects
+                .sort((a, b) => {
+                  if (a.language === "Turkish" && b.language === "English")
+                    return -1;
+                  if (a.language === "English" && b.language === "Turkish")
+                    return 1;
+                  return 0;
+                })
+                .map((i, index) =>
+                  i.language === "Turkish" ? (
+                    <span key={i.name}>
+                      {index === 0 ? "" : ", "}
+                      <LinkButton
+                        className="py-0.25 rounded text-link-chip bg-link-chip/12 px-1.25"
+                        variant="ghost"
+                        target="_blank"
+                        href={`/subjects/${encodeURIComponent(i.name)}`}
+                      >
+                        {i.name}
+                      </LinkButton>
+                    </span>
+                  ) : (
+                    <span key={i.name}>
+                      {index === 0 ? "" : ", "}
+                      {i.name}
+                    </span>
+                  )
+                )
+            : notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="keywords_section" title="Anahtar Kelimeler">
+          {thesis.keywords && thesis.keywords.length > 1
+            ? thesis.keywords
+                .sort((a, b) => {
+                  if (a.language === "Turkish" && b.language === "English")
+                    return -1;
+                  if (a.language === "English" && b.language === "Turkish")
+                    return 1;
+                  return 0;
+                })
+                .map((i) => i.name)
+                .join(", ")
+            : notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="year_section" title="Yıl">
+          {thesis.year}
+        </DetailsListItem>
+        <DetailsListItem id="language_section" title="Dil">
+          {thesis.language}
+        </DetailsListItem>
+        <DetailsListItem id="university_section" title="Üniversite">
+          <LinkButton
+            className="py-0.25 rounded text-link-chip bg-link-chip/12 px-1.25"
+            variant="ghost"
+            target="_blank"
+            href={`/university/${encodeURIComponent(thesis.university)}`}
+          >
             {thesis.university}
-          </span>
-        </li>
-        <li
-          id="institute_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">Enstitü: </span>
-          <span className="font-bold" id="institute_name">
-            {thesis.institute || notAvailable}
-          </span>
-        </li>
-        <li
-          id="department_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">
-            Ana Bilim Dalı:{" "}
-          </span>
-          <span className="font-bold" id="department_name">
-            {thesis.department || notAvailable}
-          </span>
-        </li>
-        <li
-          id="branch_section"
-          className="leading-snug py-2 border-t border-foreground/10"
-        >
-          <span className="font-medium text-muted-foreground">
-            Bilim Dalı:{" "}
-          </span>
-          <span className="font-bold" id="branch_name">
-            {thesis.branch || notAvailable}
-          </span>
-        </li>
-        <li
+          </LinkButton>
+        </DetailsListItem>
+        <DetailsListItem id="institute_section" title="Enstitü">
+          {thesis.institute || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="department_section" title="Ana Bilim Dalı">
+          {thesis.department || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="branch_section" title="Bilim Dalı">
+          {thesis.branch || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem
           id="page_count_section"
-          className="leading-snug py-2 border-t border-b border-foreground/10"
+          title="Sayfa Sayısı"
+          className="border-b"
         >
-          <span className="font-medium text-muted-foreground">
-            Sayfa Sayısı:{" "}
-          </span>
-          <span className="font-bold" id="page_count">
-            {thesis.page_count || notAvailable}
-          </span>
-        </li>
+          {thesis.page_count || notAvailable}
+        </DetailsListItem>
       </ol>
       {/* Abstract */}
       <div id="abstract_section" className="pt-8">
@@ -312,6 +251,31 @@ export default async function Page({ params }: Props) {
         className="pb-4 -mt-2 md:mt-6"
       />
     </div>
+  );
+}
+
+function DetailsListItem({
+  title,
+  id,
+  className,
+  children,
+}: {
+  title: string;
+  id: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <li
+      id={id}
+      className={cn(
+        "leading-normal py-2 border-t border-foreground/10",
+        className
+      )}
+    >
+      <span className="font-medium text-muted-foreground">{title}: </span>
+      <span className="font-bold">{children}</span>
+    </li>
   );
 }
 

@@ -102,6 +102,8 @@ input[type="search"] {
     --chart-9: 270 60% 30%;
     --chart-10: 20 90% 30%;
 
+    --link-chip: 210 100% 18%;
+
     --top-loader: 165 100% 30%;
 
     --index-fear: 0 100% 70%;
@@ -165,6 +167,8 @@ input[type="search"] {
     --chart-8: 320 60% 60%;
     --chart-9: 250 100% 75%;
     --chart-10: 40 80% 65%;
+
+    --link-chip: 210 100% 85%;
 
     --top-loader: 160 90% 60%;
 

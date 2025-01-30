@@ -161,7 +161,6 @@ export default async function Page({ params }: Props) {
           data={lastThesesRes}
           className="w-full flex flex-col px-3 pt-4"
           classNameRow="first-of-type:border-t last-of-type:border-b"
-          disableUniversityLink
         />
       </div>
       <GoBackBar

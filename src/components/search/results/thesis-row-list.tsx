@@ -9,12 +9,14 @@ type Props = {
   className?: string;
   classNameRow?: string;
   disableUniversityLink?: boolean;
+  disableSubjectLink?: boolean;
   data: TSearchThesesResult | undefined;
 };
 
 export default function ThesisRowList({
   data,
   disableUniversityLink,
+  disableSubjectLink,
   className,
   classNameRow,
 }: Props) {
@@ -27,6 +29,7 @@ export default function ThesisRowList({
               className={classNameRow}
               pagePathname={pathname}
               disableUniversityLink={disableUniversityLink}
+              disableSubjectLink={disableSubjectLink}
               key={`${i.id}-${index}`}
               thesis={i}
             />
@@ -36,6 +39,7 @@ export default function ThesisRowList({
               className={classNameRow}
               pagePathname={pathname}
               disableUniversityLink={disableUniversityLink}
+              disableSubjectLink={disableSubjectLink}
               key={index}
               isPlaceholder
             />

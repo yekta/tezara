@@ -1,5 +1,6 @@
 "use client";
 
+import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { thesesRoute } from "@/app/theses/_components/constants";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import LanguageIcon from "@/components/icons/language";
@@ -33,6 +34,7 @@ type Props =
     ) & {
       className?: string;
       disableUniversityLink?: boolean;
+      disableSubjectLink?: boolean;
       pagePathname: string;
     };
 
@@ -45,6 +47,7 @@ export default function ThesisRow({
   isPlaceholder,
   className,
   disableUniversityLink,
+  disableSubjectLink,
   pagePathname,
 }: Props) {
   const [, searchParamsStr] = useSearchParamsClientOnly();
@@ -59,6 +62,13 @@ export default function ThesisRow({
     prefetch: false,
     onClick: setPrevious,
   };
+
+  const turkishSubjects = thesis?.subjects?.filter(
+    (s) => s.language === "Turkish"
+  );
+  const firstThesisSubject = turkishSubjects?.length
+    ? turkishSubjects[0].name
+    : null;
 
   return (
     <li
@@ -195,6 +205,29 @@ export default function ThesisRow({
           <Chip classNameIcon="icon-calendar">
             {isPlaceholder ? "Yükleniyor..." : thesis.year}
           </Chip>
+          {isPlaceholder ? (
+            <Chip classNameIcon="icon-folder-closed">Yükleniyor...</Chip>
+          ) : firstThesisSubject ? (
+            disableSubjectLink ? (
+              <Chip classNameIcon="icon-folder-closed">
+                {firstThesisSubject}
+              </Chip>
+            ) : (
+              <Link
+                prefetch={false}
+                href={`${subjectsRoute}/${encodeURIComponent(
+                  firstThesisSubject
+                )}`}
+                onClick={setPrevious}
+                className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-full z-0 relative shrink min-w-0 border bg-foreground/8 
+                border-foreground/12 text-foreground not-touch:hover:bg-foreground/16 active:bg-foreground/16
+                focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background text-sm leading-none font-medium`}
+              >
+                <span className="font-icon icon-folder-closed -ml-0.5 mr-1" />
+                {firstThesisSubject}
+              </Link>
+            )
+          ) : null}
           {isPlaceholder || disableUniversityLink ? (
             <Chip classNameIcon="icon-landmark">
               {isPlaceholder ? "Yükleniyor..." : thesis.university}
