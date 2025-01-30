@@ -1,4 +1,4 @@
-# Tezara | Tez Arama ve Metaveri Analizi Aracı: [tezara.org](https://tezara.org)
+# Tezara | Tez Arama ve Metaveri Analizi Platformu: [tezara.org](https://tezara.org)
 
 Tezara, YÖK Ulusal Tez Merkezi'ne girilen tezler üzerinden arama ve metaveri analizi yapmanızı sağlar. Yazar, başlık, özet, danışman, yıl, üniversite ve dil gibi verilere ulaşabilir, bu verileri filtreleyebilir ve tablo ya da grafiğe dönüştürerek topluca indirebilirsiniz.
 
@@ -45,7 +45,7 @@ Notlar:
 
 ---
 
-# Tezara | Thesis Search and Metadata Analysis Tool: [tezara.org](https://tezara.org)
+# Tezara | Thesis Search and Metadata Analysis Platform: [tezara.org](https://tezara.org)
 
 Tezara allows you to search and analyze metadata from the theses entered into the YÖK National Thesis Center. You can access data such as author, title, abstract, advisor, year, university, and language. You can filter this data, convert it to a table or graph, and download in bulk.
 
