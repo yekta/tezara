@@ -281,7 +281,7 @@ function DetailsListItem({
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const titleSuffix = `Tez | ${siteTitle}`;
+  const titleSuffix = `Tezler | ${siteTitle}`;
   const notFoundTitle = `Tez Bulunamadı | ${titleSuffix}`;
   const notFoundDescription = `${id} numaralı tezi ${siteTitle} platformunda mevcut değil.`;
   const notFoundMeta: Metadata = {
