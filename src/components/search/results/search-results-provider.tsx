@@ -78,6 +78,10 @@ export const SearchResultsProvider: React.FC<{
     searchLikePageParamKeys.year_gte,
     searchLikePageParamParsers.year_gte
   );
+  const [subjects] = useQueryState(
+    searchLikePageParamKeys.subjects,
+    searchLikePageParamParsers.subjects
+  );
   const [searchOn] = useQueryState(
     searchLikePageParamKeys.search_on,
     searchLikePageParamParsers.search_on
@@ -113,6 +117,7 @@ export const SearchResultsProvider: React.FC<{
     thesis_types: thesisTypes,
     year_gte: yearGte,
     year_lte: yearLte,
+    subjects,
     search_on: searchOn,
     hits_per_page: HITS_PER_PAGE_DEFAULT,
     attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
@@ -130,6 +135,7 @@ export const SearchResultsProvider: React.FC<{
         advisors,
         authors,
         thesis_types: thesisTypes,
+        subjects,
         year_gte: yearGte,
         year_lte: yearLte,
         sort: undefined,
@@ -159,6 +165,7 @@ export const SearchResultsProvider: React.FC<{
       thesis_types: thesisTypes,
       year_gte: yearGte,
       year_lte: yearLte,
+      subjects,
       search_on: searchOn,
       hits_per_page: HITS_PER_PAGE_BULK,
       attributes_to_not_retrieve: undefined,

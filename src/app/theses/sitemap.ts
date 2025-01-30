@@ -42,6 +42,7 @@ async function getTheses({ page }: { page: number }) {
     universities: [],
     departments: [],
     languages: [],
+    subjects: [],
     sort: undefined,
     thesis_types: [],
     year_gte: null,

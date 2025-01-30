@@ -8,20 +8,20 @@ import {
   opengraphContentType,
   opengraphSize,
 } from "@/components/default-opengraph-image";
-import LandmarkIcon from "@/components/icons/landmark";
+import FolderClosedIcon from "@/components/icons/folder-closed";
 import Logo from "@/components/logo/logo";
 import { apiServerStatic } from "@/server/trpc/setup/server";
 import { ImageResponse } from "next/og";
 import { ComponentProps, FC } from "react";
 
-export const alt = "Üniversite sayfası";
+export const alt = "Konular sayfası";
 export const size = opengraphSize;
 export const contentType = opengraphContentType;
 
 const logoSize = 256;
 
 export default async function Image() {
-  const { totalCount } = await apiServerStatic.main.getUniversities({
+  const { totalCount } = await apiServerStatic.main.getSubjects({
     page: 1,
   });
   return new ImageResponse(
@@ -42,7 +42,7 @@ export default async function Image() {
           justifyContent: "center",
         }}
       >
-        <LandmarkIcon
+        <FolderClosedIcon
           style={{
             width: 256,
             height: 256,
@@ -72,7 +72,7 @@ export default async function Image() {
             ...defaultParagraphClassName,
           }}
         >
-          Üniversiteler
+          Konular
         </p>
         <div
           style={{
@@ -84,7 +84,7 @@ export default async function Image() {
             fontWeight: 500,
           }}
         >
-          <Stat label="Üniversite" value={totalCount} Icon={LandmarkIcon} />
+          <Stat label="Konu" value={totalCount} Icon={FolderClosedIcon} />
         </div>
       </div>
     ),

@@ -1,46 +1,46 @@
-import { universitiesRoute } from "@/app/universities/_components/constants";
-import getUniversityCardId from "@/app/universities/_components/helpers";
+import { subjectsRoute } from "@/app/subjects/_components/constants";
+import getSubjectCardId from "@/app/subjects/_components/helpers";
 import { useSearchParamsClientOnly } from "@/components/providers/search-params-client-only-provider";
 import { Button, LinkButton } from "@/components/ui/button";
 import { previousPathAtom } from "@/lib/store/main";
 import { AppRouterOutputs } from "@/server/trpc/api/root";
 import { useSetAtom } from "jotai";
 
-type TUniversityCardProps =
+type TSubjectCardProps =
   | {
-      university: AppRouterOutputs["main"]["getUniversities"]["result"][0];
+      subject: AppRouterOutputs["main"]["getSubjects"]["result"][0];
       isPlaceholder?: false;
     }
   | {
-      university?: null;
+      subject?: null;
       isPlaceholder: true;
     };
 
-export default function UniversityCard({
-  university,
+export default function SubjectCard({
+  subject,
   isPlaceholder,
-}: TUniversityCardProps) {
+}: TSubjectCardProps) {
   const Component = isPlaceholder ? Button : LinkButton;
 
   const [, searchParamsStr] = useSearchParamsClientOnly();
   const setPreviousPath = useSetAtom(previousPathAtom);
-  const hash = university ? `#${getUniversityCardId(university)}` : "";
+  const hash = subject ? `#${getSubjectCardId(subject)}` : "";
 
   return (
     <li
-      id={university ? getUniversityCardId(university) : undefined}
+      id={subject ? getSubjectCardId(subject) : undefined}
       data-placeholder={isPlaceholder ? true : undefined}
       className="w-full flex items-start justify-start md:w-1/2 lg:w-1/3 p-1 group/item"
     >
       <Component
         href={
           isPlaceholder
-            ? universitiesRoute
-            : `${universitiesRoute}/${encodeURIComponent(university.name)}`
+            ? subjectsRoute
+            : `${subjectsRoute}/${encodeURIComponent(subject.name)}`
         }
         onClick={() => {
           if (!isPlaceholder) {
-            setPreviousPath(`${universitiesRoute}${searchParamsStr}${hash}`);
+            setPreviousPath(`${subjectsRoute}${searchParamsStr}${hash}`);
           }
         }}
         disabled={isPlaceholder}
@@ -53,39 +53,34 @@ export default function UniversityCard({
           group-data-[placeholder]/item:animate-skeleton group-data-[placeholder]/item:text-transparent
           group-data-[placeholder]/item:bg-foreground group-data-[placeholder]/item:rounded-md"
         >
-          <span className="font-icon icon-landmark mr-1.5 -ml-0.25" />
-          {isPlaceholder ? "İstanbul Üniversitesi" : university.name}
+          <span className="font-icon icon-folder-closed mr-1.5 -ml-0.25" />
+          {isPlaceholder ? "İstanbul Üniversitesi" : subject.name}
         </h2>
         <div className="w-full text-sm gap-2 flex flex-wrap flex-1 content-end justify-start">
           <Stat
-            value={
-              isPlaceholder
-                ? `2000-2024`
-                : `${university.year_start}-${university.year_end}`
-            }
-            label="Tez Yılları"
-            classNameIcon="icon-calendar"
-            hideLabel
-          />
-          <Stat
-            value={isPlaceholder ? 1000 : university.thesis_count}
+            value={isPlaceholder ? 1000 : subject.thesis_count}
             label="Tez"
             classNameIcon="icon-scroll-text"
           />
           <Stat
-            value={isPlaceholder ? 8 : university.language_count}
+            value={isPlaceholder ? 100 : subject.university_count}
+            label="Üniversite"
+            classNameIcon="icon-landmark"
+          />
+          <Stat
+            value={isPlaceholder ? 8 : subject.language_count}
             label="Dil"
             classNameIcon="icon-globe"
           />
           <Stat
-            value={isPlaceholder ? 100 : university.subject_count_turkish}
-            label="Konu"
-            classNameIcon="icon-folder-closed"
-          />
-          <Stat
-            value={isPlaceholder ? 1000 : university.keyword_count_turkish}
-            label="Anahtar Kelime"
-            classNameIcon="icon-key-round"
+            value={
+              isPlaceholder
+                ? `2000-2024`
+                : `${subject.year_start}-${subject.year_end}`
+            }
+            label="Tez Yılları"
+            classNameIcon="icon-calendar"
+            hideLabel
           />
         </div>
       </Component>

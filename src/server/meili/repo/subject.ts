@@ -1,7 +1,29 @@
-import { TLanguage, TUniversity } from "@/server/meili/types";
+import { TSubject, TSubjectOrKeywordLanguage } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
 const indexName = "subjects";
+
+export async function getSubjects({
+  client,
+  languages,
+}: {
+  client: MeiliSearch;
+  languages: TSubjectOrKeywordLanguage[];
+}) {
+  const index = client.index<TSubject>(indexName);
+  let filter = `name != "11111"`;
+  if (languages.length > 0) {
+    const entries = languages.map((l) => `language = "${l}"`);
+    filter += ` AND (${entries.join(" OR ")})`;
+  }
+  const result = await index.search(undefined, {
+    limit: 5000,
+    sort: ["name:asc"],
+    filter,
+  });
+
+  return result;
+}
 
 export async function searchSubjects({
   q,
@@ -14,13 +36,13 @@ export async function searchSubjects({
   client: MeiliSearch;
   page?: number;
   hits_per_page?: number;
-  languages: TLanguage[];
+  languages: TSubjectOrKeywordLanguage[];
 }) {
-  const index = client.index<TUniversity>(indexName);
-  let filter = "";
+  const index = client.index<TSubject>(indexName);
+  let filter = `name != "11111"`;
   if (languages.length > 0) {
     const entries = languages.map((l) => `language = "${l}"`);
-    filter = `(${entries.join(" OR ")})`;
+    filter += `AND (${entries.join(" OR ")})`;
   }
   const result = await index.search(q, {
     page,

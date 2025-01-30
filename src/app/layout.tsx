@@ -74,10 +74,10 @@ export default async function RootLayout({
           {children}
           <Footer
             classNameInner="sm:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:pb-[calc(env(safe-area-inset-bottom)+0.5rem)] "
-            className="bottom-[calc(env(safe-area-inset-bottom)+3rem)] sm:bottom-0"
+            className="bottom-[calc(env(safe-area-inset-bottom)+3.25rem)] sm:bottom-0"
           />
-          <BottomBar className="h-[calc(env(safe-area-inset-bottom)+3rem)] pb-[env(safe-area-inset-bottom)] sm:hidden" />
-          <div className="h-[calc(env(safe-area-inset-bottom)+3rem)] sm:hidden" />
+          <BottomBar className="h-[calc(env(safe-area-inset-bottom)+3.25rem)] pb-[env(safe-area-inset-bottom)] sm:hidden" />
+          <div className="h-[calc(env(safe-area-inset-bottom)+3.25rem)] sm:hidden" />
           <Toaster
             position="top-right"
             icons={{

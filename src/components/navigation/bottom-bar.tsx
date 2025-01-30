@@ -10,11 +10,11 @@ export default function BottomBar({ className }: Props) {
   return (
     <nav
       className={cn(
-        "w-full bg-purple-300 flex shadow-navbar shadow-shadow/[var(--opacity-shadow)] border-t fixed bottom-0 z-50 bg-background",
+        "w-full flex shadow-navbar shadow-shadow/[var(--opacity-shadow)] border-t fixed bottom-0 z-50 bg-background",
         className
       )}
     >
-      <div className="w-full h-full flex p-1">
+      <div className="w-full h-full flex p-0.75">
         <NavbarTabs className="w-full" classNameTab="flex-1 rounded-lg" />
       </div>
       <TopLoader />

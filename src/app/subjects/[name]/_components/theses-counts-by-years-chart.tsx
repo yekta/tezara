@@ -11,19 +11,19 @@ import { cn } from "@/components/ui/utils";
 import { Bar, BarChart, XAxis } from "recharts";
 
 type Props = {
-  name: string;
   chartData: {
     [key: string]: string;
   }[];
   dataKeys: string[];
   className?: string;
+  subjectName: string;
 };
 
 export default function ThesesCountsByYearsChart({
-  name,
   chartData,
   dataKeys,
   className,
+  subjectName,
 }: Props) {
   const chartConfig = {} as ChartConfig;
 
@@ -40,7 +40,7 @@ export default function ThesesCountsByYearsChart({
   return (
     <div className={cn("w-full flex flex-col gap-3", className)}>
       <h2 className="max-w-full font-bold text-balance px-4 text-xl">
-        {name} Bünyesinde Yapılan Tezlerin Yıllara Göre Dağılımı
+        {subjectName} Konulu Tezlerin Yıllara Göre Dağılımı
       </h2>
       <div className="w-full sm:px-2">
         <div className="w-full bg-background-hover sm:rounded-xl flex flex-col">

@@ -1,3 +1,5 @@
+import { subjectsRoute } from "@/app/subjects/_components/constants";
+import { universitiesRoute } from "@/app/universities/_components/constants";
 import type { MetadataRoute } from "next";
 import { env } from "process";
 
@@ -18,16 +20,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${env.NEXT_PUBLIC_SITE_URL}/universities`,
+      url: `${env.NEXT_PUBLIC_SITE_URL}${universitiesRoute}`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
-    } /* ,
+    },
+    {
+      url: `${env.NEXT_PUBLIC_SITE_URL}${subjectsRoute}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1,
+    },
+    /* ,
     {
       url: `${env.NEXT_PUBLIC_SITE_URL}/thesis`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
-    }, */,
+    }, */
   ];
 }

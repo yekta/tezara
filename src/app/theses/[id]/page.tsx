@@ -57,6 +57,7 @@ export default async function Page({ params }: Props) {
       departments: [],
       authors: [],
       advisors: [],
+      subjects: [],
       sort: undefined,
       year_gte: null,
       year_lte: null,

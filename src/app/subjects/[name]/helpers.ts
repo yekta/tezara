@@ -1,8 +1,8 @@
-import { universitiesRoute } from "@/app/universities/_components/constants";
+import { subjectsRoute } from "@/app/subjects/_components/constants";
 import {
-  getUniversity,
-  getUniversityPageData,
-} from "@/server/clickhouse/repo/university";
+  getSubjectPageData,
+  getSubjectStat,
+} from "@/server/clickhouse/repo/subject";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import { cache } from "react";
@@ -12,42 +12,41 @@ export const cachedGetPageData = cache(({ name }: { name: string }) =>
 );
 
 async function getPageData({ name }: { name: string }) {
-  const statsQueryPromise = getUniversityPageData({ name });
+  const pageDataPromise = getSubjectPageData({ name });
   const lastThesesPromise = searchTheses({
     q: "",
     hits_per_page: 10,
     page: 1,
     sort: undefined,
-    universities: [name],
+    universities: [],
     departments: [],
     languages: [],
     advisors: [],
     authors: [],
     thesis_types: [],
+    subjects: [name],
     search_on: [],
-    subjects: [],
     attributes_to_retrieve: undefined,
     attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
     year_gte: null,
     year_lte: null,
     client: meiliAdmin,
   });
-  const universityStatsPromise = getUniversity({ name });
+  const subjectStatPromise = getSubjectStat({ name });
 
   const start = performance.now();
-  const [statsQueryRes, lastThesesRes, universityStats] = await Promise.all([
-    statsQueryPromise,
+  const [pageDataRes, lastThesesRes, subjectStat] = await Promise.all([
+    pageDataPromise,
     lastThesesPromise,
-    universityStatsPromise,
+    subjectStatPromise,
   ]);
   console.log(
-    `${universitiesRoute}/[name]:getPageData("${name}") | ${Math.round(
+    `${subjectsRoute}/[name]:getPageData("${name}") | ${Math.round(
       performance.now() - start
     ).toLocaleString()}ms`
   );
 
-  const { thesisCountsByYearsData, languagesData, subjectsData } =
-    statsQueryRes;
+  const { thesisCountsByYearsData, languagesData } = pageDataRes;
 
   const thesesCountsByYears: Record<string, Record<string, number>> = {};
   let minYear = Infinity;
@@ -64,9 +63,6 @@ async function getPageData({ name }: { name: string }) {
 
   const languages = new Map<string, number>(
     languagesData.map(({ language, count }) => [language, count])
-  );
-  const subjects = new Map<string, number>(
-    subjectsData.map(({ subject_name, count }) => [subject_name, count])
   );
   const thesisTypes = new Map<string, number>();
 
@@ -130,19 +126,9 @@ async function getPageData({ name }: { name: string }) {
     }
   }
 
-  const popularSubjectsChartData = Array.from(subjects.entries())
-    .map(([keyword, count]) => ({
-      keyword,
-      count,
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
-
   return {
     thesesCountsByYearsChartData,
-    popularSubjectsChartData,
-    universityStats,
-    subjects,
+    subjectStat,
     languages,
     minYear,
     maxYear,

@@ -26,15 +26,17 @@ export async function getUniversities({ client }: { client: MeiliSearch }) {
 export async function searchUniversities({
   q,
   client,
+  page = 1,
   hits_per_page = 100,
 }: {
   q: string;
   client: MeiliSearch;
+  page?: number;
   hits_per_page?: number;
 }) {
   const index = client.index<TUniversity>(indexName);
   const result = await index.search(q, {
-    page: 1,
+    page,
     hitsPerPage: hits_per_page,
     sort: ["name:asc"],
     attributesToRetrieve: ["name"],

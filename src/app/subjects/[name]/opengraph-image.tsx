@@ -1,5 +1,7 @@
+import { cachedGetPageData } from "@/app/subjects/[name]/helpers";
 import {
   background,
+  DefaultOpenGraphResponse,
   defaultParagraphClassName,
   foreground,
   foregroundMuted,
@@ -8,9 +10,13 @@ import {
   opengraphContentType,
   opengraphSize,
 } from "@/components/default-opengraph-image";
+import FolderClosedIcon from "@/components/icons/folder-closed";
+import GlobeIcon from "@/components/icons/globe";
 import LandmarkIcon from "@/components/icons/landmark";
+import PenToolIcon from "@/components/icons/pen-tool";
+import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
-import { apiServerStatic } from "@/server/trpc/setup/server";
+import { truncateString } from "@/lib/helpers";
 import { ImageResponse } from "next/og";
 import { ComponentProps, FC } from "react";
 
@@ -18,15 +24,32 @@ export const alt = "Üniversite sayfası";
 export const size = opengraphSize;
 export const contentType = opengraphContentType;
 
-const logoSize = 256;
+type Props = {
+  params: Promise<{ name: string }>;
+};
 
-export default async function Image() {
-  const { totalCount } = await apiServerStatic.main.getUniversities({
-    page: 1,
-  });
+const logoSize = 220;
+
+export default async function Image({ params }: Props) {
+  const { name } = await params;
+  const parsedName = decodeURIComponent(name);
+
+  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+
+  try {
+    res = await cachedGetPageData({ name: parsedName });
+  } catch (error) {
+    console.log(error);
+  }
+
+  if (!res) {
+    return DefaultOpenGraphResponse();
+  }
+
+  const { thesesCount, subjectStat, languages } = res;
+
   return new ImageResponse(
     (
-      // ImageResponse JSX element
       <div
         style={{
           background: background,
@@ -42,10 +65,10 @@ export default async function Image() {
           justifyContent: "center",
         }}
       >
-        <LandmarkIcon
+        <FolderClosedIcon
           style={{
-            width: 256,
-            height: 256,
+            width: 200,
+            height: 200,
             color: foreground,
             position: "absolute",
             opacity: 0.15,
@@ -63,16 +86,15 @@ export default async function Image() {
         />
         <p
           style={{
-            fontSize: 128,
+            fontSize: 64,
             width: "100%",
             lineHeight: 1.2,
-            marginTop: 32,
+            marginTop: 36,
             fontWeight: 700,
-            letterSpacing: -3,
             ...defaultParagraphClassName,
           }}
         >
-          Üniversiteler
+          {truncateString(parsedName, 70)}
         </p>
         <div
           style={{
@@ -80,11 +102,31 @@ export default async function Image() {
             alignItems: "center",
             gap: 32,
             fontSize: 32,
-            marginTop: -24,
+            marginTop: -8,
             fontWeight: 500,
           }}
         >
-          <Stat label="Üniversite" value={totalCount} Icon={LandmarkIcon} />
+          <Stat label="Tez" value={thesesCount} Icon={ScrollTextIcon} />
+          <Stat
+            label="Üniversite"
+            value={subjectStat.university_count}
+            Icon={LandmarkIcon}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 32,
+            marginTop: -28,
+          }}
+        >
+          <Stat label="Dil" value={languages.size} Icon={GlobeIcon} />
+          <Stat
+            label="Yazar"
+            value={subjectStat.author_count}
+            Icon={PenToolIcon}
+          />
         </div>
       </div>
     ),

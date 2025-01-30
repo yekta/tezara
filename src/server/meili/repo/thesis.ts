@@ -28,13 +28,14 @@ export async function searchTheses({
   client,
   q,
   languages,
-  thesis_types,
   universities,
   departments,
   advisors,
   authors,
   year_gte,
   year_lte,
+  thesis_types,
+  subjects,
   sort,
   hits_per_page,
   page = PAGE_DEFAULT,
@@ -56,6 +57,7 @@ export async function searchTheses({
   let advisorFilter = "";
   let authorsFilter = "";
   let thesisTypeFilter = "";
+  let subjectFilter = "";
 
   if (attributes_to_not_retrieve && attributes_to_not_retrieve.length > 0) {
     attributes_to_retrieve = allThesisAttributes.filter(
@@ -86,6 +88,10 @@ export async function searchTheses({
   if (thesis_types && thesis_types.length > 0) {
     const entries = thesis_types.map((t) => `thesis_type = "${t}"`);
     thesisTypeFilter = `(${entries.join(" OR ")})`;
+  }
+  if (subjects && subjects.length > 0) {
+    const entries = subjects.map((s) => `subjects.name = "${s}"`);
+    subjectFilter = `(${entries.join(" OR ")})`;
   }
 
   if (languageFilter.length > 0) {
@@ -125,6 +131,13 @@ export async function searchTheses({
       filter += " AND ";
     }
     filter += thesisTypeFilter;
+  }
+
+  if (subjectFilter.length > 0) {
+    if (filter.length > 0) {
+      filter += " AND ";
+    }
+    filter += subjectFilter;
   }
 
   if (year_gte) {
@@ -177,6 +190,7 @@ export async function searchTheses({
     attributesToSearchOn:
       attributesToSearchOn.length > 0 ? attributesToSearchOn : undefined,
   });
+
   return result;
 }
 export type TSearchThesesResult = Awaited<ReturnType<typeof searchTheses>>;

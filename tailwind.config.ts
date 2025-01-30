@@ -104,6 +104,9 @@ const config: Config = {
           DEFAULT: "hsl(var(--x))",
           foreground: "hsl(var(--x-foreground))",
         },
+        "top-loader": {
+          DEFAULT: "hsl(var(--top-loader))",
+        },
         barrier: "hsl(var(--barrier))",
       },
       opacity: {
@@ -210,6 +213,7 @@ const config: Config = {
         navbar: "0rem 0rem 0.5rem 0rem, 0rem 0rem 0.75rem 0rem",
         dialog: "0rem 0.5rem 1rem 0rem",
         "card-highlight": "inset 0rem 0rem 0rem 4px",
+        underline: "inset 0rem -3px 0rem 0rem",
       },
     },
     animation: {

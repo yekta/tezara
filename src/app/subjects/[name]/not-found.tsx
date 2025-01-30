@@ -1,4 +1,4 @@
-import { universitiesRoute } from "@/app/universities/_components/constants";
+import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { LinkButton } from "@/components/ui/button";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
@@ -11,11 +11,11 @@ export default function NotFound() {
           id="title"
           className="max-w-full pt-3 text-balance min-w-0 font-semibold text-muted-foreground text-center text-2xl leading-tight"
         >
-          Üniversite bulunamadı
+          Konu bulunamadı
         </h1>
-        <LinkButton href={universitiesRoute} className="mt-5">
+        <LinkButton href={subjectsRoute} className="mt-5">
           <ArrowLeftIcon className="size-5 -my-5 -ml-1.5" />
-          <p className="shrink min-w-0">Tüm Üniversiteler</p>
+          <p className="shrink min-w-0">Tüm Konular</p>
         </LinkButton>
       </div>
     </div>
