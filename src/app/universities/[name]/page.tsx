@@ -182,10 +182,9 @@ export default async function Page({ params }: Props) {
             href={`${searchRoute}?universities=${encodeURIComponent(
               parsedName
             )}`}
-            size="sm"
-            className="py-1.5 px-3.75 -ml-0.5"
+            className="py-2.25 px-4.5 gap-2 -ml-0.5"
           >
-            <SearchIcon className="size-4 -ml-1.25" />
+            <SearchIcon className="size-5 -ml-1.75" />
             <span className="flex shrink min-w-0">Tümünü Ara</span>
           </LinkButton>
         </div>

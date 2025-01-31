@@ -68,7 +68,7 @@ export default function FilterChips({ className }: Props) {
     totalSelectedFilters > 0 && (
       <div
         className={cn(
-          "w-full max-w-3xl flex flex-wrap items-center justify-center gap-1",
+          "w-full max-w-3xl flex flex-wrap items-center justify-center",
           className
         )}
       >
@@ -172,19 +172,20 @@ function Chip({
   onClick: () => void;
 }) {
   return (
-    <Button
-      onClick={onClick}
-      variant="warning-ghost"
-      className="flex border border-warning/16 items-center gap-0.75 justify-center text-xs px-2 py-1 rounded-full bg-warning/10 
-      text-warning"
-      type="button"
-      forceMinSize="medium"
-    >
-      <Icon className="size-3.5 shrink-0 -ml-0.25" />
-      <span className="shrink whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0 text-xs font-semibold">
-        {truncateString(children.toString(), 12)}
-      </span>
-      <XIcon className="size-3.5 shrink-0 -ml-0.25 -mr-0.75" />
-    </Button>
+    <div className="max-w-[33.33%] sm:max-w-[25%] p-0.5">
+      <Button
+        onClick={onClick}
+        variant="warning-ghost"
+        className="w-full flex border border-warning/16 items-center gap-0.75 justify-center text-xs px-2 py-1 rounded-full bg-warning/10 text-warning"
+        type="button"
+        forceMinSize="medium"
+      >
+        <Icon className="size-3.5 shrink-0 -ml-0.25" />
+        <span className="shrink whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0 text-xs font-semibold">
+          {children}
+        </span>
+        <XIcon className="size-3.5 shrink-0 -ml-0.25 -mr-0.75" />
+      </Button>
+    </div>
   );
 }
