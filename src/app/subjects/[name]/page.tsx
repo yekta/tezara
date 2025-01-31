@@ -8,7 +8,10 @@ import Chip from "@/components/chip";
 import Highlighted from "@/components/highlighted";
 import LandmarkIcon from "@/components/icons/landmark";
 import PenToolIcon from "@/components/icons/pen-tool";
+import { SearchIcon } from "@/components/icons/search-icon";
+import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
+import { LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
@@ -154,9 +157,19 @@ export default async function Page({ params }: Props) {
         />
       </div>
       <div className="w-full flex flex-col pt-10">
-        <h2 className="font-bold px-4 text-xl">
-          {parsedName} Konulu Son 10 Tez
-        </h2>
+        <div className="w-full flex flex-wrap items-center justify-start px-4 gap-2">
+          <h2 className="font-bold text-xl pr-2.5">
+            {parsedName} Konulu Son 10 Tez
+          </h2>
+          <LinkButton
+            href={`${searchRoute}?subjects=${encodeURIComponent(parsedName)}`}
+            size="sm"
+            className="py-1.5 px-3.75 -ml-0.5"
+          >
+            <SearchIcon className="size-4 -ml-1.25" />
+            <span className="flex shrink min-w-0">Tümünü Ara</span>
+          </LinkButton>
+        </div>
         <ThesisRowList
           disableSubjectLink
           data={lastThesesRes}

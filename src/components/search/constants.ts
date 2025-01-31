@@ -23,6 +23,8 @@ import {
 } from "nuqs";
 import { z } from "zod";
 
+export const searchRoute = "/search";
+
 export const AttributesToSearchOnEnum = z.enum([
   "title",
   "abstract",

@@ -1,5 +1,6 @@
 import Sidebar from "@/app/theses/[id]/_components/Sidebar";
 import GoBackBar from "@/app/theses/[id]/go-back-bar";
+import { searchRoute } from "@/components/search/constants";
 
 type Props = {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ export default async function Layout({ params, children }: Props) {
   return (
     <div className="w-full flex flex-col items-center flex-1">
       <GoBackBar
-        defaultPath="/search"
+        defaultPath={searchRoute}
         buttonText="Geri Dön"
         className="-mb-3 md:mb-0"
       />

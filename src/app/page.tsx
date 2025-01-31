@@ -5,6 +5,7 @@ import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-pag
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisor";
 import { getLanguages } from "@/server/meili/repo/language";
+import { getSubjects } from "@/server/meili/repo/subject";
 import { getThesisTypes } from "@/server/meili/repo/thesis-type";
 import { getUniversities } from "@/server/meili/repo/university";
 import {
@@ -20,10 +21,11 @@ export default async function Home({ searchParams }: Props) {
   await cachedSearchLikePageSearchParams.parse(searchParams);
   const queryClient = getQueryClientServer();
 
-  const [languages, universities, thesisTypes] = await Promise.all([
+  const [languages, universities, thesisTypes, subjects] = await Promise.all([
     getLanguages({ client: meili }),
     getUniversities({ client: meili }),
     getThesisTypes({ client: meili }),
+    getSubjects({ client: meili, languages: ["Turkish"] }),
     queryClient.prefetchQuery({
       queryKey: ["advisors", undefined],
       queryFn: () =>
@@ -48,6 +50,7 @@ export default async function Home({ searchParams }: Props) {
             languagesData={languages.hits}
             universitiesData={universities.hits}
             thesisTypesData={thesisTypes.hits}
+            subjectsData={subjects.hits}
             className="mt-6"
             variant="home"
           />

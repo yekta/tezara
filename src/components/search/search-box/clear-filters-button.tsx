@@ -18,6 +18,7 @@ export default function ClearFiltersButton() {
   const [yearGte, setYearsGte] = useSearchLikePageParam.year_gte();
   const [yearLte, setYearLte] = useSearchLikePageParam.year_lte();
   const [searchOn, setSearchOn] = useSearchLikePageParam.search_on();
+  const [subjects, setSubjects] = useSearchLikePageParam.subjects();
 
   const totalSelectedFilters = useMemo(() => {
     let total = 0;
@@ -30,6 +31,7 @@ export default function ClearFiltersButton() {
     if (yearLte !== null && yearLte !== undefined) total += 1;
     if (yearGte !== null && yearGte !== undefined) total += 1;
     if (searchOn) total += searchOn.length;
+    if (subjects) total += subjects.length;
     return total;
   }, [
     languages,
@@ -41,6 +43,7 @@ export default function ClearFiltersButton() {
     yearGte,
     yearLte,
     searchOn,
+    subjects,
   ]);
 
   const setYearGteKey = useSetAtom(yearGteKeyAtom);
@@ -58,6 +61,7 @@ export default function ClearFiltersButton() {
     setYearLte(null);
     setYearLteKey((k) => k + 1);
     setSearchOn([]);
+    setSubjects([]);
   };
 
   return (

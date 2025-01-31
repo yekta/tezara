@@ -7,6 +7,7 @@ import {
   PAGE_DEFAULT,
   searchLikePageParamKeys,
   searchLikePageParamParsers,
+  searchRoute,
 } from "@/components/search/constants";
 import { useEffectAfterCurrentPageMount } from "@/lib/hooks/use-effect-after-current-page-mount";
 import { meili } from "@/server/meili/constants-client";
@@ -43,7 +44,7 @@ export const SearchResultsProvider: React.FC<{
 }> = ({ children }) => {
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const isSearchResultsPath = pathname.startsWith("/search");
+  const isSearchResultsPath = pathname.startsWith(searchRoute);
 
   const [query] = useQueryState("q", searchLikePageParamParsers.q);
   const [languages] = useQueryState(

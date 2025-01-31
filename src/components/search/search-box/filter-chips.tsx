@@ -1,4 +1,5 @@
 import BuildingIcon from "@/components/icons/building";
+import FolderClosedIcon from "@/components/icons/folder-closed";
 import GlobeIcon from "@/components/icons/globe";
 import LandmarkIcon from "@/components/icons/landmark";
 import PenToolIcon from "@/components/icons/pen-tool";
@@ -27,6 +28,7 @@ type Props = {
 
 export default function FilterChips({ className }: Props) {
   const [searchOn, setSearchOn] = useSearchLikePageParam.search_on();
+  const [subjects, setSubjects] = useSearchLikePageParam.subjects();
   const [yearGte, setYearsGte] = useSearchLikePageParam.year_gte();
   const [yearLte, setYearLte] = useSearchLikePageParam.year_lte();
   const [universities, setUniversities] = useSearchLikePageParam.universities();
@@ -47,6 +49,7 @@ export default function FilterChips({ className }: Props) {
     if (yearLte !== null && yearLte !== undefined) total += 1;
     if (yearGte !== null && yearGte !== undefined) total += 1;
     if (searchOn) total += searchOn.length;
+    if (subjects) total += subjects.length;
     return total;
   }, [
     languages,
@@ -58,13 +61,14 @@ export default function FilterChips({ className }: Props) {
     yearGte,
     yearLte,
     searchOn,
+    subjects,
   ]);
 
   return (
     totalSelectedFilters > 0 && (
       <div
         className={cn(
-          "w-full flex flex-wrap items-center justify-center gap-1",
+          "w-full max-w-3xl flex flex-wrap items-center justify-center gap-1",
           className
         )}
       >
@@ -73,6 +77,11 @@ export default function FilterChips({ className }: Props) {
           valueLabelMap={searchOnOptionsMap}
           onClick={(v) => setSearchOn((prev) => prev.filter((i) => i !== v))}
           Icon={SearchCheckIcon}
+        />
+        <Chips
+          value={subjects}
+          onClick={(v) => setSubjects((prev) => prev.filter((i) => i !== v))}
+          Icon={FolderClosedIcon}
         />
         <Chips
           value={yearGte}

@@ -5,6 +5,7 @@ import DetailsListItem from "@/app/theses/_components/details-list-item";
 import DetailsListItemSubjects from "@/app/theses/_components/details-list-item-subjects";
 import DetailsListItemUniversity from "@/app/theses/_components/details-list-item-university";
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
+import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
@@ -211,7 +212,7 @@ export default async function Page({ params }: Props) {
       )}
       <NavigationSection id={thesis.id} className="md:hidden py-4" />
       <GoBackBar
-        defaultPath="/search"
+        defaultPath={searchRoute}
         buttonText="Geri Dön"
         className="pb-4 -mt-2 md:mt-6"
       />

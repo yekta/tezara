@@ -4,6 +4,7 @@ import { useIsTouchscreen } from "@/components/providers/is-touchscreen-provider
 import { SearchLikePageQueryParamProvider } from "@/components/search/query-param-provider";
 import AdvancedFiltersSection from "@/components/search/search-box/advanced-filters-section";
 import ButtonsSection from "@/components/search/search-box/buttons-section";
+import FilterChips from "@/components/search/search-box/filter-chips";
 import {
   focusToMainInput,
   mainSearchInputId,
@@ -13,6 +14,7 @@ import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
+import { TGetSubjectsResult } from "@/server/meili/repo/subject";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { usePostHog } from "posthog-js/react";
@@ -25,6 +27,7 @@ type Props = {
   universitiesData: TGetUniversitiesResult["hits"];
   languagesData: TGetLanguagesResult["hits"];
   thesisTypesData: TGetThesisTypesResult["hits"];
+  subjectsData: TGetSubjectsResult["hits"];
 };
 
 const searchRoute = "/search";
@@ -33,6 +36,7 @@ export default function SearchBox({
   languagesData,
   universitiesData,
   thesisTypesData,
+  subjectsData,
   className,
   variant,
 }: Props) {
@@ -121,11 +125,13 @@ export default function SearchBox({
         <SearchInput variant={variant} isPendingPush={isPendingPush} />
         <div className="w-full flex flex-col items-center group pt-3">
           <ButtonsSection isPendingPush={isPendingPush} />
+          <FilterChips className="pt-2.5" />
           <AdvancedFiltersSection
             className="pt-2"
             universitiesData={universitiesData}
             languagesData={languagesData}
             thesisTypesData={thesisTypesData}
+            subjectsData={subjectsData}
           />
         </div>
       </form>

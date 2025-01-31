@@ -1,9 +1,11 @@
 "use client";
 
+import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import FolderClosedIcon from "@/components/icons/folder-closed";
 import LandmarkIcon from "@/components/icons/landmark";
 import { SearchIcon } from "@/components/icons/search-icon";
+import { searchRoute } from "@/components/search/constants";
 import {
   LinkButton,
   minButtonSizeEnforcerClassName,
@@ -26,7 +28,7 @@ type TTab = {
 export default function NavbarTabs({ className, classNameTab }: Props) {
   const pathname = usePathname();
   const tabs: TTab[] = [
-    { label: "Ara", href: "/search", Icon: SearchIcon },
+    { label: "Ara", href: searchRoute, Icon: SearchIcon },
     {
       label: "Üniversiteler",
       href: universitiesRoute,
@@ -34,7 +36,7 @@ export default function NavbarTabs({ className, classNameTab }: Props) {
     },
     {
       label: "Konular",
-      href: "/subjects",
+      href: subjectsRoute,
       Icon: FolderClosedIcon,
     },
   ];

@@ -17,6 +17,7 @@ import {
   getQueryClientServer,
   HydrateClient,
 } from "@/server/trpc/setup/server";
+import { getSubjects } from "@/server/meili/repo/subject";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -57,38 +58,40 @@ export default async function Page({ searchParams }: Props) {
     attributes_to_retrieve: undefined,
   });
 
-  const [languagesData, universitiesData, thesisTypesData] = await Promise.all([
-    getLanguages({ client: meili }),
-    getUniversities({ client: meili }),
-    getThesisTypes({ client: meili }),
-    queryClient.prefetchQuery({
-      queryKey,
-      queryFn: () =>
-        searchTheses({
-          q,
-          languages,
-          universities,
-          departments,
-          advisors,
-          authors,
-          thesis_types,
-          subjects,
-          year_gte,
-          year_lte,
-          page,
-          hits_per_page: HITS_PER_PAGE_DEFAULT,
-          sort: undefined,
-          attributes_to_not_retrieve: [
-            "abstract_original",
-            "abstract_translated",
-          ],
-          search_on,
-          attributes_to_retrieve: undefined,
-          client: meiliAdmin,
-        }),
-    }),
-    ...getSearchLikePagePrefetchPromises({ queryClient }),
-  ]);
+  const [languagesData, universitiesData, thesisTypesData, subjectsData] =
+    await Promise.all([
+      getLanguages({ client: meili }),
+      getUniversities({ client: meili }),
+      getThesisTypes({ client: meili }),
+      getSubjects({ client: meili, languages: ["Turkish"] }),
+      queryClient.prefetchQuery({
+        queryKey,
+        queryFn: () =>
+          searchTheses({
+            q,
+            languages,
+            universities,
+            departments,
+            advisors,
+            authors,
+            thesis_types,
+            subjects,
+            year_gte,
+            year_lte,
+            page,
+            hits_per_page: HITS_PER_PAGE_DEFAULT,
+            sort: undefined,
+            attributes_to_not_retrieve: [
+              "abstract_original",
+              "abstract_translated",
+            ],
+            search_on,
+            attributes_to_retrieve: undefined,
+            client: meiliAdmin,
+          }),
+      }),
+      ...getSearchLikePagePrefetchPromises({ queryClient }),
+    ]);
 
   return (
     <HydrateClient>
@@ -98,6 +101,7 @@ export default async function Page({ searchParams }: Props) {
             languagesData={languagesData.hits}
             universitiesData={universitiesData.hits}
             thesisTypesData={thesisTypesData.hits}
+            subjectsData={subjectsData.hits}
             variant="search"
           />
           <SearchResults />

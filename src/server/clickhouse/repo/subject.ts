@@ -34,6 +34,7 @@ export async function getSubjectStats({
       q,
       client: meiliAdmin,
       languages,
+      hits_per_page: 100,
     });
     searchResults = res.hits.map((h) => h.name);
   }
@@ -149,6 +150,7 @@ export async function getTotalSubjectStatsCount({
     const res = await searchSubjects({
       q,
       client: meiliAdmin,
+      hits_per_page: 100,
       languages,
     });
     searchResults = res.hits.map((h) => h.name);

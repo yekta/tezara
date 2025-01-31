@@ -1,23 +1,25 @@
+import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import AdvisorsField from "@/components/search/search-box/filters/advisors";
 import AuthorsField from "@/components/search/search-box/filters/authors";
 import DepartmentsField from "@/components/search/search-box/filters/departments";
 import LanguagesField from "@/components/search/search-box/filters/languages";
 import SearchOnField from "@/components/search/search-box/filters/search-on";
+import SubjectsField from "@/components/search/search-box/filters/subjects";
 import ThesisTypesField from "@/components/search/search-box/filters/thesis-types";
 import UniversitiesField from "@/components/search/search-box/filters/universities";
 import YearsField from "@/components/search/search-box/filters/years";
-import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { cn } from "@/components/ui/utils";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
+import { TGetSubjectsResult } from "@/server/meili/repo/subject";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
-import FilterChips from "@/components/search/search-box/filter-chips";
 
 type Props = {
   className?: string;
   universitiesData: TGetUniversitiesResult["hits"];
   languagesData: TGetLanguagesResult["hits"];
   thesisTypesData: TGetThesisTypesResult["hits"];
+  subjectsData: TGetSubjectsResult["hits"];
 };
 
 export default function AdvancedFiltersSection({
@@ -25,6 +27,7 @@ export default function AdvancedFiltersSection({
   universitiesData,
   languagesData,
   thesisTypesData,
+  subjectsData,
 }: Props) {
   const [advanced] = useSearchLikePageParam.advanced();
   return (
@@ -35,9 +38,11 @@ export default function AdvancedFiltersSection({
           className
         )}
       >
-        <FilterChips className="pt-0.75 pb-2" />
         <FieldWrapper>
           <SearchOnField />
+        </FieldWrapper>
+        <FieldWrapper>
+          <SubjectsField subjectsData={subjectsData} />
         </FieldWrapper>
         <FieldWrapper>
           <YearsField />

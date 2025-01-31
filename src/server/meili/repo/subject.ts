@@ -28,7 +28,7 @@ export async function getSubjects({
 export async function searchSubjects({
   q,
   client,
-  hits_per_page = 100,
+  hits_per_page = 50,
   page = 1,
   languages,
 }: {
@@ -55,3 +55,5 @@ export async function searchSubjects({
 
   return result;
 }
+
+export type TGetSubjectsResult = Awaited<ReturnType<typeof getSubjects>>;
