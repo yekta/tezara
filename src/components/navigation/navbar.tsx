@@ -27,17 +27,20 @@ export default async function Navbar({}: { className?: string }) {
           <NavbarTabs />
         </div>
       </div>
-      <div className="flex flex-wrap min-w-0 items-center justify-end gap-1">
+      <div className="flex flex-wrap min-w-0 items-center justify-end gap-1.5">
         {/* <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.buymeacoffee.name}
             href={sc.buymeacoffee.href}
-            size="icon"
-            variant="ghost"
-            className="size-8.5 rounded-lg"
+            size="sm"
             target="_blank"
+            className="bg-yellow-300 px-3.5 not-touch:hover:bg-yellow-400 active:bg-yellow-400  py-1.5 text-foreground dark:text-background gap-2"
           >
-            <ScIcon slug={sc.buymeacoffee.slug} className="size-7 shrink-0" />
+            <ScIcon
+              slug={sc.buymeacoffee.slug}
+              className="size-7 p-0.75 -my-3 -ml-3 rounded-full bg-background text-foreground shrink-0"
+            />
+            <p>Bağış</p>
           </LinkButton>
         </NavigationMenuItem> */}
         <NavigationMenuItem asChild>
