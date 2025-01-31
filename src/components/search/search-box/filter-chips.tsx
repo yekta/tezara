@@ -13,7 +13,6 @@ import {
 import { searchOnOptionsMap } from "@/components/search/search-box/filters/search-on";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
-import { truncateString } from "@/lib/helpers";
 import {
   CalendarArrowDownIcon,
   CalendarArrowUpIcon,
