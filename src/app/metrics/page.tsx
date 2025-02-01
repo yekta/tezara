@@ -1,3 +1,4 @@
+import RefreshedAt from "@/app/metrics/_components/refreshed-at";
 import { SearchIcon } from "@/components/icons/search-icon";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
@@ -197,12 +198,6 @@ export default async function Page() {
     await res.json();
   const results = json.results;
   const lastRefresh = new Date(json.last_refresh);
-  const rtf = new Intl.RelativeTimeFormat("tr", {
-    style: "short",
-    numeric: "auto",
-  });
-  const difference = lastRefresh.getTime() - Date.now();
-  const differenceInMinutes = Math.floor(difference / 1000 / 60);
 
   return (
     <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
@@ -210,9 +205,7 @@ export default async function Page() {
         <h1 className="px-4 w-full font-bold text-3xl text-balance leading-tight">
           Kullanım Metrikleri
         </h1>
-        <p className="w-full text-muted-foreground font-medium text-sm px-4 pt-1">
-          Son güncelleme: {rtf.format(differenceInMinutes, "minute")}{" "}
-        </p>
+        <RefreshedAt timestamp={lastRefresh.getTime()} />
       </div>
       <Section
         title="Son 24 Saat"
