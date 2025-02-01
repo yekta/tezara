@@ -13,13 +13,12 @@ import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getThesis, searchTheses } from "@/server/meili/repo/thesis";
 import { Metadata } from "next";
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
-
-export const revalidate = 3600;
 
 const noAbstractText = "Özet yok.";
 const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
@@ -28,6 +27,9 @@ const noTranslatedTitle = "Başlık çevirisi mevcut değil.";
 const notAvailable = "Belirtilmemiş.";
 
 export default async function Page({ params }: Props) {
+  "use cache";
+  cacheLife("default");
+
   const { id } = await params;
   const idNumber = parseInt(Number(id).toString());
   const isIdValid = !isNaN(idNumber) && idNumber >= 0;

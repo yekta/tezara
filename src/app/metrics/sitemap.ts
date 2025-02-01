@@ -3,10 +3,12 @@ import { meiliAdmin } from "@/server/meili/constants-server";
 import { getUniversities } from "@/server/meili/repo/university";
 import type { MetadataRoute } from "next";
 import { env } from "process";
-
-export const revalidate = 3600;
+import { unstable_cacheLife as cacheLife } from "next/cache";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  "use cache";
+  cacheLife("default");
+
   const data = await getUniversities({ client: meiliAdmin });
   const universities: MetadataRoute.Sitemap = data.hits.map((u) => ({
     url: `${env.NEXT_PUBLIC_SITE_URL}${universitiesRoute}/${encodeURIComponent(

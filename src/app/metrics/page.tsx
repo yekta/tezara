@@ -6,102 +6,8 @@ import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
 import { Metadata } from "next";
-import { headers } from "next/headers";
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import { FC } from "react";
-
-export const revalidate = 1800;
-
-const posthogUrl = `https://us.posthog.com/api/projects/${env.POSTHOG_PROJECT_ID}/query/`;
-const posthogHeaders = {
-  Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
-  "Content-Type": "application/json",
-};
-const payload = {
-  query: {
-    kind: "HogQLQuery",
-    query: `
-      SELECT 
-          'pageviews_unique_24h' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'pageviews_unique_30d' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'pageviews_unique_alltime' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = '$pageview'
-      UNION ALL
-      SELECT 
-          'pageviews_total_24h' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'pageviews_total_30d' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'pageviews_total_alltime' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = '$pageview'
-      UNION ALL
-      SELECT 
-          'searched_unique_24h' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'searched_unique_30d' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'searched_unique_alltime' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = 'Searched'
-      UNION ALL
-      SELECT 
-          'searched_total_24h' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'searched_total_30d' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'searched_total_alltime' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = 'Searched'
-  `,
-  },
-};
 
 type TInterval = "24h" | "30d" | "alltime";
 type Card = {
@@ -190,17 +96,10 @@ const cards: Card[] = [
 ];
 
 export default async function Page() {
-  await headers();
-  const res = await fetch(posthogUrl, {
-    method: "POST",
-    headers: posthogHeaders,
-    body: JSON.stringify(payload),
-  });
-  const json: { results: [string, number][]; last_refresh: string } =
-    await res.json();
-  const results = json.results;
-  const lastRefresh = new Date(json.last_refresh);
+  "use cache";
+  cacheLife("default");
 
+  const { results, lastRefresh } = await getStats();
   return (
     <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
       <div className="w-full flex flex-col">
@@ -295,3 +194,109 @@ export const metadata: Metadata = {
     description,
   }),
 };
+
+async function getStats() {
+  const posthogUrl = `https://us.posthog.com/api/projects/${env.POSTHOG_PROJECT_ID}/query/`;
+  const posthogHeaders = {
+    Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
+    "Content-Type": "application/json",
+  };
+  const payload = {
+    query: {
+      kind: "HogQLQuery",
+      query: `
+      SELECT 
+          'pageviews_unique_24h' AS time_range, 
+          count(DISTINCT distinct_id) AS count
+      FROM events
+      WHERE event = '$pageview'
+          AND timestamp > now() - INTERVAL 24 HOUR
+      UNION ALL
+      SELECT 
+          'pageviews_unique_30d' AS time_range, 
+          count(DISTINCT distinct_id) AS count
+      FROM events
+      WHERE event = '$pageview'
+          AND timestamp > now() - INTERVAL 30 DAY
+      UNION ALL
+      SELECT 
+          'pageviews_unique_alltime' AS time_range, 
+          count(DISTINCT distinct_id) AS count
+      FROM events
+      WHERE event = '$pageview'
+      UNION ALL
+      SELECT 
+          'pageviews_total_24h' AS time_range, 
+          count(*) AS count
+      FROM events
+      WHERE event = '$pageview'
+          AND timestamp > now() - INTERVAL 24 HOUR
+      UNION ALL
+      SELECT 
+          'pageviews_total_30d' AS time_range, 
+          count(*) AS count
+      FROM events
+      WHERE event = '$pageview'
+          AND timestamp > now() - INTERVAL 30 DAY
+      UNION ALL
+      SELECT 
+          'pageviews_total_alltime' AS time_range, 
+          count(*) AS count
+      FROM events
+      WHERE event = '$pageview'
+      UNION ALL
+      SELECT 
+          'searched_unique_24h' AS time_range, 
+          count(DISTINCT distinct_id) AS count
+      FROM events
+      WHERE event = 'Searched'
+          AND timestamp > now() - INTERVAL 24 HOUR
+      UNION ALL
+      SELECT 
+          'searched_unique_30d' AS time_range, 
+          count(DISTINCT distinct_id) AS count
+      FROM events
+      WHERE event = 'Searched'
+          AND timestamp > now() - INTERVAL 30 DAY
+      UNION ALL
+      SELECT 
+          'searched_unique_alltime' AS time_range, 
+          count(DISTINCT distinct_id) AS count
+      FROM events
+      WHERE event = 'Searched'
+      UNION ALL
+      SELECT 
+          'searched_total_24h' AS time_range, 
+          count(*) AS count
+      FROM events
+      WHERE event = 'Searched'
+          AND timestamp > now() - INTERVAL 24 HOUR
+      UNION ALL
+      SELECT 
+          'searched_total_30d' AS time_range, 
+          count(*) AS count
+      FROM events
+      WHERE event = 'Searched'
+          AND timestamp > now() - INTERVAL 30 DAY
+      UNION ALL
+      SELECT 
+          'searched_total_alltime' AS time_range, 
+          count(*) AS count
+      FROM events
+      WHERE event = 'Searched'
+  `,
+    },
+  };
+
+  const res = await fetch(posthogUrl, {
+    method: "POST",
+    headers: posthogHeaders,
+    body: JSON.stringify(payload),
+  });
+  const json: { results: [string, number][]; last_refresh: string } =
+    await res.json();
+  const results = json.results;
+  const lastRefresh = new Date(json.last_refresh);
+
+  return { results, lastRefresh };
+}

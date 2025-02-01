@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    useCache: true,
+  },
   async rewrites() {
     if (
       !process.env.NEXT_PUBLIC_POSTHOG_HOST ||

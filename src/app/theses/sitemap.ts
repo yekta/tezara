@@ -3,8 +3,7 @@ import { env } from "@/lib/env";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import { MetadataRoute } from "next";
-
-export const revalidate = 3600;
+import { unstable_cacheLife as cacheLife } from "next/cache";
 
 const SITEMAP_ENTRIES_PER_PAGE = 5_000;
 
@@ -19,6 +18,9 @@ export default async function sitemap({
 }: {
   id: number;
 }): Promise<MetadataRoute.Sitemap> {
+  "use cache";
+  cacheLife("default");
+
   const idNumber = Number(id);
   const data = await getTheses({ page: idNumber });
 

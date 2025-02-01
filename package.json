@@ -43,7 +43,7 @@
     "jotai": "^2.11.1",
     "lucide-react": "^0.468.0",
     "meilisearch": "^0.48.1",
-    "next": "15.1.4",
+    "next": "^15.2.0-canary.33",
     "next-themes": "^0.4.4",
     "nextjs-toploader": "^3.7.15",
     "nuqs": "^2.3.1",
