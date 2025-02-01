@@ -2,7 +2,6 @@ import { thesesRoute } from "@/app/theses/_components/constants";
 import { generateSitemaps as generateThesisSitemaps } from "@/app/theses/sitemap";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import { env } from "@/lib/env";
-import { unstable_cacheLife as cacheLife } from "next/cache";
 
 function getFileName(id: string | number) {
   return `${id}.xml`;
@@ -26,9 +25,6 @@ function getSitemapsString(ids: { id: string | number }[], dir: string) {
 }
 
 export async function GET() {
-  "use cache";
-  cacheLife("default");
-
   const thesisSitemaps = await generateThesisSitemaps();
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

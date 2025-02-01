@@ -8,6 +8,9 @@ import { unstable_cacheLife as cacheLife } from "next/cache";
 const SITEMAP_ENTRIES_PER_PAGE = 5_000;
 
 export async function generateSitemaps() {
+  "use cache";
+  cacheLife("default");
+
   const data = await getTheses({ page: 1 });
   const arr = Array.from({ length: data.totalPages }, (_, i) => i);
   return [...arr.map((i) => ({ id: i + 1 }))];
