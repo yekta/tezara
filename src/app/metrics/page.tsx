@@ -172,7 +172,7 @@ function Card({
             {title}
           </h3>
         </div>
-        <p className="font-bold text-2xl py-6 text-center leading-tight">
+        <p className="w-full px-2 font-bold text-2xl py-6 text-center leading-tight">
           {count.toLocaleString("tr-TR")}
         </p>
       </div>
