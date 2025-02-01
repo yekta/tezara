@@ -57,9 +57,10 @@ export default async function Image() {
         />
         <p
           style={{
-            fontSize: 128,
+            fontSize: 112,
             width: "100%",
-            lineHeight: 1,
+            lineHeight: 1.05,
+            paddingRight: 80,
             marginTop: 32,
             fontWeight: 700,
             letterSpacing: -3,
