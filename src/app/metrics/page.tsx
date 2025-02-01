@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { FC } from "react";
 
 export const revalidate = 1800;
@@ -189,6 +190,7 @@ const cards: Card[] = [
 ];
 
 export default async function Page() {
+  await headers();
   const res = await fetch(posthogUrl, {
     method: "POST",
     headers: posthogHeaders,
