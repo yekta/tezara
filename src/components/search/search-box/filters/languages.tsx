@@ -7,11 +7,18 @@ import { useSearchLikePageParam } from "@/components/search/query-param-provider
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 type Props = {
   languagesData: TGetLanguagesResult["hits"];
 };
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Languages",
+  },
+];
 
 export default function LanguagesField({ languagesData }: Props) {
   const [languages, setLanguages] = useSearchLikePageParam.languages();
@@ -22,6 +29,13 @@ export default function LanguagesField({ languagesData }: Props) {
   const clearLanguages = useCallback(() => {
     setLanguages([]);
   }, [setLanguages]);
+
+  useEffect(() => {
+    if (!languages || languages.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [languages]);
 
   const languageOptions = useMemo(
     () =>
@@ -36,10 +50,6 @@ export default function LanguagesField({ languagesData }: Props) {
     <MultiSelectCombobox
       label="Dil Bazlı Filtrele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Language Filter Clicked");
-        posthog.capture("Language Filter Clicked");
-      }}
       Icon={GlobeIcon}
       IconSetForItem={LanguageIcon}
       iconSetForItemClassName="rounded-full"

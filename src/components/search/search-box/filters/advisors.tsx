@@ -13,7 +13,14 @@ import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisor";
 import { useQuery } from "@tanstack/react-query";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Advisors",
+  },
+];
 
 export default function AdvisorsField() {
   const [advisors, setAdvisors] = useSearchLikePageParam.advisors();
@@ -26,6 +33,13 @@ export default function AdvisorsField() {
   const clearAdvisors = useCallback(() => {
     setAdvisors([]);
   }, [setAdvisors]);
+
+  useEffect(() => {
+    if (!advisors || advisors.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [advisors]);
 
   const {
     data: advisorsData,
@@ -61,13 +75,13 @@ export default function AdvisorsField() {
       commandFilter={() => 1}
       label="Danışman Bazlı Filtrele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Advisor Filter Clicked");
-        posthog.capture("Advisor Filter Clicked");
-      }}
       Icon={UserPenIcon}
       commandInputValue={queryAdvisors}
-      commandInputOnValueChange={(v) => setQueryAdvisors(v)}
+      commandInputOnValueChange={(v) => {
+        setQueryAdvisors(v);
+        umami.capture(...eventData);
+        posthog.capture(...eventData);
+      }}
       isAsync
       isPending={isPendingAdvisors}
       isFetching={isFetchingAdvisors}

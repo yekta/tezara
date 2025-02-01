@@ -13,7 +13,14 @@ import { meili } from "@/server/meili/constants-client";
 import { searchDepartments } from "@/server/meili/repo/department";
 import { useQuery } from "@tanstack/react-query";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Departments",
+  },
+];
 
 export default function DepartmentsField() {
   const [departments, setDepartments] = useSearchLikePageParam.departments();
@@ -26,6 +33,13 @@ export default function DepartmentsField() {
   const clearDepartments = useCallback(() => {
     setDepartments([]);
   }, [setDepartments]);
+
+  useEffect(() => {
+    if (!departments || departments.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departments]);
 
   const {
     data: departmentsData,
@@ -61,10 +75,6 @@ export default function DepartmentsField() {
       commandFilter={() => 1}
       label="Ana Bilim Dalı Bazlı Filtrele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Department Filter Clicked");
-        posthog.capture("Department Filter Clicked");
-      }}
       Icon={BuildingIcon}
       commandInputValue={queryDepartments}
       commandInputOnValueChange={(v) => setQueryDepartments(v)}

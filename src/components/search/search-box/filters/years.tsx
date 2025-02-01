@@ -12,6 +12,7 @@ import { yearGteKeyAtom, yearLteKeyAtom } from "@/lib/store/main";
 import { useAtom } from "jotai";
 import { CalendarArrowDownIcon, CalendarArrowUpIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
+import { useEffect } from "react";
 
 const clearButtonText = "Temizle";
 
@@ -21,6 +22,22 @@ const yearOptions = Array.from({ length: maxYear - minYear + 1 }, (_, i) => ({
   value: `${maxYear - i}`,
   label: `${maxYear - i}`,
 }));
+
+const eventDataGte: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Years",
+    "Filter Variant": "GTE",
+  },
+];
+
+const eventDataLte: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Years",
+    "Filter Variant": "LTE",
+  },
+];
 
 export default function YearsField() {
   const [yearGte, setYearGte] = useSearchLikePageParam.year_gte();
@@ -41,17 +58,25 @@ export default function YearsField() {
     setYearLteKey((k) => k + 1);
   };
 
+  useEffect(() => {
+    if (yearGte === null) return;
+    umami.capture(...eventDataGte);
+    posthog.capture(...eventDataGte);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearGte]);
+
+  useEffect(() => {
+    if (yearLte === null) return;
+    umami.capture(...eventDataLte);
+    posthog.capture(...eventDataLte);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearLte]);
+
   return (
     <>
       {/* Year Gte */}
       <Select
         key={`year-gte-${yearGteKey}`}
-        onOpenChange={(o) => {
-          if (o) {
-            umami.capture("Year GTE Filter Clicked");
-            posthog.capture("Year GTE Filter Clicked");
-          }
-        }}
         value={yearGte?.toString()}
         onValueChange={(v) => {
           if (v === clearButtonText) {
@@ -105,12 +130,6 @@ export default function YearsField() {
       {/* Year LTE */}
       <Select
         key={`year-lte-${yearLteKey}`}
-        onOpenChange={(o) => {
-          if (o) {
-            umami.capture("Year LTE Filter Clicked");
-            posthog.capture("Year LTE Filter Clicked");
-          }
-        }}
         value={yearLte?.toString()}
         onValueChange={(v) => {
           if (v === clearButtonText) {

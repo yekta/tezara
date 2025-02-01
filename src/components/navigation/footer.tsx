@@ -1,3 +1,4 @@
+import { metricsRoute } from "@/app/metrics/_components/constants";
 import ThemeButton from "@/components/theme-button";
 import { cn } from "@/components/ui/utils";
 import { sc, siteTitle } from "@/lib/constants";
@@ -51,6 +52,10 @@ export default async function Footer({
               •
             </span>
             <FooterLink href={sc.github.href}>{sc.github.name}</FooterLink>
+            <span className="px-0.5 md:px-0.75 text-muted-more-foreground">
+              •
+            </span>
+            <FooterLink href={metricsRoute}>Metrikler</FooterLink>
           </div>
         </div>
         <div className="flex items-center justify-end gap-1.75">

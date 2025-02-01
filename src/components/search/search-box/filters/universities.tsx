@@ -6,11 +6,18 @@ import { useSearchLikePageParam } from "@/components/search/query-param-provider
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 type Props = {
   universitiesData: TGetUniversitiesResult["hits"];
 };
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Universities",
+  },
+];
 
 export default function UniversitiesField({ universitiesData }: Props) {
   const [universities, setUniversities] = useSearchLikePageParam.universities();
@@ -21,6 +28,13 @@ export default function UniversitiesField({ universitiesData }: Props) {
   const clearUniversities = useCallback(() => {
     setUniversities([]);
   }, [setUniversities]);
+
+  useEffect(() => {
+    if (!universities || universities.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [universities]);
 
   const universityOptions = useMemo(
     () =>
@@ -35,10 +49,6 @@ export default function UniversitiesField({ universitiesData }: Props) {
     <MultiSelectCombobox
       label="Üniversite Bazlı Filterele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("University Filter Clicked");
-        posthog.capture("University Filter Clicked");
-      }}
       Icon={LandmarkIcon}
       commandButtonText={
         <div className="flex-1 min-w-0 flex items-center gap-1.5">

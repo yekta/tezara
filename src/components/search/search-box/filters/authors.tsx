@@ -13,7 +13,14 @@ import { meili } from "@/server/meili/constants-client";
 import { searchAuthors } from "@/server/meili/repo/author";
 import { useQuery } from "@tanstack/react-query";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Authors",
+  },
+];
 
 export default function AuthorsField() {
   const [authors, setAuthors] = useSearchLikePageParam.authors();
@@ -29,6 +36,13 @@ export default function AuthorsField() {
   const clearAuthors = useCallback(() => {
     setAuthors([]);
   }, [setAuthors]);
+
+  useEffect(() => {
+    if (!authors || authors.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authors]);
 
   const {
     data: authorsData,
@@ -64,10 +78,6 @@ export default function AuthorsField() {
       commandFilter={() => 1}
       label="Yazar Bazlı Filtrele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Author Filter Clicked");
-        posthog.capture("Author Filter Clicked");
-      }}
       Icon={PenToolIcon}
       commandInputValue={queryAuthors}
       commandInputOnValueChange={(v) => setQueryAuthors(v)}

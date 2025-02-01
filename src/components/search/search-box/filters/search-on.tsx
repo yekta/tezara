@@ -6,7 +6,14 @@ import { useSearchLikePageParam } from "@/components/search/query-param-provider
 import { useUmami } from "@/lib/hooks/use-umami";
 import { SearchCheckIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Search On",
+  },
+];
 
 export default function SearchOnField() {
   const [searchOn, setSearchOn] = useSearchLikePageParam.search_on();
@@ -18,14 +25,17 @@ export default function SearchOnField() {
     setSearchOn([]);
   }, [setSearchOn]);
 
+  useEffect(() => {
+    if (!searchOn || searchOn.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchOn]);
+
   return (
     <MultiSelectCombobox
       label="Arama Alanı Seç"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Search On Filter Clicked");
-        posthog.capture("Search On Filter Clicked");
-      }}
       Icon={SearchCheckIcon}
       commandButtonText={
         <div className="flex-1 min-w-0 flex items-center gap-1.5">

@@ -1,10 +1,11 @@
+import { metricsRoute } from "@/app/metrics/_components/constants";
 import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import { searchRoute } from "@/components/search/constants";
 import type { MetadataRoute } from "next";
 import { env } from "process";
 
-export const revalidate = 3600;
+export const revalidate = 60 * 60;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
@@ -30,6 +31,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${env.NEXT_PUBLIC_SITE_URL}${subjectsRoute}`,
       lastModified: new Date(),
       changeFrequency: "daily",
+      priority: 1,
+    },
+    {
+      url: `${env.NEXT_PUBLIC_SITE_URL}${metricsRoute}`,
+      lastModified: new Date(),
+      changeFrequency: "hourly",
       priority: 1,
     },
     /* ,

@@ -6,11 +6,18 @@ import { useSearchLikePageParam } from "@/components/search/query-param-provider
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetSubjectsResult } from "@/server/meili/repo/subject";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 type Props = {
   subjectsData: TGetSubjectsResult["hits"];
 };
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Subjects",
+  },
+];
 
 export default function SubjectsField({ subjectsData }: Props) {
   const [subjects, setSubjects] = useSearchLikePageParam.subjects();
@@ -21,6 +28,20 @@ export default function SubjectsField({ subjectsData }: Props) {
   const clearSubjects = useCallback(() => {
     setSubjects([]);
   }, [setSubjects]);
+
+  useEffect(() => {
+    if (!subjects || subjects.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjects]);
+
+  useEffect(() => {
+    if (!subjects || subjects.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjects]);
 
   const subjectOptions = useMemo(
     () =>
@@ -35,10 +56,6 @@ export default function SubjectsField({ subjectsData }: Props) {
     <MultiSelectCombobox
       label="Konu Bazlı Filterele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Subject Filter Clicked");
-        posthog.capture("Subject Filter Clicked");
-      }}
       Icon={FolderClosedIcon}
       commandButtonText={
         <div className="flex-1 min-w-0 flex items-center gap-1.5">

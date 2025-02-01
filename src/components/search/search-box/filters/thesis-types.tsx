@@ -7,11 +7,18 @@ import { useSearchLikePageParam } from "@/components/search/query-param-provider
 import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 type Props = {
   thesisTypesData: TGetThesisTypesResult["hits"];
 };
+
+const eventData: [string, Record<string, string>] = [
+  "Filtered",
+  {
+    "Filter Type": "Thesis Types",
+  },
+];
 
 export default function ThesisTypesField({ thesisTypesData }: Props) {
   const [thesisTypes, setThesisTypes] = useSearchLikePageParam.thesis_types();
@@ -22,6 +29,13 @@ export default function ThesisTypesField({ thesisTypesData }: Props) {
   const clearThesisTypes = useCallback(() => {
     setThesisTypes([]);
   }, [setThesisTypes]);
+
+  useEffect(() => {
+    if (!thesisTypes || thesisTypes.length < 1) return;
+    umami.capture(...eventData);
+    posthog.capture(...eventData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [thesisTypes]);
 
   const thesisTypeOptions = useMemo(
     () =>
@@ -36,10 +50,6 @@ export default function ThesisTypesField({ thesisTypesData }: Props) {
     <MultiSelectCombobox
       label="Tez Türü Bazlı Filtrele"
       className="w-full"
-      triggerOnClick={() => {
-        umami.capture("Thesis Type Filter Clicked");
-        posthog.capture("Thesis Type Filter Clicked");
-      }}
       Icon={ScrollTextIcon}
       IconSetForItem={ThesisTypeIcon}
       commandButtonText={
