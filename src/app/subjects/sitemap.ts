@@ -4,7 +4,7 @@ import { getSubjects } from "@/server/meili/repo/subject";
 import type { MetadataRoute } from "next";
 import { env } from "process";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const data = await getSubjects({

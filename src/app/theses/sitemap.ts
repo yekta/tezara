@@ -4,7 +4,7 @@ import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import { MetadataRoute } from "next";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 const SITEMAP_ENTRIES_PER_PAGE = 5_000;
 

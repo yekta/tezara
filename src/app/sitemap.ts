@@ -5,7 +5,7 @@ import { searchRoute } from "@/components/search/constants";
 import type { MetadataRoute } from "next";
 import { env } from "process";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [

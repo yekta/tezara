@@ -7,7 +7,7 @@ import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
 import { Metadata } from "next";
 import { FC } from "react";
 
-export const revalidate = 60 * 30;
+export const revalidate = 1800;
 
 const posthogUrl = `https://us.posthog.com/api/projects/${env.POSTHOG_PROJECT_ID}/query/`;
 const posthogHeaders = {

@@ -3,7 +3,7 @@ import { generateSitemaps as generateThesisSitemaps } from "@/app/theses/sitemap
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import { env } from "@/lib/env";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 function getFileName(id: string | number) {
   return `${id}.xml`;

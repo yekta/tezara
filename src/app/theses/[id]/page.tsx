@@ -19,7 +19,7 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 const noAbstractText = "Özet yok.";
 const noTranslatedAbstractText = "Özet çevirisi mevcut değil.";
