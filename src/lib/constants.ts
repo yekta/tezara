@@ -30,7 +30,7 @@ export const sc: Record<
 > = {
   buymeacoffee: {
     name: "Bağış Yap",
-    href: "https://buymeacoffee.com/yekta",
+    href: "https://buymeacoffee.com/yekta?ref=tezara.org",
     slug: "buymeacoffee",
     joinable: true,
     xOrder: 1,

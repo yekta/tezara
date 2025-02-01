@@ -9,7 +9,7 @@ import { sc } from "@/lib/constants";
 export default async function Navbar({}: { className?: string }) {
   return (
     <NavbarWrapper>
-      <div className="flex flex-1 min-w-0">
+      <div className="flex shrink min-w-0 items-center">
         <div className="flex shrink-0 flex-wrap items-center justify-start gap-1.5">
           <NavigationMenuItem asChild>
             <LinkButton
@@ -27,22 +27,24 @@ export default async function Navbar({}: { className?: string }) {
           <NavbarTabs />
         </div>
       </div>
-      <div className="flex flex-wrap min-w-0 items-center justify-end gap-1.5">
-        {/* <NavigationMenuItem asChild>
+      <div className="flex shrink min-w-0 items-center justify-end gap-1.5">
+        <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.buymeacoffee.name}
             href={sc.buymeacoffee.href}
             size="sm"
             target="_blank"
-            className="bg-yellow-300 px-3.5 not-touch:hover:bg-yellow-400 active:bg-yellow-400  py-1.5 text-foreground dark:text-background gap-2"
+            className="bg-yellow-300 px-3.5 shrink min-w-0 not-touch:hover:bg-yellow-400 active:bg-yellow-400  py-1.5 text-foreground dark:text-background gap-2"
           >
             <ScIcon
               slug={sc.buymeacoffee.slug}
-              className="size-7 p-0.75 -my-3 -ml-3 rounded-full bg-background text-foreground shrink-0"
+              className="size-7 p-0.75 -my-3 -ml-3 rounded-full bg-yellow-100 text-foreground dark:text-background shrink-0"
             />
-            <p>Bağış</p>
+            <p className="shrink min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
+              Bağış
+            </p>
           </LinkButton>
-        </NavigationMenuItem> */}
+        </NavigationMenuItem>
         <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.x.name}
