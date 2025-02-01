@@ -165,16 +165,14 @@ function Card({
 }) {
   return (
     <li className="w-full flex flex-col sm:w-1/2 lg:w-1/4 p-1">
-      <div className="w-full flex-1 border rounded-xl flex flex-col items-center gap-2 px-4 py-3">
-        <div className="w-full flex-1 flex items-start justify-center text-muted-foreground">
-          <div className="w-full flex items-center justify-center gap-1">
-            <Icon className="size-4 -ml-0.5 shrink-0" />
-            <h3 className="font-medium whitespace-nowrap overflow-hidden overflow-ellipsis shrink min-w-0 text-sm leading-tight">
-              {title}
-            </h3>
-          </div>
+      <div className="w-full flex-1 border rounded-xl flex flex-col items-center px-4 py-3">
+        <div className="w-full flex items-center justify-center gap-1 text-muted-foreground">
+          <Icon className="size-4 -ml-0.5 shrink-0" />
+          <h3 className="font-medium whitespace-nowrap overflow-hidden overflow-ellipsis shrink min-w-0 text-sm leading-tight">
+            {title}
+          </h3>
         </div>
-        <p className="font-bold text-2xl py-4 text-center leading-tight">
+        <p className="font-bold text-2xl py-6 text-center leading-tight">
           {count.toLocaleString("tr-TR")}
         </p>
       </div>
