@@ -4,10 +4,11 @@ import { getSubjects } from "@/server/meili/repo/subject";
 import type { MetadataRoute } from "next";
 import { env } from "process";
 import { unstable_cacheLife as cacheLife } from "next/cache";
+import { cacheConfig } from "@/lib/constants";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";
-  cacheLife("default");
+  cacheLife(cacheConfig.longer);
 
   const data = await getSubjects({
     languages: ["Turkish"],

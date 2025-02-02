@@ -1,4 +1,5 @@
 import { universitiesRoute } from "@/app/universities/_components/constants";
+import { cacheConfig } from "@/lib/constants";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getUniversities } from "@/server/meili/repo/university";
 import type { MetadataRoute } from "next";
@@ -7,7 +8,7 @@ import { env } from "process";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";
-  cacheLife("default");
+  cacheLife(cacheConfig.longer);
 
   const data = await getUniversities({ client: meiliAdmin });
   const universities: MetadataRoute.Sitemap = data.hits.map((u) => ({
