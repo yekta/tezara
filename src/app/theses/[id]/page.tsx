@@ -8,7 +8,7 @@ import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
-import { cacheConfig, siteTitle } from "@/lib/constants";
+import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getThesis, searchTheses } from "@/server/meili/repo/thesis";
@@ -28,7 +28,7 @@ const notAvailable = "Belirtilmemiş.";
 
 export default async function Page({ params }: Props) {
   "use cache";
-  cacheLife(cacheConfig.longer);
+  cacheLife("default");
 
   const { id } = await params;
   const idNumber = parseInt(Number(id).toString());

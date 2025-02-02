@@ -1,5 +1,4 @@
 import { env } from "@/lib/env";
-import { unstable_cacheLife as cacheLife } from "next/cache";
 
 export const siteTitle = "Tezara";
 export const siteTagline = "Tez Arama ve Metaveri Analizi Platformu";
@@ -11,19 +10,6 @@ export const previewImages = {
   path: `${staticAssetsRoute}/previews`,
   version: "v3",
 };
-
-export const cacheConfig = {
-  default: {
-    stale: 900,
-    revalidate: 300,
-    expire: undefined,
-  },
-  longer: {
-    stale: 3600,
-    revalidate: 1800,
-    expire: undefined,
-  },
-} satisfies Record<string, Parameters<typeof cacheLife>[0]>;
 
 export const getPreviewUrl = (slug: string) =>
   `${env.NEXT_PUBLIC_SITE_URL}${previewImages.path}/${previewImages.version}/${slug}.png`;

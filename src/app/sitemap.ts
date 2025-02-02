@@ -2,14 +2,13 @@ import { metricsRoute } from "@/app/metrics/_components/constants";
 import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import { searchRoute } from "@/components/search/constants";
-import { cacheConfig } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 import { unstable_cacheLife as cacheLife } from "next/cache";
 import { env } from "process";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";
-  cacheLife(cacheConfig.longer);
+  cacheLife("default");
 
   return [
     {

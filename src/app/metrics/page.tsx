@@ -1,7 +1,7 @@
 import RefreshedAt from "@/app/metrics/_components/refreshed-at";
 import { SearchIcon } from "@/components/icons/search-icon";
 import { cn } from "@/components/ui/utils";
-import { cacheConfig, siteTitle } from "@/lib/constants";
+import { siteTitle } from "@/lib/constants";
 import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
@@ -97,7 +97,7 @@ const cards: Card[] = [
 
 export default async function Page() {
   "use cache";
-  cacheLife(cacheConfig.default);
+  cacheLife("default");
 
   const { results, lastRefresh } = await getStats();
   return (
