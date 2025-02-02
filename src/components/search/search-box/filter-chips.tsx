@@ -67,7 +67,7 @@ export default function FilterChips({ className }: Props) {
     totalSelectedFilters > 0 && (
       <div
         className={cn(
-          "w-full max-w-3xl flex flex-wrap items-center justify-center",
+          "w-full max-w-3xl flex flex-wrap items-center justify-center -my-0.5",
           className
         )}
       >

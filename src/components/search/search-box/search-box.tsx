@@ -125,9 +125,9 @@ export default function SearchBox({
         <SearchInput variant={variant} isPendingPush={isPendingPush} />
         <div className="w-full flex flex-col items-center group pt-3">
           <ButtonsSection isPendingPush={isPendingPush} />
-          <FilterChips className="pt-2.5" />
+          <FilterChips className="pt-2.75" />
           <AdvancedFiltersSection
-            className="pt-2"
+            className="pt-2.75"
             universitiesData={universitiesData}
             languagesData={languagesData}
             thesisTypesData={thesisTypesData}

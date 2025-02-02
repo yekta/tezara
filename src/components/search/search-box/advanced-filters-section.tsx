@@ -34,7 +34,7 @@ export default function AdvancedFiltersSection({
     advanced && (
       <div
         className={cn(
-          "w-full max-w-3xl flex justify-center flex-wrap",
+          "w-full max-w-3xl flex justify-center flex-wrap -mt-1",
           className
         )}
       >
