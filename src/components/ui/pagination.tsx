@@ -1,8 +1,8 @@
 import { ButtonProps, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
   EllipsisIcon,
@@ -90,7 +90,7 @@ const PaginationPrevious = ({
     {variant === "first" ? (
       <ChevronsLeftIcon className="size-5" />
     ) : (
-      <ArrowLeftIcon className="size-5" />
+      <ChevronLeftIcon className="size-5" />
     )}
   </PaginationLink>
 );
@@ -115,7 +115,7 @@ const PaginationNext = ({
     {variant === "last" ? (
       <ChevronsRightIcon className="size-5" />
     ) : (
-      <ArrowRightIcon className="size-5" />
+      <ChevronRightIcon className="size-5" />
     )}
   </PaginationLink>
 );
