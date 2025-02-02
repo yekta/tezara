@@ -1,10 +1,14 @@
 import GoBackBar from "@/app/theses/[id]/go-back-bar";
-import { universitiesRoute } from "@/app/universities/_components/constants";
 import LanguagesChart from "@/app/universities/[name]/_components/languages-chart";
 import PopularSubjectsChart from "@/app/universities/[name]/_components/popular-subjects-chart";
 import ThesesCountsByYearsChart from "@/app/universities/[name]/_components/theses-counts-by-years-chart";
 import ThesisTypesChart from "@/app/universities/[name]/_components/thesis-types-chart";
 import { cachedGetPageData } from "@/app/universities/[name]/helpers";
+import { universitiesRoute } from "@/app/universities/_components/constants";
+import Chip from "@/components/chip";
+import Highlighted from "@/components/highlighted";
+import SearchAllLinkButton from "@/components/search-all-link-button";
+import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
@@ -19,11 +23,6 @@ import {
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FC } from "react";
-import Highlighted from "@/components/highlighted";
-import Chip from "@/components/chip";
-import { LinkButton } from "@/components/ui/button";
-import { searchRoute } from "@/components/search/constants";
-import { SearchIcon } from "@/components/icons/search-icon";
 
 type Props = {
   params: Promise<{ name: string }>;
@@ -178,15 +177,14 @@ export default async function Page({ params }: Props) {
           <h2 className="font-bold text-xl pr-2.5">
             {parsedName} Bünyesinde Yapılan Son 10 Tez
           </h2>
-          <LinkButton
+          <SearchAllLinkButton
+            variant="universities"
             href={`${searchRoute}?universities=${encodeURIComponent(
               parsedName
             )}`}
-            className="py-2.25 px-4.5 gap-2 -ml-0.5"
-          >
-            <SearchIcon className="size-5 -ml-1.75" />
-            <span className="flex shrink min-w-0">Tümünü Ara</span>
-          </LinkButton>
+            className="-ml-0.5"
+            filters={{ universities: [parsedName] }}
+          />
         </div>
         <ThesisRowList
           disableUniversityLink

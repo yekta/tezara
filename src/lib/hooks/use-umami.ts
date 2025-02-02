@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 type TUmamiTrackFunction = (
   event: string,
-  props?: Record<string, string | number>
+  props?: Record<string, unknown>
 ) => void;
 
 type TUmamiOriginal = {

@@ -8,10 +8,9 @@ import Chip from "@/components/chip";
 import Highlighted from "@/components/highlighted";
 import LandmarkIcon from "@/components/icons/landmark";
 import PenToolIcon from "@/components/icons/pen-tool";
-import { SearchIcon } from "@/components/icons/search-icon";
+import SearchAllLinkButton from "@/components/search-all-link-button";
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
-import { LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
@@ -161,13 +160,12 @@ export default async function Page({ params }: Props) {
           <h2 className="font-bold text-xl pr-2.5">
             {parsedName} Konulu Son 10 Tez
           </h2>
-          <LinkButton
+          <SearchAllLinkButton
+            variant="subjects"
             href={`${searchRoute}?subjects=${encodeURIComponent(parsedName)}`}
-            className="py-2.25 px-4.5 gap-2 -ml-0.5"
-          >
-            <SearchIcon className="size-5 -ml-1.75" />
-            <span className="flex shrink min-w-0">Tümünü Ara</span>
-          </LinkButton>
+            className="-ml-0.5"
+            filters={{ subjects: [parsedName] }}
+          />
         </div>
         <ThesisRowList
           disableSubjectLink
