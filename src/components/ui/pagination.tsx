@@ -1,14 +1,14 @@
-import * as React from "react";
-import { cn } from "@/components/ui/utils";
 import { ButtonProps, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/components/ui/utils";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
   EllipsisIcon,
 } from "lucide-react";
 import Link from "next/link";
+import * as React from "react";
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
@@ -90,7 +90,7 @@ const PaginationPrevious = ({
     {variant === "first" ? (
       <ChevronsLeftIcon className="size-5" />
     ) : (
-      <ChevronLeftIcon className="size-5" />
+      <ArrowLeftIcon className="size-5" />
     )}
   </PaginationLink>
 );
@@ -115,7 +115,7 @@ const PaginationNext = ({
     {variant === "last" ? (
       <ChevronsRightIcon className="size-5" />
     ) : (
-      <ChevronRightIcon className="size-5" />
+      <ArrowRightIcon className="size-5" />
     )}
   </PaginationLink>
 );
@@ -139,9 +139,9 @@ PaginationEllipsis.displayName = "PaginationEllipsis";
 export {
   Pagination,
   PaginationContent,
-  PaginationLink,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
   PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
 };

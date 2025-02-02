@@ -66,22 +66,22 @@ export default function PaginationBar({
       <PaginationContent className="w-full flex">
         <PaginationItem className="-ml-1">
           <PaginationPrevious
-            disabled={!hasPrev}
-            isButton
-            onClick={() => {
-              goToPrevPage();
-              sendEvent(prevPage);
-            }}
-          />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationPrevious
             variant="first"
             disabled={!hasPrev}
             isButton
             onClick={() => {
               goToPage(firstPage);
               sendEvent(firstPage);
+            }}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationPrevious
+            disabled={!hasPrev}
+            isButton
+            onClick={() => {
+              goToPrevPage();
+              sendEvent(prevPage);
             }}
           />
         </PaginationItem>
@@ -103,22 +103,22 @@ export default function PaginationBar({
         </li>
         <PaginationItem>
           <PaginationNext
+            isButton
+            disabled={!hasNext}
+            onClick={() => {
+              goToNextPage();
+              sendEvent(nextPage);
+            }}
+          />
+        </PaginationItem>
+        <PaginationItem className="-mr-1">
+          <PaginationNext
             variant="last"
             isButton
             disabled={!hasNext}
             onClick={() => {
               goToPage(lastPage);
               sendEvent(lastPage);
-            }}
-          />
-        </PaginationItem>
-        <PaginationItem className="-mr-1">
-          <PaginationNext
-            isButton
-            disabled={!hasNext}
-            onClick={() => {
-              goToNextPage();
-              sendEvent(nextPage);
             }}
           />
         </PaginationItem>
