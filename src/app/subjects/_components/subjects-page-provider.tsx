@@ -21,6 +21,7 @@ type TSubjectsPageContext = AppRouterQueryResult<
   prevPage: number | undefined;
   nextPage: number | undefined;
   currentPage: number;
+  hasMultiplePages: boolean | undefined;
 };
 
 const SubjectsPageContext = createContext<TSubjectsPageContext | null>(null);
@@ -67,6 +68,9 @@ export const SubjectsPageProvider: React.FC<{
       ? Math.min(Math.max(totalPages, 1), Math.max(1, page + 1))
       : undefined;
 
+  const hasMultiplePages =
+    totalPages === undefined ? undefined : totalPages > 1;
+
   const goToPrevPage = () => {
     if (prevPage !== undefined) setPage(prevPage);
   };
@@ -95,6 +99,7 @@ export const SubjectsPageProvider: React.FC<{
         prevPage,
         nextPage,
         currentPage: page,
+        hasMultiplePages,
       }}
     >
       {children}

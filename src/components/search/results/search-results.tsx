@@ -45,6 +45,7 @@ export default function SearchResults({}: Props) {
     lastPage,
     prevPage,
     nextPage,
+    hasMultiplePages,
   } = searchResultsContext;
 
   const isHardError = !data && !isPending && isError;
@@ -298,20 +299,22 @@ export default function SearchResults({}: Props) {
           (data && data.hits && data.hits.length > 0)) && (
           <ResultsSection data={data} />
         )}
-        <PaginationBar
-          eventName="Prev/Next Search Result Page Button Clicked"
-          hasNext={hasNext}
-          hasPrev={hasPrev}
-          prevPage={prevPage}
-          nextPage={nextPage}
-          goToPage={goToPage}
-          goToNextPage={goToNextPage}
-          goToPrevPage={goToPrevPage}
-          currentPage={currentPage}
-          firstPage={firstPage}
-          lastPage={lastPage}
-          showLoader={isJustFetching}
-        />
+        {hasMultiplePages === true && (
+          <PaginationBar
+            eventName="Prev/Next Search Result Page Button Clicked"
+            hasNext={hasNext}
+            hasPrev={hasPrev}
+            prevPage={prevPage}
+            nextPage={nextPage}
+            goToPage={goToPage}
+            goToNextPage={goToNextPage}
+            goToPrevPage={goToPrevPage}
+            currentPage={currentPage}
+            firstPage={firstPage}
+            lastPage={lastPage}
+            showLoader={isJustFetching}
+          />
+        )}
       </div>
     </div>
   );

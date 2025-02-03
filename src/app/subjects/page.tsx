@@ -50,7 +50,7 @@ export default async function Page({ searchParams }: Props) {
             </div>
             <SubjectsCardsGrid />
             <div className="w-full px-2">
-              <SubjectsPaginationBar className="px-1.5" />
+              <SubjectsPaginationBar hideWhenSinglePage className="px-1.5" />
             </div>
           </div>
         </SubjectsPageProvider>

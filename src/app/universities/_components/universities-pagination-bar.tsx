@@ -6,9 +6,13 @@ import { cn } from "@/components/ui/utils";
 
 type Props = {
   className?: string;
+  hideWhenSinglePage?: boolean;
 };
 
-export default function UniversitiesPaginationBar({ className }: Props) {
+export default function UniversitiesPaginationBar({
+  hideWhenSinglePage,
+  className,
+}: Props) {
   const {
     hasNext,
     goToNextPage,
@@ -21,8 +25,9 @@ export default function UniversitiesPaginationBar({ className }: Props) {
     hasPrev,
     isPending,
     isFetching,
+    hasMultiplePages,
   } = useUniversitiesPage();
-  return (
+  return hideWhenSinglePage && hasMultiplePages === false ? null : (
     <PaginationBar
       showLoader={isFetching || isPending}
       currentPage={currentPage}

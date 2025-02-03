@@ -54,7 +54,10 @@ export default async function Page({ searchParams }: Props) {
             </div>
             <UniversitiesCardsGrid />
             <div className="w-full px-2">
-              <UniversitiesPaginationBar className="px-1.5" />
+              <UniversitiesPaginationBar
+                hideWhenSinglePage
+                className="px-1.5"
+              />
             </div>
           </div>
         </UniversitiesPageProvider>

@@ -21,6 +21,7 @@ type TUniversitiesPageContext = AppRouterQueryResult<
   prevPage: number | undefined;
   nextPage: number | undefined;
   currentPage: number;
+  hasMultiplePages: boolean | undefined;
 };
 
 const UniversitiesPageContext = createContext<TUniversitiesPageContext | null>(
@@ -83,6 +84,9 @@ export const UniversitiesPageProvider: React.FC<{
   const firstPage = 1;
   const lastPage = totalPages || 1;
 
+  const hasMultiplePages =
+    totalPages === undefined ? undefined : totalPages > 1;
+
   return (
     <UniversitiesPageContext.Provider
       value={{
@@ -97,6 +101,7 @@ export const UniversitiesPageProvider: React.FC<{
         prevPage,
         nextPage,
         currentPage: page,
+        hasMultiplePages,
       }}
     >
       {children}

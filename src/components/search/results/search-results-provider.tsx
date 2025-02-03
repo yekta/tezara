@@ -33,6 +33,7 @@ type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
   prevPage: number | undefined;
   nextPage: number | undefined;
   currentPage: number;
+  hasMultiplePages: boolean | undefined;
 };
 
 const LONG_STALE_TIME = 60 * 1000;
@@ -223,6 +224,9 @@ export const SearchResultsProvider: React.FC<{
   const firstPage = 1;
   const lastPage = totalPages || 1;
 
+  const hasMultiplePages =
+    totalPages === undefined ? undefined : totalPages > 1;
+
   return (
     <SearchResultsContext.Provider
       value={{
@@ -238,6 +242,7 @@ export const SearchResultsProvider: React.FC<{
         prevPage,
         nextPage,
         currentPage: page,
+        hasMultiplePages,
       }}
     >
       {children}
