@@ -7,6 +7,7 @@ import { getTwitterMeta } from "@/lib/helpers";
 import { cacheWithRedis } from "@/server/redis/constants";
 import {
   ArrowDownIcon,
+  ArrowRightIcon,
   ArrowUpIcon,
   FileTextIcon,
   InfinityIcon,
@@ -223,6 +224,9 @@ function Card({
   count: number;
   change?: number;
 }) {
+  const changeRounded =
+    change !== undefined ? Math.round(Math.abs(change) * 100) : undefined;
+
   return (
     <li className="w-full flex flex-col sm:w-1/2 lg:w-1/4 p-1">
       <div className="w-full flex-1 border rounded-xl flex flex-col items-center px-4 py-3">
@@ -233,27 +237,35 @@ function Card({
           </h3>
         </div>
         <div
-          data-has-change={change !== undefined ? true : undefined}
+          data-has-change={changeRounded !== undefined ? true : undefined}
           className="w-full flex flex-col items-center justify-center px-2 gap-1 py-6 data-[has-change]:py-4"
         >
           <p className="w-full font-bold text-2xl text-center leading-tight">
             {count.toLocaleString("tr-TR")}
           </p>
           <div
-            className="max-w-full text-success min-w-0 overflow-hidden flex items-center justify-center data-[negative]:text-destructive 
-            bg-success/12 data-[negative]:bg-destructive/12 rounded py-0.5 px-1.5"
-            data-negative={
-              change !== undefined && change < 0 ? true : undefined
+            className="max-w-full min-w-0 rounded-full overflow-hidden flex items-center justify-center py-0.5 px-1.75
+            text-foreground bg-foreground/10
+            data-[type=negative]:text-destructive data-[type=negative]:bg-destructive/12
+            data-[type=positive]:text-success data-[type=positive]:bg-success/12"
+            data-type={
+              changeRounded === undefined || changeRounded > 0
+                ? "positive"
+                : changeRounded < 0
+                ? "negative"
+                : undefined
             }
           >
-            {change !== undefined && change < 0 ? (
+            {changeRounded !== undefined && changeRounded === 0 ? (
+              <ArrowRightIcon className="size-3.5 shrink-0 -ml-0.75" />
+            ) : changeRounded !== undefined && changeRounded < 0 ? (
               <ArrowDownIcon className="size-3.5 shrink-0 -ml-0.75" />
             ) : (
               <ArrowUpIcon className="size-3.5 shrink-0 -ml-0.75" />
             )}
-            {change !== undefined ? (
+            {changeRounded !== undefined ? (
               <p className="font-semibold min-w-0 shrink overflow-hidden whitespace-nowrap overflow-ellipsis text-xs leading-tight">
-                %{Math.round(Math.abs(change) * 100)}
+                %{changeRounded}
               </p>
             ) : (
               <InfinityIcon className="size-3.5 shrink-0" />
