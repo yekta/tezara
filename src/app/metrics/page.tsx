@@ -5,7 +5,14 @@ import { siteTitle } from "@/lib/constants";
 import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
 import { cacheWithRedis } from "@/server/redis/constants";
-import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  FileTextIcon,
+  InfinityIcon,
+  UserIcon,
+  UserSearchIcon,
+} from "lucide-react";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import { FC } from "react";
@@ -17,6 +24,12 @@ type Card = {
   title: string;
   Icon: FC<{ className?: string }>;
   interval: TInterval;
+  event: string;
+  queryInterval?: {
+    type: "HOUR" | "DAY";
+    count: number;
+  };
+  distinct: boolean;
 };
 
 const cards: Card[] = [
@@ -26,24 +39,36 @@ const cards: Card[] = [
     title: "Sayfa Görüntüleme",
     Icon: FileTextIcon,
     interval: "24h",
+    event: "$pageview",
+    queryInterval: { type: "HOUR", count: 24 },
+    distinct: false,
   },
   {
     key: "pageviews_unique_24h",
     title: "Tekil Ziyaretçi",
     Icon: UserIcon,
     interval: "24h",
+    event: "$pageview",
+    queryInterval: { type: "HOUR", count: 24 },
+    distinct: true,
   },
   {
     key: "searched_total_24h",
     title: "Arama (Toplam)",
     Icon: SearchIcon,
     interval: "24h",
+    event: "Searched",
+    queryInterval: { type: "HOUR", count: 24 },
+    distinct: false,
   },
   {
     key: "searched_unique_24h",
     title: "Arama (Tekil Ziyaretçi)",
     Icon: UserSearchIcon,
     interval: "24h",
+    event: "Searched",
+    queryInterval: { type: "HOUR", count: 24 },
+    distinct: true,
   },
   // Last 30 days
   {
@@ -51,24 +76,36 @@ const cards: Card[] = [
     title: "Sayfa Görüntüleme",
     Icon: FileTextIcon,
     interval: "30d",
+    event: "$pageview",
+    queryInterval: { type: "DAY", count: 30 },
+    distinct: false,
   },
   {
     key: "pageviews_unique_30d",
     title: "Tekil Ziyaretçi",
     Icon: UserIcon,
     interval: "30d",
+    event: "$pageview",
+    queryInterval: { type: "DAY", count: 30 },
+    distinct: true,
   },
   {
     key: "searched_total_30d",
     title: "Arama (Toplam)",
     Icon: SearchIcon,
     interval: "30d",
+    event: "Searched",
+    queryInterval: { type: "DAY", count: 30 },
+    distinct: false,
   },
   {
     key: "searched_unique_30d",
     title: "Arama (Tekil Ziyaretçi)",
     Icon: UserSearchIcon,
     interval: "30d",
+    event: "Searched",
+    queryInterval: { type: "DAY", count: 30 },
+    distinct: true,
   },
   // All-time
   {
@@ -76,24 +113,32 @@ const cards: Card[] = [
     title: "Sayfa Görüntüleme",
     Icon: FileTextIcon,
     interval: "alltime",
+    event: "$pageview",
+    distinct: false,
   },
   {
     key: "pageviews_unique_alltime",
     title: "Tekil Ziyaretçi",
     Icon: UserIcon,
     interval: "alltime",
+    event: "$pageview",
+    distinct: true,
   },
   {
     key: "searched_total_alltime",
     title: "Arama (Toplam)",
     Icon: SearchIcon,
     interval: "alltime",
+    event: "Searched",
+    distinct: false,
   },
   {
     key: "searched_unique_alltime",
     title: "Arama (Tekil Ziyaretçi)",
     Icon: UserSearchIcon,
     interval: "alltime",
+    event: "Searched",
+    distinct: true,
   },
 ];
 
@@ -149,8 +194,17 @@ function Section({
           .map((c) => {
             const count = results.find(([key]) => key === c.key)?.[1];
             if (count === undefined) return null;
+            const prev = results.find(([key]) => key === `${c.key}_prev`)?.[1];
+            const change = prev ? (count - prev) / prev : undefined;
+
             return (
-              <Card key={c.key} title={c.title} count={count} Icon={c.Icon} />
+              <Card
+                key={c.key}
+                title={c.title}
+                count={count}
+                Icon={c.Icon}
+                change={change}
+              />
             );
           })}
       </ul>
@@ -162,10 +216,12 @@ function Card({
   title,
   Icon,
   count,
+  change,
 }: {
   title: string;
   Icon: FC<{ className?: string }>;
   count: number;
+  change?: number;
 }) {
   return (
     <li className="w-full flex flex-col sm:w-1/2 lg:w-1/4 p-1">
@@ -176,9 +232,34 @@ function Card({
             {title}
           </h3>
         </div>
-        <p className="w-full px-2 font-bold text-2xl py-6 text-center leading-tight">
-          {count.toLocaleString("tr-TR")}
-        </p>
+        <div
+          data-has-change={change !== undefined ? true : undefined}
+          className="w-full flex flex-col items-center justify-center px-2 gap-1 py-6 data-[has-change]:py-4"
+        >
+          <p className="w-full font-bold text-2xl text-center leading-tight">
+            {count.toLocaleString("tr-TR")}
+          </p>
+          <div
+            className="max-w-full text-success min-w-0 overflow-hidden flex items-center justify-center data-[negative]:text-destructive 
+            bg-success/12 data-[negative]:bg-destructive/12 rounded py-0.5 px-1.5"
+            data-negative={
+              change !== undefined && change < 0 ? true : undefined
+            }
+          >
+            {change !== undefined && change < 0 ? (
+              <ArrowDownIcon className="size-3.5 shrink-0 -ml-0.75" />
+            ) : (
+              <ArrowUpIcon className="size-3.5 shrink-0 -ml-0.75" />
+            )}
+            {change !== undefined ? (
+              <p className="font-semibold min-w-0 shrink overflow-hidden whitespace-nowrap overflow-ellipsis text-xs leading-tight">
+                %{Math.round(change * 100)}
+              </p>
+            ) : (
+              <InfinityIcon className="size-3.5 shrink-0" />
+            )}
+          </div>
+        </div>
       </div>
     </li>
   );
@@ -203,90 +284,44 @@ async function getStats() {
     Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
     "Content-Type": "application/json",
   };
+  const queries = cards.map(({ key, event, distinct, queryInterval }) => {
+    const and = queryInterval
+      ? ` AND timestamp > now() - INTERVAL ${queryInterval.count} ${queryInterval.type}`
+      : "";
+    const prevAnd = queryInterval
+      ? ` AND timestamp > now() - INTERVAL ${queryInterval.count * 2} ${
+          queryInterval.type
+        } AND timestamp < now() - INTERVAL ${queryInterval.count} ${
+          queryInterval.type
+        }`
+      : "";
+    const baseQuery = `
+      SELECT 
+          '${key}' AS time_range, 
+          ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
+      FROM events
+      WHERE event = '${event}'
+    `;
+    const prevQuery = queryInterval
+      ? `
+      SELECT 
+          '${key}_prev' AS time_range, 
+          ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
+      FROM events
+      WHERE event = '${event}'
+    `
+      : "";
+    let query = baseQuery + and;
+    if (!queryInterval) return query;
+    query += "\nUNION ALL\n" + prevQuery + prevAnd;
+    return query;
+  });
+
+  const query = queries.join("\nUNION ALL\n");
   const payload = {
     query: {
       kind: "HogQLQuery",
-      query: `
-      SELECT 
-          'pageviews_unique_24h' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'pageviews_unique_30d' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'pageviews_unique_alltime' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = '$pageview'
-      UNION ALL
-      SELECT 
-          'pageviews_total_24h' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'pageviews_total_30d' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = '$pageview'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'pageviews_total_alltime' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = '$pageview'
-      UNION ALL
-      SELECT 
-          'searched_unique_24h' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'searched_unique_30d' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'searched_unique_alltime' AS time_range, 
-          count(DISTINCT distinct_id) AS count
-      FROM events
-      WHERE event = 'Searched'
-      UNION ALL
-      SELECT 
-          'searched_total_24h' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 24 HOUR
-      UNION ALL
-      SELECT 
-          'searched_total_30d' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = 'Searched'
-          AND timestamp > now() - INTERVAL 30 DAY
-      UNION ALL
-      SELECT 
-          'searched_total_alltime' AS time_range, 
-          count(*) AS count
-      FROM events
-      WHERE event = 'Searched'
-  `,
+      query,
     },
   };
 
