@@ -51,6 +51,7 @@ export function cacheWithRedis<T>(
         revalidating?: boolean;
       } = JSON.parse(cached);
 
+      // Revalidate after the request if required
       if (Date.now() - parsed.timestamp > config.revalidate * 1000) {
         after(async () => {
           if (parsed.revalidating) {
@@ -86,6 +87,8 @@ export function cacheWithRedis<T>(
       } else {
         console.log(`REDIS | CACHE_HIT | NO_REVALIDATE | ${key}`);
       }
+
+      // Return the cached data right away
       return parsed.data;
     }
 
