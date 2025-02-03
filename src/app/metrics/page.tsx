@@ -253,7 +253,7 @@ function Card({
             )}
             {change !== undefined ? (
               <p className="font-semibold min-w-0 shrink overflow-hidden whitespace-nowrap overflow-ellipsis text-xs leading-tight">
-                %{Math.round(change * 100)}
+                %{Math.round(Math.abs(change) * 100)}
               </p>
             ) : (
               <InfinityIcon className="size-3.5 shrink-0" />
