@@ -7,6 +7,7 @@ import { getTwitterMeta } from "@/lib/helpers";
 import { cacheWithRedis } from "@/server/redis/constants";
 import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { FC } from "react";
 
 type TInterval = "24h" | "30d" | "alltime";
@@ -98,6 +99,7 @@ const cards: Card[] = [
 const getStatsCached = cacheWithRedis("metrics", getStats, "default");
 
 export default async function Page() {
+  await headers();
   const { results, last_refresh } = await getStatsCached();
   const lastRefreshDate = new Date(last_refresh);
   return (
