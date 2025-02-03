@@ -189,7 +189,7 @@ export default function MultiSelectCombobox({
                           {!isPending && IconSetForItem && (
                             <IconSetForItem
                               className={cn(
-                                "leading-none size-4 -my-1 -ml-0.25",
+                                "leading-none -my-1 size-4 shrink-0 -ml-0.5",
                                 iconSetForItemClassName
                               )}
                               variant={item.value}
