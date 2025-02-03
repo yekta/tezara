@@ -68,7 +68,7 @@ export default function NavbarTabs({ className, classNameTab }: Props) {
           href={tab.href}
           onClick={() => setLastClickedTab(tab.href)}
           className={cn(
-            `${minButtonSizeEnforcerClassName} py-1 sm:py-1.5 z-10 pointer-events-auto relative text-[11px] sm:text-sm leading-tight sm:leading-tight text-muted-foreground data-[active]:text-foreground
+            `${minButtonSizeEnforcerClassName} py-1 sm:py-1.75 z-10 pointer-events-auto relative text-[11px] sm:text-sm leading-tight sm:leading-tight text-muted-foreground data-[active]:text-foreground
             shrink min-w-0 rounded-full h-full flex flex-col sm:flex-row items-center justify-center
             data-[active]:bg-border/75 data-[active]:not-touch:hover:bg-border/75 data-[active]:active:bg-border/75 
             px-2 sm:px-3.5 gap-0.75 sm:gap-1.5 font-semibold not-touch:hover:bg-transparent active:bg-transparent not-touch:hover:text-foreground active:text-foreground
@@ -76,7 +76,7 @@ export default function NavbarTabs({ className, classNameTab }: Props) {
             classNameTab
           )}
         >
-          <tab.Icon className="size-5 mt-0.25 sm:size-4 sm:-my-1 sm:-ml-0.75" />
+          <tab.Icon className="size-5 mt-0.25 sm:size-4 sm:-my-1 sm:-ml-1" />
           <p className="w-full sm:w-auto shrink min-w-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
             {tab.label}
           </p>
