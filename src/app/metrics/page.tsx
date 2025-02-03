@@ -102,6 +102,7 @@ export default async function Page() {
   await headers();
   const { results, last_refresh } = await getStatsCached();
   const lastRefreshDate = new Date(last_refresh);
+
   return (
     <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
       <div className="w-full flex flex-col">
