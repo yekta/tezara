@@ -46,7 +46,7 @@ const cards: Card[] = [
   },
   {
     key: "pageviews_unique_24h",
-    title: "Tekil Ziyaretçi",
+    title: "Ziyaretçi",
     Icon: UserIcon,
     interval: "24h",
     event: "$pageview",
@@ -64,7 +64,7 @@ const cards: Card[] = [
   },
   {
     key: "searched_unique_24h",
-    title: "Arama (Tekil Ziyaretçi)",
+    title: "Arama (Ziyaretçi)",
     Icon: UserSearchIcon,
     interval: "24h",
     event: "Searched",
@@ -83,7 +83,7 @@ const cards: Card[] = [
   },
   {
     key: "pageviews_unique_30d",
-    title: "Tekil Ziyaretçi",
+    title: "Ziyaretçi",
     Icon: UserIcon,
     interval: "30d",
     event: "$pageview",
@@ -101,7 +101,7 @@ const cards: Card[] = [
   },
   {
     key: "searched_unique_30d",
-    title: "Arama (Tekil Ziyaretçi)",
+    title: "Arama (Ziyaretçi)",
     Icon: UserSearchIcon,
     interval: "30d",
     event: "Searched",
@@ -119,7 +119,7 @@ const cards: Card[] = [
   },
   {
     key: "pageviews_unique_alltime",
-    title: "Tekil Ziyaretçi",
+    title: "Ziyaretçi",
     Icon: UserIcon,
     interval: "alltime",
     event: "$pageview",
@@ -135,7 +135,7 @@ const cards: Card[] = [
   },
   {
     key: "searched_unique_alltime",
-    title: "Arama (Tekil Ziyaretçi)",
+    title: "Arama (Ziyaretçi)",
     Icon: UserSearchIcon,
     interval: "alltime",
     event: "Searched",
