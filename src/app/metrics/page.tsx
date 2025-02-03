@@ -9,6 +9,7 @@ import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import { FC } from "react";
+import { z } from "zod";
 
 type TInterval = "24h" | "30d" | "alltime";
 type Card = {
@@ -294,9 +295,14 @@ async function getStats() {
     headers: posthogHeaders,
     body: JSON.stringify(payload),
   });
-  const json: { results: [string, number][]; last_refresh: string } =
-    await res.json();
-  const results = json.results;
 
-  return { results, last_refresh: json.last_refresh };
+  const StatsSchema = z.object({
+    results: z.array(z.tuple([z.string(), z.number()])),
+    last_refresh: z.string(),
+  });
+
+  const json = await res.json();
+  const parsed = StatsSchema.parse(json);
+
+  return { results: parsed.results, last_refresh: parsed.last_refresh };
 }
