@@ -96,7 +96,7 @@ const cards: Card[] = [
   },
 ];
 
-const getStatsCached = cacheWithRedis("metrics", getStats, "default");
+const getStatsCached = cacheWithRedis("metrics", getStats, "short");
 
 export default async function Page() {
   await headers();

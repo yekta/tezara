@@ -18,9 +18,13 @@ export async function getRedis() {
 }
 
 export const cacheConfig = {
+  short: {
+    ttl: 60 * 60 * 24 * 1,
+    revalidate: 60 * 5,
+  },
   default: {
     ttl: 60 * 60 * 24 * 1,
-    revalidate: 60 * 10,
+    revalidate: 60 * 15,
   },
   long: {
     ttl: 60 * 60 * 24 * 7,
