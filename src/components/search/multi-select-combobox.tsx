@@ -111,7 +111,9 @@ export default function MultiSelectCombobox({
             )}
           >
             <div className="flex shrink min-w-0 items-center gap-1.5">
-              {Icon && <Icon className="size-4 shrink-0 -ml-0.5" />}
+              {Icon && (
+                <Icon className="leading-none -my-1 size-4 shrink-0 -ml-0.5" />
+              )}
               {typeof commandButtonText === "string" ? (
                 <p className="shrink min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">
                   {commandButtonText}
@@ -187,7 +189,7 @@ export default function MultiSelectCombobox({
                           {!isPending && IconSetForItem && (
                             <IconSetForItem
                               className={cn(
-                                "size-4 -my-1 -ml-0.25",
+                                "leading-none size-4 -my-1 -ml-0.25",
                                 iconSetForItemClassName
                               )}
                               variant={item.value}

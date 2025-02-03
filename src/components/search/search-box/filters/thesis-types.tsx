@@ -1,5 +1,5 @@
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
-import ThesisTypeIcon from "@/components/icons/sets/thesis-type";
+import ThesisTypeIconWithFont from "@/components/icons/sets/thesis-type-with-font";
 import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
@@ -51,7 +51,7 @@ export default function ThesisTypesField({ thesisTypesData }: Props) {
       label="Tez Türü Bazlı Filtrele"
       className="w-full"
       Icon={ScrollTextIcon}
-      IconSetForItem={ThesisTypeIcon}
+      IconSetForItem={ThesisTypeIconWithFont}
       commandButtonText={
         <div className="flex-1 min-w-0 flex items-center gap-1.5">
           <p className="shrink min-w-0 overflow-ellipsis overflow-hidden whitespace-nowrap">
