@@ -298,7 +298,7 @@ async function getStats() {
 
   const StatsSchema = z.object({
     results: z.array(z.tuple([z.string(), z.number()])).min(1),
-    last_refresh: z.string(),
+    last_refresh: z.string().nonempty(),
   });
 
   const json = await res.json();
