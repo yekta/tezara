@@ -297,7 +297,7 @@ async function getStats() {
   });
 
   const StatsSchema = z.object({
-    results: z.array(z.tuple([z.string(), z.number()])),
+    results: z.array(z.tuple([z.string(), z.number()])).min(1),
     last_refresh: z.string(),
   });
 
