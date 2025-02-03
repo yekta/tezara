@@ -299,7 +299,7 @@ export default function SearchResults({}: Props) {
           (data && data.hits && data.hits.length > 0)) && (
           <ResultsSection data={data} />
         )}
-        {hasMultiplePages === true && (
+        {hasMultiplePages !== false && (
           <PaginationBar
             eventName="Prev/Next Search Result Page Button Clicked"
             hasNext={hasNext}
