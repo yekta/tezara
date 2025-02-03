@@ -13,6 +13,7 @@ export const env = createEnv({
     CLICKHOUSE_URL: z.string().url(),
     CLICKHOUSE_USERNAME: z.string(),
     CLICKHOUSE_PASSWORD: z.string(),
+    REDIS_URL: z.string().url(),
     POSTHOG_PERSONAL_API_KEY: z.string(),
     POSTHOG_PROJECT_ID: z.string(),
     NODE_ENV: z
@@ -54,6 +55,7 @@ export const env = createEnv({
     CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
     CLICKHOUSE_USERNAME: process.env.CLICKHOUSE_USERNAME,
     CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
+    REDIS_URL: process.env.REDIS_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_POSTHOG_HOST_ASSETS:

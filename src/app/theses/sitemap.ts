@@ -3,14 +3,10 @@ import { env } from "@/lib/env";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import { MetadataRoute } from "next";
-import { unstable_cacheLife as cacheLife } from "next/cache";
 
 const SITEMAP_ENTRIES_PER_PAGE = 5_000;
 
 export async function generateSitemaps() {
-  "use cache";
-  cacheLife("default");
-
   const data = await getTheses({ page: 1 });
   const arr = Array.from({ length: data.totalPages }, (_, i) => i);
   return [...arr.map((i) => ({ id: i + 1 }))];
@@ -21,9 +17,6 @@ export default async function sitemap({
 }: {
   id: number;
 }): Promise<MetadataRoute.Sitemap> {
-  "use cache";
-  cacheLife("default");
-
   const idNumber = Number(id);
   const data = await getTheses({ page: idNumber });
 

@@ -4,9 +4,9 @@ import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
 import { env } from "@/lib/env";
 import { getTwitterMeta } from "@/lib/helpers";
+import { cacheWithRedis } from "@/server/redis/constants";
 import { FileTextIcon, UserIcon, UserSearchIcon } from "lucide-react";
 import { Metadata } from "next";
-import { unstable_cacheLife as cacheLife } from "next/cache";
 import { FC } from "react";
 
 type TInterval = "24h" | "30d" | "alltime";
@@ -95,18 +95,18 @@ const cards: Card[] = [
   },
 ];
 
-export default async function Page() {
-  "use cache";
-  cacheLife("default");
+const getStatsCached = cacheWithRedis("metrics", getStats, "default");
 
-  const { results, lastRefresh } = await getStats();
+export default async function Page() {
+  const { results, last_refresh } = await getStatsCached();
+  const lastRefreshDate = new Date(last_refresh);
   return (
     <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
       <div className="w-full flex flex-col">
         <h1 className="px-4 w-full font-bold text-3xl text-balance leading-tight">
           Kullanım Metrikleri
         </h1>
-        <RefreshedAt timestamp={lastRefresh.getTime()} />
+        <RefreshedAt timestamp={lastRefreshDate.getTime()} />
       </div>
       <Section
         title="Son 24 Saat"
@@ -294,7 +294,6 @@ async function getStats() {
   const json: { results: [string, number][]; last_refresh: string } =
     await res.json();
   const results = json.results;
-  const lastRefresh = new Date(json.last_refresh);
 
-  return { results, lastRefresh };
+  return { results, last_refresh: json.last_refresh };
 }
