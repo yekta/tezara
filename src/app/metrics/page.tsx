@@ -238,7 +238,7 @@ function Card({
         </div>
         <div
           data-has-change={changeRounded !== undefined ? true : undefined}
-          className="w-full flex flex-col items-center justify-center px-2 gap-1 py-6 data-[has-change]:py-4"
+          className="w-full flex flex-col items-center justify-center px-2 gap-1 pt-5 pb-4.5"
         >
           <p className="w-full font-bold text-2xl text-center leading-tight">
             {count.toLocaleString("tr-TR")}
