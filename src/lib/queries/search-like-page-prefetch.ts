@@ -3,12 +3,14 @@ import { prefetchAuthors } from "@/lib/queries/prefetch-authors";
 import { prefetchDepartments } from "@/lib/queries/prefetch-departments";
 import { QueryClient } from "@tanstack/react-query";
 
-export const getSearchLikePagePrefetchPromises = ({
+export function getSearchLikePagePrefetchPromises({
   queryClient,
 }: {
   queryClient: QueryClient;
-}) => [
-  prefetchAdvisors({ queryClient }),
-  prefetchAuthors({ queryClient }),
-  prefetchDepartments({ queryClient }),
-];
+}) {
+  return [
+    prefetchAdvisors({ queryClient }),
+    prefetchAuthors({ queryClient }),
+    prefetchDepartments({ queryClient }),
+  ];
+}

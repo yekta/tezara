@@ -4,21 +4,17 @@ import {
   HITS_PER_PAGE_DEFAULT,
   searchRoute,
 } from "@/components/search/constants";
-import SearchBox from "@/components/search/search-box/search-box";
 import SearchResults from "@/components/search/results/search-results";
 import SearchResultsProvider from "@/components/search/results/search-results-provider";
+import SearchBox from "@/components/search/search-box/search-box";
+import { getSearchLikePageDataPromises } from "@/lib/queries/search-like-page-data";
 import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
-import { meili } from "@/server/meili/constants-client";
 import { meiliAdmin } from "@/server/meili/constants-server";
-import { getLanguages } from "@/server/meili/repo/language";
 import { searchTheses } from "@/server/meili/repo/thesis";
-import { getThesisTypes } from "@/server/meili/repo/thesis-type";
-import { getUniversities } from "@/server/meili/repo/university";
 import {
   getQueryClientServer,
   HydrateClient,
 } from "@/server/trpc/setup/server";
-import { getSubjects } from "@/server/meili/repo/subject";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -60,12 +56,10 @@ export default async function Page({ searchParams }: Props) {
   });
 
   const start = performance.now();
-  const [languagesData, universitiesData, thesisTypesData, subjectsData] =
+  const [{ languagesData, universitiesData, thesisTypesData, subjectsData }] =
     await Promise.all([
-      getLanguages({ client: meili }),
-      getUniversities({ client: meili }),
-      getThesisTypes({ client: meili }),
-      getSubjects({ client: meili, languages: ["Turkish"] }),
+      getSearchLikePageDataPromises(),
+      ...getSearchLikePagePrefetchPromises({ queryClient }),
       queryClient.prefetchQuery({
         queryKey,
         queryFn: () =>
@@ -92,7 +86,6 @@ export default async function Page({ searchParams }: Props) {
             client: meiliAdmin,
           }),
       }),
-      ...getSearchLikePagePrefetchPromises({ queryClient }),
     ]);
   console.log(
     `${searchRoute}:getPageData() | ${Math.round(performance.now() - start)}ms`
