@@ -2,6 +2,7 @@ import {
   cachedSearchLikePageSearchParams,
   getSearchThesesQueryKey,
   HITS_PER_PAGE_DEFAULT,
+  searchRoute,
 } from "@/components/search/constants";
 import SearchBox from "@/components/search/search-box/search-box";
 import SearchResults from "@/components/search/results/search-results";
@@ -58,6 +59,7 @@ export default async function Page({ searchParams }: Props) {
     attributes_to_retrieve: undefined,
   });
 
+  const start = performance.now();
   const [languagesData, universitiesData, thesisTypesData, subjectsData] =
     await Promise.all([
       getLanguages({ client: meili }),
@@ -92,6 +94,9 @@ export default async function Page({ searchParams }: Props) {
       }),
       ...getSearchLikePagePrefetchPromises({ queryClient }),
     ]);
+  console.log(
+    `${searchRoute}:getPageData() | ${Math.round(performance.now() - start)}ms`
+  );
 
   return (
     <HydrateClient>

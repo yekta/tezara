@@ -21,6 +21,7 @@ export default async function Home({ searchParams }: Props) {
   await cachedSearchLikePageSearchParams.parse(searchParams);
   const queryClient = getQueryClientServer();
 
+  const start = performance.now();
   const [languages, universities, thesisTypes, subjects] = await Promise.all([
     getLanguages({ client: meili }),
     getUniversities({ client: meili }),
@@ -38,6 +39,7 @@ export default async function Home({ searchParams }: Props) {
     }),
     ...getSearchLikePagePrefetchPromises({ queryClient }),
   ]);
+  console.log(`/:getPageData() | ${Math.round(performance.now() - start)}ms`);
 
   return (
     <HydrateClient>
