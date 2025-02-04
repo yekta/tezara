@@ -4,7 +4,6 @@ import { thesesRoute } from "@/app/theses/_components/constants";
 import DetailsListItem from "@/app/theses/_components/details-list-item";
 import DetailsListItemSubjects from "@/app/theses/_components/details-list-item-subjects";
 import DetailsListItemUniversity from "@/app/theses/_components/details-list-item-university";
-import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -111,12 +110,12 @@ export default async function Page({ params }: Props) {
             size="sm"
             variant="destructive"
           >
-            <FileExtensionIcon className="size-5 -ml-1.5" variant="pdf" />
+            <span className="text-xl leading-none -ml-1.5 font-icon icon-pdf" />
             <p className="shrink min-w-0">PDF İndir</p>
           </LinkButton>
         ) : (
           <Button size="sm" variant="destructive" disabled>
-            <FileExtensionIcon className="size-5 -ml-1.5" variant="pdf-x" />
+            <span className="text-xl leading-none -ml-1.5 font-icon icon-pdf-x" />
             <p className="shrink min-w-0">PDF Yok</p>
           </Button>
         )}

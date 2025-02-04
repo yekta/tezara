@@ -4,7 +4,6 @@ import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { thesesRoute } from "@/app/theses/_components/constants";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import LanguageIcon from "@/components/icons/language";
-import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import { getThesisTypeColorClassName } from "@/components/icons/sets/thesis-type";
 import ThesisTypeIconWithFont from "@/components/icons/sets/thesis-type-with-font";
 import { cleanAdvisors, getThesisRowId } from "@/components/search/helpers";
@@ -121,19 +120,19 @@ export default function ThesisRow({
             href={thesis.pdf_url}
             variant="destructive-ghost"
             size="icon"
-            className="rounded-lg"
+            className="rounded-lg text-[1.75rem] leading-none"
           >
-            <FileExtensionIcon variant="pdf" className="size-7" />
+            <span className="font-icon icon-pdf" />
           </LinkButton>
         ) : (
           <Button
             aria-label="PDF İndir"
             variant="ghost"
             size="icon"
-            className="rounded-lg"
+            className="rounded-lg text-[1.75rem] leading-none"
             disabled
           >
-            <FileExtensionIcon variant="pdf-x" className="size-7" />
+            <span className="font-icon icon-pdf-x" />
           </Button>
         )}
       </div>
@@ -173,7 +172,7 @@ export default function ThesisRow({
           <p
             className={`${getThesisTypeColorClassName({
               variant: isPlaceholder ? null : thesis.thesis_type,
-            })} px-2 py-1 rounded-full shrink min-w-0 border group-data-[placeholder]/row:animate-skeleton 
+            })} px-2 py-1 rounded-xl shrink min-w-0 border group-data-[placeholder]/row:animate-skeleton 
             group-data-[placeholder]/row:bg-muted-more-foreground text-sm leading-none font-medium group-data-[placeholder]/row:text-transparent`}
           >
             {!isPlaceholder && (
@@ -186,7 +185,7 @@ export default function ThesisRow({
           </p>
           <div
             className={cn(
-              "px-2 py-1 rounded-full shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
+              "px-2 py-1 rounded-xl shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground",
               "group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground"
             )}
           >
@@ -220,7 +219,7 @@ export default function ThesisRow({
                   firstThesisSubject
                 )}`}
                 onClick={setPrevious}
-                className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-full z-0 relative shrink min-w-0 border bg-foreground/8 
+                className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-xl z-0 relative shrink min-w-0 border bg-foreground/8 
                 border-foreground/12 text-foreground not-touch:hover:bg-foreground/16 active:bg-foreground/16
                 focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background text-sm leading-none font-medium`}
               >
@@ -238,7 +237,7 @@ export default function ThesisRow({
               prefetch={false}
               href={`${universitiesRoute}/${thesis.university}`}
               onClick={setPrevious}
-              className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-full z-0 relative shrink min-w-0 border bg-foreground/8 
+              className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-xl z-0 relative shrink min-w-0 border bg-foreground/8 
                 border-foreground/12 text-foreground not-touch:hover:bg-foreground/16 active:bg-foreground/16
                 focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background text-sm leading-none font-medium`}
             >
@@ -273,7 +272,7 @@ function Chip({
 }) {
   return (
     <p
-      className="px-2 py-1 rounded-full shrink min-w-0 border bg-foreground/8 border-foreground/12 
+      className="px-2 py-1 rounded-xl shrink min-w-0 border bg-foreground/8 border-foreground/12 
       text-foreground group-data-[placeholder]/row:animate-skeleton group-data-[placeholder]/row:bg-muted-more-foreground
       text-sm leading-none font-medium group-data-[placeholder]/row:text-transparent"
     >
