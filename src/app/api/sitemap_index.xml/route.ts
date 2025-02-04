@@ -1,3 +1,4 @@
+import { subjectsRoute } from "@/app/subjects/_components/constants";
 import { thesesRoute } from "@/app/theses/_components/constants";
 import { generateSitemaps as generateThesisSitemaps } from "@/app/theses/sitemap";
 import { universitiesRoute } from "@/app/universities/_components/constants";
@@ -30,6 +31,7 @@ export async function GET() {
     <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       ${getSitemapString("sitemap", "/")}
       ${getSitemapString("sitemap", `${universitiesRoute}`)}
+      ${getSitemapString("sitemap", `${subjectsRoute}`)}
       ${getSitemapsString(thesisSitemaps, `${thesesRoute}/sitemap`)}
     </sitemapindex>
   `;
