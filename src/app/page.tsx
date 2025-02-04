@@ -1,10 +1,8 @@
 import Logo from "@/components/logo/logo";
 import { cachedSearchLikePageSearchParams } from "@/components/search/constants";
 import SearchBox from "@/components/search/search-box/search-box";
-import { getSearchLikePageDataPromises } from "@/lib/queries/search-like-page-data";
-import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
-import { meili } from "@/server/meili/constants-client";
-import { searchAdvisors } from "@/server/meili/repo/advisor";
+import { getSearchLikePageData } from "@/lib/queries/search-like-page-data";
+import { prefetchSearchLikePage } from "@/lib/queries/search-like-page-prefetch";
 import {
   getQueryClientServer,
   HydrateClient,
@@ -21,18 +19,8 @@ export default async function Home({ searchParams }: Props) {
   const start = performance.now();
   const [{ languagesData, universitiesData, thesisTypesData, subjectsData }] =
     await Promise.all([
-      getSearchLikePageDataPromises(),
-      ...getSearchLikePagePrefetchPromises({ queryClient }),
-      queryClient.prefetchQuery({
-        queryKey: ["advisors", undefined],
-        queryFn: () =>
-          searchAdvisors({
-            q: "",
-            page: 1,
-            sort: undefined,
-            client: meili,
-          }),
-      }),
+      getSearchLikePageData(),
+      prefetchSearchLikePage({ queryClient }),
     ]);
   console.log(`/:getPageData() | ${Math.round(performance.now() - start)}ms`);
 

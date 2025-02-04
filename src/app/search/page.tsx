@@ -7,8 +7,8 @@ import {
 import SearchResults from "@/components/search/results/search-results";
 import SearchResultsProvider from "@/components/search/results/search-results-provider";
 import SearchBox from "@/components/search/search-box/search-box";
-import { getSearchLikePageDataPromises } from "@/lib/queries/search-like-page-data";
-import { getSearchLikePagePrefetchPromises } from "@/lib/queries/search-like-page-prefetch";
+import { getSearchLikePageData } from "@/lib/queries/search-like-page-data";
+import { prefetchSearchLikePage } from "@/lib/queries/search-like-page-prefetch";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import {
@@ -58,8 +58,8 @@ export default async function Page({ searchParams }: Props) {
   const start = performance.now();
   const [{ languagesData, universitiesData, thesisTypesData, subjectsData }] =
     await Promise.all([
-      getSearchLikePageDataPromises(),
-      ...getSearchLikePagePrefetchPromises({ queryClient }),
+      getSearchLikePageData(),
+      prefetchSearchLikePage({ queryClient }),
       queryClient.prefetchQuery({
         queryKey,
         queryFn: () =>
