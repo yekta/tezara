@@ -69,7 +69,7 @@ export default async function Page({ params }: Props) {
       year_lte: null,
       search_on: [],
       attributes_to_retrieve: undefined,
-      attributes_to_not_retrieve: undefined,
+      attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
       client: meiliAdmin,
     });
     similarTheses.hits = similarTheses.hits.filter(
