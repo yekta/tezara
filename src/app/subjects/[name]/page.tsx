@@ -61,7 +61,7 @@ export default async function Page({ params }: Props) {
   }
 
   return (
-    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
+    <main className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 pt-2 md:pt-0 md:px-8 pb-32">
       <GoBackBar
         className="justify-start px-1.5"
         defaultPath={subjectsRoute}
@@ -179,7 +179,7 @@ export default async function Page({ params }: Props) {
         defaultPath={subjectsRoute}
         className="justify-center pt-5 sm:pt-6 px-1.5"
       />
-    </div>
+    </main>
   );
 }
 

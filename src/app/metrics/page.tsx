@@ -151,7 +151,7 @@ export default async function Page() {
   const lastRefreshDate = new Date(last_refresh);
 
   return (
-    <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
+    <main className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
       <div className="w-full flex flex-col">
         <h1 className="px-4 w-full font-bold text-3xl text-balance leading-tight">
           Kullanım Metrikleri
@@ -166,7 +166,7 @@ export default async function Page() {
       />
       <Section title="Son 30 Gün" interval="30d" results={results} />
       <Section title="Tüm Zamanlar" interval="alltime" results={results} />
-    </div>
+    </main>
   );
 }
 

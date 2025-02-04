@@ -87,7 +87,7 @@ export default async function Page({ params }: Props) {
   );
 
   return (
-    <div className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32">
+    <main className="w-full shrink min-w-0 max-w-2xl flex flex-col flex-1 md:pt-2 pb-20 md:pb-32">
       <NavigationSection id={thesis.id} className="md:hidden pb-4" />
       {/* Title */}
       <h1
@@ -214,7 +214,7 @@ export default async function Page({ params }: Props) {
         buttonText="Geri Dön"
         className="pb-4 -mt-2 md:mt-6"
       />
-    </div>
+    </main>
   );
 }
 

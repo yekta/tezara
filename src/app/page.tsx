@@ -41,7 +41,7 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <HydrateClient>
-      <div className="w-full max-w-7xl px-3 md:px-8 flex-1 flex flex-col justify-center items-center pt-4 pb-[calc(10vh+5rem)] sm:pb-[calc(11vh+6rem)]">
+      <main className="w-full max-w-7xl px-3 md:px-8 flex-1 flex flex-col justify-center items-center pt-4 pb-[calc(10vh+5rem)] sm:pb-[calc(11vh+6rem)]">
         <div className="w-full flex flex-col items-center">
           <div className="w-full flex items-center justify-center px-4">
             <Logo variant="full" className="w-32 max-w-full h-auto" />
@@ -55,7 +55,7 @@ export default async function Home({ searchParams }: Props) {
             variant="home"
           />
         </div>
-      </div>
+      </main>
     </HydrateClient>
   );
 }

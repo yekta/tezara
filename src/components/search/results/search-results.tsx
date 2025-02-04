@@ -217,7 +217,7 @@ export default function SearchResults({}: Props) {
       {/* Metrics */}
       <div className="w-full flex items-center justify-start py-3.5 px-1.5 gap-1.5">
         <p className="shrink min-w-0 font-semibold text-sm text-muted-foreground text-balance">
-          <span>Eşleşen: </span>
+          Eşleşen:{" "}
           {!data ? (
             <span className={metricsPendingClassName}>
               {isHardError ? "0" : "900,000"}
@@ -228,7 +228,7 @@ export default function SearchResults({}: Props) {
             </span>
           )}
           <span className="text-foreground/30 px-[0.75ch]">|</span>
-          <span>Gösterilen: </span>
+          Gösterilen:{" "}
           {!data ? (
             <span className={metricsPendingClassName}>
               {isHardError ? 0 : 10}

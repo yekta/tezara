@@ -95,7 +95,7 @@ export default async function Page({ searchParams }: Props) {
 
   return (
     <HydrateClient>
-      <div className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-32">
+      <main className="w-full max-w-5xl px-3 md:px-8 flex-1 flex flex-col items-center pb-32">
         <SearchResultsProvider>
           <SearchBox
             languagesData={languagesData.hits}
@@ -106,7 +106,7 @@ export default async function Page({ searchParams }: Props) {
           />
           <SearchResults />
         </SearchResultsProvider>
-      </div>
+      </main>
     </HydrateClient>
   );
 }

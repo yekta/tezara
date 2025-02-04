@@ -36,7 +36,7 @@ export default async function Page({ searchParams }: Props) {
     <HydrateClient>
       <UniversitiesPageQueryParamProvider>
         <UniversitiesPageProvider>
-          <div className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
+          <main className="w-full shrink min-w-0 max-w-5xl flex flex-col flex-1 content-start pt-2 md:px-8 pb-32">
             {/* Title and search bar */}
             <div className="w-full flex flex-col sm:flex-row sm:justify-between sm:items-center">
               <div className="w-full sm:w-1/2 flex flex-wrap items-center gap-1.5 px-4">
@@ -59,7 +59,7 @@ export default async function Page({ searchParams }: Props) {
                 className="px-1.5"
               />
             </div>
-          </div>
+          </main>
         </UniversitiesPageProvider>
       </UniversitiesPageQueryParamProvider>
     </HydrateClient>

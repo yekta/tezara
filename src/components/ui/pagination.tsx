@@ -65,6 +65,7 @@ const PaginationLink = ({
           variant: isActive ? "outline" : "ghost",
           size,
         }),
+        "rounded-[0.55rem]",
         className
       )}
       {...props}
@@ -83,7 +84,7 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label={variant === "first" ? "İlk Sayfaya Git" : "Önceki Sayfaya Git"}
     size="icon"
-    className={cn("rounded-lg", className)}
+    className={className}
     {...props}
   >
     <span className="sr-only">{variant === "first" ? "İlk" : "Önceki"}</span>
@@ -106,7 +107,7 @@ const PaginationNext = ({
   <PaginationLink
     aria-label={variant === "last" ? "Son Sayfaya Git" : "Sonraki Sayfaya Git"}
     size="icon"
-    className={cn("rounded-lg", className)}
+    className={className}
     {...props}
   >
     <span className="sr-only">
