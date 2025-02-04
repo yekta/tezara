@@ -28,7 +28,7 @@ export default function SubjectCard({
     <li
       id={subject ? getSubjectCardId(subject) : undefined}
       data-placeholder={isPlaceholder ? true : undefined}
-      className="w-full flex items-start justify-start md:w-1/2 lg:w-1/3 p-1 group/item"
+      className="w-full flex items-start justify-start sm:w-1/2 lg:w-1/3 p-1 group/item"
     >
       <Component
         href={
