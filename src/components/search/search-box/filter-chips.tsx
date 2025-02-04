@@ -175,7 +175,7 @@ function Chip({
       <Button
         onClick={onClick}
         variant="warning-ghost"
-        className="w-full flex border border-warning/16 items-center gap-0.75 justify-center text-xs px-2 py-1 rounded-full bg-warning/10 text-warning"
+        className="w-full flex border border-warning/16 items-center gap-1 justify-center text-xs px-2 py-1 rounded-full bg-warning/10 text-warning"
         type="button"
         forceMinSize="medium"
       >
@@ -183,7 +183,7 @@ function Chip({
         <span className="shrink whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0 text-xs font-semibold">
           {children}
         </span>
-        <XIcon className="size-3.5 shrink-0 -ml-0.25 -mr-0.75" />
+        <XIcon className="size-3.5 shrink-0 -ml-0.5 -mr-0.75" />
       </Button>
     </div>
   );
