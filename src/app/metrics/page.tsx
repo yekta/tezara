@@ -225,7 +225,9 @@ function Card({
   change?: number;
 }) {
   const changeRounded =
-    change !== undefined ? Math.round(Math.abs(change) * 100) : undefined;
+    change !== undefined ? Math.round(change * 100) : undefined;
+  const changeRoundedAbs =
+    changeRounded !== undefined ? Math.abs(changeRounded) : undefined;
 
   return (
     <li className="w-full flex flex-col sm:w-1/2 lg:w-1/4 p-1">
@@ -263,9 +265,9 @@ function Card({
             ) : (
               <ArrowUpIcon className="size-3.5 shrink-0 -ml-0.75" />
             )}
-            {changeRounded !== undefined ? (
+            {changeRoundedAbs !== undefined ? (
               <p className="font-semibold min-w-0 shrink overflow-hidden whitespace-nowrap overflow-ellipsis text-xs leading-tight">
-                %{changeRounded}
+                %{changeRoundedAbs}
               </p>
             ) : (
               <InfinityIcon className="size-3.5 shrink-0" />
