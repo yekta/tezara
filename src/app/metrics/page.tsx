@@ -174,7 +174,7 @@ export default async function Page() {
           <h2 className="px-4 w-full min-w-0 font-bold text-xl text-balance leading-tight">
             Popüler Filtreler
           </h2>
-          <ul className="w-full flex flex-row flex-wrap content-stretch pt-3.5 px-3 gap-1.5">
+          <ul className="w-full flex flex-row flex-wrap content-stretch pt-3 px-3 gap-1.5">
             {results
               .filter((c) => c[0].startsWith(filterSeparator))
               .map((c) => {
@@ -186,13 +186,15 @@ export default async function Page() {
                 return (
                   <li
                     key={key}
-                    className="px-2.5 py-1 leading-tight rounded-2xl shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground"
+                    className="px-3 py-2.5 border leading-tight rounded-xl gap-1.25 shrink min-w-0 flex items-center text-foreground"
                   >
-                    <obj.Icon className="size-4 shrink-0 text-muted-foreground -ml-0.25" />
-                    <p className="font-bold shrink min-w-0">
-                      <span className="text-muted-foreground font-medium">
-                        {obj.title}:{" "}
-                      </span>
+                    <div className="shrink pl-0.25 gap-1 min-w-0 flex items-center justify-center">
+                      <obj.Icon className="size-4 shrink-0 text-muted-foreground" />
+                      <p className="text-muted-foreground leading-none font-medium text-sm">
+                        {obj.title}:
+                      </p>
+                    </div>
+                    <p className="font-bold shrink min-w-0 leading-none text-lg">
                       {count}
                     </p>
                   </li>
