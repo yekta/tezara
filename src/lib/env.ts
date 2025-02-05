@@ -7,7 +7,6 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    DATABASE_URL: z.string().url(),
     MEILI_ADMIN_KEY: z.string(),
     MEILI_URL_INTERNAL: z.string().url(),
     CLICKHOUSE_URL: z.string().url(),
@@ -43,7 +42,6 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_MEILI_URL: process.env.NEXT_PUBLIC_MEILI_URL,
     NEXT_PUBLIC_MEILI_CLIENT_KEY: process.env.NEXT_PUBLIC_MEILI_CLIENT_KEY,
