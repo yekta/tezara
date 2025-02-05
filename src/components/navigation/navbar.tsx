@@ -28,7 +28,7 @@ export default async function Navbar({}: { className?: string }) {
         </div>
       </div>
       <div className="flex shrink min-w-0 items-center justify-end gap-1.5">
-        <NavigationMenuItem asChild>
+        {/* <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.buymeacoffee.name}
             href={sc.buymeacoffee.href}
@@ -44,7 +44,7 @@ export default async function Navbar({}: { className?: string }) {
               Bağış
             </p>
           </LinkButton>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
         <NavigationMenuItem asChild>
           <LinkButton
             aria-label={sc.x.name}
