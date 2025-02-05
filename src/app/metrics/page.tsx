@@ -1,4 +1,11 @@
 import RefreshedAt from "@/app/metrics/_components/refreshed-at";
+import BuildingIcon from "@/components/icons/building";
+import CalendarIcon from "@/components/icons/calendar";
+import FolderClosedIcon from "@/components/icons/folder-closed";
+import GlobeIcon from "@/components/icons/globe";
+import LandmarkIcon from "@/components/icons/landmark";
+import PenToolIcon from "@/components/icons/pen-tool";
+import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import { SearchIcon } from "@/components/icons/search-icon";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
@@ -11,6 +18,7 @@ import {
   ArrowUpIcon,
   FileTextIcon,
   InfinityIcon,
+  SearchCheckIcon,
   UserIcon,
   UserSearchIcon,
 } from "lucide-react";
@@ -166,6 +174,38 @@ export default async function Page() {
       />
       <Section title="Son 30 Gün" interval="30d" results={results} />
       <Section title="Tüm Zamanlar" interval="alltime" results={results} />
+      {results.some(([key]) => key.startsWith(filterSeparator)) && (
+        <div id="popular_filters" className="w-full pt-8 flex flex-col">
+          <h2 className="px-4 w-full min-w-0 font-bold text-xl text-balance leading-tight">
+            Popüler Filtreler
+          </h2>
+          <ul className="w-full flex flex-row flex-wrap content-stretch pt-3.5 px-3 gap-1.5">
+            {results
+              .filter((c) => c[0].startsWith(filterSeparator))
+              .map((c) => {
+                const count = c[1];
+                const key = c[0].replace(filterSeparator, "");
+                const obj = filterMap[key];
+                if (!obj) return null;
+                if (count < 20) return null;
+                return (
+                  <li
+                    key={key}
+                    className="px-2.5 py-1 leading-tight rounded-2xl shrink min-w-0 border flex items-center gap-1 bg-foreground/8 border-foreground/12 text-foreground"
+                  >
+                    <obj.Icon className="size-4 shrink-0 text-muted-foreground -ml-0.25" />
+                    <p className="font-bold shrink min-w-0">
+                      <span className="text-muted-foreground font-medium">
+                        {obj.title}:{" "}
+                      </span>
+                      {count}
+                    </p>
+                  </li>
+                );
+              })}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }
@@ -186,7 +226,7 @@ function Section({
       <h2 className="px-4 w-full min-w-0 font-bold text-xl text-balance leading-tight">
         {title}
       </h2>
-      <ul className="w-full flex flex-row flex-wrap content-stretch pt-2 px-1">
+      <ul className="w-full flex flex-row flex-wrap content-stretch pt-2 px-2">
         {cards
           .filter(
             (c) =>
@@ -292,12 +332,64 @@ export const metadata: Metadata = {
   }),
 };
 
+const filterSeparator = "|Filter|";
+const filterMap: Record<
+  string,
+  { title: string; Icon: FC<{ className?: string }> }
+> = {
+  Subjects: {
+    title: "Konu",
+    Icon: FolderClosedIcon,
+  },
+  Departments: {
+    title: "Ana Bilim Dalı",
+    Icon: BuildingIcon,
+  },
+  Languages: {
+    title: "Dil",
+    Icon: GlobeIcon,
+  },
+  "Thesis Types": {
+    title: "Tez Türü",
+    Icon: ScrollTextIcon,
+  },
+  Universities: {
+    title: "Üniversite",
+    Icon: LandmarkIcon,
+  },
+  Years: {
+    title: "Yıl",
+    Icon: CalendarIcon,
+  },
+  Advisors: {
+    title: "Danışman",
+    Icon: UserIcon,
+  },
+  "Search On": {
+    title: "Arama Alanı",
+    Icon: SearchCheckIcon,
+  },
+  Authors: {
+    title: "Yazar",
+    Icon: PenToolIcon,
+  },
+};
+
 async function getStats() {
   const posthogUrl = `https://us.posthog.com/api/projects/${env.POSTHOG_PROJECT_ID}/query/`;
   const posthogHeaders = {
     Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
     "Content-Type": "application/json",
   };
+  const filtersQuery = `
+    SELECT 
+        concat('|Filter|', properties['Filter Type']) AS key,
+        count(uuid) AS count,
+    FROM events
+    WHERE event = 'Filtered'
+    GROUP BY key
+    ORDER BY count DESC
+  `;
   const queries = cards.map(({ key, event, distinct, queryInterval }) => {
     const and = queryInterval
       ? ` AND timestamp > now() - INTERVAL ${queryInterval.count} ${queryInterval.type}`
@@ -311,7 +403,7 @@ async function getStats() {
       : "";
     const baseQuery = `
       SELECT 
-          '${key}' AS time_range, 
+          '${key}' AS key, 
           ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
       FROM events
       WHERE event = '${event}'
@@ -319,7 +411,7 @@ async function getStats() {
     const prevQuery = queryInterval
       ? `
       SELECT 
-          '${key}_prev' AS time_range, 
+          '${key}_prev' AS key, 
           ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
       FROM events
       WHERE event = '${event}'
@@ -331,7 +423,7 @@ async function getStats() {
     return query;
   });
 
-  const query = queries.join("\nUNION ALL\n");
+  const query = queries.join("\nUNION ALL\n") + "\nUNION ALL\n" + filtersQuery;
   const payload = {
     query: {
       kind: "HogQLQuery",
