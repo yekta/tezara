@@ -37,6 +37,8 @@ type TConfig = {
   revalidate: number;
 };
 
+const REVALIDATION_WINDOW = 30 * 1000;
+
 export function cacheWithRedis<T>(
   key: string,
   fn: () => Promise<T>,
@@ -52,25 +54,29 @@ export function cacheWithRedis<T>(
       const parsed: {
         data: T;
         timestamp: number;
-        revalidating?: boolean;
+        revalidation_started_at?: number;
       } = JSON.parse(cached);
 
       // Revalidate after the request if required
       if (Date.now() - parsed.timestamp > config.revalidate * 1000) {
         after(async () => {
-          if (parsed.revalidating) {
+          if (
+            parsed.revalidation_started_at &&
+            typeof parsed.revalidation_started_at === "number" &&
+            Date.now() - parsed.revalidation_started_at < REVALIDATION_WINDOW
+          ) {
             console.log(`REDIS | CACHE_HIT | 🔵 REVALIDATING_ALREADY | ${key}`);
             return;
           }
 
           console.log(`REDIS | CACHE_HIT | 🟡 REVALIDATE | ${key}`);
 
-          // Set revalidating right away
+          // Set revalidation_started_at right away
           await redis.set(
             key,
             JSON.stringify({
               ...parsed,
-              revalidating: true,
+              revalidation_started_at: Date.now(),
             }),
             {
               EX: config.ttl,
