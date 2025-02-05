@@ -166,16 +166,11 @@ export default async function Page() {
         </h1>
         <RefreshedAt timestamp={lastRefreshDate.getTime()} />
       </div>
-      <Section
-        title="Son 24 Saat"
-        interval="24h"
-        results={results}
-        className="pt-6"
-      />
+      <Section title="Son 24 Saat" interval="24h" results={results} />
       <Section title="Son 30 Gün" interval="30d" results={results} />
       <Section title="Tüm Zamanlar" interval="alltime" results={results} />
       {results.some(([key]) => key.startsWith(filterSeparator)) && (
-        <div id="popular_filters" className="w-full pt-8 flex flex-col">
+        <div id="popular_filters" className="w-full pt-6 flex flex-col">
           <h2 className="px-4 w-full min-w-0 font-bold text-xl text-balance leading-tight">
             Popüler Filtreler
           </h2>
@@ -222,7 +217,7 @@ function Section({
   className?: string;
 }) {
   return (
-    <div id={interval} className={cn("w-full pt-8 flex flex-col", className)}>
+    <div id={interval} className={cn("w-full pt-6 flex flex-col", className)}>
       <h2 className="px-4 w-full min-w-0 font-bold text-xl text-balance leading-tight">
         {title}
       </h2>
@@ -280,7 +275,7 @@ function Card({
         </div>
         <div
           data-has-change={changeRounded !== undefined ? true : undefined}
-          className="w-full flex flex-col items-center justify-center px-2 gap-1 pt-5 pb-4.5"
+          className="w-full flex flex-col items-center justify-center px-2 gap-1 pt-3 pb-2.5"
         >
           <p className="w-full font-bold text-2xl text-center leading-tight">
             {count.toLocaleString("tr-TR")}
