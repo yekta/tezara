@@ -63,7 +63,9 @@ export default function SearchResults({}: Props) {
     try {
       const res = await bulkDownload();
       const formatted = formatForDownload(res.hits);
-      const parser = new Parser();
+      const parser = new Parser({
+        withBOM: true,
+      });
       const csv = parser.parse(formatted);
 
       // Convert CSV to a Blob
