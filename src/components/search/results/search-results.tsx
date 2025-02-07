@@ -67,7 +67,7 @@ export default function SearchResults({}: Props) {
       const csv = parser.parse(formatted);
 
       // Convert CSV to a Blob
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csv], { type: "text/csv" });
 
       setIsPendingDownload(false);
       umami.capture("Downloaded Bulk CSV", {
