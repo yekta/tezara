@@ -3,8 +3,6 @@ import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchUniversities } from "@/server/meili/repo/university";
 import { ResponseJSON } from "@clickhouse/client";
 
-//
-
 export async function getUniversities({
   page,
   perPage,

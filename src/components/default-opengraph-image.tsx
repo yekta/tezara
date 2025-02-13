@@ -76,7 +76,18 @@ export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
   );
 }
 
+type TFont = {
+  name: string;
+  weight: number;
+  style: "normal" | "italic";
+  data: ArrayBuffer;
+};
+
+let fonts: TFont[] | null = null;
+
 export async function getOpengraphFonts() {
+  if (fonts) return fonts;
+
   const getFontFile = async (path: string) => {
     const data = await readFile(
       join(process.cwd(), `public/static/fonts/${path}`)
@@ -94,7 +105,8 @@ export async function getOpengraphFonts() {
     fontSemiBold,
     fontMedium,
   ]);
-  return [
+
+  fonts = [
     {
       name: "dm",
       weight: 700,
@@ -113,7 +125,9 @@ export async function getOpengraphFonts() {
       style: "normal",
       data: fontMediumData,
     },
-  ] as const;
+  ];
+
+  return fonts;
 }
 
 export async function DefaultOpenGraphResponse() {
