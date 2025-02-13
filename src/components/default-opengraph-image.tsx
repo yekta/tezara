@@ -83,7 +83,7 @@ type TFont = {
   data: ArrayBuffer;
 };
 
-let fonts: TFont[] | null = null;
+let fonts: TFont[] | undefined = undefined;
 
 export async function getOpengraphFonts() {
   if (fonts) return fonts;
