@@ -86,7 +86,10 @@ type TFont = {
 let fonts: TFont[] | undefined = undefined;
 
 export async function getOpengraphFonts() {
-  if (fonts) return fonts;
+  if (fonts) {
+    console.log("𝑓 Returning cached fonts");
+    return fonts;
+  }
 
   const getFontFile = async (path: string) => {
     const data = await readFile(
