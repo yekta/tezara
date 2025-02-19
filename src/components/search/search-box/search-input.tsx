@@ -102,7 +102,7 @@ export default function SearchInput({
         enterKeyHint="search"
         disabled={isPendingPush}
         className="w-full pl-8.5 pr-12"
-        placeholder="Tez, yazar, veya danışman ara..."
+        placeholder="Tez, yazar veya danışman ara..."
         value={queryInputValue}
         onChange={(e) => setQueryInputValue(e.target.value)}
       />
