@@ -1,17 +1,30 @@
 import "server-only";
 
 import { env } from "@/lib/env";
-import { createClient, type RedisClientType } from "redis";
+import { Redis } from "ioredis";
 import { after } from "next/server";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let client: RedisClientType<any, any, any> | undefined = undefined;
+let client: Redis | undefined = undefined;
 
-export async function getRedis() {
+const parseRedisUrl = (url: string) => {
+  const parsed = new URL(url);
+  return {
+    host: parsed.hostname,
+    port: parseInt(parsed.port),
+    username: parsed.username,
+    password: parsed.password,
+  };
+};
+
+export function getRedis() {
   if (!client) {
-    client = await createClient({
-      url: env.REDIS_URL,
-    }).connect();
+    const { host, port, username, password } = parseRedisUrl(env.REDIS_URL);
+    client = new Redis({
+      host,
+      port,
+      username,
+      password,
+    });
   }
 
   return client;
@@ -47,7 +60,7 @@ export function cacheWithRedis<T>(
   const config = cacheConfig[cacheDuration];
 
   const func = async () => {
-    const redis = await getRedis();
+    const redis = getRedis();
     const cached = await redis.get(key);
 
     if (cached) {
@@ -78,9 +91,8 @@ export function cacheWithRedis<T>(
               ...parsed,
               revalidation_started_at: Date.now(),
             }),
-            {
-              EX: config.ttl,
-            }
+            "EX",
+            config.ttl
           );
 
           const result = await fn();
@@ -89,9 +101,7 @@ export function cacheWithRedis<T>(
             timestamp: Date.now(),
           };
 
-          await redis.set(key, JSON.stringify(payload), {
-            EX: config.ttl,
-          });
+          await redis.set(key, JSON.stringify(payload), "EX", config.ttl);
           console.log(`REDIS | CACHE_HIT | 🟢 REVALIDATED | ${key}`);
         });
       } else {
@@ -109,9 +119,7 @@ export function cacheWithRedis<T>(
       data: result,
       timestamp: Date.now(),
     };
-    await redis.set(key, JSON.stringify(payload), {
-      EX: config.ttl,
-    });
+    await redis.set(key, JSON.stringify(payload), "EX", config.ttl);
 
     return result;
   };
