@@ -69,5 +69,6 @@ export const metadata: Metadata = {
   twitter: getTwitterMeta({
     title,
     description,
+    addImages: true,
   }),
 };
