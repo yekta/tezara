@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    unoptimized: true,
-  },
   async rewrites() {
     if (
       !process.env.NEXT_PUBLIC_POSTHOG_HOST ||
