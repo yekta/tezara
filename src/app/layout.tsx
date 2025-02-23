@@ -4,7 +4,12 @@ import Navbar from "@/components/navigation/navbar";
 import TopLoader from "@/components/navigation/top-loader";
 import Providers from "@/components/providers/providers";
 import { Toaster } from "@/components/ui/sonner";
-import { siteDescription, siteTagline, siteTitle } from "@/lib/constants";
+import {
+  getPreviewUrl,
+  siteDescription,
+  siteTagline,
+  siteTitle,
+} from "@/lib/constants";
 import { env } from "@/lib/env";
 import {
   AlertCircleIcon,
@@ -43,10 +48,27 @@ export const metadata: Metadata = {
   title,
   description: siteDescription,
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
+  openGraph: {
+    title,
+    description: siteDescription,
+    type: "website",
+    images: [
+      {
+        url: getPreviewUrl("home"),
+        alt: title,
+      },
+    ],
+  },
   twitter: {
     title,
     description: siteDescription,
     card: "summary_large_image",
+    images: [
+      {
+        url: getPreviewUrl("home"),
+        alt: title,
+      },
+    ],
   },
 };
 

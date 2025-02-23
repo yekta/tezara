@@ -8,7 +8,7 @@ export const staticAssetsRoute = "/static";
 
 export const previewImages = {
   path: `${staticAssetsRoute}/previews`,
-  version: "v3",
+  version: "v4",
 };
 
 export const getPreviewUrl = (slug: string) =>
