@@ -195,7 +195,7 @@ export default async function Page() {
                       </p>
                     </div>
                     <p className="font-bold shrink min-w-0 leading-none text-lg">
-                      {count}
+                      {count.toLocaleString("tr-TR")}
                     </p>
                   </li>
                 );
@@ -304,7 +304,7 @@ function Card({
             )}
             {changeRoundedAbs !== undefined ? (
               <p className="font-semibold min-w-0 shrink overflow-hidden whitespace-nowrap overflow-ellipsis text-xs leading-tight">
-                %{changeRoundedAbs}
+                %{changeRoundedAbs.toLocaleString("tr-TR")}
               </p>
             ) : (
               <InfinityIcon className="size-3.5 shrink-0" />
