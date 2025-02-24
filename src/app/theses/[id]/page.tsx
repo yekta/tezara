@@ -7,7 +7,7 @@ import DetailsListItemUniversity from "@/app/theses/_components/details-list-ite
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
-import { getPreviewUrl, siteTitle } from "@/lib/constants";
+import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getThesis, searchTheses } from "@/server/meili/repo/thesis";
@@ -228,7 +228,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: getTwitterMeta({
       title: notFoundTitle,
       description: notFoundDescription,
-      addImages: true,
     }),
   };
 
@@ -273,17 +272,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         thesis.subjects.length > 0
           ? thesis.subjects.map((subject) => subject.name)
           : undefined,
-      images: [
-        {
-          url: getPreviewUrl("home"),
-          alt: title,
-        },
-      ],
     },
     twitter: getTwitterMeta({
       title,
       description,
-      addImages: true,
     }),
   };
 }
