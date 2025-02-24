@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  cacheHandler:
+    process.env.NODE_ENV === "production"
+      ? require.resolve("./cache-handler.js")
+      : undefined,
   async rewrites() {
     if (
       !process.env.NEXT_PUBLIC_POSTHOG_HOST ||
