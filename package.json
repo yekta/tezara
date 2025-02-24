@@ -58,7 +58,6 @@
     "react-hook-form": "^7.53.2",
     "react-hotkeys-hook": "^4.6.1",
     "recharts": "^2.13.3",
-    "redis": "^4.7.0",
     "server-only": "^0.0.1",
     "sonner": "^1.7.1",
     "superjson": "^2.2.1",
