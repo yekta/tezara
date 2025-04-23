@@ -1,2 +1,6 @@
+[phases.setup]
+    nixPkgs = ['nodejs-23_x']
+    nodeVersion = '23.6.1'
+
 [phases.install]
     cmds = ['npm ci --force']
