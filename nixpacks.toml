@@ -1,4 +1,4 @@
 [variables]
-    NIXPACKS_NODE_VERSION = '22' 
+    NIXPACKS_NODE_VERSION = '23' 
 [phases.install]
     cmds = ['npm ci --force']
