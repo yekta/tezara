@@ -80,7 +80,7 @@ type TFont = {
   name: string;
   weight: number;
   style: "normal" | "italic";
-  data: ArrayBuffer;
+  data: Buffer<ArrayBufferLike>;
 };
 
 let fonts: TFont[] | undefined = undefined;
@@ -95,8 +95,7 @@ export async function getOpengraphFonts() {
     const data = await readFile(
       join(process.cwd(), `public/static/fonts/${path}`)
     );
-    const buffer = Uint8Array.from(data).buffer;
-    return buffer;
+    return data;
   };
 
   const fontBold = getFontFile(`DMSansBold.ttf`);
