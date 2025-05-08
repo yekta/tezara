@@ -93,8 +93,8 @@ export default function YearsField() {
       >
         <SelectTrigger
           aria-label="Minimum Yılı Seç"
-          className="flex-1 py-2 rounded-r-none -mr-[0.5px]"
-          classNameInnerContainer="flex items-center -ml-0.5"
+          className="flex-1 min-w-0 overflow-hidden py-2 rounded-r-none -mr-[0.5px]"
+          classNameInnerContainer="flex-1 min-w-0 overflow-hidden items-center -ml-0.5 [&>span]:truncate"
         >
           <CalendarArrowUpIcon className="size-4 shrink-0" />
           <SelectValue placeholder="Yıl >=">
@@ -146,8 +146,8 @@ export default function YearsField() {
       >
         <SelectTrigger
           aria-label="Maksimum Yılı Seç"
-          className="flex-1 py-2 rounded-l-none -ml-[0.5px]"
-          classNameInnerContainer="flex items-center -ml-0.5"
+          className="flex-1 min-w-0 overflow-hidden py-2 rounded-l-none -ml-[0.5px]"
+          classNameInnerContainer="flex-1 min-w-0 overflow-hidden items-center -ml-0.5 [&>span]:truncate"
         >
           <CalendarArrowDownIcon className="size-4 shrink-0" />
           <SelectValue placeholder="Yıl <=">
