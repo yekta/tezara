@@ -6,6 +6,7 @@ import Link from "next/link";
 import * as React from "react";
 
 import { cn } from "@/components/ui/utils";
+import { useRouter } from "next/navigation";
 
 export const minButtonSizeEnforcerClassName =
   "before:w-full before:h-full before:min-w-[44px] before:min-h-[44px] before:z-[-1] before:bg-transparent before:absolute before:-translate-y-1/2 before:top-1/2 before:-translate-x-1/2 before:left-1/2";
@@ -91,12 +92,6 @@ export interface ButtonProps
 
 export type TButtonVariants = VariantProps<typeof buttonVariants>;
 
-export interface LinkButtonProps
-  extends React.ComponentPropsWithRef<typeof Link>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
-
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -136,39 +131,89 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-const LinkButton = React.forwardRef<HTMLAnchorElement, LinkButtonProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      state,
-      fadeOnDisabled,
-      focusVariant,
-      forceMinSize,
-      ...props
+export interface TLinkButtonProps
+  extends React.ComponentProps<typeof LinkCustom>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+function LinkButton({
+  className,
+  variant,
+  size,
+  state,
+  fadeOnDisabled,
+  focusVariant,
+  forceMinSize,
+  children,
+  asChild,
+  ...props
+}: TLinkButtonProps) {
+  const Comp = asChild ? Slot : LinkCustom;
+
+  return (
+    <Comp
+      className={cn(
+        buttonVariants({
+          variant,
+          size,
+          state,
+          fadeOnDisabled,
+          focusVariant,
+          forceMinSize,
+          className,
+        })
+      )}
+      {...props}
+    >
+      {children}
+    </Comp>
+  );
+}
+
+type TPrefetch = "hover" | false;
+type TLinkCustomProps = Omit<React.ComponentProps<typeof Link>, "prefetch"> & {
+  prefetch?: TPrefetch;
+};
+
+export function LinkCustom({
+  onMouseEnter: onMouseEnterProp,
+  onTouchStart: onTouchStartProp,
+  href,
+  prefetch = "hover",
+  ...rest
+}: TLinkCustomProps) {
+  const router = useRouter();
+
+  const onMouseEnter = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+      onMouseEnterProp?.(e);
+      if (prefetch === "hover") {
+        router.prefetch(href.toString());
+      }
     },
-    ref
-  ) => {
-    return (
-      <Link
-        className={cn(
-          buttonVariants({
-            variant,
-            size,
-            className,
-            state,
-            fadeOnDisabled,
-            focusVariant,
-            forceMinSize,
-          })
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-LinkButton.displayName = "LinkButton";
+    [onMouseEnterProp, href, router, prefetch]
+  );
+
+  const onTouchStart = React.useCallback(
+    (e: React.TouchEvent<HTMLAnchorElement>) => {
+      onTouchStartProp?.(e);
+      if (prefetch === "hover") {
+        router.prefetch(href.toString());
+      }
+    },
+    [onTouchStartProp, href, router, prefetch]
+  );
+
+  return (
+    <Link
+      href={href}
+      onMouseEnter={onMouseEnter}
+      onTouchStart={onTouchStart}
+      prefetch={false}
+      {...rest}
+    />
+  );
+}
 
 export { Button, buttonVariants, LinkButton };

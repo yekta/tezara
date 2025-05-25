@@ -10,13 +10,14 @@ import { cleanAdvisors, getThesisRowId } from "@/components/search/helpers";
 import {
   Button,
   LinkButton,
+  LinkCustom,
   minButtonSizeEnforcerClassName,
+  TLinkButtonProps,
 } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { routeHistoryAtom } from "@/lib/store/main";
 import { TThesis } from "@/server/meili/types";
 import { useSetAtom } from "jotai";
-import Link, { LinkProps } from "next/link";
 import { ReactNode } from "react";
 
 type Props =
@@ -57,9 +58,8 @@ export default function ThesisRow({
     ]);
   };
 
-  const thesisLinkProps: LinkProps = {
+  const thesisLinkProps: TLinkButtonProps = {
     href: `${thesesRoute}/${thesis?.id}`,
-    prefetch: false,
     onClick: setPrevious,
   };
 
@@ -142,12 +142,12 @@ export default function ThesisRow({
             Başlık yükleniyor................................
           </div>
         ) : (
-          <Link
+          <LinkCustom
             {...thesisLinkProps}
             className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight not-touch:hover:underline active:underline focus-visible:underline py-0.5"
           >
             {thesis.title_original || noTitle}
-          </Link>
+          </LinkCustom>
         )}
         <p
           className="mt-1 max-w-full text-balance pr-2 min-w-0 text-sm leading-tight font-medium text-muted-foreground
@@ -213,8 +213,7 @@ export default function ThesisRow({
                 {firstThesisSubject}
               </Chip>
             ) : (
-              <Link
-                prefetch={false}
+              <LinkCustom
                 href={`${subjectsRoute}/${encodeURIComponent(
                   firstThesisSubject
                 )}`}
@@ -225,7 +224,7 @@ export default function ThesisRow({
               >
                 <span className="font-icon icon-folder-closed -ml-0.5 mr-1" />
                 {firstThesisSubject}
-              </Link>
+              </LinkCustom>
             )
           ) : null}
           {isPlaceholder || disableUniversityLink ? (
@@ -233,8 +232,7 @@ export default function ThesisRow({
               {isPlaceholder ? "Yükleniyor..." : thesis.university}
             </Chip>
           ) : (
-            <Link
-              prefetch={false}
+            <LinkCustom
               href={`${universitiesRoute}/${thesis.university}`}
               onClick={setPrevious}
               className={`${minButtonSizeEnforcerClassName} px-2 py-1 rounded-xl z-0 relative shrink min-w-0 border bg-foreground/8 
@@ -243,7 +241,7 @@ export default function ThesisRow({
             >
               <span className="font-icon icon-landmark -ml-0.5 mr-1" />
               {thesis.university}
-            </Link>
+            </LinkCustom>
           )}
           {(isPlaceholder || thesis?.department) && (
             <Chip classNameIcon="icon-building">

@@ -1,8 +1,8 @@
 import { metricsRoute } from "@/app/metrics/_components/constants";
 import ThemeButton from "@/components/theme-button";
+import { LinkCustom } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { sc, siteTitle } from "@/lib/constants";
-import Link from "next/link";
 import { ReactNode } from "react";
 
 export default async function Footer({
@@ -68,7 +68,7 @@ export default async function Footer({
 
 function FooterLink({ children, href }: { children: ReactNode; href: string }) {
   return (
-    <Link
+    <LinkCustom
       prefetch={false}
       href={href}
       target="_blank"
@@ -77,6 +77,6 @@ function FooterLink({ children, href }: { children: ReactNode; href: string }) {
       before:w-full before:h-full before:-translate-y-1/2 before:top-1/2 before:-translate-x-1/2 before:left-1/2 before:min-w-[48px] before:min-h-[48px] before:z-[-1] z-0 before:bg-transparent before:absolute"
     >
       <p className="max-w-full">{children}</p>
-    </Link>
+    </LinkCustom>
   );
 }
