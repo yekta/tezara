@@ -123,7 +123,8 @@ export default async function Image({ params }: Props) {
         fonts,
       }
     );
-    await res.arrayBuffer();
+    const clone = res.clone();
+    await clone.arrayBuffer();
     return res;
   } catch (error) {
     console.error("Error generating thesis opengraph image:");
