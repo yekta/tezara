@@ -37,89 +37,99 @@ export default async function Image({ params }: Props) {
     thesis = data.thesis;
     if (!thesis) return DefaultOpenGraphResponse();
   } catch (error) {
+    console.log("Error fetching thesis data for opengraph image:");
     console.log(error);
     return DefaultOpenGraphResponse();
   }
 
-  return new ImageResponse(
-    (
-      // ImageResponse JSX element
-      <div
-        style={{
-          background: background,
-          color: foreground,
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          paddingLeft: 80,
-          paddingRight: 80,
-          paddingTop: 24,
-          paddingBottom: 24,
-          justifyContent: "center",
-        }}
-      >
-        <ScrollTextIcon
-          style={{
-            width: 200,
-            height: 200,
-            color: foreground,
-            position: "absolute",
-            opacity: 0.15,
-            right: 64,
-            bottom: 64,
-          }}
-        />
-        <Logo
-          variant="full"
-          style={{
-            width: logoSize,
-            height: logoSize / logoAspectRatio,
-          }}
-        />
-        <p
-          style={{
-            fontSize: 56,
-            width: "100%",
-            lineHeight: 1.15,
-            marginTop: 36,
-            fontWeight: 700,
-            ...defaultParagraphClassName,
-          }}
-        >
-          {truncateString(
-            thesis.title_original ||
-              thesis.title_translated ||
-              `Tez No: ${thesis.id}`,
-            115
-          )}
-        </p>
+  try {
+    const fonts = await getOpengraphFonts();
+    const res = new ImageResponse(
+      (
+        // ImageResponse JSX element
         <div
           style={{
-            display: "flex",
+            background: background,
+            color: foreground,
             width: "100%",
+            height: "100%",
+            display: "flex",
             flexDirection: "column",
-            marginTop: 8,
-            gap: -20,
+            paddingLeft: 80,
+            paddingRight: 80,
+            paddingTop: 24,
+            paddingBottom: 24,
+            justifyContent: "center",
           }}
         >
-          <Info
-            label={truncateString(thesis.author || `Yazar belirtilmemiş`, 70)}
-            Icon={PenToolIcon}
+          <ScrollTextIcon
+            style={{
+              width: 200,
+              height: 200,
+              color: foreground,
+              position: "absolute",
+              opacity: 0.15,
+              right: 64,
+              bottom: 64,
+            }}
           />
-          <Info
-            label={thesis.thesis_type || "Tez türü belirtilmemiş"}
-            Icon={ScrollTextIcon}
+          <Logo
+            variant="full"
+            style={{
+              width: logoSize,
+              height: logoSize / logoAspectRatio,
+            }}
           />
+          <p
+            style={{
+              fontSize: 56,
+              width: "100%",
+              lineHeight: 1.15,
+              marginTop: 36,
+              fontWeight: 700,
+              ...defaultParagraphClassName,
+            }}
+          >
+            {truncateString(
+              thesis.title_original ||
+                thesis.title_translated ||
+                `Tez No: ${thesis.id}`,
+              115
+            )}
+          </p>
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              flexDirection: "column",
+              marginTop: 8,
+              gap: -20,
+            }}
+          >
+            <Info
+              label={truncateString(thesis.author || `Yazar belirtilmemiş`, 70)}
+              Icon={PenToolIcon}
+            />
+            <Info
+              label={thesis.thesis_type || "Tez türü belirtilmemiş"}
+              Icon={ScrollTextIcon}
+            />
+          </div>
         </div>
-      </div>
-    ),
-    {
-      ...size,
-      // @ts-expect-error - This is fine, they don't export the type so I can't set it
-      fonts: await getOpengraphFonts(),
-    }
-  );
+      ),
+      {
+        ...size,
+        // @ts-expect-error - This is fine, they don't export the type so I can't set it
+        fonts,
+      }
+    );
+    await res.arrayBuffer();
+    return res;
+  } catch (error) {
+    console.error("Error generating thesis opengraph image:");
+    console.error(error);
+    return DefaultOpenGraphResponse();
+  }
 }
 
 function Info({
