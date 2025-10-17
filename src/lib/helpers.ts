@@ -32,3 +32,16 @@ export function getTwitterMeta({
 export const truncateString = (str: string, length: number): string => {
   return str.length > length ? str.slice(0, length) + "..." : str;
 };
+
+function mb(n: number) {
+  return Math.round(n / 1024 / 1024);
+}
+
+export function logMemory(tag: string) {
+  const m = process.memoryUsage();
+  console.log(
+    `[${tag}] heap=${mb(m.heapUsed)}MB rss=${mb(m.rss)}MB ext=${mb(
+      m.external
+    )}MB`
+  );
+}
