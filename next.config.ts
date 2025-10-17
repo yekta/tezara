@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheMaxMemorySize: 1024 * 1024 * 100, // 100mb
+  cacheMaxMemorySize: 0,
   async rewrites() {
     if (
       !process.env.NEXT_PUBLIC_POSTHOG_HOST ||
