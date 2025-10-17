@@ -80,53 +80,56 @@ type TFont = {
   name: string;
   weight: number;
   style: "normal" | "italic";
-  data: ArrayBuffer;
+  data: Buffer<ArrayBufferLike>;
 };
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __OG_FONTS__: readonly TFont[];
-}
+let fonts: TFont[] | undefined = undefined;
 
-const bufferToArrayBuffer = (buf: Buffer): ArrayBuffer => {
-  const ab = new ArrayBuffer(buf.byteLength); // guaranteed ArrayBuffer, not Shared
-  new Uint8Array(ab).set(buf); // copy once
-  return ab;
-};
+export async function getOpengraphFonts() {
+  if (fonts) {
+    console.log("𝑓 Returning cached fonts");
+    return fonts;
+  }
 
-export async function getOpengraphFonts(): Promise<readonly TFont[]> {
-  if (globalThis.__OG_FONTS__) return globalThis.__OG_FONTS__;
+  const getFontFile = async (path: string) => {
+    const data = await readFile(
+      join(process.cwd(), `public/static/fonts/${path}`)
+    );
+    return data;
+  };
 
-  const base = join(process.cwd(), "public/static/fonts");
-  const [bold, semi, medium] = await Promise.all([
-    readFile(join(base, "DMSansBold.ttf")),
-    readFile(join(base, "DMSansSemiBold.ttf")),
-    readFile(join(base, "DMSansMedium.ttf")),
+  const fontBold = getFontFile(`DMSansBold.ttf`);
+  const fontSemiBold = getFontFile(`DMSansSemiBold.ttf`);
+  const fontMedium = getFontFile(`DMSansMedium.ttf`);
+
+  const [fontBoldData, fontSemiBoldData, fontMediumData] = await Promise.all([
+    fontBold,
+    fontSemiBold,
+    fontMedium,
   ]);
 
-  const fonts: TFont[] = [
+  fonts = [
     {
       name: "dm",
       weight: 700,
       style: "normal",
-      data: bufferToArrayBuffer(bold),
+      data: fontBoldData,
     },
     {
       name: "dm",
       weight: 600,
       style: "normal",
-      data: bufferToArrayBuffer(semi),
+      data: fontSemiBoldData,
     },
     {
       name: "dm",
       weight: 500,
       style: "normal",
-      data: bufferToArrayBuffer(medium),
+      data: fontMediumData,
     },
   ];
 
-  globalThis.__OG_FONTS__ = Object.freeze(fonts);
-  return globalThis.__OG_FONTS__;
+  return fonts;
 }
 
 export async function DefaultOpenGraphResponse() {
