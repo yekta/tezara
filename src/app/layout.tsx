@@ -46,6 +46,13 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description: siteDescription,
+    images: [
+      {
+        width: 1200,
+        height: 630,
+        url: "/static/previews/v4/home.png",
+      },
+    ],
     type: "website",
   },
   twitter: {
