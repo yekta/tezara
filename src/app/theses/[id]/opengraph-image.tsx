@@ -45,26 +45,6 @@ export default async function Image({ params }: Props) {
     return DefaultOpenGraphResponse();
   }
 
-  try {
-    const fonts = await getOpengraphFonts();
-    const testRes = createResponse({ thesis, fonts });
-    await testRes.arrayBuffer();
-    const res = createResponse({ thesis, fonts });
-    return res;
-  } catch (error) {
-    console.error("Error generating thesis opengraph image:");
-    console.error(error);
-    return DefaultOpenGraphResponse();
-  }
-}
-
-function createResponse({
-  thesis,
-  fonts,
-}: {
-  thesis: NonNullable<Awaited<ReturnType<typeof cachedGetPageData>>["thesis"]>;
-  fonts: Awaited<ReturnType<typeof getOpengraphFonts>>;
-}) {
   return new ImageResponse(
     (
       <OGWrapper>
@@ -113,7 +93,7 @@ function createResponse({
     ),
     {
       ...size,
-      fonts,
+      fonts: await getOpengraphFonts(),
     }
   );
 }
