@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheMaxMemorySize: 100 * 1024 * 1024, // 128 MB
+  serverExternalPackages: ["@takumi-rs/core"],
   async rewrites() {
     if (
       !process.env.NEXT_PUBLIC_POSTHOG_HOST ||

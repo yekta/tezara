@@ -1,7 +1,7 @@
 import PenToolIcon from "@/components/icons/pen-tool";
 import ScrollTextIcon from "@/components/icons/scroll-text-icon";
 import Logo from "@/components/logo/logo";
-import { ImageResponse } from "next/og";
+import ImageResponse from "@takumi-rs/image-response";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CSSProperties } from "react";
@@ -21,7 +21,7 @@ export const opengraphSize = {
 };
 export const opengraphContentType = "image/png";
 export const defaultParagraphClassName: CSSProperties = {
-  wordBreak: "break-word",
+  wordBreak: "break-all",
   textWrap: "balance",
 };
 
@@ -70,6 +70,7 @@ export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
           width: logoSize,
           height: logoSize / logoAspectRatio,
           marginTop: -34,
+          marginLeft: -44,
         }}
       />
     </div>
@@ -135,7 +136,6 @@ export async function getOpengraphFonts() {
 export async function DefaultOpenGraphResponse() {
   return new ImageResponse(<DefaultOpenGraphImage />, {
     ...opengraphSize,
-    // @ts-expect-error - This is fine, they don't export the type so I can't set it
     fonts: await getOpengraphFonts(),
   });
 }

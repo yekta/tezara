@@ -1,6 +1,4 @@
 import {
-  background,
-  defaultParagraphClassName,
   foreground,
   getOpengraphFonts,
   logoAspectRatio,
@@ -9,7 +7,9 @@ import {
 } from "@/components/default-opengraph-image";
 import ChartColumn from "@/components/icons/chart-column";
 import Logo from "@/components/logo/logo";
-import { ImageResponse } from "next/og";
+import { OGTitle } from "@/components/og/og-title";
+import OGWrapper from "@/components/og/og-wrapper";
+import ImageResponse from "@takumi-rs/image-response";
 
 export const alt = "Kullanım metrikleri sayfası";
 export const size = opengraphSize;
@@ -20,22 +20,7 @@ const logoSize = 256;
 export default async function Image() {
   return new ImageResponse(
     (
-      // ImageResponse JSX element
-      <div
-        style={{
-          background: background,
-          color: foreground,
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          paddingLeft: 80,
-          paddingRight: 80,
-          paddingTop: 24,
-          paddingBottom: 24,
-          justifyContent: "center",
-        }}
-      >
+      <OGWrapper gap={48}>
         <ChartColumn
           style={{
             width: 256,
@@ -52,28 +37,18 @@ export default async function Image() {
           style={{
             width: logoSize,
             height: logoSize / logoAspectRatio,
-            marginTop: -12,
+            marginTop: 96,
           }}
         />
-        <p
-          style={{
-            fontSize: 112,
-            width: "100%",
-            lineHeight: 1.05,
-            paddingRight: 80,
-            marginTop: 32,
-            fontWeight: 700,
-            letterSpacing: -3,
-            ...defaultParagraphClassName,
-          }}
-        >
-          Kullanım Metrikleri
-        </p>
-      </div>
+        <OGTitle size="lg">
+          Kullanım
+          <br />
+          Metrikleri
+        </OGTitle>
+      </OGWrapper>
     ),
     {
       ...size,
-      // @ts-expect-error - This is fine, they don't export the type so I can't set it
       fonts: await getOpengraphFonts(),
     }
   );

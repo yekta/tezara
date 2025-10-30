@@ -225,15 +225,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const notFoundMeta: Metadata = {
     title: notFoundTitle,
     description: notFoundDescription,
-    openGraph: {
-      images: [
-        {
-          width: 1200,
-          height: 630,
-          url: "/static/previews/v4/home.png",
-        },
-      ],
-    },
     twitter: getTwitterMeta({
       title: notFoundTitle,
       description: notFoundDescription,
@@ -281,13 +272,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         thesis.subjects.length > 0
           ? thesis.subjects.map((subject) => subject.name)
           : undefined,
-      images: [
-        {
-          width: 1200,
-          height: 630,
-          url: "/static/previews/v4/home.png",
-        },
-      ],
     },
     twitter: getTwitterMeta({
       title,
