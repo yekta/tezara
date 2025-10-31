@@ -29,7 +29,7 @@ export default function DefaultOpenGraphImage({ logoSize = 500 }: Props) {
   return (
     <div
       style={{
-        background: background,
+        backgroundColor: background,
         color: foreground,
         width: "100%",
         height: "100%",

@@ -105,7 +105,7 @@ export default function LanguagesChart({
               >
                 <div
                   style={{
-                    background: chartConfig[k].color,
+                    backgroundColor: chartConfig[k].color,
                   }}
                   className="size-3.5 rounded"
                 />

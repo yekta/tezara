@@ -111,7 +111,7 @@ export default function ThesisTypesChart({
               >
                 <div
                   style={{
-                    background: getThesisTypeColorClassName({
+                    backgroundColor: getThesisTypeColorClassName({
                       variant: k,
                       classType: "variable",
                     }),

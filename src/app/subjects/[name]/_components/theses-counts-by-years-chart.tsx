@@ -80,7 +80,7 @@ export default function ThesesCountsByYearsChart({
               >
                 <div
                   style={{
-                    background: getThesisTypeColorClassName({
+                    backgroundColor: getThesisTypeColorClassName({
                       variant: k,
                       classType: "variable",
                     }),
