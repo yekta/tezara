@@ -21,7 +21,8 @@ export const opengraphSize = {
 };
 export const opengraphContentType = "image/png";
 export const defaultParagraphClassName: CSSProperties = {
-  wordBreak: "break-all",
+  wordBreak: "normal",
+  overflowWrap: "break-word",
   textWrap: "balance",
 };
 
