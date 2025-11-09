@@ -1,4 +1,8 @@
-import { PAGE_DEFAULT } from "@/components/search/constants";
+import {
+  HITS_PER_PAGE_DEFAULT,
+  PAGE_DEFAULT,
+  RANKING_SCORE_THRESHOLD_DEFAULT,
+} from "@/components/search/constants";
 import { boostedStringSort } from "@/server/meili/helpers";
 import { TAuthor } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
@@ -19,8 +23,10 @@ export async function searchAuthors({
   const index = client.index<TAuthor>(indexName);
   const result = await index.search(q, {
     page,
-    hitsPerPage: 50,
+    hitsPerPage: HITS_PER_PAGE_DEFAULT,
     sort,
+    rankingScoreThreshold:
+      q === "" ? undefined : RANKING_SCORE_THRESHOLD_DEFAULT,
   });
   result.hits = result.hits.sort(
     boostedStringSort({

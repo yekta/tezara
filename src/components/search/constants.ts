@@ -2,6 +2,7 @@ import { TThesis } from "@/server/meili/types";
 
 export const PAGE_DEFAULT = 1;
 export const HITS_PER_PAGE_DEFAULT = 20;
+export const RANKING_SCORE_THRESHOLD_DEFAULT = 0.5;
 export const HITS_PER_PAGE_BULK = 15_000;
 
 import {

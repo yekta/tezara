@@ -1,3 +1,4 @@
+import { RANKING_SCORE_THRESHOLD_DEFAULT } from "@/components/search/constants";
 import { boostedStringSort } from "@/server/meili/helpers";
 import { TUniversity } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
@@ -41,6 +42,8 @@ export async function searchUniversities({
     sort: ["name:asc"],
     attributesToRetrieve: ["name"],
     attributesToSearchOn: ["name"],
+    rankingScoreThreshold:
+      q === "" ? undefined : RANKING_SCORE_THRESHOLD_DEFAULT,
   });
 
   return result;

@@ -1,3 +1,7 @@
+import {
+  HITS_PER_PAGE_DEFAULT,
+  RANKING_SCORE_THRESHOLD_DEFAULT,
+} from "@/components/search/constants";
 import { TSubject, TSubjectOrKeywordLanguage } from "@/server/meili/types";
 import { MeiliSearch } from "meilisearch";
 
@@ -28,7 +32,7 @@ export async function getSubjects({
 export async function searchSubjects({
   q,
   client,
-  hits_per_page = 50,
+  hits_per_page = HITS_PER_PAGE_DEFAULT,
   page = 1,
   languages,
 }: {
@@ -51,6 +55,8 @@ export async function searchSubjects({
     attributesToRetrieve: ["name"],
     attributesToSearchOn: ["name"],
     filter,
+    rankingScoreThreshold:
+      q === "" ? undefined : RANKING_SCORE_THRESHOLD_DEFAULT,
   });
 
   return result;

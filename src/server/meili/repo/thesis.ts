@@ -1,5 +1,6 @@
 import {
   PAGE_DEFAULT,
+  RANKING_SCORE_THRESHOLD_DEFAULT,
   TSearchLikePageParamsSearchProps,
 } from "@/components/search/constants";
 import {
@@ -189,6 +190,8 @@ export async function searchTheses({
     attributesToRetrieve: attributes_to_retrieve,
     attributesToSearchOn:
       attributesToSearchOn.length > 0 ? attributesToSearchOn : undefined,
+    rankingScoreThreshold:
+      q === "" ? undefined : RANKING_SCORE_THRESHOLD_DEFAULT,
   });
 
   return result;
