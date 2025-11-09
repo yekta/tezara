@@ -39,6 +39,7 @@ export async function searchTheses({
   subjects,
   sort,
   hits_per_page,
+  disable_ranking_score_threshold,
   page = PAGE_DEFAULT,
   attributes_to_retrieve,
   attributes_to_not_retrieve,
@@ -46,6 +47,7 @@ export async function searchTheses({
 }: {
   sort: string[] | undefined;
   hits_per_page: number | undefined;
+  disable_ranking_score_threshold?: boolean;
   attributes_to_retrieve: TThesisAttribute[] | undefined;
   attributes_to_not_retrieve: TThesisAttribute[] | undefined;
   client: MeiliSearch;
@@ -191,7 +193,9 @@ export async function searchTheses({
     attributesToSearchOn:
       attributesToSearchOn.length > 0 ? attributesToSearchOn : undefined,
     rankingScoreThreshold:
-      q === "" ? undefined : RANKING_SCORE_THRESHOLD_DEFAULT,
+      q === "" || disable_ranking_score_threshold
+        ? undefined
+        : RANKING_SCORE_THRESHOLD_DEFAULT,
   });
 
   return result;

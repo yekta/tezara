@@ -55,6 +55,7 @@ export default async function Page({ params }: Props) {
   try {
     similarTheses = await searchTheses({
       q: thesis.title_original || thesis.title_translated || "",
+      disable_ranking_score_threshold: true,
       hits_per_page: 6,
       page: 1,
       languages: [],
