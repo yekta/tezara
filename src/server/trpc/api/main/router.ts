@@ -10,6 +10,8 @@ import { TSubjectOrKeywordLanguage } from "@/server/meili/types";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/setup/trpc";
 import { z } from "zod";
 
+//
+
 export const mainRouter = createTRPCRouter({
   getUniversities: publicProcedure
     .input(
