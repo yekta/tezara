@@ -27,6 +27,8 @@ import { headers } from "next/headers";
 import { FC } from "react";
 import { z } from "zod";
 
+//
+
 type TInterval = "24h" | "30d" | "alltime";
 type Card = {
   key: string;
