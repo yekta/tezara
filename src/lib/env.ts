@@ -8,11 +8,11 @@ export const env = createEnv({
    */
   server: {
     MEILI_ADMIN_KEY: z.string(),
-    MEILI_URL_INTERNAL: z.string().url(),
-    CLICKHOUSE_URL: z.string().url(),
+    MEILI_URL_INTERNAL: z.url(),
+    CLICKHOUSE_URL: z.url(),
     CLICKHOUSE_USERNAME: z.string(),
     CLICKHOUSE_PASSWORD: z.string(),
-    REDIS_URL: z.string().url(),
+    REDIS_URL: z.url(),
     POSTHOG_PERSONAL_API_KEY: z.string(),
     POSTHOG_PROJECT_ID: z.string(),
     NODE_ENV: z
@@ -26,11 +26,11 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_MEILI_URL: z.string().url(),
+    NEXT_PUBLIC_MEILI_URL: z.url(),
     NEXT_PUBLIC_MEILI_CLIENT_KEY: z.string(),
     NEXT_PUBLIC_SITE_URL: z.string(),
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string(),
-    NEXT_PUBLIC_UMAMI_HOST_URL: z.string().url(),
+    NEXT_PUBLIC_UMAMI_HOST_URL: z.url(),
     NEXT_PUBLIC_UMAMI_DOMAINS: z.string(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
