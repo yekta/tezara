@@ -6,7 +6,7 @@ export const cachedGetPageData = cache(({ id }: { id: string }) =>
   getPageData({ id })
 );
 
-async function getPageData({ id }: { id: string }) {
+export async function getPageData({ id }: { id: string }) {
   const thesis = await getThesis({ id: parseInt(id), client: meiliAdmin });
   return {
     thesis,

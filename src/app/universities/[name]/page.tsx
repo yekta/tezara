@@ -3,7 +3,7 @@ import LanguagesChart from "@/app/universities/[name]/_components/languages-char
 import PopularSubjectsChart from "@/app/universities/[name]/_components/popular-subjects-chart";
 import ThesesCountsByYearsChart from "@/app/universities/[name]/_components/theses-counts-by-years-chart";
 import ThesisTypesChart from "@/app/universities/[name]/_components/thesis-types-chart";
-import { cachedGetPageData } from "@/app/universities/[name]/helpers";
+import { getPageData } from "@/app/universities/[name]/helpers";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import Chip from "@/components/chip";
 import Highlighted from "@/components/highlighted";
@@ -34,10 +34,10 @@ export default async function Page({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
 
-  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+  let res: Awaited<ReturnType<typeof getPageData>> | null = null;
 
   try {
-    res = await cachedGetPageData({ name: parsedName });
+    res = await getPageData({ name: parsedName });
   } catch (error) {
     console.log(error);
   }
@@ -248,10 +248,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const locale = "tr";
-  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+  let res: Awaited<ReturnType<typeof getPageData>> | null = null;
 
   try {
-    res = await cachedGetPageData({ name: parsedName });
+    res = await getPageData({ name: parsedName });
   } catch (error) {
     console.log(error);
   }

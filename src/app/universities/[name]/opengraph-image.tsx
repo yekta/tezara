@@ -1,4 +1,4 @@
-import { cachedGetPageData } from "@/app/universities/[name]/helpers";
+import { getPageData } from "@/app/universities/[name]/helpers";
 import {
   DefaultOpenGraphResponse,
   foreground,
@@ -36,10 +36,10 @@ export default async function Image({ params }: Props) {
   const { name } = await params;
   const parsedName = decodeURIComponent(name);
 
-  let res: Awaited<ReturnType<typeof cachedGetPageData>> | null = null;
+  let res: Awaited<ReturnType<typeof getPageData>> | null = null;
 
   try {
-    res = await cachedGetPageData({ name: parsedName });
+    res = await getPageData({ name: parsedName });
   } catch (error) {
     console.log(error);
   }

@@ -11,7 +11,7 @@ export const cachedGetPageData = cache(({ name }: { name: string }) =>
   getPageData({ name })
 );
 
-async function getPageData({ name }: { name: string }) {
+export async function getPageData({ name }: { name: string }) {
   const pageDataPromise = getSubjectPageData({ name });
   const lastThesesPromise = searchTheses({
     q: "",

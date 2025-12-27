@@ -1,4 +1,4 @@
-import { cachedGetPageData } from "@/app/theses/[id]/helpers";
+import { getPageData } from "@/app/theses/[id]/helpers";
 import {
   DefaultOpenGraphResponse,
   foreground,
@@ -33,10 +33,10 @@ const logoSize = 220;
 
 export default async function Image({ params }: Props) {
   const { id } = await params;
-  let thesis: Awaited<ReturnType<typeof cachedGetPageData>>["thesis"];
+  let thesis: Awaited<ReturnType<typeof getPageData>>["thesis"];
 
   try {
-    const data = await cachedGetPageData({ id });
+    const data = await getPageData({ id });
     thesis = data.thesis;
     if (!thesis) return DefaultOpenGraphResponse();
   } catch (error) {
