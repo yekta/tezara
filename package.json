@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": "23.6.1"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "next dev --turbopack",
@@ -49,7 +49,7 @@
     "jotai": "2.11.1",
     "lucide-react": "0.468.0",
     "meilisearch": "0.48.1",
-    "next": "16.1.1",
+    "next": "16.3.2",
     "next-themes": "0.4.4",
     "nextjs-toploader": "3.7.15",
     "nuqs": "2.3.1",
@@ -78,7 +78,7 @@
     "@types/react-dom": "19.2.3",
     "drizzle-kit": "0.28.1",
     "eslint": "9",
-    "eslint-config-next": "16.1.1",
+    "eslint-config-next": "16.3.2",
     "postcss": "8",
     "tailwindcss": "3.4.1",
     "typescript": "5"

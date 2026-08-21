@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheMaxMemorySize: 200 * 1024 * 1024,
+  // Redis is the shared cache. Keep Next from retaining another large cache in
+  // each Railway process.
+  cacheMaxMemorySize: 0,
+  // Cloudflare handles response compression at the edge. This also avoids
+  // retaining origin-side zlib state when a client disconnects mid-response.
+  compress: false,
   serverExternalPackages: ["@takumi-rs/core"],
   async rewrites() {
     if (

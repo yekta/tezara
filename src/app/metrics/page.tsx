@@ -10,6 +10,7 @@ import { SearchIcon } from "@/components/icons/search-icon";
 import { cn } from "@/components/ui/utils";
 import { siteTitle } from "@/lib/constants";
 import { env } from "@/lib/env";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { getTwitterMeta } from "@/lib/helpers";
 import { cacheWithRedis } from "@/server/redis/constants";
 import {
@@ -428,7 +429,7 @@ async function getStats() {
     },
   };
 
-  const res = await fetch(posthogUrl, {
+  const res = await fetchWithTimeout(posthogUrl, {
     method: "POST",
     headers: posthogHeaders,
     body: JSON.stringify(payload),

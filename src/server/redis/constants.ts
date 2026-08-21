@@ -5,6 +5,7 @@ import { Redis } from "ioredis";
 import { after } from "next/server";
 
 let client: Redis | undefined = undefined;
+const inFlightCacheFills = new Map<string, Promise<unknown>>();
 
 const parseRedisUrl = (url: string) => {
   const parsed = new URL(url);
@@ -24,6 +25,8 @@ export function getRedis() {
       port,
       username,
       password,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
     });
   }
 
@@ -50,7 +53,36 @@ type TConfig = {
   revalidate: number;
 };
 
-const REVALIDATION_WINDOW = 30 * 1000;
+const REVALIDATION_LOCK_TTL = 60 * 1000;
+
+async function dedupeInFlight<T>(key: string, fn: () => Promise<T>) {
+  const existing = inFlightCacheFills.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+
+  const task = Promise.resolve().then(fn);
+  inFlightCacheFills.set(key, task);
+
+  try {
+    return await task;
+  } finally {
+    if (inFlightCacheFills.get(key) === task) {
+      inFlightCacheFills.delete(key);
+    }
+  }
+}
+
+async function setCachedValue(
+  redis: Redis,
+  key: string,
+  payload: unknown,
+  ttl: number
+) {
+  try {
+    await redis.set(key, JSON.stringify(payload), "EX", ttl);
+  } catch (error) {
+    console.error(`REDIS | CACHE_WRITE_FAILED | ${key}`, error);
+  }
+}
 
 export function cacheWithRedis<T>(
   key: string,
@@ -60,50 +92,73 @@ export function cacheWithRedis<T>(
   const config = cacheConfig[cacheDuration];
 
   const func = async () => {
-    const redis = getRedis();
-    const cached = await redis.get(key);
+    let redis: Redis;
+    let cached: string | null;
+
+    try {
+      redis = getRedis();
+      cached = await redis.get(key);
+    } catch (error) {
+      console.error(`REDIS | CACHE_READ_FAILED | ${key}`, error);
+      return dedupeInFlight(key, fn);
+    }
 
     if (cached) {
-      const parsed: {
-        data: T;
-        timestamp: number;
-        revalidation_started_at?: number;
-      } = JSON.parse(cached);
+      let parsed: { data: T; timestamp: number };
+
+      try {
+        parsed = JSON.parse(cached);
+      } catch (error) {
+        console.error(`REDIS | CACHE_PARSE_FAILED | ${key}`, error);
+        return dedupeInFlight(key, async () => {
+          const result = await fn();
+          await setCachedValue(
+            redis,
+            key,
+            { data: result, timestamp: Date.now() },
+            config.ttl
+          );
+          return result;
+        });
+      }
 
       // Revalidate after the request if required
       if (Date.now() - parsed.timestamp > config.revalidate * 1000) {
-        after(async () => {
-          if (
-            parsed.revalidation_started_at &&
-            typeof parsed.revalidation_started_at === "number" &&
-            Date.now() - parsed.revalidation_started_at < REVALIDATION_WINDOW
-          ) {
-            console.log(`REDIS | CACHE_HIT | 🔵 REVALIDATING_ALREADY | ${key}`);
-            return;
-          }
+        const lockKey = `${key}:revalidation-lock`;
+        let lockAcquired = false;
 
-          console.log(`REDIS | CACHE_HIT | 🟡 REVALIDATE | ${key}`);
+        try {
+          lockAcquired =
+            (await redis.set(
+              lockKey,
+              "1",
+              "PX",
+              REVALIDATION_LOCK_TTL,
+              "NX"
+            )) === "OK";
+        } catch (error) {
+          console.error(`REDIS | REVALIDATION_LOCK_FAILED | ${key}`, error);
+        }
 
-          // Set revalidation_started_at right away
-          await redis.set(
-            key,
-            JSON.stringify({
-              ...parsed,
-              revalidation_started_at: Date.now(),
-            }),
-            "EX",
-            config.ttl
-          );
-
-          const result = await fn();
-          const payload = {
-            data: result,
-            timestamp: Date.now(),
-          };
-
-          await redis.set(key, JSON.stringify(payload), "EX", config.ttl);
-          console.log(`REDIS | CACHE_HIT | 🟢 REVALIDATED | ${key}`);
-        });
+        if (lockAcquired) {
+          after(async () => {
+            try {
+              console.log(`REDIS | CACHE_HIT | 🟡 REVALIDATE | ${key}`);
+              const result = await dedupeInFlight(`revalidate:${key}`, fn);
+              await setCachedValue(
+                redis,
+                key,
+                { data: result, timestamp: Date.now() },
+                config.ttl
+              );
+              console.log(`REDIS | CACHE_HIT | 🟢 REVALIDATED | ${key}`);
+            } catch (error) {
+              console.error(`REDIS | CACHE_REVALIDATE_FAILED | ${key}`, error);
+            }
+          });
+        } else {
+          console.log(`REDIS | CACHE_HIT | 🔵 REVALIDATING_ALREADY | ${key}`);
+        }
       } else {
         console.log(`REDIS | CACHE_HIT | NO_REVALIDATE | ${key}`);
       }
@@ -114,14 +169,16 @@ export function cacheWithRedis<T>(
 
     console.log(`REDIS | CACHE_MISS | ${key}`);
 
-    const result = await fn();
-    const payload = {
-      data: result,
-      timestamp: Date.now(),
-    };
-    await redis.set(key, JSON.stringify(payload), "EX", config.ttl);
-
-    return result;
+    return dedupeInFlight(key, async () => {
+      const result = await fn();
+      await setCachedValue(
+        redis,
+        key,
+        { data: result, timestamp: Date.now() },
+        config.ttl
+      );
+      return result;
+    });
   };
   return func;
 }
