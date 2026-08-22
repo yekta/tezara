@@ -12,7 +12,8 @@
     "probe": "tsx src/probe.ts",
     "test": "node --experimental-strip-types --test --test-concurrency=1 \"src/**/*.test.ts\"",
     "backfill": "node --experimental-strip-types src/backfill.ts",
-    "migrate": "node --experimental-strip-types src/migrate.ts"
+    "migrate": "node --experimental-strip-types src/migrate.ts",
+    "wipe": "node --experimental-strip-types src/wipe.ts"
   },
   "dependencies": {
     "@tezara/clickhouse": "workspace:*",

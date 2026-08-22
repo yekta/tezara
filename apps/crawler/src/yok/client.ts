@@ -71,7 +71,10 @@ export async function fetchThesisById(
   const where = parseLocation(detail.yer);
   const [trAbstract, trKeywordLine] = splitAbstractAndKeywords(detail.trOzet ?? "");
   const [enAbstract, enKeywordLine] = splitAbstractAndKeywords(detail.enOzet ?? "");
-  const keywords = extractKeywords(trKeywordLine, enKeywordLine);
+  const keywords = extractKeywords(trKeywordLine, enKeywordLine, {
+    tr: detail.anahtarKelimeTr,
+    en: detail.anahtarKelimeEn,
+  });
 
   const subjects: TCrawledThesis["subjects"] = [];
   for (const tr of (row.subject_raw ?? "").split(";").map((x) => x.trim()).filter(Boolean)) {

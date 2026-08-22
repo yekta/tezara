@@ -118,6 +118,42 @@ export function finalizeKeywords(items: readonly string[]): string[] {
 }
 
 /**
+ * Parse the structured keyword field: "Tr = En ; Tr2 = En2", wrapped in a
+ * "<strong>Anahtar Kelime: </strong>" (or "Keyword: ") label.
+ *
+ * YÖK stores keywords in two different places and a thesis may use either:
+ *  - this field, as explicit Turkish/English pairs;
+ *  - or appended to the abstract after "Anahtar Kelimeler:", as free text.
+ * Reading only the abstract misses every record that uses the structured field.
+ */
+export function parseKeywordPairs(raw: string | null | undefined): {
+  turkish: string[];
+  english: string[];
+} {
+  const text = (raw ?? "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/^\s*(Anahtar Kelime|Keyword)\s*:\s*/i, "");
+  const turkish: string[] = [];
+  const english: string[] = [];
+  for (const pair of text.split(";").map((x) => x.trim()).filter(Boolean)) {
+    const [tr, en] = pair.split("=").map((x) => x.trim());
+    if (tr) turkish.push(tr);
+    if (en) english.push(en);
+  }
+  return { turkish, english };
+}
+
+const dedupe = (items: string[]) => {
+  const seen = new Set<string>();
+  return items.filter((k) => {
+    const key = k.toLocaleLowerCase("tr-TR");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+/**
  * Full keyword pipeline for one thesis, mirroring the order the previous pipeline used.
  *
  * The comma split has to happen FIRST and is easy to miss: the old code did it in
@@ -127,7 +163,12 @@ export function finalizeKeywords(items: readonly string[]): string[] {
  *
  * Returns both languages because the Turkish line sometimes carries the English one.
  */
-export function extractKeywords(turkishRaw: string | null, englishRaw: string | null): {
+export function extractKeywords(
+  turkishRaw: string | null,
+  englishRaw: string | null,
+  /** The structured `anahtarKelimeTr` / `anahtarKelimeEn` fields, if present. */
+  pairsRaw?: { tr?: string | null; en?: string | null },
+): {
   turkish: string[];
   english: string[];
 } {
@@ -146,5 +187,21 @@ export function extractKeywords(turkishRaw: string | null, englishRaw: string | 
     }
   }
 
-  return { turkish: finalizeKeywords(turkish), english: finalizeKeywords(english) };
+  // The structured field is a second, independent source — merge rather than replace, so
+  // a thesis that populates both keeps everything.
+  const a = parseKeywordPairs(pairsRaw?.tr);
+  const b = parseKeywordPairs(pairsRaw?.en);
+
+  return {
+    turkish: dedupe([
+      ...finalizeKeywords(turkish),
+      ...finalizeKeywords(a.turkish),
+      ...finalizeKeywords(b.turkish),
+    ]),
+    english: dedupe([
+      ...finalizeKeywords(english),
+      ...finalizeKeywords(a.english),
+      ...finalizeKeywords(b.english),
+    ]),
+  };
 }
