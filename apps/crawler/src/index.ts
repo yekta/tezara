@@ -89,8 +89,8 @@ if (wants.worker) {
   });
   const session = await openSession({ gate: redisGate(limiter, breaker) });
   const lookups = await buildLookups(session);
-  const meili = config.MEILI_HOST
-    ? createMeiliClient({ host: config.MEILI_HOST, apiKey: config.MEILI_KEY })
+  const meili = config.MEILI_URL_INTERNAL
+    ? createMeiliClient({ host: config.MEILI_URL_INTERNAL, apiKey: config.MEILI_ADMIN_KEY })
     : undefined;
   const clickhouse = config.CLICKHOUSE_URL
     ? createClickhouseClient({
@@ -100,7 +100,7 @@ if (wants.worker) {
         database: config.CLICKHOUSE_DATABASE,
       })
     : undefined;
-  if (!meili) console.error("[crawler] MEILI_HOST unset — crawling into the outbox only");
+  if (!meili) console.error("[crawler] MEILI_URL_INTERNAL unset — crawling into the outbox only");
   if (!clickhouse) console.error("[crawler] CLICKHOUSE_URL unset — stats projection disabled");
 
   // Counting held records is the projection's job; ClickHouse is the stats store, so it
