@@ -1,0 +1,86 @@
+[
+  {
+    "id": 828616,
+    "tr": "Bel ağrısı, Dalış, Dizabilite, Fiziksel Endurans, Postür",
+    "en": "Low back pain, Diving, Disability, Physical Endurance, Posture",
+    "expected": {
+      "turkish": [
+        "Bel ağrısı",
+        "Dalış",
+        "Dizabilite",
+        "Fiziksel Endurans",
+        "Postür"
+      ],
+      "english": [
+        "Low back pain",
+        "Diving",
+        "Disability",
+        "Physical Endurance",
+        "Posture"
+      ]
+    }
+  },
+  {
+    "id": 864902,
+    "tr": "Algı, Fen Bilimleri Eğitimi, LGS (Liselere Geçiş Sistemi),Yeni Nesil Soru",
+    "en": "Perception, Science Education, LGS (High School Transition System), New Generation Questions",
+    "expected": {
+      "turkish": [
+        "Algı",
+        "Fen Bilimleri Eğitimi",
+        "LGS (Liselere Geçiş Sistemi)",
+        "Yeni Nesil Soru"
+      ],
+      "english": [
+        "Perception",
+        "Science Education",
+        "LGS (High School Transition System)",
+        "New Generation Questions"
+      ]
+    }
+  },
+  {
+    "id": 845735,
+    "tr": "yenidoğan, kardiyoloji, konsültasyon, konjenital kalp hastalığı, aritmi, miyokardit",
+    "en": "neonate, cardiology, consultation, congenital heart disease, arrhythmia, myocarditis",
+    "expected": {
+      "turkish": [
+        "yenidoğan",
+        "kardiyoloji",
+        "konsültasyon",
+        "konjenital kalp hastalığı",
+        "aritmi",
+        "miyokardit"
+      ],
+      "english": [
+        "neonate",
+        "cardiology",
+        "consultation",
+        "congenital heart disease",
+        "arrhythmia",
+        "myocarditis"
+      ]
+    }
+  },
+  {
+    "id": 849995,
+    "tr": "Alkol, dürtüsellik, eğitim, ehliyet, sürücü.",
+    "en": "Alcohol, driver, impulsivity, driver's license, education",
+    "expected": {
+      "turkish": [
+        "Alkol",
+        "dürtüsellik",
+        "eğitim",
+        "ehliyet",
+        "sürücü"
+      ],
+      "english": [
+        "Alcohol",
+        "driver",
+        "impulsivity",
+        "driver's license",
+        "education"
+      ]
+    }
+  }
+]

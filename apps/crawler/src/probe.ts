@@ -5,7 +5,7 @@
 import { fetchThesisById } from "./yok/client.ts";
 import { openSession } from "./yok/session.ts";
 import { fetchSubjectTaxonomy } from "./yok/taxonomy.ts";
-import { foldTr } from "./yok/normalize.ts";
+import { foldTr } from "@tezara/core";
 
 const ids = process.argv.slice(2).map(Number).filter((n) => Number.isInteger(n) && n > 0);
 if (ids.length === 0) {

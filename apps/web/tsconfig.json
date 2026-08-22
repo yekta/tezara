@@ -15,6 +15,8 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // @tezara/core ships raw TS with explicit .ts specifiers so Node can strip types
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "preserveSymlinks": false,

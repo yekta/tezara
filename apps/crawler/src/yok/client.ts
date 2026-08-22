@@ -1,13 +1,13 @@
-import type { TCrawledThesis } from "@tezara/core";
+import {
+  canonicalUniversity, cleanText, extractKeywords, foldTr, normalizeDepartment,
+  parseAdvisors, parseLocation, splitAbstractAndKeywords, titleCaseTr,
+  type TCrawledThesis,
+} from "@tezara/core";
 import { classify } from "./classify.ts";
 import { byTezNo } from "./form.ts";
 import { parseList } from "./parse-list.ts";
 import { parsePdfFragment } from "./parse-pdf.ts";
-import {
-  cleanText, parseAdvisors, parseLocation, splitAbstractAndKeywords,
-  stripTags, type DetailPayload,
-} from "./parse-detail.ts";
-import { canonicalUniversity, foldTr, normalizeDepartment, titleCaseTr } from "./normalize.ts";
+import type { DetailPayload } from "./parse-detail.ts";
 import type { Session } from "./session.ts";
 
 export type FetchResult =
@@ -22,9 +22,6 @@ export type Lookups = {
   subjectEnByTr: Map<string, string>;
   universityCanon: Map<string, string>;
 };
-
-const splitList = (s: string | null) =>
-  (s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
 
 /** One thesis, three requests: search → detail → pdf. */
 export async function fetchThesisById(
@@ -67,8 +64,9 @@ export async function fetchThesisById(
   const pdf = parsePdfFragment(pdfFragment);
 
   const where = parseLocation(detail.yer);
-  const [trAbstract, trKeywords] = splitAbstractAndKeywords(detail.trOzet ?? "");
-  const [enAbstract, enKeywords] = splitAbstractAndKeywords(detail.enOzet ?? "");
+  const [trAbstract, trKeywordLine] = splitAbstractAndKeywords(detail.trOzet ?? "");
+  const [enAbstract, enKeywordLine] = splitAbstractAndKeywords(detail.enOzet ?? "");
+  const keywords = extractKeywords(trKeywordLine, enKeywordLine);
 
   const subjects: TCrawledThesis["subjects"] = [];
   for (const tr of (row.subject_raw ?? "").split(";").map((x) => x.trim()).filter(Boolean)) {
@@ -96,8 +94,8 @@ export async function fetchThesisById(
       language: row.language!,
       subjects,
       keywords: [
-        ...splitList(trKeywords).map((name) => ({ name, language: "Turkish" as const })),
-        ...splitList(enKeywords).map((name) => ({ name, language: "English" as const })),
+        ...keywords.turkish.map((name) => ({ name, language: "Turkish" as const })),
+        ...keywords.english.map((name) => ({ name, language: "English" as const })),
       ],
       abstract_original: cleanText(trAbstract) || null,
       abstract_translated: cleanText(enAbstract) || null,
@@ -107,5 +105,3 @@ export async function fetchThesisById(
     },
   };
 }
-
-export { stripTags };
