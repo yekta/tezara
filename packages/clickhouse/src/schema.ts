@@ -117,6 +117,40 @@ export const MIGRATIONS: Migration[] = [
       ) ENGINE = MergeTree() ORDER BY (university, subject_name, subject_language)`,
   },
   {
+    // The /universities/[name] and /subjects/[name] pages are prerendered for every
+    // university and subject at build time. Reading those stats straight from `theses`
+    // means a full scan per page (`theses` is ORDER BY id, so `WHERE university = ...`
+    // cannot use the primary key) — and for subjects, a full join against
+    // `thesis_subjects` on top. Each of these is keyed by exactly what the page filters
+    // on, turning those scans into primary-key lookups.
+    id: "0012_page_aggregates",
+    sql: `
+      CREATE TABLE IF NOT EXISTS theses_by_university_year_type (
+        university String, year UInt32, thesis_type String, count UInt64
+      ) ENGINE = MergeTree() ORDER BY (university, year, thesis_type)`,
+  },
+  {
+    id: "0013_page_aggregates_university_language",
+    sql: `
+      CREATE TABLE IF NOT EXISTS theses_by_university_language (
+        university String, language String, count UInt64
+      ) ENGINE = MergeTree() ORDER BY (university, language)`,
+  },
+  {
+    id: "0014_page_aggregates_subject_year_type",
+    sql: `
+      CREATE TABLE IF NOT EXISTS theses_by_subject_year_type (
+        subject_name String, year UInt32, thesis_type String, count UInt64
+      ) ENGINE = MergeTree() ORDER BY (subject_name, year, thesis_type)`,
+  },
+  {
+    id: "0015_page_aggregates_subject_language",
+    sql: `
+      CREATE TABLE IF NOT EXISTS theses_by_subject_language (
+        subject_name String, language String, count UInt64
+      ) ENGINE = MergeTree() ORDER BY (subject_name, language)`,
+  },
+  {
     id: "0011_migrations_log",
     sql: `
       CREATE TABLE IF NOT EXISTS schema_migrations (

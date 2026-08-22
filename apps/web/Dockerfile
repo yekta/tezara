@@ -1,5 +1,5 @@
 # Build context is the REPO ROOT (the pnpm workspace + lockfile live there).
-#   Coolify: Build Pack = Dockerfile, Base Directory = /, Dockerfile = /apps/web/Dockerfile
+#   Unbind: Build Pack = Dockerfile, Base Directory = /, Dockerfile = /apps/web/Dockerfile
 FROM node:22-alpine AS base
 RUN corepack enable
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY --from=pruner /app/out/full/ .
 # which fails the build on third-party .d.ts files.
 COPY --from=pruner /app/tsconfig.base.json ./
 # Next inlines NEXT_PUBLIC_* into the client bundle at BUILD time, so these must be the
-# real values — a placeholder here ships a broken bundle. Coolify: set them as build args.
+# real values — a placeholder here ships a broken bundle. Unbind: set them as build args.
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_MEILI_URL
 ARG NEXT_PUBLIC_MEILI_CLIENT_KEY
@@ -34,23 +34,42 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
     NEXT_PUBLIC_POSTHOG_HOST_ASSETS=$NEXT_PUBLIC_POSTHOG_HOST_ASSETS
 
-# The sitemap routes QUERY Meilisearch during page-data collection, so the build needs a
-# genuinely reachable instance — not just a syntactically valid URL.
+# Runtime-only. Never contacted during the build, so placeholders are correct here — the
+# real values come from the runtime environment. SKIP_ENV_VALIDATION is what lets these
+# through; the vars the build genuinely needs are enforced by the preflight instead.
 ARG MEILI_URL_INTERNAL=http://build.invalid
-ARG MEILI_ADMIN_KEY=build
 ARG CLICKHOUSE_URL=http://build.invalid
-ARG CLICKHOUSE_URL_BUILD
 ARG REDIS_URL=redis://build.invalid:6379
 ENV SKIP_ENV_VALIDATION=1 \
     MEILI_URL_INTERNAL=$MEILI_URL_INTERNAL \
-    MEILI_ADMIN_KEY=$MEILI_ADMIN_KEY \
     CLICKHOUSE_URL=$CLICKHOUSE_URL \
-    CLICKHOUSE_URL_BUILD=$CLICKHOUSE_URL_BUILD \
     REDIS_URL=$REDIS_URL \
     POSTHOG_PERSONAL_API_KEY=build \
     POSTHOG_PROJECT_ID=0
 
-RUN pnpm --filter @tezara/web build
+# Sitemaps, pages and opengraph images QUERY ClickHouse and Meilisearch during page-data
+# collection, so the build needs genuinely reachable instances — not just syntactically
+# valid URLs. `scripts/preflight-build.mjs` connects to both and fails the build in seconds
+# if either is missing or unreachable, rather than letting Next grind through a 60s
+# prerender timeout per page and emit thousands of notFound() pages.
+#
+# These carry credentials, so they are BuildKit secrets, not build args: an ARG is baked
+# into image history and echoed in build logs. Mounted secrets exist only for the lifetime
+# of this RUN and never land in a layer.
+#
+# *_URL_BUILD is whatever address the BUILDER can reach. If the builder runs inside the
+# cluster, that is just the private service address again — it does not have to be publicly
+# routable. Verify with the preflight before assuming either way.
+#
+# MEILI_URL_BUILD is a plain ARG because it carries no credentials (the admin key is
+# separate). CLICKHOUSE_URL_BUILD does carry them inline, so it stays a secret.
+ARG MEILI_URL_BUILD
+ENV MEILI_URL_BUILD=$MEILI_URL_BUILD
+RUN --mount=type=secret,id=clickhouse_url_build \
+    --mount=type=secret,id=meili_admin_key \
+    CLICKHOUSE_URL_BUILD="$(cat /run/secrets/clickhouse_url_build)" \
+    MEILI_ADMIN_KEY="$(cat /run/secrets/meili_admin_key)" \
+    pnpm --filter @tezara/web build
 
 # --- runtime --- #
 FROM base AS runner

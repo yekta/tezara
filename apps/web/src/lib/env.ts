@@ -9,8 +9,16 @@ export const env = createEnv({
   server: {
     MEILI_ADMIN_KEY: z.string(),
     MEILI_URL_INTERNAL: z.url(),
+    /**
+     * Meilisearch as reachable by the BUILDER. Optional here because runtime never uses
+     * it, but REQUIRED during `next build` — see `scripts/preflight-build.mjs`.
+     */
+    MEILI_URL_BUILD: z.url().optional(),
     CLICKHOUSE_URL: z.url(),
-    /** Publicly routable ClickHouse, used only during `next build`. */
+    /**
+     * Publicly routable ClickHouse. Optional here because runtime never uses it, but
+     * REQUIRED during `next build` — see `scripts/preflight-build.mjs`.
+     */
     CLICKHOUSE_URL_BUILD: z.url().optional(),
     REDIS_URL: z.url(),
     POSTHOG_PERSONAL_API_KEY: z.string(),
@@ -44,6 +52,7 @@ export const env = createEnv({
     NEXT_PUBLIC_MEILI_CLIENT_KEY: process.env.NEXT_PUBLIC_MEILI_CLIENT_KEY,
     MEILI_ADMIN_KEY: process.env.MEILI_ADMIN_KEY,
     MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
+    MEILI_URL_BUILD: process.env.MEILI_URL_BUILD,
     CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
     CLICKHOUSE_URL_BUILD: process.env.CLICKHOUSE_URL_BUILD,
     REDIS_URL: process.env.REDIS_URL,
