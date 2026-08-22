@@ -20,6 +20,9 @@ importers:
       '@tezara/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@tezara/meili':
+        specifier: workspace:*
+        version: link:../../packages/meili
       cheerio:
         specifier: 1.0.0
         version: 1.0.0
@@ -244,6 +247,22 @@ importers:
       zod:
         specifier: 4.2.1
         version: 4.2.1
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.7
+        version: 22.10.7
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
+  packages/meili:
+    dependencies:
+      '@tezara/core':
+        specifier: workspace:*
+        version: link:../core
+      meilisearch:
+        specifier: 0.48.1
+        version: 0.48.1
     devDependencies:
       '@types/node':
         specifier: 22.10.7

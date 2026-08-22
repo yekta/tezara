@@ -2,15 +2,21 @@
   "name": "@tezara/crawler",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node --experimental-strip-types src/index.ts",
     "typecheck": "tsc --noEmit",
-    "probe": "tsx src/probe.ts"
+    "probe": "tsx src/probe.ts",
+    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\"",
+    "backfill": "node --experimental-strip-types src/backfill.ts",
+    "migrate": "node --experimental-strip-types src/migrate.ts"
   },
   "dependencies": {
     "@tezara/core": "workspace:*",
+    "@tezara/meili": "workspace:*",
     "cheerio": "1.0.0",
     "ioredis": "5.5.0",
     "playwright": "1.49.1",

@@ -1,0 +1,21 @@
+{
+  "name": "@tezara/meili",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@tezara/core": "workspace:*",
+    "meilisearch": "0.48.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.7",
+    "typescript": "5.9.3"
+  }
+}
