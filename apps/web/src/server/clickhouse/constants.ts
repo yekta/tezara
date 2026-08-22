@@ -12,7 +12,6 @@ import { isBuildPhase } from "@/server/build-phase";
  * network with ClickHouse.
  */
 export const clickhouse = createClient({
+  // Credentials live in the URL: http://user:pass@host:8123
   url: isBuildPhase ? (env.CLICKHOUSE_URL_BUILD ?? env.CLICKHOUSE_URL) : env.CLICKHOUSE_URL,
-  username: env.CLICKHOUSE_USERNAME,
-  password: env.CLICKHOUSE_PASSWORD,
 });

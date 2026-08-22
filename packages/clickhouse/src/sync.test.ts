@@ -7,7 +7,7 @@ import { appliedMigrations, migrate } from "./migrate.ts";
 import { MIGRATIONS } from "./schema.ts";
 import { syncTheses } from "./sync.ts";
 
-const url = process.env.CLICKHOUSE_TEST_URL ?? "http://127.0.0.1:8123";
+const url = process.env.CLICKHOUSE_TEST_URL ?? "http://default:chpass@127.0.0.1:8123";
 const database = "tezara_test";
 
 let client: ClickHouseClient;
