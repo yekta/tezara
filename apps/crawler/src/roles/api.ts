@@ -18,11 +18,12 @@ export type ApiDeps = {
 };
 
 async function buildStatus(deps: ApiDeps) {
-  const [queue, scan, meiliOutbox, clickhouseOutbox, breaker] = await Promise.all([
+  const [queue, scan, meiliOutbox, clickhouseOutbox, meiliDead, breaker] = await Promise.all([
     deps.queue.stats(),
     deps.scan.counts(),
     deps.outbox.depth(),
     deps.clickhouseOutbox?.depth() ?? Promise.resolve(0),
+    deps.outbox.deadDepth(),
     deps.breaker.stats(),
   ]);
 
@@ -53,6 +54,9 @@ async function buildStatus(deps: ApiDeps) {
       // means the sync jobs are not running.
       meili: meiliOutbox,
       clickhouse: clickhouseOutbox,
+      // Documents Meili refused one at a time. Nothing retries these; a non-zero count
+      // is a bug to look at, in `<prefix>:outbox:meili:dead`.
+      meiliQuarantined: meiliDead,
     },
     upstream: {
       breaker: breaker.state,

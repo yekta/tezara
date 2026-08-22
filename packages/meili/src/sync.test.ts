@@ -4,7 +4,7 @@ import type { TCrawledThesis } from "@tezara/core";
 import { createMeiliClient, type MeiliSearch } from "./client.ts";
 import { INDEXES, INDEX_NAMES, md5 } from "./indexes.ts";
 import { applySettings } from "./settings.ts";
-import { deleteTheses, syncTheses } from "./sync.ts";
+import { deleteTheses, type Rejection, syncTheses } from "./sync.ts";
 
 // Throwaway local instance; see MEILI_TEST_HOST to point elsewhere.
 const host = process.env.MEILI_TEST_HOST ?? "http://127.0.0.1:7700";
@@ -152,5 +152,37 @@ describe("meili sync", () => {
     const report = await syncTheses(client, [], { waitForTasks: true });
     assert.equal(report.theses, 0);
     assert.equal(await deleteTheses(client, []), 0);
+  });
+
+  // A non-integer id is refused by Meili for the whole task, so it also kills the
+  // documents batched alongside it — which is what makes bisecting worth the trouble.
+  const poison = () => thesis({ id: 50.5 as number });
+
+  test("a failed task is an error, not a silent success", async () => {
+    await assert.rejects(
+      () => syncTheses(client, [poison()], { waitForTasks: true }),
+      /Document identifier/,
+    );
+  });
+
+  test("a refused document is bisected out and the rest of the batch still lands", async () => {
+    const rejections: Rejection[] = [];
+    const report = await syncTheses(
+      client,
+      [thesis({ id: 51 }), poison(), thesis({ id: 52 })],
+      { waitForTasks: true, onReject: (r) => void rejections.push(r) },
+    );
+
+    assert.equal(report.theses, 2, "the two sound theses are indexed");
+    assert.equal((await client.index("theses").getDocument(51)).id, 51);
+    assert.equal((await client.index("theses").getDocument(52)).id, 52);
+    await assert.rejects(() => client.index("theses").getDocument("50.5"));
+
+    const dropped = rejections.filter((r) => r.dropped);
+    assert.equal(dropped.length, 1, "only the offending document is given up on");
+    assert.equal(dropped[0]!.docs[0]!.id, 50.5);
+    assert.equal(dropped[0]!.index, "theses");
+    assert.ok(dropped[0]!.payloadBytes > 0);
+    assert.match(dropped[0]!.reason, /Document identifier/);
   });
 });
