@@ -53,22 +53,39 @@ ENV SKIP_ENV_VALIDATION=1 \
 # if either is missing or unreachable, rather than letting Next grind through a 60s
 # prerender timeout per page and emit thousands of notFound() pages.
 #
-# These carry credentials, so they are BuildKit secrets, not build args: an ARG is baked
-# into image history and echoed in build logs. Mounted secrets exist only for the lifetime
-# of this RUN and never land in a layer.
-#
 # *_URL_BUILD is whatever address the BUILDER can reach. If the builder runs inside the
 # cluster, that is just the private service address again — it does not have to be publicly
 # routable. Verify with the preflight before assuming either way.
 #
 # MEILI_URL_BUILD is a plain ARG because it carries no credentials (the admin key is
-# separate). CLICKHOUSE_URL_BUILD does carry them inline, so it stays a secret.
+# separate). The other two DO carry credentials, so a BuildKit secret is preferred: an ARG
+# is baked into image history and echoed in build logs, while a mounted secret exists only
+# for the lifetime of this RUN.
+#
+# Not every builder can pass BuildKit secrets, so each falls back to the matching ARG and
+# the build says which channel it used. This is not the silent fallback this file used to
+# have: it is the SAME value arriving by a different route, and the preflight still refuses
+# to build unless it can actually connect with it.
 ARG MEILI_URL_BUILD
+ARG CLICKHOUSE_URL_BUILD
+ARG MEILI_ADMIN_KEY
 ENV MEILI_URL_BUILD=$MEILI_URL_BUILD
+
 RUN --mount=type=secret,id=clickhouse_url_build \
     --mount=type=secret,id=meili_admin_key \
-    CLICKHOUSE_URL_BUILD="$(cat /run/secrets/clickhouse_url_build)" \
-    MEILI_ADMIN_KEY="$(cat /run/secrets/meili_admin_key)" \
+    set -eu; \
+    read_secret() { \
+      if [ -s "/run/secrets/$1" ]; then \
+        echo "  $2: BuildKit secret" >&2; cat "/run/secrets/$1"; \
+      elif [ -n "${3:-}" ]; then \
+        echo "  $2: build ARG (leaks into image history — prefer a secret)" >&2; printf %s "$3"; \
+      else \
+        echo "  $2: MISSING — no secret id=$1 mounted and no --build-arg given" >&2; \
+      fi; \
+    }; \
+    echo "build credentials:" >&2; \
+    CLICKHOUSE_URL_BUILD="$(read_secret clickhouse_url_build CLICKHOUSE_URL_BUILD "${CLICKHOUSE_URL_BUILD:-}")" \
+    MEILI_ADMIN_KEY="$(read_secret meili_admin_key MEILI_ADMIN_KEY "${MEILI_ADMIN_KEY:-}")" \
     pnpm --filter @tezara/web build
 
 # --- runtime --- #
