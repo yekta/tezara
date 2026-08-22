@@ -37,10 +37,7 @@ const meili = createMeiliClient({
   host: config.MEILI_URL_INTERNAL,
   apiKey: config.MEILI_ADMIN_KEY,
 });
-const clickhouse = createClickhouseClient({
-  url: config.CLICKHOUSE_URL,
-  database: config.CLICKHOUSE_DATABASE,
-});
+const clickhouse = createClickhouseClient({ url: config.CLICKHOUSE_URL });
 
 const controller = new AbortController();
 

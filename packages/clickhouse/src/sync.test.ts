@@ -7,8 +7,9 @@ import { appliedMigrations, migrate } from "./migrate.ts";
 import { MIGRATIONS } from "./schema.ts";
 import { syncTheses } from "./sync.ts";
 
-const url = process.env.CLICKHOUSE_TEST_URL ?? "http://default:chpass@127.0.0.1:8123";
+const base = process.env.CLICKHOUSE_TEST_URL ?? "http://default:chpass@127.0.0.1:8123";
 const database = "tezara_test";
+const url = `${base.replace(/\/$/, "")}/${database}`;
 
 let client: ClickHouseClient;
 
@@ -47,11 +48,11 @@ const scalar = async (query: string): Promise<number> => {
 };
 
 before(async () => {
-  const bootstrap = createClickhouseClient({ url });
+  const bootstrap = createClickhouseClient({ url: base });
   await bootstrap.command({ query: `DROP DATABASE IF EXISTS ${database}` });
   await bootstrap.command({ query: `CREATE DATABASE ${database}` });
   await bootstrap.close();
-  client = createClickhouseClient({ url, database });
+  client = createClickhouseClient({ url });
 });
 
 beforeEach(async () => {
