@@ -76,11 +76,13 @@ describe("job reporting", () => {
         pendingProjection: { meili: 0, clickhouse: 3, meiliQuarantined: 0 },
         upstream: { breaker: "closed", consecutiveFailures: 0 },
         reconciliation: { yearsShort: 0, missingRecords: 0 },
+        search: { databaseSizeBytes: 3_650_722_201, indexedTheses: 812_000 },
       },
       300,
     );
     assert.match(healthy, /backfill 812,400\/1,030,000 \(78\.87%\)/);
     assert.match(healthy, /300 ids\/min/);
+    assert.match(healthy, /meili 812,000 indexed, 3\.4GB on disk/);
     assert.doesNotMatch(healthy, /DEAD|QUARANTINED|breaker/);
 
     const sick = describeStatus(
@@ -90,9 +92,11 @@ describe("job reporting", () => {
         pendingProjection: { meili: 15_645, clickhouse: 0, meiliQuarantined: 7 },
         upstream: { breaker: "open", consecutiveFailures: 5 },
         reconciliation: { yearsShort: 3, missingRecords: 120 },
+        search: { unreachable: "No space left on device (os error 28)" },
       },
       0,
     );
+    assert.match(sick, /MEILI UNREACHABLE: No space left on device/);
     assert.match(sick, /4 DEAD JOBS \(see \/failures\)/);
     assert.match(sick, /7 QUARANTINED DOCS/);
     assert.match(sick, /breaker open after 5 failures/);

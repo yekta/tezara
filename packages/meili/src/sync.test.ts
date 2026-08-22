@@ -165,6 +165,75 @@ describe("meili sync", () => {
     );
   });
 
+  // Meili answers a full disk with 422 no_space_left_on_device, and a mangled request
+  // body with 400 malformed_payload. Neither says anything about the documents, and
+  // quarantining on either would turn an outage into permanent data loss.
+  const failingClient = (err: unknown) =>
+    ({
+      index: () => ({
+        addDocuments: () => Promise.reject(err),
+        waitForTask: () => Promise.reject(new Error("unreachable")),
+      }),
+    }) as unknown as MeiliSearch;
+
+  const apiError = (status: number, code: string, message: string) =>
+    Object.assign(new Error(message), { name: "MeiliSearchApiError", response: { status }, cause: { code } });
+
+  test("a full disk fails the sync instead of quarantining the batch", async () => {
+    const dropped: Rejection[] = [];
+    await assert.rejects(
+      () =>
+        syncTheses(
+          failingClient(apiError(422, "no_space_left_on_device", "No space left on device")),
+          [thesis({ id: 60 })],
+          { waitForTasks: true, onReject: (r) => void (r.dropped && dropped.push(r)) },
+        ),
+      /No space left on device/,
+    );
+    assert.deepEqual(dropped, [], "nothing may be given up on over a server-side failure");
+  });
+
+  // Meili answers a full disk with 400 malformed_payload — the upload it streams to its
+  // own volume is what fails to parse — so this is the same failure as the one above
+  // wearing a client error's clothes. Splitting or quarantining on it would be wrong.
+  test("a malformed payload fails fast instead of being blamed on the documents", async () => {
+    const rejections: Rejection[] = [];
+    await assert.rejects(
+      () =>
+        syncTheses(
+          failingClient(apiError(400, "malformed_payload", "The `json` payload provided is malformed.")),
+          [thesis({ id: 61 }), thesis({ id: 62 })],
+          { waitForTasks: true, onReject: (r) => void rejections.push(r) },
+        ),
+      /payload provided is malformed/,
+    );
+    assert.deepEqual(rejections, [], "no bisect, no quarantine — the server is the problem");
+  });
+
+  test("an oversized payload is halved, since a smaller batch can fit", async () => {
+    const rejections: Rejection[] = [];
+    await assert.rejects(
+      () =>
+        syncTheses(
+          failingClient(apiError(413, "payload_too_large", "Payload too large")),
+          [thesis({ id: 64 }), thesis({ id: 65 })],
+          { waitForTasks: true, onReject: (r) => void rejections.push(r) },
+        ),
+      /Payload too large/,
+    );
+    assert.ok(rejections.length > 0, "it is worth trying smaller");
+    assert.equal(rejections.filter((r) => r.dropped).length, 0, "but nothing is dropped");
+  });
+
+  test("a failed push says how big the payload was", async () => {
+    await assert.rejects(
+      () => syncTheses(failingClient(apiError(422, "no_space_left_on_device", "No space left")), [thesis({ id: 63 })], {
+        waitForTasks: true,
+      }),
+      /\[theses: 1 docs, \d+ byte payload\]/,
+    );
+  });
+
   test("a refused document is bisected out and the rest of the batch still lands", async () => {
     const rejections: Rejection[] = [];
     const report = await syncTheses(

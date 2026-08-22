@@ -2,8 +2,8 @@
  * The crawler. One process: it serves /health, /ready and /metrics, schedules work, and
  * runs it. There is nothing to configure beyond the connection URLs.
  */
-import { createClickhouseClient } from "@tezara/clickhouse";
-import { createMeiliClient } from "@tezara/meili";
+import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
+import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
 import { error, info, warn } from "./log.ts";
 import { buildLookups } from "./jobs/context.ts";
@@ -57,7 +57,7 @@ process.on("uncaughtException", (err) => {
 });
 
 const apiDeps = {
-  redis, queue, scan, outbox, clickhouseOutbox, breaker, reconcile,
+  redis, queue, scan, outbox, clickhouseOutbox, breaker, reconcile, meili,
   maxThesisId: config.CRAWLER_MAX_THESIS_ID,
 };
 const server = createApi(apiDeps);
@@ -102,6 +102,54 @@ const countHeldForYear = async (year: number) => {
   const rows = await res.json<{ c: string }>();
   return Number(rows[0]?.c ?? 0);
 };
+
+/**
+ * Bring the projection targets up to date before crawling.
+ *
+ * Pointing the crawler at a fresh Meili or ClickHouse should be all it takes. Leaving
+ * this to a deploy-time command means a new service quietly collects nothing: the crawl
+ * runs, the outboxes fill, and every sync job fails on a missing table or index.
+ *
+ * Never fatal. A target that is unreachable at boot is a target that will be reachable
+ * later, and the sync jobs retry on their own — taking the process down would only stop
+ * the crawl as well.
+ *
+ * What it will NOT do is change settings on an index that already holds documents: that
+ * forces a full reindex, so it stays a deliberate `pnpm --filter @tezara/crawler migrate`.
+ */
+async function prepareTargets(): Promise<void> {
+  try {
+    const ran = await migrateClickhouse(clickhouse);
+    info(
+      ran.length > 0
+        ? `clickhouse: applied ${ran.length} migration(s): ${ran.join(", ")}`
+        : "clickhouse: schema already up to date",
+    );
+  } catch (err) {
+    warn(`clickhouse: could not migrate — ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  try {
+    const drift = await verifySettings(meili);
+    const absent = drift.filter((d) => d.missing).map((d) => d.index);
+    if (absent.length > 0) {
+      await applySettings(meili, { only: absent, waitForTasks: true });
+      info(`meili: created and configured ${absent.length} index(es): ${absent.join(", ")}`);
+    } else {
+      info("meili: all indexes present");
+    }
+
+    const drifted = drift.filter((d) => !d.missing).map((d) => d.index);
+    if (drifted.length > 0) {
+      warn(
+        `meili: settings drift on ${drifted.join(", ")} — syncs will fail until ` +
+          "`pnpm --filter @tezara/crawler migrate` is run (it forces a reindex)",
+      );
+    }
+  } catch (err) {
+    warn(`meili: could not verify settings — ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
 
 /**
  * Establishing a YÖK session can fail — maintenance, blocked egress, slow DNS. That must
@@ -156,6 +204,8 @@ async function crawlForever(): Promise<void> {
     }
   }
 }
+
+await prepareTargets();
 
 try {
   await Promise.all([

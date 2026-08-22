@@ -1,12 +1,13 @@
 import type { MeiliSearch, Rejection } from "@tezara/meili";
-import { syncTheses, verifySettings } from "@tezara/meili";
+import { applySettings, syncTheses, verifySettings } from "@tezara/meili";
 import type { Outbox } from "../state/outbox.ts";
 
 export class SettingsNotMigratedError extends Error {
   constructor(indexes: string[]) {
     super(
-      `Meili indexes are not migrated: ${indexes.join(", ")}. ` +
-      `Run \`pnpm --filter @tezara/crawler migrate\` first.`,
+      `Meili indexes exist but their settings have drifted: ${indexes.join(", ")}. ` +
+      `Run \`pnpm --filter @tezara/crawler migrate\` — changing settings on a populated ` +
+      `index forces a full reindex, so it is not done automatically.`,
     );
     this.name = "SettingsNotMigratedError";
   }
@@ -71,7 +72,23 @@ export async function syncMeili(
 
   if ((await deps.outbox.depth()) > 0) {
     const drift = await verifySettings(deps.client);
-    if (drift.length > 0) throw new SettingsNotMigratedError(drift.map((d) => d.index));
+
+    // An index that does not exist yet is not a migration decision. If we do nothing,
+    // addDocuments creates it anyway — with Meili's defaults, no filterable attributes
+    // and maxTotalHits 1000 — which is the silent breakage this guard exists to prevent.
+    // Creating it properly is strictly better, and it is what lets a brand new Meili
+    // service come up without a human running anything.
+    const absent = drift.filter((d) => d.missing);
+    if (absent.length > 0) {
+      const names = absent.map((d) => d.index);
+      await applySettings(deps.client, { only: names, waitForTasks: true });
+      log(`created ${names.length} missing Meili index(es): ${names.join(", ")}`);
+    }
+
+    // Settings drift on an index that already holds documents is a different animal:
+    // applying it forces a full reindex, so that stays an operator's call.
+    const drifted = drift.filter((d) => !d.missing);
+    if (drifted.length > 0) throw new SettingsNotMigratedError(drifted.map((d) => d.index));
   }
 
   const rejects: RejectLog[] = [];
