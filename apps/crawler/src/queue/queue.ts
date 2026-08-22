@@ -215,6 +215,30 @@ export class Queue {
     )) as number;
   }
 
+  /**
+   * The dead-lettered jobs, newest first, with the error that killed each one.
+   *
+   * The failure is otherwise only in the log stream, which is exactly where it is
+   * hardest to find once a hosted log viewer has scrolled past it.
+   */
+  async deadJobs(limit = 20): Promise<Job[]> {
+    // ZREVRANGE 0 -1 is the whole set, so a zero limit has to short-circuit.
+    if (limit <= 0) return [];
+    const ids = await this.#redis.zrevrange(this.#keys.jobsDead, 0, limit - 1);
+    if (ids.length === 0) return [];
+
+    const pipeline = this.#redis.pipeline();
+    for (const id of ids) pipeline.hget(this.#keys.job(id), "data");
+    const results = (await pipeline.exec()) ?? [];
+
+    const jobs: Job[] = [];
+    for (const [err, data] of results) {
+      if (err || typeof data !== "string") continue;
+      jobs.push(JSON.parse(data) as Job);
+    }
+    return jobs;
+  }
+
   async stats(): Promise<{ pending: number; leased: number; dead: number }> {
     const [pending, leased, dead] = await Promise.all([
       this.#redis.zcard(this.#keys.jobsPending),

@@ -5,9 +5,11 @@
 import { createClickhouseClient } from "@tezara/clickhouse";
 import { createMeiliClient } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
+import { error, info, warn } from "./log.ts";
 import { buildLookups } from "./jobs/context.ts";
 import { Queue } from "./queue/queue.ts";
-import { createApi } from "./roles/api.ts";
+import { buildStatus, createApi } from "./roles/api.ts";
+import { describeJob, describeStatus } from "./roles/report.ts";
 import { DEFAULT_POLICY, runScheduler } from "./roles/scheduler.ts";
 import { runWorker } from "./roles/worker.ts";
 import { makeKeys } from "./state/keys.ts";
@@ -43,25 +45,43 @@ const controller = new AbortController();
 
 // ioredis emits errors on its own event emitter; unhandled, they take the process down.
 // Reconnection is automatic, so log and let it recover.
-redis.on("error", (err) => console.error("[redis]", err.message));
+redis.on("error", (err) => error(`redis: ${err.message}`));
 
 process.on("unhandledRejection", (reason) => {
-  console.error("[crawler] FATAL unhandled rejection:", reason);
+  error(`FATAL unhandled rejection: ${reason instanceof Error ? reason.stack : String(reason)}`);
   process.exit(1);
 });
 process.on("uncaughtException", (err) => {
-  console.error("[crawler] FATAL uncaught exception:", err);
+  error(`FATAL uncaught exception: ${err instanceof Error ? err.stack : String(err)}`);
   process.exit(1);
 });
 
-const server = createApi({
+const apiDeps = {
   redis, queue, scan, outbox, clickhouseOutbox, breaker, reconcile,
   maxThesisId: config.CRAWLER_MAX_THESIS_ID,
-});
-server.listen(config.PORT, () => console.error(`[crawler] listening on :${config.PORT}`));
+};
+const server = createApi(apiDeps);
+server.listen(config.PORT, () => info(`listening on :${config.PORT}`));
+
+/**
+ * A per-job log never shows totals, and totals are the only way to tell a crawl that is
+ * working from one that is busy failing. One summary line a minute, always.
+ */
+const STATUS_EVERY_MS = 60_000;
+let idsCrawledSinceStatus = 0;
+
+const statusTimer = setInterval(() => {
+  buildStatus(apiDeps)
+    .then((status) => {
+      info(describeStatus(status, idsCrawledSinceStatus));
+      idsCrawledSinceStatus = 0;
+    })
+    .catch((err: unknown) => warn(`status unavailable: ${String(err)}`));
+}, STATUS_EVERY_MS);
+statusTimer.unref();
 
 async function shutdown(signal: string): Promise<void> {
-  console.error(`[crawler] ${signal} — shutting down`);
+  info(`${signal} — shutting down`);
   controller.abort();
   server.close();
   // In-flight jobs keep their lease; if we die before completing them the reaper
@@ -94,12 +114,12 @@ async function crawlForever(): Promise<void> {
   while (!controller.signal.aborted) {
     try {
       // One throwaway session to load the subject taxonomy; each lane opens its own.
-      console.error("[crawler] fetching subject taxonomy…");
+      info("fetching subject taxonomy…");
       const bootstrap = await openSession({ gate: redisGate(breaker) });
       const lookups = await buildLookups(bootstrap);
       await bootstrap.close().catch(() => {});
-      console.error(
-        `[crawler] taxonomy loaded (${lookups.subjectEnByTr.size} subjects), ` +
+      info(
+        `taxonomy loaded (${lookups.subjectEnByTr.size} subjects), ` +
           `starting ${config.CRAWLER_CONCURRENCY} lanes`,
       );
       attempt = 0;
@@ -109,22 +129,28 @@ async function crawlForever(): Promise<void> {
           session: undefined as never, // each lane supplies its own
           queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
           reconcile, countHeldForYear,
+          log: info,
         },
         queue,
         {
           signal: controller.signal,
           concurrency: config.CRAWLER_CONCURRENCY,
           newSession: () => openSession({ gate: redisGate(breaker) }),
-          onEvent: ({ job, outcome, detail }) =>
-            console.error(`[crawler] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
+          // A retry or a dead-letter is the only job outcome worth stderr.
+          onEvent: ({ job, outcome, detail, elapsedMs }) => {
+            if (job.kind === "scan-id-range" && outcome === "ok") {
+              idsCrawledSinceStatus += (detail as { ok?: number }).ok ?? 0;
+            }
+            (outcome === "ok" ? info : warn)(describeJob(job, outcome, detail, elapsedMs));
+          },
         },
       );
     } catch (err) {
       attempt++;
       const wait = Math.min(30_000 * 2 ** (attempt - 1), 5 * 60_000);
-      console.error(
-        `[crawler] crawl loop failed (attempt ${attempt}), retrying in ${wait / 1000}s:`,
-        err instanceof Error ? err.message : err,
+      error(
+        `crawl loop failed (attempt ${attempt}), retrying in ${wait / 1000}s: ` +
+          `${err instanceof Error ? err.message : String(err)}`,
       );
       await new Promise((r) => setTimeout(r, wait));
     }
@@ -138,12 +164,12 @@ try {
       {
         signal: controller.signal,
         policy: { ...DEFAULT_POLICY, maxThesisId: config.CRAWLER_MAX_THESIS_ID },
-        onTick: (r) => console.error(`[crawler] scheduled ${JSON.stringify(r)}`),
+        onTick: (r) => info(`scheduled ${JSON.stringify(r)}`),
       },
     ),
     crawlForever(),
   ]);
 } catch (err) {
-  console.error("[crawler] FATAL:", err instanceof Error ? err.stack : err);
+  error(`FATAL: ${err instanceof Error ? err.stack : String(err)}`);
   process.exit(1);
 }

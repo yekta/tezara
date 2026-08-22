@@ -27,6 +27,12 @@ export type JobContext = {
    * reconciliation still works on a Meili-only deployment.
    */
   countHeldForYear?: (year: number) => Promise<number>;
+  /**
+   * Progress line for work that runs long enough that the job's own completion event is
+   * too late to be useful — a full outbox drain takes minutes and would otherwise be
+   * silent while it runs.
+   */
+  log?: (message: string) => void;
 };
 
 /**

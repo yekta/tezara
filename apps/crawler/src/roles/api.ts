@@ -17,7 +17,7 @@ export type ApiDeps = {
   maxThesisId: number;
 };
 
-async function buildStatus(deps: ApiDeps) {
+export async function buildStatus(deps: ApiDeps) {
   const [queue, scan, meiliOutbox, clickhouseOutbox, meiliDead, breaker] = await Promise.all([
     deps.queue.stats(),
     deps.scan.counts(),
@@ -75,6 +75,35 @@ async function buildStatus(deps: ApiDeps) {
   };
 }
 
+/**
+ * Everything that went wrong recently, in one place.
+ *
+ * Hunting a failure in a hosted log viewer means knowing it happened and roughly when.
+ * These two lists are the durable copy: jobs that exhausted their retries, and documents
+ * a projection target refused.
+ */
+async function buildFailures(deps: ApiDeps, limit: number) {
+  const [jobs, quarantined] = await Promise.all([
+    deps.queue.deadJobs(limit),
+    deps.outbox.dead(limit),
+  ]);
+
+  return {
+    deadJobs: jobs.map((j) => ({
+      kind: j.kind,
+      params: j.params,
+      attempts: j.attempts,
+      lastError: j.lastError ?? null,
+    })),
+    quarantined: quarantined.map((q) => ({
+      at: q.at,
+      reason: q.reason,
+      id: (q.doc as { id?: unknown } | null)?.id ?? null,
+      title: (q.doc as { title_original?: unknown } | null)?.title_original ?? null,
+    })),
+  };
+}
+
 function json(res: ServerResponse, code: number, body: unknown) {
   res.writeHead(code, { "content-type": "application/json; charset=utf-8" });
   res.end(`${JSON.stringify(body, null, 2)}\n`);
@@ -104,6 +133,17 @@ export function createApi(deps: ApiDeps): Server {
       return;
     }
 
-    json(res, 404, { error: "not found", routes: ["/health", "/ready", "/metrics"] });
+    if (path === "/failures") {
+      const limit = Math.min(200, Number(new URL(req.url ?? "/", "http://x").searchParams.get("limit")) || 20);
+      buildFailures(deps, limit)
+        .then((body) => json(res, 200, body))
+        .catch((err: unknown) => json(res, 500, { error: String(err) }));
+      return;
+    }
+
+    json(res, 404, {
+      error: "not found",
+      routes: ["/health", "/ready", "/status", "/failures"],
+    });
   });
 }
