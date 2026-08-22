@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import Script from "next/script";
 import "./globals.css";
 
 const sans = localFont({
@@ -62,13 +61,6 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <Script
-          data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-          data-domains={env.NEXT_PUBLIC_UMAMI_DOMAINS}
-          src={`${env.NEXT_PUBLIC_UMAMI_HOST_URL}/script.js`}
-        />
-      </head>
       <body
         className={`${sans.variable} ${mono.variable} ${icon.variable} w-full flex flex-col min-h-[100svh] relative items-center bg-background text-foreground antialiased break-words`}
       >

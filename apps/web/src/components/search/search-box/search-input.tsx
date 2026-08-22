@@ -8,7 +8,6 @@ import { useSearchLikePageParam } from "@/components/search/query-param-provider
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { LoaderIcon, XIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
@@ -38,16 +37,11 @@ export default function SearchInput({
     : false;
   const isPendingOrFetchingResults = isPendingResults || isFetchingResults;
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const captureSearch = useCallback(
     (query: string, variant: Props["variant"]) => {
       if (!query) return;
-      umami.capture("Searched", {
-        Query: query,
-        Variant: variant,
-      });
       posthog.capture("Searched", {
         Query: query,
         Variant: variant,

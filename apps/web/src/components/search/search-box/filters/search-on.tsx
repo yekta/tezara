@@ -3,7 +3,6 @@ import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
 import { useSearchLikePageParam } from "@/components/search/query-param-provider";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { SearchCheckIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect } from "react";
@@ -18,7 +17,6 @@ const eventData: [string, Record<string, string>] = [
 export default function SearchOnField() {
   const [searchOn, setSearchOn] = useSearchLikePageParam.search_on();
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const clearSearchOn = useCallback(() => {
@@ -27,7 +25,6 @@ export default function SearchOnField() {
 
   useEffect(() => {
     if (!searchOn || searchOn.length < 1) return;
-    umami.capture(...eventData);
     posthog.capture(...eventData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchOn]);

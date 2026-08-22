@@ -4,7 +4,6 @@ import { SearchIcon } from "@/components/icons/search-icon";
 import { TSearchLikePageParamParsers } from "@/components/search/constants";
 import { LinkButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { usePostHog } from "posthog-js/react";
 
 type Props<T extends keyof TSearchLikePageParamParsers> = {
@@ -17,15 +16,9 @@ type Props<T extends keyof TSearchLikePageParamParsers> = {
 export default function SearchAllLinkButton<
   T extends keyof TSearchLikePageParamParsers
 >({ href, variant, filters, className }: Props<T>) {
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const onClick = () => {
-    umami.capture("Searched", {
-      Query: "",
-      Variant: variant,
-      Filters: filters,
-    });
     posthog.capture("Searched", {
       Query: "",
       Variant: variant,

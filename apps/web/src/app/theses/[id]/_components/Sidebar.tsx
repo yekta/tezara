@@ -3,7 +3,6 @@
 import { thesesRoute } from "@/app/theses/_components/constants";
 import NextPrevButton from "@/components/navigation/next-prev-button";
 import { cn } from "@/components/ui/utils";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { usePostHog } from "posthog-js/react";
 
 export default function Sidebar({
@@ -19,13 +18,8 @@ export default function Sidebar({
   const _currentThesisId = isNaN(idNumber) ? 0 : idNumber < 1 ? 0 : idNumber;
   const disabled = side === "start" ? _currentThesisId <= 1 : false;
 
-  const umami = useUmami();
   const posthog = usePostHog();
   const sendEvent = (to: number) => {
-    umami.capture("Prev/Next Thesis Button Clicked", {
-      "From Thesis ID": currentThesisId,
-      "To Thesis ID": to,
-    });
     posthog.capture("Prev/Next Thesis Button Clicked", {
       "From Thesis ID": currentThesisId,
       "To Thesis ID": to,

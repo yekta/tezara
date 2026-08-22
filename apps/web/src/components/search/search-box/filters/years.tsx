@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { yearGteKeyAtom, yearLteKeyAtom } from "@/lib/store/main";
 import { useAtom } from "jotai";
 import { CalendarArrowDownIcon, CalendarArrowUpIcon } from "lucide-react";
@@ -46,7 +45,6 @@ export default function YearsField() {
   const [yearGteKey, setYearGteKey] = useAtom(yearGteKeyAtom);
   const [yearLteKey, setYearLteKey] = useAtom(yearLteKeyAtom);
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const clearYearGte = () => {
@@ -60,14 +58,12 @@ export default function YearsField() {
 
   useEffect(() => {
     if (yearGte === null) return;
-    umami.capture(...eventDataGte);
     posthog.capture(...eventDataGte);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yearGte]);
 
   useEffect(() => {
     if (yearLte === null) return;
-    umami.capture(...eventDataLte);
     posthog.capture(...eventDataLte);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yearLte]);

@@ -3,7 +3,6 @@ import { useSearchResults } from "@/components/search/results/search-results-pro
 import ClearFiltersButton from "@/components/search/search-box/clear-filters-button";
 import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import { Button } from "@/components/ui/button";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { ChevronUpIcon, LoaderIcon, SettingsIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 
@@ -24,7 +23,6 @@ export default function ButtonsSection({ isPendingPush }: Props) {
     : false;
   const isPendingOrFetchingResults = isPendingResults || isFetchingResults;
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   return (
@@ -54,7 +52,6 @@ export default function ButtonsSection({ isPendingPush }: Props) {
           className="font-semibold py-2 px-3.75"
           onClick={() => {
             if (!advancedSearch) {
-              umami.capture("Advance Search Clicked");
               posthog.capture("Advance Search Clicked");
             }
             setAdvancedSearch((a) => !a);

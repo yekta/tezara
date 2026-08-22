@@ -6,7 +6,6 @@ import { formatForDownload } from "@/components/search/format-for-download";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-row-list";
 import { Button } from "@/components/ui/button";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { Parser } from "@json2csv/plainjs";
 import {
   CheckCircleIcon,
@@ -51,7 +50,6 @@ export default function SearchResults({}: Props) {
   const isHardError = !data && !isPending && isError;
   const isJustFetching = !isPending && isFetching;
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const [isPendingCsvDownload, setIsPendingDownload] = useState(false);
@@ -72,10 +70,6 @@ export default function SearchResults({}: Props) {
       const blob = new Blob([csv], { type: "text/csv" });
 
       setIsPendingDownload(false);
-      umami.capture("Downloaded Bulk CSV", {
-        "Row Count": res.hits.length,
-        "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
-      });
       posthog.capture("Downloaded Bulk CSV", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
@@ -100,10 +94,6 @@ export default function SearchResults({}: Props) {
       });
 
       setIsPendingJsonDownload(false);
-      umami.capture("Downloaded Bulk JSON", {
-        "Row Count": res.hits.length,
-        "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
-      });
       posthog.capture("Downloaded Bulk JSON", {
         "Row Count": res.hits.length,
         "Size (MB)": Number((blob.size / 1024 / 1024).toPrecision(6)),
