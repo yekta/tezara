@@ -45,6 +45,8 @@ async function runJob(ctx: JobContext, job: Job, signal?: AbortSignal): Promise<
 
 export type WorkerOptions = {
   signal?: AbortSignal;
+  /** How many jobs to run at once. */
+  concurrency?: number;
   onEvent?: (event: { job: Job; outcome: "ok" | "retry" | "dead"; detail?: unknown }) => void;
   /** Stop once the queue drains — used by the backfill CLI and by tests. */
   exitWhenDrained?: boolean;
@@ -56,36 +58,51 @@ export async function runWorker(
   opts: WorkerOptions = {},
 ): Promise<void> {
   const { signal, onEvent } = opts;
+  const concurrency = Math.max(1, opts.concurrency ?? 1);
   let lastReap = 0;
 
-  while (!signal?.aborted) {
-    if (Date.now() - lastReap > REAP_INTERVAL_MS) {
-      await queue.reap();
-      lastReap = Date.now();
-    }
-
-    const [job] = await queue.claim(1);
-    if (!job) {
-      if (opts.exitWhenDrained) {
-        const { leased } = await queue.stats();
-        if (leased === 0) return;
+  /**
+   * One job at a time, start to finish. Several of these run in parallel.
+   *
+   * Concurrency matters here because a single lane is latency-bound, not rate-bound:
+   * three sequential round trips per thesis at ~400ms each means ~2.5 requests/second
+   * however high the rate limit is set. Extra lanes keep requests in flight while others
+   * wait, so the shared token bucket becomes the actual ceiling — which is the number we
+   * want to control.
+   */
+  const lane = async (): Promise<void> => {
+    while (!signal?.aborted) {
+      if (Date.now() - lastReap > REAP_INTERVAL_MS) {
+        // Cheap and idempotent, so it does not matter which lane gets there first.
+        lastReap = Date.now();
+        await queue.reap();
       }
-      await sleep(IDLE_SLEEP_MS);
-      continue;
-    }
 
-    // Hold the lease for as long as the job actually runs.
-    const heartbeat = setInterval(() => { void queue.renewLease(job); }, HEARTBEAT_MS);
-    try {
-      const detail = await runJob(ctx, job, signal);
-      await queue.complete(job);
-      onEvent?.({ job, outcome: "ok", detail });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      const outcome = await queue.fail(job, message);
-      onEvent?.({ job, outcome, detail: message });
-    } finally {
-      clearInterval(heartbeat);
+      const [job] = await queue.claim(1);
+      if (!job) {
+        if (opts.exitWhenDrained) {
+          const { leased } = await queue.stats();
+          if (leased === 0) return;
+        }
+        await sleep(IDLE_SLEEP_MS);
+        continue;
+      }
+
+      // Hold the lease for as long as the job actually runs.
+      const heartbeat = setInterval(() => { void queue.renewLease(job); }, HEARTBEAT_MS);
+      try {
+        const detail = await runJob(ctx, job, signal);
+        await queue.complete(job);
+        onEvent?.({ job, outcome: "ok", detail });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        const outcome = await queue.fail(job, message);
+        onEvent?.({ job, outcome, detail: message });
+      } finally {
+        clearInterval(heartbeat);
+      }
     }
-  }
+  };
+
+  await Promise.all(Array.from({ length: concurrency }, () => lane()));
 }

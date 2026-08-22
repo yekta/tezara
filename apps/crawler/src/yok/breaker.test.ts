@@ -4,7 +4,6 @@ import type { Redis } from "ioredis";
 import { makeKeys, type Keys } from "../state/keys.ts";
 import { createRedis } from "../state/redis.ts";
 import { CircuitBreaker } from "./breaker.ts";
-import { RateLimiter } from "./limiter.ts";
 
 let redis: Redis;
 let keys: Keys;
@@ -23,43 +22,6 @@ after(async () => {
   const existing = await redis.keys(`${keys.prefix}*`);
   if (existing.length) await redis.del(...existing);
   await redis.quit();
-});
-
-describe("rate limiter", () => {
-  test("allows up to capacity immediately, then makes callers wait", async () => {
-    const limiter = new RateLimiter(redis, keys, { ratePerSecond: 1, capacity: 3 });
-    assert.equal(await limiter.tryAcquire(), 0);
-    assert.equal(await limiter.tryAcquire(), 0);
-    assert.equal(await limiter.tryAcquire(), 0);
-    const wait = await limiter.tryAcquire();
-    assert.ok(wait > 0, "fourth request must be told to wait");
-    assert.ok(wait <= 1000, `wait should be about one token at 1/s, got ${wait}`);
-  });
-
-  test("the budget is shared, not per-instance", async () => {
-    // Two workers, one bucket: scaling out must not multiply the load YÖK sees.
-    const a = new RateLimiter(redis, keys, { ratePerSecond: 1, capacity: 2 });
-    const b = new RateLimiter(redis, keys, { ratePerSecond: 1, capacity: 2 });
-    assert.equal(await a.tryAcquire(), 0);
-    assert.equal(await b.tryAcquire(), 0);
-    assert.ok(await a.tryAcquire() > 0, "second worker consumed the shared budget");
-  });
-
-  test("tokens refill over time", async () => {
-    const limiter = new RateLimiter(redis, keys, { ratePerSecond: 50, capacity: 1 });
-    assert.equal(await limiter.tryAcquire(), 0);
-    assert.ok(await limiter.tryAcquire() > 0);
-    await new Promise((r) => setTimeout(r, 60));
-    assert.equal(await limiter.tryAcquire(), 0, "should have refilled");
-  });
-
-  test("acquire() blocks until a token frees up", async () => {
-    const limiter = new RateLimiter(redis, keys, { ratePerSecond: 50, capacity: 1 });
-    await limiter.acquire();
-    const started = Date.now();
-    await limiter.acquire();
-    assert.ok(Date.now() - started >= 15, "second acquire must have waited");
-  });
 });
 
 describe("circuit breaker", () => {

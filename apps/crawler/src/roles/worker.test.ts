@@ -60,6 +60,21 @@ describe("worker", () => {
     assert.deepEqual(await queue.stats(), { pending: 0, leased: 0, dead: 0 });
   });
 
+  test("lanes run jobs in parallel without ever double-claiming one", async () => {
+    for (let i = 0; i < 12; i++) await queue.enqueue("sync-meili", { at: i });
+
+    const seen: string[] = [];
+    await runWorker(ctx, queue, {
+      exitWhenDrained: true,
+      concurrency: 4,
+      onEvent: ({ job }) => seen.push(job.id),
+    });
+
+    assert.equal(seen.length, 12, "every job ran");
+    assert.equal(new Set(seen).size, 12, "no job ran twice across lanes");
+    assert.deepEqual(await queue.stats(), { pending: 0, leased: 0, dead: 0 });
+  });
+
   test("an unknown job kind fails rather than silently succeeding", async () => {
     await queue.enqueue("refresh-thesis", { id: 1 });
     const outcomes: string[] = [];

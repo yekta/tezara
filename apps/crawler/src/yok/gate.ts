@@ -1,9 +1,12 @@
 import type { CircuitBreaker } from "./breaker.ts";
-import type { RateLimiter } from "./limiter.ts";
 
 /**
  * What every outbound YÖK request passes through. Kept as an interface so a session can
  * run without Redis (the probe CLI, tests) using a plain delay instead.
+ *
+ * Throughput is controlled by worker concurrency, not by a rate limit: request rate is
+ * roughly concurrency divided by round-trip latency, which is one number to reason about
+ * instead of two that interact.
  */
 export type Gate = {
   before(signal?: AbortSignal): Promise<void>;
@@ -17,12 +20,11 @@ export class BreakerOpenError extends Error {
   }
 }
 
-/** Shared-budget gate: global rate limit plus a shared circuit breaker. */
-export function redisGate(limiter: RateLimiter, breaker: CircuitBreaker): Gate {
+/** Shared circuit breaker, so a failing upstream parks every lane at once. */
+export function redisGate(breaker: CircuitBreaker): Gate {
   return {
-    async before(signal) {
+    async before() {
       if (!(await breaker.allow())) throw new BreakerOpenError();
-      await limiter.acquire(1, signal);
     },
     async after(ok) {
       if (ok) await breaker.recordSuccess();

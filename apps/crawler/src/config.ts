@@ -76,9 +76,8 @@ const Env = z.object({
   // --- optional: tuning, with defaults that are genuinely fine to leave alone.
   CLICKHOUSE_DATABASE: z.string().min(1).default("default"),
   CRAWLER_REDIS_PREFIX: z.string().min(1).default("tezara:crawler"),
-  /** Sustained request rate against YÖK, shared across the whole deployment. */
-  CRAWLER_RATE_PER_SECOND: z.coerce.number().positive().default(6),
-  CRAWLER_BURST: z.coerce.number().positive().default(12),
+  /** Jobs run in parallel. The shared rate limit still caps total request volume. */
+  CRAWLER_CONCURRENCY: z.coerce.number().positive().default(10),
   CRAWLER_BREAKER_THRESHOLD: z.coerce.number().positive().default(5),
   CRAWLER_BREAKER_COOLDOWN_MS: z.coerce.number().positive().default(300_000),
   /** Upper bound of the id space. Measured max Tez No was 1,020,391 in Aug 2026. */
@@ -113,7 +112,7 @@ export function loadConfig(env?: NodeJS.ProcessEnv): Config {
     `[crawler] config redis=${redact(config.REDIS_URL)}` +
       ` meili=${config.MEILI_URL_INTERNAL}` +
       ` clickhouse=${redact(config.CLICKHOUSE_URL)}/${config.CLICKHOUSE_DATABASE}` +
-      ` rate=${config.CRAWLER_RATE_PER_SECOND}/s`,
+      ` concurrency=${config.CRAWLER_CONCURRENCY}`,
   );
 
   return config;

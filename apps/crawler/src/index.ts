@@ -17,7 +17,6 @@ import { createRedis } from "./state/redis.ts";
 import { ScanStore } from "./state/scan.ts";
 import { CircuitBreaker } from "./yok/breaker.ts";
 import { redisGate } from "./yok/gate.ts";
-import { RateLimiter } from "./yok/limiter.ts";
 import { openSession } from "./yok/session.ts";
 
 const config = loadConfig();
@@ -93,16 +92,12 @@ const countHeldForYear = async (year: number) => {
  * so the crawl loop retries on its own with backoff.
  */
 async function crawlForever(): Promise<void> {
-  const limiter = new RateLimiter(redis, keys, {
-    ratePerSecond: config.CRAWLER_RATE_PER_SECOND,
-    capacity: config.CRAWLER_BURST,
-  });
   let attempt = 0;
 
   while (!controller.signal.aborted) {
     try {
       console.error("[crawler] opening YÖK session…");
-      const session = await openSession({ gate: redisGate(limiter, breaker) });
+      const session = await openSession({ gate: redisGate(breaker) });
       console.error("[crawler] session established, fetching subject taxonomy…");
       const lookups = await buildLookups(session);
       console.error(`[crawler] taxonomy loaded (${lookups.subjectEnByTr.size} subjects)`);
@@ -116,6 +111,7 @@ async function crawlForever(): Promise<void> {
         queue,
         {
           signal: controller.signal,
+          concurrency: config.CRAWLER_CONCURRENCY,
           onEvent: ({ job, outcome, detail }) =>
             console.error(`[crawler] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
         },
