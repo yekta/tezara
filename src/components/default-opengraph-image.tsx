@@ -137,6 +137,7 @@ export async function getOpengraphFonts() {
 export async function DefaultOpenGraphResponse() {
   return new ImageResponse(<DefaultOpenGraphImage />, {
     ...opengraphSize,
+    format: "png",
     fonts: await getOpengraphFonts(),
   });
 }

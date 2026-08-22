@@ -12,6 +12,7 @@ export const contentType = opengraphContentType;
 export default async function Image() {
   return new ImageResponse(<DefaultOpenGraphImage />, {
     ...size,
+    format: "png",
     fonts: await getOpengraphFonts(),
   });
 }

@@ -93,6 +93,7 @@ export default async function Image({ params }: Props) {
     ),
     {
       ...size,
+      format: "png",
       fonts: await getOpengraphFonts(),
     }
   );

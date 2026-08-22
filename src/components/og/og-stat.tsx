@@ -84,7 +84,7 @@ export function OGStatSectionWrapper({
         display: "flex",
         flexDirection: "column",
         gap: 32,
-        marginTop,
+        ...(marginTop !== undefined && { marginTop }),
       }}
     >
       {children}

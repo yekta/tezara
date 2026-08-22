@@ -58,6 +58,7 @@ export default async function Image() {
     ),
     {
       ...size,
+      format: "png",
       fonts: await getOpengraphFonts(),
     }
   );
