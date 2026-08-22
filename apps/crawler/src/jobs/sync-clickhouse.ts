@@ -12,25 +12,50 @@ export type SyncClickhouseParams = { batchSize?: number; maxBatches?: number; re
  *
  * Commit-after-push, same as the Meili sync — a partial failure re-pushes a batch,
  * which ReplacingMergeTree collapses, rather than losing theses.
+ *
+ * Held under the outbox drain lock: peek/commit is only safe for one worker at a time,
+ * and two lanes committing the same head would trim a batch nobody pushed.
  */
 export async function syncClickhouse(
   deps: { client: ClickHouseClient; outbox: Outbox },
   params: SyncClickhouseParams = {},
-): Promise<{ pushed: number; batches: number; remaining: number; rebuilt: string[] }> {
+): Promise<{
+  pushed: number;
+  batches: number;
+  remaining: number;
+  rebuilt: string[];
+  skipped?: string;
+}> {
   const batchSize = params.batchSize ?? 5_000;
   const maxBatches = params.maxBatches ?? 20;
 
-  let pushed = 0;
-  let batches = 0;
+  const drained = await deps.outbox.drain(async () => {
+    let pushed = 0;
+    let batches = 0;
 
-  for (let i = 0; i < maxBatches; i++) {
-    const batch = await deps.outbox.peek(batchSize);
-    if (batch.length === 0) break;
-    await syncTheses(deps.client, batch);
-    await deps.outbox.commit(batch.length);
-    pushed += batch.length;
-    batches++;
+    for (let i = 0; i < maxBatches; i++) {
+      const batch = await deps.outbox.peek(batchSize);
+      if (batch.length === 0) break;
+      await syncTheses(deps.client, batch);
+      await deps.outbox.commit(batch.length);
+      pushed += batch.length;
+      batches++;
+    }
+
+    return { pushed, batches };
+  });
+
+  if (drained === null) {
+    return {
+      pushed: 0,
+      batches: 0,
+      remaining: await deps.outbox.depth(),
+      rebuilt: [],
+      skipped: "another worker holds the drain lock",
+    };
   }
+
+  const { pushed, batches } = drained;
 
   // Aggregates are only worth rebuilding when something actually landed.
   const rebuilt = pushed > 0 && params.rebuild !== false ? await rebuildAggregates(deps.client) : [];
