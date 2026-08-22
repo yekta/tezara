@@ -19,13 +19,17 @@ async function runJob(ctx: JobContext, job: Job, signal?: AbortSignal): Promise<
       return scanIdRange(ctx, job.params as ScanIdRangeParams, signal);
     case "discover-head":
       return discoverHead(ctx, job.params as DiscoverHeadParams, signal);
+    // An unconfigured projection target is a valid deployment, not a failure: the
+    // scheduler cannot know which targets a given worker has, so skipping here is what
+    // keeps a Meili-only (or ClickHouse-only) deployment from dead-lettering jobs
+    // forever.
     case "sync-meili": {
-      if (!ctx.meili) throw new Error("sync-meili requires a Meili client");
+      if (!ctx.meili) return { skipped: "no Meili client configured" };
       return syncMeili({ client: ctx.meili, outbox: ctx.outbox }, job.params as SyncMeiliParams);
     }
     case "sync-clickhouse": {
       if (!ctx.clickhouse || !ctx.clickhouseOutbox) {
-        throw new Error("sync-clickhouse requires a ClickHouse client");
+        return { skipped: "no ClickHouse client configured" };
       }
       return syncClickhouse(
         { client: ctx.clickhouse, outbox: ctx.clickhouseOutbox },
