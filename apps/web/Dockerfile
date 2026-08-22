@@ -62,30 +62,38 @@ ENV SKIP_ENV_VALIDATION=1 \
 # is baked into image history and echoed in build logs, while a mounted secret exists only
 # for the lifetime of this RUN.
 #
-# Not every builder can pass BuildKit secrets, so each falls back to the matching ARG and
-# the build says which channel it used. This is not the silent fallback this file used to
-# have: it is the SAME value arriving by a different route, and the preflight still refuses
-# to build unless it can actually connect with it.
+# Secret ids are the SERVICE VARIABLE NAME, verbatim. Unbind hands every service variable
+# to BuildKit as a secret under its own name, so id=CLICKHOUSE_URL_BUILD matches the
+# variable of that name — a lowercase id matches nothing and silently yields an empty value.
+# See dockerfileBuildArgs() in unbind/apps/api/pkg/builder/internal/buildkit/buildkit.go.
+#
+# Deliberately NOT declared as ARGs: Unbind auto-passes any ARG whose name matches a service
+# variable, and build args are recorded in image history. Keeping these out of the ARG list
+# is what confines them to the secret channel. MEILI_URL_BUILD carries no credentials, so it
+# stays an ARG and gets populated automatically.
+#
+# Not every builder can pass BuildKit secrets, so each falls back to a same-named build arg
+# and the build says which channel it used. That is not the silent fallback this file used
+# to have: it is the SAME value by a different route, and the preflight still refuses to
+# build unless it can actually connect with it.
 ARG MEILI_URL_BUILD
-ARG CLICKHOUSE_URL_BUILD
-ARG MEILI_ADMIN_KEY
 ENV MEILI_URL_BUILD=$MEILI_URL_BUILD
 
-RUN --mount=type=secret,id=clickhouse_url_build \
-    --mount=type=secret,id=meili_admin_key \
+RUN --mount=type=secret,id=CLICKHOUSE_URL_BUILD \
+    --mount=type=secret,id=MEILI_ADMIN_KEY \
     set -eu; \
     read_secret() { \
       if [ -s "/run/secrets/$1" ]; then \
-        echo "  $2: BuildKit secret" >&2; cat "/run/secrets/$1"; \
-      elif [ -n "${3:-}" ]; then \
-        echo "  $2: build ARG (leaks into image history — prefer a secret)" >&2; printf %s "$3"; \
+        echo "  $1: BuildKit secret" >&2; cat "/run/secrets/$1"; \
+      elif [ -n "${2:-}" ]; then \
+        echo "  $1: build ARG (recorded in image history — prefer a secret)" >&2; printf %s "$2"; \
       else \
-        echo "  $2: MISSING — no secret id=$1 mounted and no --build-arg given" >&2; \
+        echo "  $1: MISSING — set a service variable named $1" >&2; \
       fi; \
     }; \
     echo "build credentials:" >&2; \
-    CLICKHOUSE_URL_BUILD="$(read_secret clickhouse_url_build CLICKHOUSE_URL_BUILD "${CLICKHOUSE_URL_BUILD:-}")" \
-    MEILI_ADMIN_KEY="$(read_secret meili_admin_key MEILI_ADMIN_KEY "${MEILI_ADMIN_KEY:-}")" \
+    CLICKHOUSE_URL_BUILD="$(read_secret CLICKHOUSE_URL_BUILD "${CLICKHOUSE_URL_BUILD:-}")" \
+    MEILI_ADMIN_KEY="$(read_secret MEILI_ADMIN_KEY "${MEILI_ADMIN_KEY:-}")" \
     pnpm --filter @tezara/web build
 
 # --- runtime --- #
