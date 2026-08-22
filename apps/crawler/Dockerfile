@@ -35,8 +35,6 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/crawler ./apps/crawler
 RUN addgroup -g 1001 -S nodejs && adduser -S crawler -u 1001 && chown -R crawler:nodejs /app
 USER crawler
-# Default role runs scheduler + worker + api in one process.
-ENV CRAWLER_ROLE=all
 EXPOSE 3000
 # Node 22 strips TS types natively, so there is no build step to keep in sync.
 CMD ["node", "--experimental-strip-types", "apps/crawler/src/index.ts"]

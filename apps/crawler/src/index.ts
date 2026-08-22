@@ -1,21 +1,19 @@
 /**
- * One image, three roles selected by CRAWLER_ROLE.
- *   scheduler — exactly one instance, enqueues due work
- *   worker    — scale freely, claims and runs jobs
- *   api       — /health /ready /metrics
+ * The crawler. One process: it serves /health, /ready and /metrics, schedules work, and
+ * runs it. There is nothing to configure beyond the connection URLs.
  */
 import { createClickhouseClient } from "@tezara/clickhouse";
 import { createMeiliClient } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
 import { buildLookups } from "./jobs/context.ts";
-import { createApi } from "./roles/api.ts";
-import { runScheduler, DEFAULT_POLICY } from "./roles/scheduler.ts";
-import { runWorker } from "./roles/worker.ts";
 import { Queue } from "./queue/queue.ts";
+import { createApi } from "./roles/api.ts";
+import { DEFAULT_POLICY, runScheduler } from "./roles/scheduler.ts";
+import { runWorker } from "./roles/worker.ts";
 import { makeKeys } from "./state/keys.ts";
 import { Outbox } from "./state/outbox.ts";
-import { createRedis } from "./state/redis.ts";
 import { ReconcileStore } from "./state/reconcile.ts";
+import { createRedis } from "./state/redis.ts";
 import { ScanStore } from "./state/scan.ts";
 import { CircuitBreaker } from "./yok/breaker.ts";
 import { redisGate } from "./yok/gate.ts";
@@ -25,26 +23,50 @@ import { openSession } from "./yok/session.ts";
 const config = loadConfig();
 const redis = createRedis(config.REDIS_URL);
 const keys = makeKeys(config.CRAWLER_REDIS_PREFIX);
+
 const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
 const outbox = new Outbox(redis, keys, "meili");
-// Only created when the target exists: an outbox nobody drains grows without bound.
-const clickhouseOutbox = config.CLICKHOUSE_URL
-  ? new Outbox(redis, keys, "clickhouse")
-  : undefined;
+const clickhouseOutbox = new Outbox(redis, keys, "clickhouse");
 const reconcile = new ReconcileStore(redis, keys);
 const breaker = new CircuitBreaker(redis, keys, {
   failureThreshold: config.CRAWLER_BREAKER_THRESHOLD,
   cooldownMs: config.CRAWLER_BREAKER_COOLDOWN_MS,
 });
 
+const meili = createMeiliClient({
+  host: config.MEILI_URL_INTERNAL,
+  apiKey: config.MEILI_ADMIN_KEY,
+});
+const clickhouse = createClickhouseClient({
+  url: config.CLICKHOUSE_URL,
+  username: config.CLICKHOUSE_USERNAME,
+  password: config.CLICKHOUSE_PASSWORD,
+  database: config.CLICKHOUSE_DATABASE,
+});
+
 const controller = new AbortController();
-let server: ReturnType<typeof createApi> | undefined;
+
+// ioredis emits errors on its own event emitter; unhandled, they take the process down.
+// Reconnection is automatic, so log and let it recover.
+redis.on("error", (err) => console.error("[redis]", err.message));
+
+process.on("unhandledRejection", (reason) => {
+  console.error("[crawler] FATAL unhandled rejection:", reason);
+  process.exit(1);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[crawler] FATAL uncaught exception:", err);
+  process.exit(1);
+});
+
+const server = createApi({ redis, queue, scan, outbox, breaker, reconcile });
+server.listen(config.PORT, () => console.error(`[crawler] listening on :${config.PORT}`));
 
 async function shutdown(signal: string): Promise<void> {
   console.error(`[crawler] ${signal} — shutting down`);
   controller.abort();
-  server?.close();
+  server.close();
   // In-flight jobs keep their lease; if we die before completing them the reaper
   // requeues them, so there is nothing to flush here.
   await redis.quit().catch(() => {});
@@ -53,91 +75,76 @@ async function shutdown(signal: string): Promise<void> {
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
 process.on("SIGINT", () => void shutdown("SIGINT"));
 
-console.error(`[crawler] role=${config.CRAWLER_ROLE} prefix=${keys.prefix}`);
-
-const role = config.CRAWLER_ROLE;
-const wants = {
-  api: role === "all" || role === "api",
-  scheduler: role === "all" || role === "scheduler",
-  worker: role === "all" || role === "worker",
+/** How many records we hold for a year — the reconciliation oracle's other half. */
+const countHeldForYear = async (year: number) => {
+  const res = await clickhouse.query({
+    query: "SELECT count() AS c FROM theses FINAL WHERE year = {year:UInt32}",
+    query_params: { year },
+    format: "JSONEachRow",
+  });
+  const rows = await res.json<{ c: string }>();
+  return Number(rows[0]?.c ?? 0);
 };
 
-if (wants.api) {
-  server = createApi({ redis, queue, scan, outbox, breaker, reconcile });
-  server.listen(config.PORT, () => console.error(`[crawler] api on :${config.PORT}`));
+/**
+ * Establishing a YÖK session can fail — maintenance, blocked egress, slow DNS. That must
+ * not take the process down: /metrics still needs serving and work still needs queueing,
+ * so the crawl loop retries on its own with backoff.
+ */
+async function crawlForever(): Promise<void> {
+  const limiter = new RateLimiter(redis, keys, {
+    ratePerSecond: config.CRAWLER_RATE_PER_SECOND,
+    capacity: config.CRAWLER_BURST,
+  });
+  let attempt = 0;
+
+  while (!controller.signal.aborted) {
+    try {
+      console.error("[crawler] opening YÖK session…");
+      const session = await openSession({ gate: redisGate(limiter, breaker) });
+      console.error("[crawler] session established, fetching subject taxonomy…");
+      const lookups = await buildLookups(session);
+      console.error(`[crawler] taxonomy loaded (${lookups.subjectEnByTr.size} subjects)`);
+      attempt = 0;
+
+      await runWorker(
+        {
+          session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
+          reconcile, countHeldForYear,
+        },
+        queue,
+        {
+          signal: controller.signal,
+          onEvent: ({ job, outcome, detail }) =>
+            console.error(`[crawler] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
+        },
+      );
+      await session.close().catch(() => {});
+    } catch (err) {
+      attempt++;
+      const wait = Math.min(30_000 * 2 ** (attempt - 1), 5 * 60_000);
+      console.error(
+        `[crawler] crawl loop failed (attempt ${attempt}), retrying in ${wait / 1000}s:`,
+        err instanceof Error ? err.message : err,
+      );
+      await new Promise((r) => setTimeout(r, wait));
+    }
+  }
 }
 
-const running: Promise<void>[] = [];
-
-if (wants.scheduler) {
-  running.push(
+try {
+  await Promise.all([
     runScheduler(
       { redis, keys, queue, scan },
       {
         signal: controller.signal,
         policy: { ...DEFAULT_POLICY, maxThesisId: config.CRAWLER_MAX_THESIS_ID },
-        onTick: (r) => console.error(`[scheduler] ${JSON.stringify(r)}`),
+        onTick: (r) => console.error(`[crawler] scheduled ${JSON.stringify(r)}`),
       },
     ),
-  );
+    crawlForever(),
+  ]);
+} catch (err) {
+  console.error("[crawler] FATAL:", err instanceof Error ? err.stack : err);
+  process.exit(1);
 }
-
-if (wants.worker) {
-  const limiter = new RateLimiter(redis, keys, {
-    ratePerSecond: config.CRAWLER_RATE_PER_SECOND,
-    capacity: config.CRAWLER_BURST,
-  });
-  const session = await openSession({ gate: redisGate(limiter, breaker) });
-  const lookups = await buildLookups(session);
-  const meili = config.MEILI_URL_INTERNAL
-    ? createMeiliClient({ host: config.MEILI_URL_INTERNAL, apiKey: config.MEILI_ADMIN_KEY })
-    : undefined;
-  const clickhouse = config.CLICKHOUSE_URL
-    ? createClickhouseClient({
-        url: config.CLICKHOUSE_URL,
-        username: config.CLICKHOUSE_USERNAME,
-        password: config.CLICKHOUSE_PASSWORD,
-        database: config.CLICKHOUSE_DATABASE,
-      })
-    : undefined;
-  if (!meili) console.error("[crawler] MEILI_URL_INTERNAL unset — crawling into the outbox only");
-  if (!clickhouse) console.error("[crawler] CLICKHOUSE_URL unset — stats projection disabled");
-
-  // Counting held records is the projection's job; ClickHouse is the stats store, so it
-  // answers when present and Meili stands in when it is not.
-  const countHeldForYear = clickhouse
-    ? async (year: number) => {
-        const res = await clickhouse.query({
-          query: "SELECT count() AS c FROM theses FINAL WHERE year = {year:UInt32}",
-          query_params: { year },
-          format: "JSONEachRow",
-        });
-        const rows = await res.json<{ c: string }>();
-        return Number(rows[0]?.c ?? 0);
-      }
-    : meili
-      ? async (year: number) => {
-          const res = await meili.index("theses").search("", {
-            filter: `year = ${year}`, limit: 0, hitsPerPage: 0,
-          });
-          return Number((res as { totalHits?: number }).totalHits ?? 0);
-        }
-      : undefined;
-
-  running.push(
-    runWorker(
-      {
-        session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
-        reconcile, countHeldForYear,
-      },
-      queue,
-      {
-        signal: controller.signal,
-        onEvent: ({ job, outcome, detail }) =>
-          console.error(`[worker] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
-      },
-    ),
-  );
-}
-
-await Promise.all(running);
