@@ -4,7 +4,7 @@ import {
   type TCrawledThesis,
 } from "@tezara/core";
 import { classify } from "./classify.ts";
-import { byTezNo } from "./form.ts";
+import { baseForm, byTezNo } from "./form.ts";
 import { parseList } from "./parse-list.ts";
 import { parsePdfFragment } from "./parse-pdf.ts";
 import type { DetailPayload } from "./parse-detail.ts";
@@ -109,4 +109,33 @@ export async function fetchThesisById(
       restricted: pdf.restricted,
     },
   };
+}
+
+
+/**
+ * How many theses YÖK reports for a single year.
+ *
+ * The reconciliation oracle. A year-only search costs one request and returns an
+ * authoritative total, which is what makes drift detectable: if YÖK says 66,114 for 2023
+ * and we hold 66,090, something was missed.
+ *
+ * `Durum=0` is load-bearing here as everywhere — the form's default of 3 hides 11.7% of
+ * the corpus, so reconciling against it would compare our data to the wrong number.
+ */
+export async function fetchYearCount(
+  s: Session,
+  year: number,
+): Promise<{ status: "ok"; count: number } | { status: "error" | "maintenance" }> {
+  await s.throttle();
+  const form = baseForm({ yil1: String(year), yil2: String(year) });
+  const html = await (await s.api.post("SearchTez", { form })).text();
+  const outcome = classify(html);
+
+  await s.settle(outcome.kind !== "maintenance" && outcome.kind !== "error");
+
+  if (outcome.kind === "maintenance") return { status: "maintenance" };
+  if (outcome.kind === "empty") return { status: "ok", count: 0 };
+  if (outcome.kind === "error") return { status: "error" };
+  // `truncated` still carries the true total — YÖK reports found and shown separately.
+  return { status: "ok", count: outcome.found };
 }

@@ -63,6 +63,10 @@ export type SchedulerPolicy = {
   backfillDepth: number;
   discoverHeadEveryMs: number;
   syncEveryMs: number;
+  /** How often to reconcile ONE year; the corpus cycles through over time. */
+  reconcileEveryMs: number;
+  /** Inclusive year range to cycle through. */
+  reconcileYears: { from: number; to: number };
 };
 
 export const DEFAULT_POLICY: SchedulerPolicy = {
@@ -75,6 +79,9 @@ export const DEFAULT_POLICY: SchedulerPolicy = {
   backfillDepth: 20,
   discoverHeadEveryMs: 30 * 60_000,
   syncEveryMs: 60_000,
+  // One year every 20 minutes cycles the whole 1959-2026 corpus in about a day.
+  reconcileEveryMs: 20 * 60_000,
+  reconcileYears: { from: 1959, to: 2026 },
 };
 
 export type TickReport = {
@@ -82,6 +89,7 @@ export type TickReport = {
   refreshQueued: number;
   discoverQueued: boolean;
   syncQueued: boolean;
+  reconcileQueued: number | null;
 };
 
 /**
@@ -95,6 +103,7 @@ export async function tick(
 ): Promise<TickReport> {
   const report: TickReport = {
     backfillQueued: 0, refreshQueued: 0, discoverQueued: false, syncQueued: false,
+    reconcileQueued: null,
   };
 
   // 1. Keep the backfill topped up, starting just past the highest scanned id.
@@ -134,6 +143,19 @@ export async function tick(
     await deps.queue.enqueue("sync-clickhouse", { at });
     await deps.scan.raiseWatermark("sync:lastRun", now);
     report.syncQueued = true;
+  }
+
+  // 5. Reconcile one year per interval, cycling through the corpus.
+  const lastRecon = (await deps.scan.watermark("reconcile:lastRun")) ?? 0;
+  if (now - lastRecon >= policy.reconcileEveryMs) {
+    const span = policy.reconcileYears.to - policy.reconcileYears.from + 1;
+    const cursor = (await deps.scan.watermark("reconcile:cursor")) ?? 0;
+    const year = policy.reconcileYears.from + (cursor % span);
+    await deps.queue.enqueue("reconcile-year", { year });
+    // raiseWatermark is monotonic, so the cursor is stored as a plain counter.
+    await deps.scan.raiseWatermark("reconcile:cursor", cursor + 1);
+    await deps.scan.raiseWatermark("reconcile:lastRun", now);
+    report.reconcileQueued = year;
   }
 
   return report;
