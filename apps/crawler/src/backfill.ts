@@ -3,7 +3,7 @@
  *   pnpm --filter @tezara/crawler backfill 200 260 [--chunk 20]
  *
  * Resumable: re-running the same range skips ids already in the scan store, so an
- * interrupted run costs only the ids it had not reached. Set MEILI_HOST + MEILI_KEY to
+ * interrupted run costs only the ids it had not reached. Set MEILI_URL_INTERNAL + MEILI_ADMIN_KEY to
  * also project the results; without them the crawl still runs and the outbox just grows.
  */
 import { createMeiliClient } from "@tezara/meili";
@@ -33,9 +33,9 @@ const keys = makeKeys(process.env.CRAWLER_REDIS_PREFIX ?? DEFAULT_PREFIX);
 const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
 const outbox = new Outbox(redis, keys);
-const meiliHost = process.env.MEILI_HOST;
-const meili = meiliHost
-  ? createMeiliClient({ host: meiliHost, apiKey: process.env.MEILI_KEY ?? "" })
+const meiliUrl = process.env.MEILI_URL_INTERNAL;
+const meili = meiliUrl
+  ? createMeiliClient({ host: meiliUrl, apiKey: process.env.MEILI_ADMIN_KEY ?? "" })
   : undefined;
 const session = await openSession({ delayMs: Number(process.env.CRAWLER_DELAY_MS ?? 400) });
 

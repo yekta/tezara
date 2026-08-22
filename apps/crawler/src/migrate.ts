@@ -1,6 +1,6 @@
 /**
  * Apply Meili index settings, then verify them.
- *   MEILI_HOST=… MEILI_KEY=… pnpm --filter @tezara/crawler migrate
+ *   MEILI_URL_INTERNAL=… MEILI_ADMIN_KEY=… pnpm --filter @tezara/crawler migrate
  *
  * Must run before the first sync: addDocuments silently auto-creates indexes with
  * Meili's defaults, which leaves every filter the web app relies on returning nothing.
@@ -8,15 +8,15 @@
 import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
 import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
 
-const host = process.env.MEILI_HOST;
+const host = process.env.MEILI_URL_INTERNAL;
 const chUrl = process.env.CLICKHOUSE_URL;
 if (!host && !chUrl) {
-  console.error("set MEILI_HOST and/or CLICKHOUSE_URL");
+  console.error("set MEILI_URL_INTERNAL and/or CLICKHOUSE_URL");
   process.exit(1);
 }
 
 if (host) {
-  const client = createMeiliClient({ host, apiKey: process.env.MEILI_KEY ?? "" });
+  const client = createMeiliClient({ host, apiKey: process.env.MEILI_ADMIN_KEY ?? "" });
   const applied = await applySettings(client, { waitForTasks: true });
   console.error(`meili: applied settings to ${applied.length} indexes`);
 
