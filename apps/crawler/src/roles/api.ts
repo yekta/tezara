@@ -1,9 +1,9 @@
-import { createServer, type Server } from "node:http";
+import { createServer, type Server, type ServerResponse } from "node:http";
 import type { Redis } from "ioredis";
 import type { Queue } from "../queue/queue.ts";
 import type { Outbox } from "../state/outbox.ts";
-import type { ScanStore } from "../state/scan.ts";
 import type { ReconcileStore } from "../state/reconcile.ts";
+import type { ScanStore } from "../state/scan.ts";
 import type { CircuitBreaker } from "../yok/breaker.ts";
 
 export type ApiDeps = {
@@ -11,85 +11,95 @@ export type ApiDeps = {
   queue: Queue;
   scan: ScanStore;
   outbox: Outbox;
+  clickhouseOutbox?: Outbox;
   breaker: CircuitBreaker;
   reconcile?: ReconcileStore;
+  maxThesisId: number;
 };
 
-const escape = (v: string) => v.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+async function buildStatus(deps: ApiDeps) {
+  const [queue, scan, meiliOutbox, clickhouseOutbox, breaker] = await Promise.all([
+    deps.queue.stats(),
+    deps.scan.counts(),
+    deps.outbox.depth(),
+    deps.clickhouseOutbox?.depth() ?? Promise.resolve(0),
+    deps.breaker.stats(),
+  ]);
 
-function metric(name: string, help: string, type: string, value: number, labels = ""): string {
-  return `# HELP ${name} ${help}\n# TYPE ${name} ${type}\n${name}${labels} ${value}\n`;
+  const head = (await deps.scan.watermark("head")) ?? 0;
+  const backfillCursor = (await deps.scan.watermark("backfill")) ?? 1;
+  const reconciliations = (await deps.reconcile?.all()) ?? [];
+  const drifting = reconciliations.filter((r) => r.drift > 0);
+
+  return {
+    crawl: {
+      idsVisited: scan.tracked,
+      idsDueForRecheck: scan.due,
+      backfillCursor,
+      maxThesisId: deps.maxThesisId,
+      // Where the sequential backfill has reached, not how much of the corpus is held.
+      backfillPercent: Number(
+        (Math.min(100, (backfillCursor / deps.maxThesisId) * 100)).toFixed(2),
+      ),
+      highestIdSeenUpstream: head,
+    },
+    queue: {
+      pending: queue.pending,
+      running: queue.leased,
+      dead: queue.dead,
+    },
+    pendingProjection: {
+      // Crawled but not yet indexed. Should hover near zero; a number that only grows
+      // means the sync jobs are not running.
+      meili: meiliOutbox,
+      clickhouse: clickhouseOutbox,
+    },
+    upstream: {
+      breaker: breaker.state,
+      consecutiveFailures: breaker.failures,
+    },
+    reconciliation: {
+      yearsChecked: reconciliations.length,
+      yearsShort: drifting.length,
+      // Records YÖK reports that we do not hold.
+      missingRecords: reconciliations.reduce((sum, r) => sum + Math.max(0, r.drift), 0),
+      worst: drifting
+        .sort((a, b) => b.drift - a.drift)
+        .slice(0, 10)
+        .map((r) => ({ year: r.year, reported: r.reported, held: r.held, missing: r.drift })),
+    },
+  };
 }
 
-async function renderMetrics(deps: ApiDeps): Promise<string> {
-  const [queue, scan, outbox, breaker] = await Promise.all([
-    deps.queue.stats(), deps.scan.counts(), deps.outbox.depth(), deps.breaker.stats(),
-  ]);
-  const head = (await deps.scan.watermark("head")) ?? 0;
-  const backfill = (await deps.scan.watermark("backfill")) ?? 0;
-  const reconciliations = (await deps.reconcile?.all()) ?? [];
-  const totalDrift = reconciliations.reduce((sum, r) => sum + Math.max(0, r.drift), 0);
-  const driftingYears = reconciliations.filter((r) => r.drift > 0).length;
-
-  return [
-    metric("tezara_queue_jobs", "Jobs by state", "gauge", queue.pending, '{state="pending"}'),
-    `tezara_queue_jobs{state="leased"} ${queue.leased}\n`,
-    `tezara_queue_jobs{state="dead"} ${queue.dead}\n`,
-    metric("tezara_scan_ids_tracked", "Thesis ids with recorded state", "gauge", scan.tracked),
-    metric("tezara_scan_ids_due", "Thesis ids due for a re-visit", "gauge", scan.due),
-    metric("tezara_outbox_depth", "Theses awaiting projection into Meili", "gauge", outbox),
-    metric("tezara_head_watermark", "Highest thesis id known upstream", "gauge", head),
-    metric("tezara_backfill_cursor", "Next thesis id the backfill will queue", "gauge", backfill),
-    metric("tezara_breaker_failures", "Consecutive upstream failures", "gauge", breaker.failures),
-    metric(
-      "tezara_breaker_state", "Circuit breaker state (1 = active)", "gauge", 1,
-      `{state="${escape(breaker.state)}"}`,
-    ),
-    metric("tezara_years_reconciled", "Years checked against YÖK's own totals", "gauge", reconciliations.length),
-    metric("tezara_reconcile_drift_total", "Records YÖK reports that we do not hold", "gauge", totalDrift),
-    metric("tezara_reconcile_years_drifting", "Years where we hold fewer than YÖK reports", "gauge", driftingYears),
-  ].join("");
+function json(res: ServerResponse, code: number, body: unknown) {
+  res.writeHead(code, { "content-type": "application/json; charset=utf-8" });
+  res.end(`${JSON.stringify(body, null, 2)}\n`);
 }
 
 export function createApi(deps: ApiDeps): Server {
   return createServer((req, res) => {
-    const url = req.url ?? "/";
+    const path = (req.url ?? "/").split("?")[0];
 
-    if (url === "/health") {
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ status: "ok" }));
+    if (path === "/health") {
+      json(res, 200, { status: "ok" });
       return;
     }
 
-    if (url === "/ready") {
-      // Ready means we can actually reach our own state store.
+    if (path === "/ready") {
       deps.redis
         .ping()
-        .then(() => {
-          res.writeHead(200, { "content-type": "application/json" });
-          res.end(JSON.stringify({ status: "ready" }));
-        })
-        .catch((err: unknown) => {
-          res.writeHead(503, { "content-type": "application/json" });
-          res.end(JSON.stringify({ status: "unready", error: String(err) }));
-        });
+        .then(() => json(res, 200, { status: "ready" }))
+        .catch((err: unknown) => json(res, 503, { status: "unready", error: String(err) }));
       return;
     }
 
-    if (url === "/metrics") {
-      renderMetrics(deps)
-        .then((body) => {
-          res.writeHead(200, { "content-type": "text/plain; version=0.0.4" });
-          res.end(body);
-        })
-        .catch((err: unknown) => {
-          res.writeHead(500, { "content-type": "text/plain" });
-          res.end(String(err));
-        });
+    if (path === "/metrics" || path === "/status" || path === "/") {
+      buildStatus(deps)
+        .then((body) => json(res, 200, body))
+        .catch((err: unknown) => json(res, 500, { error: String(err) }));
       return;
     }
 
-    res.writeHead(404, { "content-type": "application/json" });
-    res.end(JSON.stringify({ error: "not found" }));
+    json(res, 404, { error: "not found", routes: ["/health", "/ready", "/metrics"] });
   });
 }

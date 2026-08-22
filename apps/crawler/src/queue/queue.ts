@@ -37,17 +37,65 @@ const defaultBackoff = (attempt: number) =>
   Math.min(60_000 * 2 ** (attempt - 1), 30 * 60_000) * (0.5 + Math.random());
 
 /**
+ * Job kinds that must not queue behind the backfill, highest priority first.
+ *
+ * Score alone is enqueue order, and the scheduler queues backfill chunks before the sync
+ * jobs, so a plain lowest-score-wins claim starves them: crawled theses pile up in the
+ * outbox and never reach Meili, while every tick adds another sync job that also waits.
+ * Job ids are prefixed with their kind, so the claim can prefer them by prefix.
+ */
+const PRIORITY_KINDS = [
+  "sync-meili",
+  "sync-clickhouse",
+  "reconcile-year",
+  "discover-head",
+] as const;
+
+/** How many due jobs to consider when looking for a priority one. */
+const CLAIM_WINDOW = 500;
+
+/**
  * Move up to `count` due jobs from pending to leased and return them, atomically.
  * Doing this in Lua is what makes concurrent workers safe: without it, two workers can
  * both read the same member before either removes it.
+ *
+ * Within the due set, priority kinds are taken first; everything else follows in score
+ * order. `runAfter` is still respected, so retry backoff is unaffected.
  */
 const CLAIM_LUA = `
-local pending, leased, now, count, leaseUntil = KEYS[1], KEYS[2], tonumber(ARGV[1]), tonumber(ARGV[2]), tonumber(ARGV[3])
-local ids = redis.call('ZRANGEBYSCORE', pending, '-inf', now, 'LIMIT', 0, count)
-if #ids == 0 then return {} end
-redis.call('ZREM', pending, unpack(ids))
-for i = 1, #ids do redis.call('ZADD', leased, leaseUntil, ids[i]) end
-return ids
+local pending, leased = KEYS[1], KEYS[2]
+local now, count, leaseUntil, window = tonumber(ARGV[1]), tonumber(ARGV[2]), tonumber(ARGV[3]), tonumber(ARGV[4])
+
+local candidates = redis.call('ZRANGEBYSCORE', pending, '-inf', now, 'LIMIT', 0, window)
+if #candidates == 0 then return {} end
+
+local picked = {}
+local taken = {}
+
+for p = 5, #ARGV do
+  local prefix = ARGV[p]
+  for i = 1, #candidates do
+    if #picked >= count then break end
+    if not taken[i] and string.sub(candidates[i], 1, string.len(prefix)) == prefix then
+      picked[#picked + 1] = candidates[i]
+      taken[i] = true
+    end
+  end
+  if #picked >= count then break end
+end
+
+for i = 1, #candidates do
+  if #picked >= count then break end
+  if not taken[i] then
+    picked[#picked + 1] = candidates[i]
+    taken[i] = true
+  end
+end
+
+if #picked == 0 then return {} end
+redis.call('ZREM', pending, unpack(picked))
+for i = 1, #picked do redis.call('ZADD', leased, leaseUntil, picked[i]) end
+return picked
 `;
 
 /** Return every job whose lease expired to the pending set. This is crash recovery. */
@@ -99,7 +147,8 @@ export class Queue {
     const now = Date.now();
     const ids = (await this.#redis.eval(
       CLAIM_LUA, 2, this.#keys.jobsPending, this.#keys.jobsLeased,
-      String(now), String(count), String(now + this.#leaseMs),
+      String(now), String(count), String(now + this.#leaseMs), String(CLAIM_WINDOW),
+      ...PRIORITY_KINDS,
     )) as string[];
     if (ids.length === 0) return [];
 
