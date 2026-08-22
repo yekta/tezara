@@ -12,7 +12,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "web": "pnpm --filter @tezara/web",
-    "crawler": "pnpm --filter @tezara/crawler"
+    "crawler": "pnpm --filter @tezara/crawler",
+    "start": "pnpm --filter @tezara/web start"
   },
   "devDependencies": {
     "turbo": "^2.5.5",
