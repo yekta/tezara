@@ -40,7 +40,7 @@ async function runJob(
     case "sync-meili": {
       if (!ctx.meili) return { skipped: "no Meili client configured" };
       return syncMeili(
-        { client: ctx.meili, outbox: ctx.outbox },
+        { client: ctx.meili, outbox: ctx.outbox, log: ctx.log },
         job.params as SyncMeiliParams,
       );
     }
@@ -49,7 +49,7 @@ async function runJob(
         return { skipped: "no ClickHouse client configured" };
       }
       return syncClickhouse(
-        { client: ctx.clickhouse, outbox: ctx.clickhouseOutbox },
+        { client: ctx.clickhouse, outbox: ctx.clickhouseOutbox, log: ctx.log },
         job.params as SyncClickhouseParams,
       );
     }
@@ -77,6 +77,8 @@ export type WorkerOptions = {
     job: Job;
     outcome: "ok" | "retry" | "dead";
     detail?: unknown;
+    /** How long the job actually took — the number that tells you if it is stuck. */
+    elapsedMs: number;
   }) => void;
   /** Stop once the queue drains — used by the backfill CLI and by tests. */
   exitWhenDrained?: boolean;
@@ -126,14 +128,15 @@ export async function runWorker(
         const heartbeat = setInterval(() => {
           void queue.renewLease(job);
         }, HEARTBEAT_MS);
+        const startedAt = Date.now();
         try {
           const detail = await runJob(laneCtx, job, signal);
           await queue.complete(job);
-          onEvent?.({ job, outcome: "ok", detail });
+          onEvent?.({ job, outcome: "ok", detail, elapsedMs: Date.now() - startedAt });
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           const outcome = await queue.fail(job, message);
-          onEvent?.({ job, outcome, detail: message });
+          onEvent?.({ job, outcome, detail: message, elapsedMs: Date.now() - startedAt });
         } finally {
           clearInterval(heartbeat);
         }

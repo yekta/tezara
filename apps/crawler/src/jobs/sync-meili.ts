@@ -62,11 +62,12 @@ const MAX_LOGGED_REJECTS = 5;
  * keeps the outbox intact so nothing is lost while the migration is run.
  */
 export async function syncMeili(
-  deps: { client: MeiliSearch; outbox: Outbox },
+  deps: { client: MeiliSearch; outbox: Outbox; log?: (message: string) => void },
   params: SyncMeiliParams = {},
 ): Promise<SyncMeiliResult> {
   const batchSize = params.batchSize ?? 1_000;
   const maxBatches = params.maxBatches ?? 20;
+  const log = deps.log ?? (() => {});
 
   if ((await deps.outbox.depth()) > 0) {
     const drift = await verifySettings(deps.client);
@@ -81,6 +82,15 @@ export async function syncMeili(
       quarantined += r.docs.length;
       await deps.outbox.quarantine(r.docs, r.reason);
     }
+    // Logged as it happens: a drain of twenty batches takes minutes, and the job's own
+    // completion event is far too late to tell you which push Meili is refusing.
+    log(
+      `meili refused ${r.docs.length} ${r.index} doc(s)` +
+        `${r.dropped ? " — quarantined" : ", halving and retrying"}: ${r.reason}` +
+        ` [payload ${r.payloadBytes}B` +
+        (r.atOffset ? `, at column ${r.atOffset.column}: ${JSON.stringify(r.atOffset.excerpt)}` : "") +
+        "]",
+    );
     if (rejects.length < MAX_LOGGED_REJECTS) {
       rejects.push({
         index: r.index,
@@ -98,13 +108,22 @@ export async function syncMeili(
     let pushed = 0;
     let batches = 0;
 
+    const depth = await deps.outbox.depth();
+    if (depth > 0) log(`meili drain starting: ${depth} queued, up to ${maxBatches} batches`);
+
     for (let i = 0; i < maxBatches; i++) {
       const batch = await deps.outbox.peek(batchSize);
       if (batch.length === 0) break;
+
+      const started = Date.now();
       await syncTheses(deps.client, batch, { waitForTasks: true, onReject });
       await deps.outbox.commit(batch.length);
       pushed += batch.length;
       batches++;
+      log(
+        `meili batch ${batches}/${maxBatches}: ${batch.length} docs in ` +
+          `${Math.round((Date.now() - started) / 1000)}s, ${await deps.outbox.depth()} left`,
+      );
     }
 
     return { pushed, batches };

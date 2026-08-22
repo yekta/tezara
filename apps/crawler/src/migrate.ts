@@ -7,31 +7,32 @@
  */
 import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
 import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
+import { error, info } from "./log.ts";
 
 const host = process.env.MEILI_URL_INTERNAL;
 const chUrl = process.env.CLICKHOUSE_URL;
 if (!host && !chUrl) {
-  console.error("set MEILI_URL_INTERNAL and/or CLICKHOUSE_URL");
+  error("set MEILI_URL_INTERNAL and/or CLICKHOUSE_URL");
   process.exit(1);
 }
 
 if (host) {
   const client = createMeiliClient({ host, apiKey: process.env.MEILI_ADMIN_KEY ?? "" });
   const applied = await applySettings(client, { waitForTasks: true });
-  console.error(`meili: applied settings to ${applied.length} indexes`);
+  info(`meili: applied settings to ${applied.length} indexes`);
 
   const drift = await verifySettings(client);
   if (drift.length > 0) {
-    console.error("meili: settings drift remains after migration:");
-    for (const d of drift) console.error(`  ${d.index}: ${JSON.stringify(d)}`);
+    error("meili: settings drift remains after migration:");
+    for (const d of drift) error(`  ${d.index}: ${JSON.stringify(d)}`);
     process.exit(1);
   }
-  console.error("meili: verified against the declarative definitions");
+  info("meili: verified against the declarative definitions");
 }
 
 if (chUrl) {
   const ch = createClickhouseClient({ url: chUrl });
   const ran = await migrateClickhouse(ch);
-  console.error(`clickhouse: applied ${ran.length} migration(s)${ran.length ? `: ${ran.join(", ")}` : ""}`);
+  info(`clickhouse: applied ${ran.length} migration(s)${ran.length ? `: ${ran.join(", ")}` : ""}`);
   await ch.close();
 }

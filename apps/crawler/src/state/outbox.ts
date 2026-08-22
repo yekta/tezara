@@ -70,6 +70,16 @@ export class Outbox {
     await this.#redis.ltrim(this.#deadKey, -MAX_DEAD, -1);
   }
 
+  /** The quarantined documents, newest first, with the reason each was refused. */
+  async dead(limit = 20): Promise<{ at: string; reason: string; doc: unknown }[]> {
+    // LRANGE -0 -1 is the whole list, so a zero limit has to short-circuit.
+    if (limit <= 0) return [];
+    const raw = await this.#redis.lrange(this.#deadKey, -limit, -1);
+    return raw
+      .reverse()
+      .map((r) => JSON.parse(r) as { at: string; reason: string; doc: unknown });
+  }
+
   async depth(): Promise<number> {
     return this.#redis.llen(this.#key);
   }

@@ -159,6 +159,20 @@ describe("queue", () => {
     assert.equal(stats.leased, 0);
   });
 
+  test("a dead-lettered job keeps the error that killed it", async () => {
+    await queue.enqueue("sync-meili", { at: 7 });
+    for (let i = 0; i < 3; i++) {
+      const [job] = await queue.claim(1);
+      await queue.fail(job!, "malformed payload");
+    }
+
+    const [dead] = await queue.deadJobs();
+    assert.equal(dead?.kind, "sync-meili");
+    assert.equal(dead?.lastError, "malformed payload");
+    assert.equal(dead?.attempts, 3);
+    assert.deepEqual(await queue.deadJobs(0), [], "an empty window reads as empty");
+  });
+
   test("attempts accumulate across retries", async () => {
     await queue.enqueue("scan-id-range", { from: 9, to: 9 });
     const [first] = await queue.claim(1);

@@ -81,6 +81,16 @@ describe("outbox", () => {
     assert.ok(Date.parse(entry.at) > 0);
   });
 
+  test("quarantined documents read back newest first", async () => {
+    await outbox.quarantine([thesis(1)], "first");
+    await outbox.quarantine([thesis(2)], "second");
+
+    const dead = await outbox.dead(10);
+    assert.deepEqual(dead.map((d) => d.reason), ["second", "first"]);
+    assert.deepEqual(await outbox.dead(1), [dead[0]], "the limit takes the newest");
+    assert.deepEqual(await outbox.dead(0), [], "an empty window reads as empty");
+  });
+
   test("quarantining nothing is a no-op", async () => {
     await outbox.quarantine([], "unused");
     assert.equal(await outbox.deadDepth(), 0);

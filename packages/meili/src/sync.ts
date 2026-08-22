@@ -1,5 +1,5 @@
 import type { TCrawledThesis } from "@tezara/core";
-import { MeiliSearchApiError, type MeiliSearch } from "meilisearch";
+import type { MeiliSearch } from "meilisearch";
 import { INDEXES, INDEX_NAMES, type IndexDoc, type IndexName } from "./indexes.ts";
 
 export type SyncReport = Record<IndexName, number>;
@@ -61,12 +61,19 @@ function chunk<T>(items: T[], size: number): T[][] {
  *
  * Deliberately narrow: 401, 404 and 429 are about the request, not the documents, and
  * bisecting on those would quarantine a whole batch over an expired key.
+ *
+ * Matched on shape rather than `instanceof MeiliSearchApiError`. In production a refusal
+ * reached the worker as a plain job failure instead of being bisected out, which means
+ * the class check did not hold — the client ships ESM, CJS and UMD builds, and an error
+ * raised through one is not an instance of another's class. Shape cannot go wrong that
+ * way.
  */
 function refusalReason(err: unknown): string | null {
-  if (err instanceof TaskFailedError) return err.message;
-  if (err instanceof MeiliSearchApiError && [400, 413].includes(err.response.status)) {
-    return err.message;
-  }
+  if (!(err instanceof Error)) return null;
+  if (err.name === "TaskFailedError") return err.message;
+
+  const status = (err as { response?: { status?: unknown } }).response?.status;
+  if (typeof status === "number" && [400, 413].includes(status)) return err.message;
   return null;
 }
 
@@ -103,9 +110,18 @@ async function push(
     return docs.length;
   } catch (err) {
     const reason = refusalReason(err);
-    if (reason === null || !opts.onReject) throw err;
-
     const payload = Buffer.from(JSON.stringify(docs), "utf8");
+
+    if (reason === null || !opts.onReject) {
+      // Say what we sent even when the failure cannot be classified. An offset in a
+      // parse error means nothing without the size of the payload it refers to, and
+      // this is the only place that still knows it.
+      if (err instanceof Error) {
+        err.message = `${err.message} [${name}: ${docs.length} docs, ${payload.byteLength} byte payload]`;
+      }
+      throw err;
+    }
+
     await opts.onReject({
       index: name,
       docs,

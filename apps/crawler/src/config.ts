@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { z } from "zod";
+import { error, info } from "./log.ts";
 
 /**
  * Precedence is real env > .env.local > .env, so a value injected by the platform always
@@ -86,16 +87,16 @@ export function loadConfig(env?: NodeJS.ProcessEnv): Config {
 
   const parsed = Env.safeParse(cleaned);
   if (!parsed.success) {
-    console.error("invalid crawler configuration:");
+    error("invalid crawler configuration:");
     for (const issue of parsed.error.issues) {
-      console.error(`  ${issue.path.join(".")}: ${issue.message}`);
+      error(`  ${issue.path.join(".")}: ${issue.message}`);
     }
     process.exit(1);
   }
   const config = parsed.data;
 
-  console.error(
-    `[crawler] config redis=${redact(config.REDIS_URL)}` +
+  info(
+    `config redis=${redact(config.REDIS_URL)}` +
       ` meili=${config.MEILI_URL_INTERNAL}` +
       ` clickhouse=${redact(config.CLICKHOUSE_URL)}` +
       ` concurrency=${config.CRAWLER_CONCURRENCY}`,

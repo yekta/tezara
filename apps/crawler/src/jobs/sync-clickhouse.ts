@@ -17,7 +17,7 @@ export type SyncClickhouseParams = { batchSize?: number; maxBatches?: number; re
  * and two lanes committing the same head would trim a batch nobody pushed.
  */
 export async function syncClickhouse(
-  deps: { client: ClickHouseClient; outbox: Outbox },
+  deps: { client: ClickHouseClient; outbox: Outbox; log?: (message: string) => void },
   params: SyncClickhouseParams = {},
 ): Promise<{
   pushed: number;
@@ -36,10 +36,15 @@ export async function syncClickhouse(
     for (let i = 0; i < maxBatches; i++) {
       const batch = await deps.outbox.peek(batchSize);
       if (batch.length === 0) break;
+      const started = Date.now();
       await syncTheses(deps.client, batch);
       await deps.outbox.commit(batch.length);
       pushed += batch.length;
       batches++;
+      deps.log?.(
+        `clickhouse batch ${batches}/${maxBatches}: ${batch.length} rows in ` +
+          `${Math.round((Date.now() - started) / 1000)}s, ${await deps.outbox.depth()} left`,
+      );
     }
 
     return { pushed, batches };
