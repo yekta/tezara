@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "node .next/standalone/apps/web/server.js",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
