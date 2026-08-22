@@ -15,11 +15,29 @@ const TASK_POLL_MS = 500;
 
 /** A task Meili accepted and then failed to process. */
 export class TaskFailedError extends Error {
-  constructor(message: string) {
+  readonly code: string | undefined;
+  constructor(message: string, code?: string) {
     super(message);
     this.name = "TaskFailedError";
+    this.code = code;
   }
 }
+
+/**
+ * Meili error codes that are genuinely the document's fault.
+ *
+ * Only these are ever grounds for giving up on a record. Everything else Meili can
+ * refuse a push for — a malformed payload, a full disk — says nothing about the
+ * documents, and dropping perfectly good theses because the server ran out of space
+ * would turn an outage into permanent data loss.
+ */
+const DOCUMENT_IS_TO_BLAME = new Set([
+  "invalid_document_id",
+  "missing_document_id",
+  "invalid_document_fields",
+  "invalid_document_geo_field",
+  "document_fields_limit_reached",
+]);
 
 export type Rejection = {
   index: IndexName;
@@ -56,11 +74,21 @@ function chunk<T>(items: T[], size: number): T[][] {
   return out;
 }
 
+type Refusal = {
+  reason: string;
+  /** The record itself is wrong, so isolating it and dropping it is the fix. */
+  blamesDocument: boolean;
+  /** A smaller batch could succeed, so halving is worth the requests. */
+  worthSplitting: boolean;
+};
+
 /**
- * The message when Meili refused the *content* of a push, or null for anything else.
+ * How Meili refused this push, or null if it did not refuse it at all.
  *
- * Deliberately narrow: 401, 404 and 429 are about the request, not the documents, and
- * bisecting on those would quarantine a whole batch over an expired key.
+ * Deliberately narrow: 401, 404, 429 and 422 are about the request or the server, not
+ * the documents. A full disk arrives as 422 `no_space_left_on_device` — retrying that
+ * in ever-smaller batches would accomplish nothing and quarantining on it would be a
+ * catastrophe, so it stays an ordinary job failure and the outbox holds the line.
  *
  * Matched on shape rather than `instanceof MeiliSearchApiError`. In production a refusal
  * reached the worker as a plain job failure instead of being bisected out, which means
@@ -68,13 +96,28 @@ function chunk<T>(items: T[], size: number): T[][] {
  * raised through one is not an instance of another's class. Shape cannot go wrong that
  * way.
  */
-function refusalReason(err: unknown): string | null {
+function refusal(err: unknown): Refusal | null {
   if (!(err instanceof Error)) return null;
-  if (err.name === "TaskFailedError") return err.message;
+
+  if (err.name === "TaskFailedError") {
+    const blamesDocument = DOCUMENT_IS_TO_BLAME.has((err as TaskFailedError).code ?? "");
+    return { reason: err.message, blamesDocument, worthSplitting: blamesDocument };
+  }
 
   const status = (err as { response?: { status?: unknown } }).response?.status;
-  if (typeof status === "number" && [400, 413].includes(status)) return err.message;
-  return null;
+  if (typeof status !== "number" || ![400, 413].includes(status)) return null;
+
+  const code = (err as { cause?: { code?: unknown } }).cause?.code;
+  const blamesDocument = typeof code === "string" && DOCUMENT_IS_TO_BLAME.has(code);
+  return {
+    reason: err.message,
+    blamesDocument,
+    // 413 means the batch was too big for Meili's payload limit, which halving fixes.
+    // `malformed_payload` does NOT belong here: Meili answers a full disk with it (the
+    // upload it streams to its own volume is what fails to parse), so splitting on it
+    // costs a thousand futile requests and proves nothing.
+    worthSplitting: blamesDocument || status === 413,
+  };
 }
 
 function offsetContext(payload: Buffer, reason: string): Rejection["atOffset"] {
@@ -85,6 +128,12 @@ function offsetContext(payload: Buffer, reason: string): Rejection["atOffset"] {
   const from = Math.max(0, column - 41);
   return { column, excerpt: payload.subarray(from, column + 19).toString("utf8") };
 }
+
+/**
+ * Errors already carrying payload context, so a bisect does not append it once per
+ * level on the way back up.
+ */
+const annotated = new WeakSet<Error>();
 
 /** Push one chunk, halving it until Meili accepts it or a single document is to blame. */
 async function push(
@@ -104,30 +153,39 @@ async function push(
       // A failed task used to pass silently: the batch was committed and its theses
       // were dropped without ever reaching the index.
       if (done.status === "failed") {
-        throw new TaskFailedError(done.error?.message ?? `task ${task.taskUid} failed`);
+        throw new TaskFailedError(
+          done.error?.message ?? `task ${task.taskUid} failed`,
+          done.error?.code,
+        );
       }
     }
     return docs.length;
   } catch (err) {
-    const reason = refusalReason(err);
+    const refused = refusal(err);
     const payload = Buffer.from(JSON.stringify(docs), "utf8");
 
-    if (reason === null || !opts.onReject) {
-      // Say what we sent even when the failure cannot be classified. An offset in a
-      // parse error means nothing without the size of the payload it refers to, and
-      // this is the only place that still knows it.
-      if (err instanceof Error) {
-        err.message = `${err.message} [${name}: ${docs.length} docs, ${payload.byteLength} byte payload]`;
+    // Say what we sent, whatever the failure turns out to be. An offset in a parse error
+    // means nothing without the size of the payload it refers to, and this is the only
+    // place that still knows it.
+    const annotate = (e: unknown): unknown => {
+      if (e instanceof Error && !annotated.has(e)) {
+        annotated.add(e);
+        e.message = `${e.message} [${name}: ${docs.length} docs, ${payload.byteLength} byte payload]`;
       }
-      throw err;
-    }
+      return e;
+    };
+
+    // A refusal that is not about the documents is a symptom, not poison: fail the job,
+    // leave the outbox intact, and let the operator fix the server.
+    if (refused === null || !refused.worthSplitting || !opts.onReject) throw annotate(err);
+    if (docs.length === 1 && !refused.blamesDocument) throw annotate(err);
 
     await opts.onReject({
       index: name,
       docs,
-      reason,
+      reason: refused.reason,
       payloadBytes: payload.byteLength,
-      atOffset: offsetContext(payload, reason),
+      atOffset: offsetContext(payload, refused.reason),
       dropped: docs.length === 1,
     });
     if (docs.length === 1) return 0;

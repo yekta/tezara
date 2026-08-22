@@ -8,11 +8,12 @@ import { INDEXES, INDEX_NAMES, type IndexName } from "./indexes.ts";
  */
 export async function applySettings(
   client: MeiliSearch,
-  opts: { waitForTasks?: boolean } = {},
+  opts: { waitForTasks?: boolean; only?: readonly IndexName[] } = {},
 ): Promise<IndexName[]> {
   const applied: IndexName[] = [];
+  const targets = opts.only ?? INDEX_NAMES;
 
-  for (const name of INDEX_NAMES) {
+  for (const name of targets) {
     const def = INDEXES[name];
     try {
       const task = await client.createIndex(name, { primaryKey: "id" });
@@ -36,6 +37,8 @@ export async function applySettings(
 
 export type SettingsDrift = {
   index: IndexName;
+  /** The index does not exist at all — creating it is safe and needs no operator. */
+  missing: boolean;
   missingFilterable: string[];
   missingSortable: string[];
   maxTotalHits: { expected: number; actual: number | null | undefined };
@@ -52,20 +55,28 @@ export type SettingsDrift = {
 export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift[]> {
   const drift: SettingsDrift[] = [];
 
+  // One listing rather than a settings GET per index: against a fresh instance the
+  // latter is eleven 404s in the server's log every time a sync job runs, which buries
+  // whatever actually went wrong. A failure to list is left to propagate — "Meili is
+  // unreachable" is a truer answer than "nothing is migrated".
+  const { results } = await client.getIndexes({ limit: INDEX_NAMES.length + 100 });
+  const existing = new Set(results.map((index) => index.uid));
+
   for (const name of INDEX_NAMES) {
     const def = INDEXES[name];
-    let settings;
-    try {
-      settings = await client.index(name).getSettings();
-    } catch {
+
+    if (!existing.has(name)) {
       drift.push({
         index: name,
+        missing: true,
         missingFilterable: def.filterable ?? [],
         missingSortable: def.sortable ?? [],
         maxTotalHits: { expected: def.maxTotalHits, actual: undefined },
       });
       continue;
     }
+
+    const settings = await client.index(name).getSettings();
 
     const filterable = new Set(settings.filterableAttributes ?? []);
     const sortable = new Set(settings.sortableAttributes ?? []);
@@ -77,6 +88,7 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
     if (missingFilterable.length || missingSortable.length || actual !== def.maxTotalHits) {
       drift.push({
         index: name,
+        missing: false,
         missingFilterable,
         missingSortable,
         maxTotalHits: { expected: def.maxTotalHits, actual },

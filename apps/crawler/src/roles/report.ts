@@ -92,12 +92,19 @@ export function describeJob(
   return `${label} ${job.kind} ${JSON.stringify(job.params)} after ${secs(elapsedMs)}: ${String(detail)}`;
 }
 
+function bytes(value: number): string {
+  if (value >= 1024 ** 3) return `${(value / 1024 ** 3).toFixed(1)}GB`;
+  if (value >= 1024 ** 2) return `${Math.round(value / 1024 ** 2)}MB`;
+  return `${Math.round(value / 1024)}KB`;
+}
+
 export type CrawlerStatus = {
   crawl: { backfillCursor: number; maxThesisId: number; backfillPercent: number };
   queue: { pending: number; running: number; dead: number };
   pendingProjection: { meili: number; clickhouse: number; meiliQuarantined: number };
   upstream: { breaker: string; consecutiveFailures: number };
   reconciliation: { yearsShort: number; missingRecords: number };
+  search: { databaseSizeBytes?: number; indexedTheses?: number; unreachable?: string } | null;
 };
 
 /**
@@ -112,6 +119,14 @@ export function describeStatus(status: CrawlerStatus, crawledLastMinute: number)
     `queue ${n(queue.pending)} pending, ${n(queue.running)} running`,
     `outbox meili ${n(outbox.meili)}, clickhouse ${n(outbox.clickhouse)}`,
   ];
+  if (status.search?.unreachable) {
+    parts.push(`MEILI UNREACHABLE: ${status.search.unreachable}`);
+  } else if (status.search) {
+    parts.push(
+      `meili ${n(status.search.indexedTheses ?? 0)} indexed` +
+        `, ${bytes(status.search.databaseSizeBytes ?? 0)} on disk`,
+    );
+  }
   if (queue.dead) parts.push(`${n(queue.dead)} DEAD JOBS (see /failures)`);
   if (outbox.meiliQuarantined) {
     parts.push(`${n(outbox.meiliQuarantined)} QUARANTINED DOCS (see /failures)`);

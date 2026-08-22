@@ -1,4 +1,5 @@
 import { createServer, type Server, type ServerResponse } from "node:http";
+import type { MeiliSearch } from "@tezara/meili";
 import type { Redis } from "ioredis";
 import type { Queue } from "../queue/queue.ts";
 import type { Outbox } from "../state/outbox.ts";
@@ -15,17 +16,42 @@ export type ApiDeps = {
   breaker: CircuitBreaker;
   reconcile?: ReconcileStore;
   maxThesisId: number;
+  /** Only for reporting — the sync jobs get their own handle from the job context. */
+  meili?: MeiliSearch;
 };
 
+/**
+ * Meili's own view of itself: how much disk its database occupies and how much of the
+ * corpus it actually holds.
+ *
+ * Worth the extra call on a status page, because the failure it warns about is silent
+ * until it is total: a full volume answers every write with 422 and the outbox simply
+ * grows. Never fatal to the status page — an unreachable Meili is itself the answer.
+ */
+async function meiliStats(client: MeiliSearch | undefined) {
+  if (!client) return null;
+  try {
+    const stats = await client.getStats();
+    return {
+      databaseSizeBytes: stats.databaseSize,
+      indexedTheses: stats.indexes?.theses?.numberOfDocuments ?? 0,
+    };
+  } catch (err) {
+    return { unreachable: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 export async function buildStatus(deps: ApiDeps) {
-  const [queue, scan, meiliOutbox, clickhouseOutbox, meiliDead, breaker] = await Promise.all([
-    deps.queue.stats(),
-    deps.scan.counts(),
-    deps.outbox.depth(),
-    deps.clickhouseOutbox?.depth() ?? Promise.resolve(0),
-    deps.outbox.deadDepth(),
-    deps.breaker.stats(),
-  ]);
+  const [queue, scan, meiliOutbox, clickhouseOutbox, meiliDead, breaker, search] =
+    await Promise.all([
+      deps.queue.stats(),
+      deps.scan.counts(),
+      deps.outbox.depth(),
+      deps.clickhouseOutbox?.depth() ?? Promise.resolve(0),
+      deps.outbox.deadDepth(),
+      deps.breaker.stats(),
+      meiliStats(deps.meili),
+    ]);
 
   const head = (await deps.scan.watermark("head")) ?? 0;
   const backfillCursor = (await deps.scan.watermark("backfill")) ?? 1;
@@ -58,6 +84,7 @@ export async function buildStatus(deps: ApiDeps) {
       // is a bug to look at, in `<prefix>:outbox:meili:dead`.
       meiliQuarantined: meiliDead,
     },
+    search,
     upstream: {
       breaker: breaker.state,
       consecutiveFailures: breaker.failures,

@@ -34,6 +34,21 @@ describe("settings", () => {
   test("missing indexes are reported as drift", async () => {
     const drift = await verifySettings(client);
     assert.equal(drift.length, INDEX_NAMES.length, "every index is absent");
+    assert.ok(drift.every((d) => d.missing), "absent, not merely misconfigured");
+  });
+
+  // Applying a subset is how the crawler heals a fresh instance on its own without
+  // touching indexes that already hold documents.
+  test("only the named indexes are created when applying a subset", async () => {
+    const applied = await applySettings(client, { only: ["branches"], waitForTasks: true });
+    assert.deepEqual(applied, ["branches"]);
+
+    const drift = await verifySettings(client);
+    assert.equal(drift.length, INDEX_NAMES.length - 1, "the rest are untouched");
+    assert.ok(!drift.some((d) => d.index === "branches"), "branches is configured");
+
+    const dropped = await client.deleteIndex("branches");
+    await client.waitForTask(dropped.taskUid);
   });
 
   test("addDocuments silently auto-creates an index with Meili defaults", async () => {
