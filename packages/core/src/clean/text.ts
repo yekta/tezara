@@ -18,30 +18,34 @@ export function trimChars(input: string, chars: readonly string[]): string {
 
 export const KEYWORD_TRIM_CHARS = ['"', "'", "-", "!", "^", "?", "“", " "] as const;
 
-const ABSTRACT_KEYWORD_MARKERS = [
-  "Anahtar Kelimeler:", "Anahtar kelimeler:", "Anahtar Sözcükler:", "Anahtar sözcükler:",
-  "Keywords:", "Key Words:", "Key words:", "Anahtar kavramlar:", "Key terms:",
-] as const;
+/**
+ * Turkish-safe case folding that preserves string length.
+ *
+ * `"İ".toLowerCase()` yields two code points, which would shift every index after it —
+ * so the dotted capital is mapped explicitly before folding.
+ */
+const foldForSearch = (s: string) => s.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
 
 /**
- * YÖK returns the abstract with its keyword line appended. Splitting here is what keeps
- * the two apart — roughly 90% of the abstracts in the current corpus have the English
- * abstract concatenated onto the Turkish one because the old pipeline never did this.
+ * Matches every keyword label seen in the corpus, in either language.
+ *
+ * A fixed list of strings does not survive contact with this data: authors write
+ * "Anahtar Kelimeler:", "Anahtar kelime:", "ANAHTAR KELİMELER:", "Anahtar Sözcükler:",
+ * "Keywords :", "KEY WORDS:" and more. Singular/plural, casing, and the space before the
+ * colon all vary, so this matches the shape instead of enumerating spellings.
  */
+const KEYWORD_LABEL =
+  /(?:anahtar\s*(?:kelimeler|kelime|sözcükler|sözcük|kavramlar|kavram|ek\s*kelimeler)|key\s*words?|keywords?|key\s*terms?)\s*:/;
+
 export function splitAbstractAndKeywords(text: string): [string, string | null] {
   if (!text) return ["", null];
-  let at = -1;
-  let marker = "";
-  for (const m of ABSTRACT_KEYWORD_MARKERS) {
-    const p = text.indexOf(m);
-    if (p !== -1 && (at === -1 || p < at)) {
-      at = p;
-      marker = m;
-    }
-  }
-  if (at === -1) return [text.trim(), null];
+  // Search a folded copy of identical length, then slice the ORIGINAL so casing survives.
+  const match = KEYWORD_LABEL.exec(foldForSearch(text));
+  if (!match) return [text.trim(), null];
+
+  const at = match.index;
   const tail = text
-    .slice(at + marker.length)
+    .slice(at + match[0].length)
     .trim()
     .replace(/^[:\s,]+/, "")
     .replace(/[\s,]+$/, "");
