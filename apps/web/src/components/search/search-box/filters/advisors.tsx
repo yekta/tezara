@@ -8,7 +8,6 @@ import {
 } from "@/components/search/search-box/filters/helpers";
 import { useSearchLikePageParam } from "@/components/search/query-param-provider";
 import useDebounceIf from "@/lib/hooks/use-debounce-if";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { meili } from "@/server/meili/constants-client";
 import { searchAdvisors } from "@/server/meili/repo/advisor";
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +26,6 @@ export default function AdvisorsField() {
   const [queryAdvisors, setQueryAdvisors, debouncedQueryAdvisors] =
     useDebounceIf("", isNonEmpty, 150);
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const clearAdvisors = useCallback(() => {
@@ -36,7 +34,6 @@ export default function AdvisorsField() {
 
   useEffect(() => {
     if (!advisors || advisors.length < 1) return;
-    umami.capture(...eventData);
     posthog.capture(...eventData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advisors]);
@@ -79,7 +76,6 @@ export default function AdvisorsField() {
       commandInputValue={queryAdvisors}
       commandInputOnValueChange={(v) => {
         setQueryAdvisors(v);
-        umami.capture(...eventData);
         posthog.capture(...eventData);
       }}
       isAsync

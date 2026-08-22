@@ -12,7 +12,6 @@ import {
 import SearchInput from "@/components/search/search-box/search-input";
 import { cn } from "@/components/ui/utils";
 import { useAsyncRouterPush } from "@/lib/hooks/use-async-router-push";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { TGetSubjectsResult } from "@/server/meili/repo/subject";
 import { TGetThesisTypesResult } from "@/server/meili/repo/thesis-type";
@@ -40,7 +39,6 @@ export default function SearchBox({
   className,
   variant,
 }: Props) {
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const [asyncPush, isPendingAsyncPush] = useAsyncRouterPush();
@@ -65,10 +63,6 @@ export default function SearchBox({
       const query = formData.get(mainSearchInputId)?.toString() || "";
       setIsPendingHackyPush(true);
       try {
-        umami.capture("Searched", {
-          Query: query,
-          Variant: variant,
-        });
         posthog.capture("Searched", {
           Query: query,
           Variant: variant,

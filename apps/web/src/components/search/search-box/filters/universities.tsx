@@ -3,7 +3,6 @@ import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
 import { useSearchLikePageParam } from "@/components/search/query-param-provider";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetUniversitiesResult } from "@/server/meili/repo/university";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useMemo } from "react";
@@ -22,7 +21,6 @@ const eventData: [string, Record<string, string>] = [
 export default function UniversitiesField({ universitiesData }: Props) {
   const [universities, setUniversities] = useSearchLikePageParam.universities();
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const clearUniversities = useCallback(() => {
@@ -31,7 +29,6 @@ export default function UniversitiesField({ universitiesData }: Props) {
 
   useEffect(() => {
     if (!universities || universities.length < 1) return;
-    umami.capture(...eventData);
     posthog.capture(...eventData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [universities]);

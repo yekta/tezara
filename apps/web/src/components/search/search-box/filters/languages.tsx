@@ -4,7 +4,6 @@ import FilterCountChip from "@/components/search/filter-count-chip";
 import { toggleInArray } from "@/components/search/helpers";
 import MultiSelectCombobox from "@/components/search/multi-select-combobox";
 import { useSearchLikePageParam } from "@/components/search/query-param-provider";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { TGetLanguagesResult } from "@/server/meili/repo/language";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useMemo } from "react";
@@ -23,7 +22,6 @@ const eventData: [string, Record<string, string>] = [
 export default function LanguagesField({ languagesData }: Props) {
   const [languages, setLanguages] = useSearchLikePageParam.languages();
 
-  const umami = useUmami();
   const posthog = usePostHog();
 
   const clearLanguages = useCallback(() => {
@@ -32,7 +30,6 @@ export default function LanguagesField({ languagesData }: Props) {
 
   useEffect(() => {
     if (!languages || languages.length < 1) return;
-    umami.capture(...eventData);
     posthog.capture(...eventData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [languages]);

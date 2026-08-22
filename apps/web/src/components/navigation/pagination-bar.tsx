@@ -6,7 +6,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/components/ui/utils";
-import { useUmami } from "@/lib/hooks/use-umami";
 import { LoaderIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 
@@ -41,13 +40,8 @@ export default function PaginationBar({
   showLoader,
   eventName,
 }: Props) {
-  const umami = useUmami();
   const posthog = usePostHog();
   const sendEvent = (to: number | undefined) => {
-    umami.capture(eventName, {
-      "From Page": currentPage,
-      "To Page": to || "Undefined",
-    });
     posthog.capture(eventName, {
       "From Page": currentPage,
       "To Page": to || "Undefined",
