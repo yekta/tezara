@@ -189,7 +189,8 @@ async function crawlForever(): Promise<void> {
             if (job.kind === "scan-id-range" && outcome === "ok") {
               idsCrawledSinceStatus += (detail as { ok?: number }).ok ?? 0;
             }
-            (outcome === "ok" ? info : warn)(describeJob(job, outcome, detail, elapsedMs));
+            const line = describeJob(job, outcome, detail, elapsedMs);
+            if (line !== null) (outcome === "ok" ? info : warn)(line);
           },
         },
       );

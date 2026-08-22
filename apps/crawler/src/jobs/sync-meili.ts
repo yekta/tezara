@@ -40,6 +40,8 @@ export type SyncMeiliResult = {
 /** Enough to diagnose; not so many that a bad batch floods the log. */
 const MAX_LOGGED_REJECTS = 5;
 
+const n = (value: number) => value.toLocaleString("en-US");
+
 /**
  * Drain the outbox into Meili.
  *
@@ -69,27 +71,6 @@ export async function syncMeili(
   const batchSize = params.batchSize ?? 1_000;
   const maxBatches = params.maxBatches ?? 20;
   const log = deps.log ?? (() => {});
-
-  if ((await deps.outbox.depth()) > 0) {
-    const drift = await verifySettings(deps.client);
-
-    // An index that does not exist yet is not a migration decision. If we do nothing,
-    // addDocuments creates it anyway — with Meili's defaults, no filterable attributes
-    // and maxTotalHits 1000 — which is the silent breakage this guard exists to prevent.
-    // Creating it properly is strictly better, and it is what lets a brand new Meili
-    // service come up without a human running anything.
-    const absent = drift.filter((d) => d.missing);
-    if (absent.length > 0) {
-      const names = absent.map((d) => d.index);
-      await applySettings(deps.client, { only: names, waitForTasks: true });
-      log(`created ${names.length} missing Meili index(es): ${names.join(", ")}`);
-    }
-
-    // Settings drift on an index that already holds documents is a different animal:
-    // applying it forces a full reindex, so that stays an operator's call.
-    const drifted = drift.filter((d) => !d.missing);
-    if (drifted.length > 0) throw new SettingsNotMigratedError(drifted.map((d) => d.index));
-  }
 
   const rejects: RejectLog[] = [];
   let quarantined = 0;
@@ -126,7 +107,29 @@ export async function syncMeili(
     let batches = 0;
 
     const depth = await deps.outbox.depth();
-    if (depth > 0) log(`meili drain starting: ${depth} queued, up to ${maxBatches} batches`);
+    if (depth === 0) return { pushed, batches };
+    log(`meili drain starting: ${n(depth)} queued, up to ${maxBatches} batches`);
+
+    // Inside the lock, so the nine lanes that lose the race do no work at all rather
+    // than each spending a round trip verifying settings they will not use.
+    const drift = await verifySettings(deps.client);
+
+    // An index that does not exist yet is not a migration decision. If we do nothing,
+    // addDocuments creates it anyway — with Meili's defaults, no filterable attributes
+    // and maxTotalHits 1000 — which is the silent breakage this guard exists to prevent.
+    // Creating it properly is strictly better, and it is what lets a brand new Meili
+    // service come up without a human running anything.
+    const absent = drift.filter((d) => d.missing);
+    if (absent.length > 0) {
+      const names = absent.map((d) => d.index);
+      await applySettings(deps.client, { only: names, waitForTasks: true });
+      log(`created ${names.length} missing Meili index(es): ${names.join(", ")}`);
+    }
+
+    // Settings drift on an index that already holds documents is a different animal:
+    // applying it forces a full reindex, so that stays an operator's call.
+    const drifted = drift.filter((d) => !d.missing);
+    if (drifted.length > 0) throw new SettingsNotMigratedError(drifted.map((d) => d.index));
 
     for (let i = 0; i < maxBatches; i++) {
       const batch = await deps.outbox.peek(batchSize);
@@ -138,8 +141,8 @@ export async function syncMeili(
       pushed += batch.length;
       batches++;
       log(
-        `meili batch ${batches}/${maxBatches}: ${batch.length} docs in ` +
-          `${Math.round((Date.now() - started) / 1000)}s, ${await deps.outbox.depth()} left`,
+        `meili batch ${batches}/${maxBatches}: ${n(batch.length)} docs in ` +
+          `${Math.round((Date.now() - started) / 1000)}s, ${n(await deps.outbox.depth())} left`,
       );
     }
 

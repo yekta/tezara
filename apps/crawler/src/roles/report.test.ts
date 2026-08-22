@@ -15,21 +15,37 @@ describe("job reporting", () => {
       { ok: 48, gap: 2, error: 0, skipped: 0 },
       12_300,
     );
-    assert.match(line, /ids 812,350\.\.812,399/);
-    assert.match(line, /48 crawled/);
-    assert.match(line, /2 absent upstream/);
-    assert.doesNotMatch(line, /FAILED/, "zero failures are not worth a word");
-    assert.match(line, /\[12\.3s\]/);
+    assert.match(String(line), /ids 812,350\.\.812,399/);
+    assert.match(String(line), /48 crawled/);
+    assert.match(String(line), /2 absent upstream/);
+    assert.doesNotMatch(String(line), /FAILED/, "zero failures are not worth a word");
+    assert.match(String(line), /\[12\.3s\]/);
   });
 
-  test("a skipped drain says how much is still waiting", () => {
-    const line = describeJob(
+  test("a drain that did nothing gets no line at all", () => {
+    const lockHeld = describeJob(
       job("sync-meili", { at: 1 }),
       "ok",
       { pushed: 0, batches: 0, remaining: 15645, skipped: "another worker holds the drain lock" },
       4,
     );
-    assert.match(line, /meili: another worker holds the drain lock — 15,645 still queued/);
+    assert.equal(lockHeld, null, "losing the race is not news — nine lanes do it a minute");
+
+    const nothingQueued = describeJob(
+      job("sync-clickhouse", { at: 1 }),
+      "ok",
+      { pushed: 0, batches: 0, remaining: 0, rebuilt: [] },
+      6,
+    );
+    assert.equal(nothingQueued, null, "an empty outbox is the steady state");
+
+    const didWork = describeJob(
+      job("sync-clickhouse", { at: 1 }),
+      "ok",
+      { pushed: 640, batches: 1, remaining: 4, rebuilt: [] },
+      600,
+    );
+    assert.match(String(didWork), /clickhouse: indexed 640/);
   });
 
   test("quarantined documents are shouted about, not buried", () => {
@@ -39,15 +55,15 @@ describe("job reporting", () => {
       { pushed: 4000, batches: 4, remaining: 11645, quarantined: 3 },
       200_000,
     );
-    assert.match(line, /indexed 4,000 in 4 batch\(es\)/);
-    assert.match(line, /3 QUARANTINED/);
-    assert.match(line, /\[3m20s\]/);
+    assert.match(String(line), /indexed 4,000 in 4 batch\(es\)/);
+    assert.match(String(line), /3 QUARANTINED/);
+    assert.match(String(line), /\[3m20s\]/);
   });
 
   test("a retry names the job and how many attempts are left", () => {
     const line = describeJob(job("sync-meili", { at: 9 }, 2), "retry", "boom", 500);
-    assert.match(line, /retry 3 of sync-meili/);
-    assert.match(line, /boom/);
+    assert.match(String(line), /retry 3 of sync-meili/);
+    assert.match(String(line), /boom/);
   });
 
   test("a reconciliation reports the shortfall in words", () => {
@@ -57,7 +73,7 @@ describe("job reporting", () => {
       { year: 1967, reported: 10, held: 0, drift: 10 },
       2_100,
     );
-    assert.match(short, /year 1967: YÖK has 10, we hold 0 — missing 10/);
+    assert.match(String(short), /year 1967: YÖK has 10, we hold 0 — missing 10/);
 
     const done = describeJob(
       job("reconcile-year", { year: 2020 }),
@@ -65,7 +81,7 @@ describe("job reporting", () => {
       { year: 2020, reported: 40000, held: 40000, drift: 0 },
       2_100,
     );
-    assert.match(done, /complete \(40,000 of 40,000\)/);
+    assert.match(String(done), /complete \(40,000 of 40,000\)/);
   });
 
   test("the status line leads with progress and only mentions trouble when there is some", () => {
