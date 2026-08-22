@@ -60,7 +60,10 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-const server = createApi({ redis, queue, scan, outbox, breaker, reconcile });
+const server = createApi({
+  redis, queue, scan, outbox, clickhouseOutbox, breaker, reconcile,
+  maxThesisId: config.CRAWLER_MAX_THESIS_ID,
+});
 server.listen(config.PORT, () => console.error(`[crawler] listening on :${config.PORT}`));
 
 async function shutdown(signal: string): Promise<void> {

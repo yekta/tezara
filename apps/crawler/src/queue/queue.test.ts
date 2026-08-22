@@ -76,6 +76,29 @@ describe("queue", () => {
     assert.equal(new Set(claimed).size, 20, "no job may be claimed twice");
   });
 
+  test("sync jobs preempt a backlog of crawl work", async () => {
+    // Regression: the scheduler queues backfill chunks before the sync jobs, so plain
+    // lowest-score-wins starved them — crawled theses piled up in the outbox and never
+    // reached Meili, while every tick added another sync job that also waited.
+    for (let i = 0; i < 30; i++) await queue.enqueue("scan-id-range", { from: i, to: i });
+    await queue.enqueue("sync-meili", { at: 1 });
+    await queue.enqueue("sync-clickhouse", { at: 1 });
+
+    const first = await queue.claim(2);
+    assert.deepEqual(
+      first.map((j) => j.kind).sort(),
+      ["sync-clickhouse", "sync-meili"],
+      "sync must jump the 30 queued crawl jobs",
+    );
+  });
+
+  test("priority does not override runAfter, so retry backoff still holds", async () => {
+    await queue.enqueue("scan-id-range", { from: 1, to: 1 });
+    await queue.enqueue("sync-meili", { at: 2 }, Date.now() + 60_000);
+    const [job] = await queue.claim(1);
+    assert.equal(job?.kind, "scan-id-range", "a future-dated sync job is not due yet");
+  });
+
   test("complete removes the job entirely", async () => {
     await queue.enqueue("scan-id-range", { from: 1, to: 5 });
     const [job] = await queue.claim(1);

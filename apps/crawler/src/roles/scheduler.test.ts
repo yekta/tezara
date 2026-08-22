@@ -129,7 +129,12 @@ describe("scheduler tick", () => {
     await scan.raiseWatermark("backfill", 950);
     const report = await tick({ queue, scan }, { ...policy, backfillDepth: 10 });
     assert.equal(report.backfillQueued, 1, "only one chunk left below the cap");
-    const [job] = await queue.claim(1);
-    assert.deepEqual(job?.params, { from: 950, to: 1000 });
+
+    // Claim everything: sync and reconcile jobs are claimed ahead of crawl work, so
+    // asserting on the first job back would be asserting on priority, not on the cap.
+    const ranges = (await queue.claim(20))
+      .filter((j) => j.kind === "scan-id-range")
+      .map((j) => j.params);
+    assert.deepEqual(ranges, [{ from: 950, to: 1000 }]);
   });
 });
