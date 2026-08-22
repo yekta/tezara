@@ -41,6 +41,7 @@ export async function scanIdRange(
     switch (outcome.status) {
       case "ok": {
         await ctx.outbox.push([outcome.thesis]);
+        await ctx.clickhouseOutbox?.push([outcome.thesis]);
         await ctx.scan.record(id, "ok", { contentHash: hashThesis(outcome.thesis) });
         await ctx.scan.raiseWatermark("head", id);
         result.ok++;

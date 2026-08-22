@@ -4,6 +4,7 @@
  *   worker    — scale freely, claims and runs jobs
  *   api       — /health /ready /metrics
  */
+import { createClickhouseClient } from "@tezara/clickhouse";
 import { createMeiliClient } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
 import { buildLookups } from "./jobs/context.ts";
@@ -25,7 +26,8 @@ const redis = createRedis(config.REDIS_URL);
 const keys = makeKeys(config.CRAWLER_REDIS_PREFIX);
 const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
-const outbox = new Outbox(redis, keys);
+const outbox = new Outbox(redis, keys, "meili");
+const clickhouseOutbox = new Outbox(redis, keys, "clickhouse");
 const breaker = new CircuitBreaker(redis, keys, {
   failureThreshold: config.CRAWLER_BREAKER_THRESHOLD,
   cooldownMs: config.CRAWLER_BREAKER_COOLDOWN_MS,
@@ -77,13 +79,26 @@ switch (config.CRAWLER_ROLE) {
     const meili = config.MEILI_HOST
       ? createMeiliClient({ host: config.MEILI_HOST, apiKey: config.MEILI_KEY })
       : undefined;
+    const clickhouse = config.CLICKHOUSE_URL
+      ? createClickhouseClient({
+          url: config.CLICKHOUSE_URL,
+          username: config.CLICKHOUSE_USERNAME,
+          password: config.CLICKHOUSE_PASSWORD,
+          database: config.CLICKHOUSE_DATABASE,
+        })
+      : undefined;
     if (!meili) console.error("[crawler] MEILI_HOST unset — crawling into the outbox only");
+    if (!clickhouse) console.error("[crawler] CLICKHOUSE_URL unset — stats projection disabled");
 
-    await runWorker({ session, queue, scan, lookups, outbox, meili }, queue, {
-      signal: controller.signal,
-      onEvent: ({ job, outcome, detail }) =>
-        console.error(`[worker] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
-    });
+    await runWorker(
+      { session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse },
+      queue,
+      {
+        signal: controller.signal,
+        onEvent: ({ job, outcome, detail }) =>
+          console.error(`[worker] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
+      },
+    );
     break;
   }
 }

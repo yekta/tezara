@@ -13,6 +13,10 @@ const Env = z.object({
   PORT: z.coerce.number().positive().default(3000),
   MEILI_HOST: z.string().optional(),
   MEILI_KEY: z.string().default(""),
+  CLICKHOUSE_URL: z.string().optional(),
+  CLICKHOUSE_USERNAME: z.string().default("default"),
+  CLICKHOUSE_PASSWORD: z.string().default(""),
+  CLICKHOUSE_DATABASE: z.string().default("default"),
 });
 
 export type Config = z.infer<typeof Env>;

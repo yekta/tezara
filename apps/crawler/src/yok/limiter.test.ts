@@ -11,7 +11,7 @@ let keys: Keys;
 
 before(() => {
   redis = createRedis();
-  keys = makeKeys(`tezara:test:limiter:${process.pid}`);
+  keys = makeKeys(`tezara:test:limiter:${process.pid}:${Math.random().toString(36).slice(2, 8)}`);
 });
 
 beforeEach(async () => {

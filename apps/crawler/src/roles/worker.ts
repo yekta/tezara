@@ -3,6 +3,7 @@ import type { JobContext } from "../jobs/context.ts";
 import { scanIdRange, type ScanIdRangeParams } from "../jobs/scan-id-range.ts";
 import { discoverHead, type DiscoverHeadParams } from "../jobs/discover-head.ts";
 import { syncMeili, type SyncMeiliParams } from "../jobs/sync-meili.ts";
+import { syncClickhouse, type SyncClickhouseParams } from "../jobs/sync-clickhouse.ts";
 
 const REAP_INTERVAL_MS = 30_000;
 const IDLE_SLEEP_MS = 2_000;
@@ -20,6 +21,15 @@ async function runJob(ctx: JobContext, job: Job, signal?: AbortSignal): Promise<
     case "sync-meili": {
       if (!ctx.meili) throw new Error("sync-meili requires a Meili client");
       return syncMeili({ client: ctx.meili, outbox: ctx.outbox }, job.params as SyncMeiliParams);
+    }
+    case "sync-clickhouse": {
+      if (!ctx.clickhouse || !ctx.clickhouseOutbox) {
+        throw new Error("sync-clickhouse requires a ClickHouse client");
+      }
+      return syncClickhouse(
+        { client: ctx.clickhouse, outbox: ctx.clickhouseOutbox },
+        job.params as SyncClickhouseParams,
+      );
     }
     default:
       throw new Error(`no handler for job kind "${job.kind}"`);

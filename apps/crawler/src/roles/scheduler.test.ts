@@ -16,7 +16,7 @@ const policy = { ...DEFAULT_POLICY, maxThesisId: 1000, chunkSize: 100, backfillD
 
 before(() => {
   redis = createRedis();
-  keys = makeKeys(`tezara:test:sched:${process.pid}`);
+  keys = makeKeys(`tezara:test:sched:${process.pid}:${Math.random().toString(36).slice(2, 8)}`);
 });
 
 beforeEach(async () => {
@@ -67,8 +67,8 @@ describe("scheduler tick", () => {
   test("tops the backfill up to the configured depth", async () => {
     const report = await tick({ queue, scan }, policy);
     assert.equal(report.backfillQueued, 3);
-    // 3 backfill chunks + discover-head + sync-meili
-    assert.equal((await queue.stats()).pending, 5);
+    // 3 backfill chunks + discover-head + sync-meili + sync-clickhouse
+    assert.equal((await queue.stats()).pending, 6);
     assert.equal(report.discoverQueued, true);
     assert.equal(report.syncQueued, true);
   });

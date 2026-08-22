@@ -11,7 +11,7 @@ let store: ScanStore;
 
 before(() => {
   redis = createRedis();
-  keys = makeKeys(`tezara:test:scan:${process.pid}`);
+  keys = makeKeys(`tezara:test:scan:${process.pid}:${Math.random().toString(36).slice(2, 8)}`);
 });
 
 beforeEach(async () => {

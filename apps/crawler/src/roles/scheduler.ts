@@ -126,10 +126,12 @@ export async function tick(
     report.discoverQueued = true;
   }
 
-  // 4. Drain the outbox into Meili.
+  // 4. Drain the outboxes into the projection targets.
   const lastSync = (await deps.scan.watermark("sync:lastRun")) ?? 0;
   if (now - lastSync >= policy.syncEveryMs) {
-    await deps.queue.enqueue("sync-meili", { at: Math.floor(now / policy.syncEveryMs) });
+    const at = Math.floor(now / policy.syncEveryMs);
+    await deps.queue.enqueue("sync-meili", { at });
+    await deps.queue.enqueue("sync-clickhouse", { at });
     await deps.scan.raiseWatermark("sync:lastRun", now);
     report.syncQueued = true;
   }

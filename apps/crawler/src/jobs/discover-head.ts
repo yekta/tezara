@@ -27,6 +27,7 @@ export async function discoverHead(
     const outcome = await fetchThesisById(ctx.session, id, ctx.lookups);
     if (outcome.status === "ok") {
       await ctx.outbox.push([outcome.thesis]);
+        await ctx.clickhouseOutbox?.push([outcome.thesis]);
       await ctx.scan.record(id, "ok");
       await ctx.scan.raiseWatermark("head", id);
       found.push(id);

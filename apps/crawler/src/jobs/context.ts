@@ -1,4 +1,5 @@
 import { foldTr } from "@tezara/core";
+import type { ClickHouseClient } from "@tezara/clickhouse";
 import type { MeiliSearch } from "@tezara/meili";
 import type { Outbox } from "../state/outbox.ts";
 import type { Queue } from "../queue/queue.ts";
@@ -12,10 +13,12 @@ export type JobContext = {
   queue: Queue;
   scan: ScanStore;
   lookups: Lookups;
-  /** Crawled theses go here first; sync-meili drains it. */
+  /** One outbox per projection target; each drains independently. */
   outbox: Outbox;
+  clickhouseOutbox?: Outbox;
   /** Absent when running a crawl-only worker with no projection target. */
   meili?: MeiliSearch;
+  clickhouse?: ClickHouseClient;
 };
 
 /**

@@ -17,6 +17,9 @@ importers:
 
   apps/crawler:
     dependencies:
+      '@tezara/clickhouse':
+        specifier: workspace:*
+        version: link:../../packages/clickhouse
       '@tezara/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -240,6 +243,22 @@ importers:
         version: 3.4.1
       typescript:
         specifier: '5'
+        version: 5.9.3
+
+  packages/clickhouse:
+    dependencies:
+      '@clickhouse/client':
+        specifier: 1.10.1
+        version: 1.10.1
+      '@tezara/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.7
+        version: 22.10.7
+      typescript:
+        specifier: 5.9.3
         version: 5.9.3
 
   packages/core:

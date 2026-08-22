@@ -1,0 +1,19 @@
+{
+  "name": "@tezara/clickhouse",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@clickhouse/client": "1.10.1",
+    "@tezara/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.7",
+    "typescript": "5.9.3"
+  }
+}

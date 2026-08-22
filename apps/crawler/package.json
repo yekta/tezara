@@ -10,11 +10,12 @@
     "start": "node --experimental-strip-types src/index.ts",
     "typecheck": "tsc --noEmit",
     "probe": "tsx src/probe.ts",
-    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\"",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 \"src/**/*.test.ts\"",
     "backfill": "node --experimental-strip-types src/backfill.ts",
     "migrate": "node --experimental-strip-types src/migrate.ts"
   },
   "dependencies": {
+    "@tezara/clickhouse": "workspace:*",
     "@tezara/core": "workspace:*",
     "@tezara/meili": "workspace:*",
     "cheerio": "1.0.0",

@@ -3,19 +3,22 @@ import type { Redis } from "ioredis";
 import type { Keys } from "./keys.ts";
 
 /**
- * Crawled theses land here before they reach Meili.
+ * Crawled theses land here before they reach a projection target.
  *
- * Decoupling the two means a Meili outage costs nothing: the crawl keeps running and
- * the backlog drains when Meili returns. Draining is destructive-on-success only —
- * documents are removed after the push is acknowledged, never before.
+ * One queue per target, because Meili and ClickHouse fail independently: an outage in
+ * either costs nothing, the crawl keeps running, and that backlog drains when the target
+ * returns. Draining is destructive-on-success only — documents are removed after the
+ * push is acknowledged, never before.
  */
+export type OutboxTarget = "meili" | "clickhouse";
+
 export class Outbox {
   readonly #redis: Redis;
   readonly #key: string;
 
-  constructor(redis: Redis, keys: Keys) {
+  constructor(redis: Redis, keys: Keys, target: OutboxTarget = "meili") {
     this.#redis = redis;
-    this.#key = `${keys.prefix}:outbox:meili`;
+    this.#key = `${keys.prefix}:outbox:${target}`;
   }
 
   async push(theses: readonly TCrawledThesis[]): Promise<number> {
