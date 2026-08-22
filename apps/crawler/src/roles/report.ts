@@ -20,7 +20,14 @@ function secs(ms: number): string {
 const field = <T>(detail: unknown, key: string): T | undefined =>
   (detail as Record<string, T> | null | undefined)?.[key];
 
-function describeDetail(job: Job, detail: unknown): string {
+/**
+ * A line for this result, or null when the job did nothing worth saying.
+ *
+ * Nine of ten lanes lose the race for the drain lock every minute and return
+ * immediately; logging each one buries the crawl in lines that report no work. The
+ * minute-by-minute status line already carries the outbox depth, so nothing is hidden.
+ */
+function describeDetail(job: Job, detail: unknown): string | null {
   const p = job.params as Record<string, number>;
 
   switch (job.kind) {
@@ -48,11 +55,12 @@ function describeDetail(job: Job, detail: unknown): string {
     case "sync-meili":
     case "sync-clickhouse": {
       const target = job.kind === "sync-meili" ? "meili" : "clickhouse";
-      const skipped = field<string>(detail, "skipped");
-      const remaining = field<number>(detail, "remaining") ?? 0;
-      if (skipped) return `${target}: ${skipped} — ${n(remaining)} still queued`;
+      if (field<string>(detail, "skipped")) return null;
 
+      const remaining = field<number>(detail, "remaining") ?? 0;
       const pushed = field<number>(detail, "pushed") ?? 0;
+      // A drain that found an empty outbox is the steady state, not news.
+      if (pushed === 0 && remaining === 0) return null;
       const batches = field<number>(detail, "batches") ?? 0;
       const quarantined = field<number>(detail, "quarantined");
       const parts = [`${target}: indexed ${n(pushed)} in ${batches} batch(es)`];
@@ -82,9 +90,10 @@ export function describeJob(
   outcome: "ok" | "retry" | "dead",
   detail: unknown,
   elapsedMs: number,
-): string {
+): string | null {
   if (outcome === "ok") {
-    return `${describeDetail(job, detail)} [${secs(elapsedMs)}]`;
+    const described = describeDetail(job, detail);
+    return described === null ? null : `${described} [${secs(elapsedMs)}]`;
   }
   // A failure's detail is the error message, and the attempt count is the useful part:
   // "retry 3/5" tells you how close this job is to being abandoned.
