@@ -1,0 +1,111 @@
+import type { TCrawledThesis } from "@tezara/core";
+import { classify } from "./classify.ts";
+import { byTezNo } from "./form.ts";
+import { parseList } from "./parse-list.ts";
+import { parsePdfFragment } from "./parse-pdf.ts";
+import {
+  cleanText, parseAdvisors, parseLocation, splitAbstractAndKeywords,
+  stripTags, type DetailPayload,
+} from "./parse-detail.ts";
+import { canonicalUniversity, foldTr, normalizeDepartment, titleCaseTr } from "./normalize.ts";
+import type { Session } from "./session.ts";
+
+export type FetchResult =
+  | { status: "ok"; thesis: TCrawledThesis }
+  | { status: "gap" }
+  | { status: "filter-ignored"; rows: number }
+  | { status: "detail-failed" }
+  | { status: "maintenance" }
+  | { status: "error" };
+
+export type Lookups = {
+  subjectEnByTr: Map<string, string>;
+  universityCanon: Map<string, string>;
+};
+
+const splitList = (s: string | null) =>
+  (s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+
+/** One thesis, three requests: search → detail → pdf. */
+export async function fetchThesisById(
+  s: Session,
+  id: number,
+  lookups: Lookups,
+): Promise<FetchResult> {
+  await s.throttle();
+  const html = await (await s.api.post("SearchTez", { form: byTezNo(id) })).text();
+  const outcome = classify(html);
+
+  if (outcome.kind === "empty") return { status: "gap" };
+  if (outcome.kind === "maintenance") return { status: "maintenance" };
+  if (outcome.kind !== "results") return { status: "error" };
+
+  const rows = parseList(html);
+  // A TezNo YÖK cannot parse is silently ignored, yielding 2000 unrelated rows.
+  if (rows.length !== 1 || rows[0]!.id !== id) {
+    return { status: "filter-ignored", rows: rows.length };
+  }
+  const row = rows[0]!;
+
+  await s.throttle();
+  const detailRes = await s.api.get(
+    `tezBilgiDetay.jsp?kayitNo=${encodeURIComponent(row.detail_id_1)}` +
+    `&tezNo=${encodeURIComponent(row.detail_id_2)}`,
+  );
+  let detail: DetailPayload;
+  try {
+    detail = JSON.parse((await detailRes.text()).trim());
+  } catch {
+    return { status: "detail-failed" };
+  }
+
+  await s.throttle();
+  const pdfFragment = await (await s.api.get(
+    `getTezPdf.jsp?kayitNo=${encodeURIComponent(row.detail_id_1)}` +
+    `&tezNo=${encodeURIComponent(row.detail_id_2)}`,
+  )).text();
+  const pdf = parsePdfFragment(pdfFragment);
+
+  const where = parseLocation(detail.yer);
+  const [trAbstract, trKeywords] = splitAbstractAndKeywords(detail.trOzet ?? "");
+  const [enAbstract, enKeywords] = splitAbstractAndKeywords(detail.enOzet ?? "");
+
+  const subjects: TCrawledThesis["subjects"] = [];
+  for (const tr of (row.subject_raw ?? "").split(";").map((x) => x.trim()).filter(Boolean)) {
+    subjects.push({ name: tr, language: "Turkish" });
+    const en = lookups.subjectEnByTr.get(foldTr(tr));
+    if (en) subjects.push({ name: en, language: "English" });
+  }
+
+  return {
+    status: "ok",
+    thesis: {
+      id: row.id,
+      title_original: cleanText(row.title_original),
+      title_translated: cleanText(row.title_translated) || null,
+      author: cleanText(row.author),
+      advisors: parseAdvisors(detail.danisman),
+      university: canonicalUniversity(where.university, lookups.universityCanon)!,
+      institute: titleCaseTr(where.institute)!,
+      department: normalizeDepartment(where.department),
+      branch: normalizeDepartment(where.branch),
+      detail_id_1: row.detail_id_1,
+      detail_id_2: row.detail_id_2,
+      year: row.year!,
+      thesis_type: row.thesis_type!,
+      language: row.language!,
+      subjects,
+      keywords: [
+        ...splitList(trKeywords).map((name) => ({ name, language: "Turkish" as const })),
+        ...splitList(enKeywords).map((name) => ({ name, language: "English" as const })),
+      ],
+      abstract_original: cleanText(trAbstract) || null,
+      abstract_translated: cleanText(enAbstract) || null,
+      page_count: null, // YÖK no longer exposes it
+      pdf_url: pdf.pdf_url,
+      restricted: pdf.restricted,
+    },
+  };
+}
+
+export { stripTags };

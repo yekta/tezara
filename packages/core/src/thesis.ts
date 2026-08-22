@@ -74,3 +74,16 @@ export type TSubject = {
   name: string;
   language: TSubjectOrKeywordLanguage;
 };
+
+/**
+ * What the crawler produces. Same shape the web app reads, plus `restricted`:
+ * YÖK renders an info icon instead of a PDF link when no full text is available,
+ * which lets us distinguish "no PDF exists" from "we failed to fetch one".
+ * Kept separate from ThesisSchema so the live index shape is unchanged until we
+ * deliberately migrate it.
+ */
+export const CrawledThesisSchema = ThesisSchema.extend({
+  restricted: z.boolean(),
+});
+
+export type TCrawledThesis = z.infer<typeof CrawledThesisSchema>;

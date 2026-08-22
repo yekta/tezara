@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2022"],
+    "types": ["node"],
+    // Explicit .ts specifiers so `node --experimental-strip-types` can run src directly.
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*"]
+}

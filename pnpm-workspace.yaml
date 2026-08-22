@@ -1,0 +1,29 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# core-js only prints a funding banner; unrs-resolver ships prebuilt binaries.
+# Neither postinstall is needed, so installs stay non-interactive in CI/Coolify.
+allowBuilds:
+  core-js: false
+  unrs-resolver: false
+  sharp: true
+  esbuild: true      # tsx needs its native binary
+  "@takumi-rs/core": true
+
+# pnpm 11 rejects packages published within minimumReleaseAge (supply-chain guard).
+# next@16.3.2 and friends are already what production runs, so exempt those by name
+# rather than switching the guard off for the whole repo.
+minimumReleaseAgeExclude:
+  - next
+  - eslint-config-next
+  - "@next/env"
+  - "@next/eslint-plugin-next"
+  - "@next/swc-darwin-arm64"
+  - "@next/swc-darwin-x64"
+  - "@next/swc-linux-arm64-gnu"
+  - "@next/swc-linux-arm64-musl"
+  - "@next/swc-linux-x64-gnu"
+  - "@next/swc-linux-x64-musl"
+  - "@next/swc-win32-arm64-msvc"
+  - "@next/swc-win32-x64-msvc"

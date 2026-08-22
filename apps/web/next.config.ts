@@ -1,6 +1,11 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Slim runtime image: Docker copies .next/standalone instead of node_modules.
+  output: "standalone",
+  // Monorepo: trace files from the workspace root, not apps/web.
+  outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
   // Redis is the shared cache. Keep Next from retaining another large cache in
   // each Railway process.
   cacheMaxMemorySize: 0,
@@ -8,6 +13,8 @@ const nextConfig: NextConfig = {
   // retaining origin-side zlib state when a client disconnects mid-response.
   compress: false,
   serverExternalPackages: ["@takumi-rs/core"],
+  // workspace package ships raw TS
+  transpilePackages: ["@tezara/core"],
   async rewrites() {
     if (
       !process.env.NEXT_PUBLIC_POSTHOG_HOST ||
