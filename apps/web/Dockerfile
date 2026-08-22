@@ -35,8 +35,7 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_POSTHOG_HOST_ASSETS=$NEXT_PUBLIC_POSTHOG_HOST_ASSETS
 
 # The sitemap routes QUERY Meilisearch during page-data collection, so the build needs a
-# genuinely reachable instance — not just a syntactically valid URL. On Coolify that
-# means the build must run on the network that can see Meili.
+# genuinely reachable instance — not just a syntactically valid URL.
 ARG MEILI_URL_INTERNAL=http://build.invalid
 ARG MEILI_ADMIN_KEY=build
 ARG CLICKHOUSE_URL=http://build.invalid
