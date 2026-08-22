@@ -52,7 +52,7 @@ ENV SKIP_ENV_VALIDATION=1 \
 
 RUN pnpm --filter @tezara/web build
 
-# --- runtime ----------------------------------------------------------------
+# --- runtime --- #
 FROM base AS runner
 ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
