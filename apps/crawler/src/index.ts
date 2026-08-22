@@ -28,7 +28,10 @@ const keys = makeKeys(config.CRAWLER_REDIS_PREFIX);
 const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
 const outbox = new Outbox(redis, keys, "meili");
-const clickhouseOutbox = new Outbox(redis, keys, "clickhouse");
+// Only created when the target exists: an outbox nobody drains grows without bound.
+const clickhouseOutbox = config.CLICKHOUSE_URL
+  ? new Outbox(redis, keys, "clickhouse")
+  : undefined;
 const reconcile = new ReconcileStore(redis, keys);
 const breaker = new CircuitBreaker(redis, keys, {
   failureThreshold: config.CRAWLER_BREAKER_THRESHOLD,

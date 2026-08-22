@@ -14,8 +14,51 @@ FROM base AS builder
 COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
-ARG SKIP_ENV_VALIDATION=1
-ENV SKIP_ENV_VALIDATION=$SKIP_ENV_VALIDATION
+# turbo prune copies package manifests and package directories, but NOT arbitrary root
+# files. Every package tsconfig does `extends: "../../tsconfig.base.json"`, and without
+# it tsc silently falls back to compiler defaults — no esModuleInterop, no skipLibCheck —
+# which fails the build on third-party .d.ts files.
+COPY --from=pruner /app/tsconfig.base.json ./
+# Next inlines NEXT_PUBLIC_* into the client bundle at BUILD time, so these must be the
+# real values — a placeholder here ships a broken bundle. Coolify: set them as build args.
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_MEILI_URL
+ARG NEXT_PUBLIC_MEILI_CLIENT_KEY
+ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
+ARG NEXT_PUBLIC_UMAMI_HOST_URL
+ARG NEXT_PUBLIC_UMAMI_DOMAINS
+ARG NEXT_PUBLIC_POSTHOG_KEY
+ARG NEXT_PUBLIC_POSTHOG_HOST
+ARG NEXT_PUBLIC_POSTHOG_HOST_ASSETS
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
+    NEXT_PUBLIC_MEILI_URL=$NEXT_PUBLIC_MEILI_URL \
+    NEXT_PUBLIC_MEILI_CLIENT_KEY=$NEXT_PUBLIC_MEILI_CLIENT_KEY \
+    NEXT_PUBLIC_UMAMI_WEBSITE_ID=$NEXT_PUBLIC_UMAMI_WEBSITE_ID \
+    NEXT_PUBLIC_UMAMI_HOST_URL=$NEXT_PUBLIC_UMAMI_HOST_URL \
+    NEXT_PUBLIC_UMAMI_DOMAINS=$NEXT_PUBLIC_UMAMI_DOMAINS \
+    NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
+    NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST \
+    NEXT_PUBLIC_POSTHOG_HOST_ASSETS=$NEXT_PUBLIC_POSTHOG_HOST_ASSETS
+
+# The sitemap routes QUERY Meilisearch during page-data collection, so the build needs a
+# genuinely reachable instance — not just a syntactically valid URL. On Coolify that
+# means the build must run on the network that can see Meili.
+ARG MEILI_URL_INTERNAL=http://build.invalid
+ARG MEILI_ADMIN_KEY=build
+ARG CLICKHOUSE_URL=http://build.invalid
+ARG CLICKHOUSE_USERNAME=build
+ARG CLICKHOUSE_PASSWORD=build
+ARG REDIS_URL=redis://build.invalid:6379
+ENV SKIP_ENV_VALIDATION=1 \
+    MEILI_URL_INTERNAL=$MEILI_URL_INTERNAL \
+    MEILI_ADMIN_KEY=$MEILI_ADMIN_KEY \
+    CLICKHOUSE_URL=$CLICKHOUSE_URL \
+    CLICKHOUSE_USERNAME=$CLICKHOUSE_USERNAME \
+    CLICKHOUSE_PASSWORD=$CLICKHOUSE_PASSWORD \
+    REDIS_URL=$REDIS_URL \
+    POSTHOG_PERSONAL_API_KEY=build \
+    POSTHOG_PROJECT_ID=0
+
 RUN pnpm --filter @tezara/web build
 
 # --- runtime ----------------------------------------------------------------

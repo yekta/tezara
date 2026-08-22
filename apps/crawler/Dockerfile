@@ -16,11 +16,21 @@ FROM base AS builder
 COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile --prod=false
 COPY --from=pruner /app/out/full/ .
+# turbo prune copies package manifests and package directories, but NOT arbitrary root
+# files. Every package tsconfig does `extends: "../../tsconfig.base.json"`, and without
+# it tsc silently falls back to compiler defaults — no esModuleInterop, no skipLibCheck —
+# which fails the build on third-party .d.ts files.
+COPY --from=pruner /app/tsconfig.base.json ./
 RUN pnpm --filter @tezara/crawler typecheck
 
 FROM base AS runner
 ENV NODE_ENV=production
-COPY --from=builder /app/node_modules ./node_modules
+# Production-only install rather than copying the builder's node_modules: turbo,
+# TypeScript and esbuild are build-time only and account for ~85MB of dependencies the
+# runtime never loads (we execute TS directly via --experimental-strip-types).
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/tsconfig.base.json ./
+RUN pnpm install --frozen-lockfile --prod && pnpm store prune
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/crawler ./apps/crawler
 RUN addgroup -g 1001 -S nodejs && adduser -S crawler -u 1001 && chown -R crawler:nodejs /app
