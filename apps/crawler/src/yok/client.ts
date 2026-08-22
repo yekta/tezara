@@ -33,6 +33,9 @@ export async function fetchThesisById(
   const html = await (await s.api.post("SearchTez", { form: byTezNo(id) })).text();
   const outcome = classify(html);
 
+  // Maintenance and error pages feed the breaker; "empty" is a legitimate answer.
+  await s.settle(outcome.kind !== "maintenance" && outcome.kind !== "error");
+
   if (outcome.kind === "empty") return { status: "gap" };
   if (outcome.kind === "maintenance") return { status: "maintenance" };
   if (outcome.kind !== "results") return { status: "error" };
@@ -52,7 +55,9 @@ export async function fetchThesisById(
   let detail: DetailPayload;
   try {
     detail = JSON.parse((await detailRes.text()).trim());
+    await s.settle(true);
   } catch {
+    await s.settle(false);
     return { status: "detail-failed" };
   }
 

@@ -6,6 +6,8 @@ import { syncMeili, type SyncMeiliParams } from "../jobs/sync-meili.ts";
 
 const REAP_INTERVAL_MS = 30_000;
 const IDLE_SLEEP_MS = 2_000;
+/** Renew well inside the lease so a slow tick cannot let it lapse. */
+const HEARTBEAT_MS = 60_000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -55,6 +57,8 @@ export async function runWorker(
       continue;
     }
 
+    // Hold the lease for as long as the job actually runs.
+    const heartbeat = setInterval(() => { void queue.renewLease(job); }, HEARTBEAT_MS);
     try {
       const detail = await runJob(ctx, job, signal);
       await queue.complete(job);
@@ -63,6 +67,8 @@ export async function runWorker(
       const message = err instanceof Error ? err.message : String(err);
       const outcome = await queue.fail(job, message);
       onEvent?.({ job, outcome, detail: message });
+    } finally {
+      clearInterval(heartbeat);
     }
   }
 }

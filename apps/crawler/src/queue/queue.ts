@@ -141,6 +141,24 @@ export class Queue {
     return "retry";
   }
 
+  /**
+   * Extend a lease while the job is still running.
+   *
+   * Without this, any job that outlives the lease gets reaped and handed to a second
+   * worker while the first is still working on it. Long jobs (a 200-id range at two
+   * requests a second takes minutes) hit that immediately.
+   *
+   * Returns false if we no longer hold the lease — the caller should stop, because
+   * someone else now owns the job.
+   */
+  async renewLease(job: Job): Promise<boolean> {
+    const renewed = await this.#redis.zadd(
+      this.#keys.jobsLeased, "XX", "GT", String(Date.now() + this.#leaseMs), job.id,
+    );
+    void renewed;
+    return (await this.#redis.zscore(this.#keys.jobsLeased, job.id)) !== null;
+  }
+
   /** Requeue jobs whose worker died mid-flight. Run this on a timer. */
   async reap(): Promise<number> {
     return (await this.#redis.eval(

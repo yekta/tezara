@@ -16,7 +16,7 @@ export async function discoverHead(
   params: DiscoverHeadParams = {},
   signal?: AbortSignal,
 ): Promise<{ from: number; found: number[]; watermark: number }> {
-  const probe = params.probe ?? 500;
+  const probe = params.probe ?? 100;
   const head = (await ctx.scan.watermark("head")) ?? 0;
   const found: number[] = [];
 

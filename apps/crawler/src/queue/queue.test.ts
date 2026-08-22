@@ -97,6 +97,32 @@ describe("queue", () => {
     assert.equal((await queue.claim(1)).length, 1, "another worker can pick it up");
   });
 
+  test("renewLease keeps a long-running job from being reaped out from under us", async () => {
+    // Regression: a 200-id range at two requests a second runs longer than the lease.
+    // Without renewal the reaper hands the job to a second worker while the first is
+    // still crawling it — duplicate work and duplicate writes.
+    await queue.enqueue("scan-id-range", { from: 1, to: 200 });
+    const [job] = await queue.claim(1);
+    assert.ok(job);
+
+    await new Promise((r) => setTimeout(r, 150));
+    assert.equal(await queue.renewLease(job), true, "we still hold it");
+    assert.equal(await queue.reap(), 0, "renewal pushed the expiry out");
+    assert.equal((await queue.stats()).leased, 1);
+
+    // …and once we stop renewing, it does get reclaimed.
+    await new Promise((r) => setTimeout(r, 250));
+    assert.equal(await queue.reap(), 1);
+  });
+
+  test("renewLease reports false once the job was reaped away", async () => {
+    await queue.enqueue("scan-id-range", { from: 1, to: 5 });
+    const [job] = await queue.claim(1);
+    await new Promise((r) => setTimeout(r, 250));
+    await queue.reap();
+    assert.equal(await queue.renewLease(job!), false, "someone else owns it now");
+  });
+
   test("failures retry until maxAttempts, then dead-letter", async () => {
     await queue.enqueue("scan-id-range", { from: 1, to: 5 });
     for (const expected of ["retry", "retry", "dead"] as const) {

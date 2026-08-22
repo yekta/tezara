@@ -62,6 +62,9 @@ after(async () => {
       /* ignore */
     }
   }
+  // Leave the instance migrated: a bare index would let a later sync auto-create it
+  // with Meili's defaults and silently break every filter.
+  await applySettings(client, { waitForTasks: true });
 });
 
 describe("meili sync", () => {
