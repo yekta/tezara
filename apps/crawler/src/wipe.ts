@@ -33,10 +33,7 @@ const meili = createMeiliClient({
   host: config.MEILI_URL_INTERNAL,
   apiKey: config.MEILI_ADMIN_KEY,
 });
-const clickhouse = createClickhouseClient({
-  url: config.CLICKHOUSE_URL,
-  database: config.CLICKHOUSE_DATABASE,
-});
+const clickhouse = createClickhouseClient({ url: config.CLICKHOUSE_URL });
 
 /** Hide credentials so a connection string can be printed. */
 const redact = (url: string) => url.replace(/\/\/[^@]*@/, "//***:***@");
@@ -82,7 +79,7 @@ async function main(): Promise<void> {
     // absent table — nothing to count
   }
   console.error(`  ClickHouse ${chRows} theses across ${CLICKHOUSE_TABLES.length} tables`);
-  console.error(`             ${redact(config.CLICKHOUSE_URL)}/${config.CLICKHOUSE_DATABASE}`);
+  console.error(`             ${redact(config.CLICKHOUSE_URL)}`);
 
   const rl = createInterface({ input: stdin, output: stdout });
   const answer = await rl.question(`\nType "${CONFIRMATION}" to proceed:\n> `);

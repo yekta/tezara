@@ -30,10 +30,7 @@ if (host) {
 }
 
 if (chUrl) {
-  const ch = createClickhouseClient({
-    url: chUrl,
-    database: process.env.CLICKHOUSE_DATABASE ?? "default",
-  });
+  const ch = createClickhouseClient({ url: chUrl });
   const ran = await migrateClickhouse(ch);
   console.error(`clickhouse: applied ${ran.length} migration(s)${ran.length ? `: ${ran.join(", ")}` : ""}`);
   await ch.close();
