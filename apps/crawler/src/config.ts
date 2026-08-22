@@ -1,4 +1,46 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { z } from "zod";
+
+/**
+ * Load .env.local then .env, without clobbering anything already in the environment.
+ *
+ * Precedence is real env > .env.local > .env, matching Next's convention, so a value
+ * exported in the shell (or injected by Railway) always wins over a file. Files are
+ * looked for in the working directory and in the repo root, so it works whether you run
+ * from apps/crawler or from the workspace root.
+ */
+function loadEnvFiles(): void {
+  const roots = [process.cwd(), resolve(dirname(new URL(import.meta.url).pathname), "../../..")];
+  const seen = new Set<string>();
+
+  for (const root of roots) {
+    for (const name of [".env.local", ".env"]) {
+      const path = resolve(root, name);
+      if (seen.has(path) || !existsSync(path)) continue;
+      seen.add(path);
+
+      for (const line of readFileSync(path, "utf8").split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const eq = trimmed.indexOf("=");
+        if (eq === -1) continue;
+
+        const key = trimmed.slice(0, eq).trim().replace(/^export\s+/, "");
+        if (key in process.env) continue; // never override
+
+        let value = trimmed.slice(eq + 1).trim();
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
+        process.env[key] = value;
+      }
+    }
+  }
+}
 
 /**
  * A URL that must actually parse, with a readable message when it does not.
@@ -46,7 +88,11 @@ const Env = z.object({
 
 export type Config = z.infer<typeof Env>;
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
+export function loadConfig(env?: NodeJS.ProcessEnv): Config {
+  if (!env) {
+    loadEnvFiles();
+    env = process.env;
+  }
   // Treat "" as absent so a missing Railway reference fails as "required" rather than
   // as a confusing parse error, matching the web app's `emptyStringAsUndefined`.
   const cleaned = Object.fromEntries(
@@ -79,7 +125,9 @@ function redact(raw: string): string {
     const u = new URL(raw);
     if (u.password) u.password = "***";
     if (u.username) u.username = "***";
-    return u.toString();
+    // toString() appends a trailing slash for a bare origin, which reads badly when a
+    // database name is concatenated after it.
+    return u.toString().replace(/\/$/, "");
   } catch {
     return raw;
   }
