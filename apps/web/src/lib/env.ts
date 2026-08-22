@@ -10,6 +10,8 @@ export const env = createEnv({
     MEILI_ADMIN_KEY: z.string(),
     MEILI_URL_INTERNAL: z.url(),
     CLICKHOUSE_URL: z.url(),
+    /** Publicly routable ClickHouse, used only during `next build`. */
+    CLICKHOUSE_URL_BUILD: z.url().optional(),
     CLICKHOUSE_USERNAME: z.string(),
     CLICKHOUSE_PASSWORD: z.string(),
     REDIS_URL: z.url(),
@@ -45,6 +47,7 @@ export const env = createEnv({
     MEILI_ADMIN_KEY: process.env.MEILI_ADMIN_KEY,
     MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
     CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
+    CLICKHOUSE_URL_BUILD: process.env.CLICKHOUSE_URL_BUILD,
     CLICKHOUSE_USERNAME: process.env.CLICKHOUSE_USERNAME,
     CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
     REDIS_URL: process.env.REDIS_URL,
