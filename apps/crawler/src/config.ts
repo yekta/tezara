@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 const Env = z.object({
-  CRAWLER_ROLE: z.enum(["scheduler", "worker", "api"]).default("worker"),
+  // "all" runs scheduler + worker + api in one process, which is the right shape for
+  // this workload: ~1M theses growing by ~100k a year. Splitting roles only matters if
+  // you need to scale workers independently, which this does not.
+  CRAWLER_ROLE: z.enum(["all", "scheduler", "worker", "api"]).default("all"),
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
   CRAWLER_REDIS_PREFIX: z.string().default("tezara:crawler"),
   /** Sustained request rate against YÖK, shared across every worker. */

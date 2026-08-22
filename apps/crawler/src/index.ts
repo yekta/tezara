@@ -55,68 +55,77 @@ process.on("SIGINT", () => void shutdown("SIGINT"));
 
 console.error(`[crawler] role=${config.CRAWLER_ROLE} prefix=${keys.prefix}`);
 
-switch (config.CRAWLER_ROLE) {
-  case "api": {
-    server = createApi({ redis, queue, scan, outbox, breaker, reconcile });
-    server.listen(config.PORT, () => console.error(`[crawler] api on :${config.PORT}`));
-    break;
-  }
+const role = config.CRAWLER_ROLE;
+const wants = {
+  api: role === "all" || role === "api",
+  scheduler: role === "all" || role === "scheduler",
+  worker: role === "all" || role === "worker",
+};
 
-  case "scheduler": {
-    await runScheduler(
+if (wants.api) {
+  server = createApi({ redis, queue, scan, outbox, breaker, reconcile });
+  server.listen(config.PORT, () => console.error(`[crawler] api on :${config.PORT}`));
+}
+
+const running: Promise<void>[] = [];
+
+if (wants.scheduler) {
+  running.push(
+    runScheduler(
       { redis, keys, queue, scan },
       {
         signal: controller.signal,
         policy: { ...DEFAULT_POLICY, maxThesisId: config.CRAWLER_MAX_THESIS_ID },
         onTick: (r) => console.error(`[scheduler] ${JSON.stringify(r)}`),
       },
-    );
-    break;
-  }
+    ),
+  );
+}
 
-  case "worker": {
-    const limiter = new RateLimiter(redis, keys, {
-      ratePerSecond: config.CRAWLER_RATE_PER_SECOND,
-      capacity: config.CRAWLER_BURST,
-    });
-    const session = await openSession({ gate: redisGate(limiter, breaker) });
-    const lookups = await buildLookups(session);
-    const meili = config.MEILI_HOST
-      ? createMeiliClient({ host: config.MEILI_HOST, apiKey: config.MEILI_KEY })
-      : undefined;
-    const clickhouse = config.CLICKHOUSE_URL
-      ? createClickhouseClient({
-          url: config.CLICKHOUSE_URL,
-          username: config.CLICKHOUSE_USERNAME,
-          password: config.CLICKHOUSE_PASSWORD,
-          database: config.CLICKHOUSE_DATABASE,
-        })
-      : undefined;
-    if (!meili) console.error("[crawler] MEILI_HOST unset — crawling into the outbox only");
-    if (!clickhouse) console.error("[crawler] CLICKHOUSE_URL unset — stats projection disabled");
+if (wants.worker) {
+  const limiter = new RateLimiter(redis, keys, {
+    ratePerSecond: config.CRAWLER_RATE_PER_SECOND,
+    capacity: config.CRAWLER_BURST,
+  });
+  const session = await openSession({ gate: redisGate(limiter, breaker) });
+  const lookups = await buildLookups(session);
+  const meili = config.MEILI_HOST
+    ? createMeiliClient({ host: config.MEILI_HOST, apiKey: config.MEILI_KEY })
+    : undefined;
+  const clickhouse = config.CLICKHOUSE_URL
+    ? createClickhouseClient({
+        url: config.CLICKHOUSE_URL,
+        username: config.CLICKHOUSE_USERNAME,
+        password: config.CLICKHOUSE_PASSWORD,
+        database: config.CLICKHOUSE_DATABASE,
+      })
+    : undefined;
+  if (!meili) console.error("[crawler] MEILI_HOST unset — crawling into the outbox only");
+  if (!clickhouse) console.error("[crawler] CLICKHOUSE_URL unset — stats projection disabled");
 
-    // Counting held records is the projection's job; ClickHouse is the stats store, so
-    // it answers when present and Meili stands in when it is not.
-    const countHeldForYear = clickhouse
+  // Counting held records is the projection's job; ClickHouse is the stats store, so it
+  // answers when present and Meili stands in when it is not.
+  const countHeldForYear = clickhouse
+    ? async (year: number) => {
+        const res = await clickhouse.query({
+          query: "SELECT count() AS c FROM theses FINAL WHERE year = {year:UInt32}",
+          query_params: { year },
+          format: "JSONEachRow",
+        });
+        const rows = await res.json<{ c: string }>();
+        return Number(rows[0]?.c ?? 0);
+      }
+    : meili
       ? async (year: number) => {
-          const res = await clickhouse.query({
-            query: "SELECT count() AS c FROM theses FINAL WHERE year = {year:UInt32}",
-            query_params: { year },
-            format: "JSONEachRow",
+          const res = await meili.index("theses").search("", {
+            filter: `year = ${year}`, limit: 0, hitsPerPage: 0,
           });
-          const rows = await res.json<{ c: string }>();
-          return Number(rows[0]?.c ?? 0);
+          return Number((res as { totalHits?: number }).totalHits ?? 0);
         }
-      : meili
-        ? async (year: number) => {
-            const res = await meili.index("theses").search("", {
-              filter: `year = ${year}`, limit: 0, hitsPerPage: 0,
-            });
-            return Number((res as { totalHits?: number }).totalHits ?? 0);
-          }
-        : undefined;
+      : undefined;
 
-    await runWorker(
+  running.push(
+    runWorker(
       {
         session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
         reconcile, countHeldForYear,
@@ -127,7 +136,8 @@ switch (config.CRAWLER_ROLE) {
         onEvent: ({ job, outcome, detail }) =>
           console.error(`[worker] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
       },
-    );
-    break;
-  }
+    ),
+  );
 }
+
+await Promise.all(running);
