@@ -93,27 +93,32 @@ async function crawlForever(): Promise<void> {
 
   while (!controller.signal.aborted) {
     try {
-      console.error("[crawler] opening YÖK session…");
-      const session = await openSession({ gate: redisGate(breaker) });
-      console.error("[crawler] session established, fetching subject taxonomy…");
-      const lookups = await buildLookups(session);
-      console.error(`[crawler] taxonomy loaded (${lookups.subjectEnByTr.size} subjects)`);
+      // One throwaway session to load the subject taxonomy; each lane opens its own.
+      console.error("[crawler] fetching subject taxonomy…");
+      const bootstrap = await openSession({ gate: redisGate(breaker) });
+      const lookups = await buildLookups(bootstrap);
+      await bootstrap.close().catch(() => {});
+      console.error(
+        `[crawler] taxonomy loaded (${lookups.subjectEnByTr.size} subjects), ` +
+          `starting ${config.CRAWLER_CONCURRENCY} lanes`,
+      );
       attempt = 0;
 
       await runWorker(
         {
-          session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
+          session: undefined as never, // each lane supplies its own
+          queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
           reconcile, countHeldForYear,
         },
         queue,
         {
           signal: controller.signal,
           concurrency: config.CRAWLER_CONCURRENCY,
+          newSession: () => openSession({ gate: redisGate(breaker) }),
           onEvent: ({ job, outcome, detail }) =>
             console.error(`[crawler] ${job.kind} -> ${outcome} ${JSON.stringify(detail)}`),
         },
       );
-      await session.close().catch(() => {});
     } catch (err) {
       attempt++;
       const wait = Math.min(30_000 * 2 ** (attempt - 1), 5 * 60_000);
