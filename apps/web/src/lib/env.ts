@@ -12,8 +12,6 @@ export const env = createEnv({
     CLICKHOUSE_URL: z.url(),
     /** Publicly routable ClickHouse, used only during `next build`. */
     CLICKHOUSE_URL_BUILD: z.url().optional(),
-    CLICKHOUSE_USERNAME: z.string(),
-    CLICKHOUSE_PASSWORD: z.string(),
     REDIS_URL: z.url(),
     POSTHOG_PERSONAL_API_KEY: z.string(),
     POSTHOG_PROJECT_ID: z.string(),
@@ -48,8 +46,6 @@ export const env = createEnv({
     MEILI_URL_INTERNAL: process.env.MEILI_URL_INTERNAL,
     CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
     CLICKHOUSE_URL_BUILD: process.env.CLICKHOUSE_URL_BUILD,
-    CLICKHOUSE_USERNAME: process.env.CLICKHOUSE_USERNAME,
-    CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD,
     REDIS_URL: process.env.REDIS_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

@@ -32,8 +32,6 @@ if (host) {
 if (chUrl) {
   const ch = createClickhouseClient({
     url: chUrl,
-    username: process.env.CLICKHOUSE_USERNAME ?? "default",
-    password: process.env.CLICKHOUSE_PASSWORD ?? "",
     database: process.env.CLICKHOUSE_DATABASE ?? "default",
   });
   const ran = await migrateClickhouse(ch);

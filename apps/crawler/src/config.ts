@@ -28,9 +28,8 @@ const Env = z.object({
   REDIS_URL: url("REDIS_URL"),
   MEILI_URL_INTERNAL: url("MEILI_URL_INTERNAL"),
   MEILI_ADMIN_KEY: required("MEILI_ADMIN_KEY").min(1),
+  /** Credentials go in the URL: http://user:pass@clickhouse.railway.internal:8123 */
   CLICKHOUSE_URL: url("CLICKHOUSE_URL"),
-  CLICKHOUSE_USERNAME: required("CLICKHOUSE_USERNAME").min(1),
-  CLICKHOUSE_PASSWORD: required("CLICKHOUSE_PASSWORD").min(1),
 
   // --- optional: tuning, with defaults that are genuinely fine to leave alone.
   CLICKHOUSE_DATABASE: z.string().min(1).default("default"),
@@ -67,7 +66,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   console.error(
     `[crawler] config redis=${redact(config.REDIS_URL)}` +
       ` meili=${config.MEILI_URL_INTERNAL}` +
-      ` clickhouse=${config.CLICKHOUSE_URL}/${config.CLICKHOUSE_DATABASE}` +
+      ` clickhouse=${redact(config.CLICKHOUSE_URL)}/${config.CLICKHOUSE_DATABASE}` +
       ` rate=${config.CRAWLER_RATE_PER_SECOND}/s`,
   );
 

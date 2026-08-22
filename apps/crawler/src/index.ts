@@ -40,8 +40,6 @@ const meili = createMeiliClient({
 });
 const clickhouse = createClickhouseClient({
   url: config.CLICKHOUSE_URL,
-  username: config.CLICKHOUSE_USERNAME,
-  password: config.CLICKHOUSE_PASSWORD,
   database: config.CLICKHOUSE_DATABASE,
 });
 
