@@ -4,6 +4,7 @@ import { scanIdRange, type ScanIdRangeParams } from "../jobs/scan-id-range.ts";
 import { discoverHead, type DiscoverHeadParams } from "../jobs/discover-head.ts";
 import { syncMeili, type SyncMeiliParams } from "../jobs/sync-meili.ts";
 import { syncClickhouse, type SyncClickhouseParams } from "../jobs/sync-clickhouse.ts";
+import { reconcileYear, type ReconcileYearParams } from "../jobs/reconcile-year.ts";
 
 const REAP_INTERVAL_MS = 30_000;
 const IDLE_SLEEP_MS = 2_000;
@@ -31,6 +32,8 @@ async function runJob(ctx: JobContext, job: Job, signal?: AbortSignal): Promise<
         job.params as SyncClickhouseParams,
       );
     }
+    case "reconcile-year":
+      return reconcileYear(ctx, job.params as ReconcileYearParams);
     default:
       throw new Error(`no handler for job kind "${job.kind}"`);
   }

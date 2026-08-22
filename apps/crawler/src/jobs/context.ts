@@ -2,6 +2,7 @@ import { foldTr } from "@tezara/core";
 import type { ClickHouseClient } from "@tezara/clickhouse";
 import type { MeiliSearch } from "@tezara/meili";
 import type { Outbox } from "../state/outbox.ts";
+import type { ReconcileStore } from "../state/reconcile.ts";
 import type { Queue } from "../queue/queue.ts";
 import type { ScanStore } from "../state/scan.ts";
 import type { Lookups } from "../yok/client.ts";
@@ -19,6 +20,13 @@ export type JobContext = {
   /** Absent when running a crawl-only worker with no projection target. */
   meili?: MeiliSearch;
   clickhouse?: ClickHouseClient;
+  /** Per-year drift tracking. */
+  reconcile?: ReconcileStore;
+  /**
+   * How many theses we hold for a year. Injected rather than hard-wired to ClickHouse so
+   * reconciliation still works on a Meili-only deployment.
+   */
+  countHeldForYear?: (year: number) => Promise<number>;
 };
 
 /**

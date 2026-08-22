@@ -15,6 +15,7 @@ import { Queue } from "./queue/queue.ts";
 import { makeKeys } from "./state/keys.ts";
 import { Outbox } from "./state/outbox.ts";
 import { createRedis } from "./state/redis.ts";
+import { ReconcileStore } from "./state/reconcile.ts";
 import { ScanStore } from "./state/scan.ts";
 import { CircuitBreaker } from "./yok/breaker.ts";
 import { redisGate } from "./yok/gate.ts";
@@ -28,6 +29,7 @@ const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
 const outbox = new Outbox(redis, keys, "meili");
 const clickhouseOutbox = new Outbox(redis, keys, "clickhouse");
+const reconcile = new ReconcileStore(redis, keys);
 const breaker = new CircuitBreaker(redis, keys, {
   failureThreshold: config.CRAWLER_BREAKER_THRESHOLD,
   cooldownMs: config.CRAWLER_BREAKER_COOLDOWN_MS,
@@ -52,7 +54,7 @@ console.error(`[crawler] role=${config.CRAWLER_ROLE} prefix=${keys.prefix}`);
 
 switch (config.CRAWLER_ROLE) {
   case "api": {
-    server = createApi({ redis, queue, scan, outbox, breaker });
+    server = createApi({ redis, queue, scan, outbox, breaker, reconcile });
     server.listen(config.PORT, () => console.error(`[crawler] api on :${config.PORT}`));
     break;
   }
@@ -90,8 +92,32 @@ switch (config.CRAWLER_ROLE) {
     if (!meili) console.error("[crawler] MEILI_HOST unset — crawling into the outbox only");
     if (!clickhouse) console.error("[crawler] CLICKHOUSE_URL unset — stats projection disabled");
 
+    // Counting held records is the projection's job; ClickHouse is the stats store, so
+    // it answers when present and Meili stands in when it is not.
+    const countHeldForYear = clickhouse
+      ? async (year: number) => {
+          const res = await clickhouse.query({
+            query: "SELECT count() AS c FROM theses FINAL WHERE year = {year:UInt32}",
+            query_params: { year },
+            format: "JSONEachRow",
+          });
+          const rows = await res.json<{ c: string }>();
+          return Number(rows[0]?.c ?? 0);
+        }
+      : meili
+        ? async (year: number) => {
+            const res = await meili.index("theses").search("", {
+              filter: `year = ${year}`, limit: 0, hitsPerPage: 0,
+            });
+            return Number((res as { totalHits?: number }).totalHits ?? 0);
+          }
+        : undefined;
+
     await runWorker(
-      { session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse },
+      {
+        session, queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
+        reconcile, countHeldForYear,
+      },
       queue,
       {
         signal: controller.signal,

@@ -3,6 +3,7 @@ import type { Redis } from "ioredis";
 import type { Queue } from "../queue/queue.ts";
 import type { Outbox } from "../state/outbox.ts";
 import type { ScanStore } from "../state/scan.ts";
+import type { ReconcileStore } from "../state/reconcile.ts";
 import type { CircuitBreaker } from "../yok/breaker.ts";
 
 export type ApiDeps = {
@@ -11,6 +12,7 @@ export type ApiDeps = {
   scan: ScanStore;
   outbox: Outbox;
   breaker: CircuitBreaker;
+  reconcile?: ReconcileStore;
 };
 
 const escape = (v: string) => v.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -25,6 +27,9 @@ async function renderMetrics(deps: ApiDeps): Promise<string> {
   ]);
   const head = (await deps.scan.watermark("head")) ?? 0;
   const backfill = (await deps.scan.watermark("backfill")) ?? 0;
+  const reconciliations = (await deps.reconcile?.all()) ?? [];
+  const totalDrift = reconciliations.reduce((sum, r) => sum + Math.max(0, r.drift), 0);
+  const driftingYears = reconciliations.filter((r) => r.drift > 0).length;
 
   return [
     metric("tezara_queue_jobs", "Jobs by state", "gauge", queue.pending, '{state="pending"}'),
@@ -40,6 +45,9 @@ async function renderMetrics(deps: ApiDeps): Promise<string> {
       "tezara_breaker_state", "Circuit breaker state (1 = active)", "gauge", 1,
       `{state="${escape(breaker.state)}"}`,
     ),
+    metric("tezara_years_reconciled", "Years checked against YÖK's own totals", "gauge", reconciliations.length),
+    metric("tezara_reconcile_drift_total", "Records YÖK reports that we do not hold", "gauge", totalDrift),
+    metric("tezara_reconcile_years_drifting", "Years where we hold fewer than YÖK reports", "gauge", driftingYears),
   ].join("");
 }
 

@@ -67,10 +67,17 @@ describe("scheduler tick", () => {
   test("tops the backfill up to the configured depth", async () => {
     const report = await tick({ queue, scan }, policy);
     assert.equal(report.backfillQueued, 3);
-    // 3 backfill chunks + discover-head + sync-meili + sync-clickhouse
-    assert.equal((await queue.stats()).pending, 6);
     assert.equal(report.discoverQueued, true);
     assert.equal(report.syncQueued, true);
+    assert.equal(report.reconcileQueued, policy.reconcileYears.from);
+
+    // Derived from the report rather than hard-coded: adding a scheduler step should
+    // not break this test, only change what the report says.
+    const periodic =
+      (report.discoverQueued ? 1 : 0) +
+      (report.syncQueued ? 2 : 0) + // sync-meili and sync-clickhouse
+      (report.reconcileQueued !== null ? 1 : 0);
+    assert.equal((await queue.stats()).pending, report.backfillQueued + periodic);
   });
 
   test("the backfill cursor advances instead of re-queuing the same range", async () => {
