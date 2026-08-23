@@ -59,13 +59,18 @@ function describeDetail(job: Job, detail: unknown): string | null {
 
       const remaining = field<number>(detail, "remaining") ?? 0;
       const pushed = field<number>(detail, "pushed") ?? 0;
-      // A drain that found an empty outbox is the steady state, not news.
-      if (pushed === 0 && remaining === 0) return null;
+      const rebuilt = field<string[]>(detail, "rebuilt") ?? [];
+      // A drain that found an empty outbox is the steady state, not news — unless it
+      // caught up on a rebuild an earlier run owed.
+      if (pushed === 0 && remaining === 0 && rebuilt.length === 0) return null;
       const batches = field<number>(detail, "batches") ?? 0;
       const quarantined = field<number>(detail, "quarantined");
       const parts = [`${target}: indexed ${n(pushed)} in ${batches} batch(es)`];
       parts.push(`${n(remaining)} left`);
       if (quarantined) parts.push(`${n(quarantined)} QUARANTINED`);
+      if (rebuilt.length > 0) parts.push(`rebuilt ${rebuilt.length} aggregate table(s)`);
+      const held = field<string>(detail, "rebuildHeld");
+      if (held) parts.push(`aggregates stale (${held})`);
       return parts.join(", ");
     }
 

@@ -49,7 +49,7 @@ async function runJob(
         return { skipped: "no ClickHouse client configured" };
       }
       return syncClickhouse(
-        { client: ctx.clickhouse, outbox: ctx.clickhouseOutbox, log: ctx.log },
+        { client: ctx.clickhouse, outbox: ctx.clickhouseOutbox, marks: ctx.scan, log: ctx.log },
         job.params as SyncClickhouseParams,
       );
     }
