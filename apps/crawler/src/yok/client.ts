@@ -30,7 +30,7 @@ export async function fetchThesisById(
   lookups: Lookups,
 ): Promise<FetchResult> {
   await s.throttle();
-  const html = await (await s.api.post("SearchTez", { form: byTezNo(id) })).text();
+  const html = await s.post("SearchTez", byTezNo(id));
   const outcome = classify(html);
 
   // Maintenance and error pages feed the breaker; "empty" is a legitimate answer.
@@ -48,13 +48,13 @@ export async function fetchThesisById(
   const row = rows[0]!;
 
   await s.throttle();
-  const detailRes = await s.api.get(
+  const detailBody = await s.get(
     `tezBilgiDetay.jsp?kayitNo=${encodeURIComponent(row.detail_id_1)}` +
     `&tezNo=${encodeURIComponent(row.detail_id_2)}`,
   );
   let detail: DetailPayload;
   try {
-    detail = JSON.parse((await detailRes.text()).trim());
+    detail = JSON.parse(detailBody.trim());
     await s.settle(true);
   } catch {
     await s.settle(false);
@@ -62,10 +62,10 @@ export async function fetchThesisById(
   }
 
   await s.throttle();
-  const pdfFragment = await (await s.api.get(
+  const pdfFragment = await s.get(
     `getTezPdf.jsp?kayitNo=${encodeURIComponent(row.detail_id_1)}` +
     `&tezNo=${encodeURIComponent(row.detail_id_2)}`,
-  )).text();
+  );
   const pdf = parsePdfFragment(pdfFragment);
 
   const where = parseLocation(detail.yer);
@@ -131,7 +131,7 @@ export async function fetchYearCount(
 ): Promise<{ status: "ok"; count: number } | { status: "error" | "maintenance" }> {
   await s.throttle();
   const form = baseForm({ yil1: String(year), yil2: String(year) });
-  const html = await (await s.api.post("SearchTez", { form })).text();
+  const html = await s.post("SearchTez", form);
   const outcome = classify(html);
 
   await s.settle(outcome.kind !== "maintenance" && outcome.kind !== "error");
