@@ -162,6 +162,69 @@ describe("aggregate rebuild", () => {
     assert.ok(await scalar("SELECT count() FROM subject_stats") > 0);
   });
 
+  test("keyword and subject counts are exact, per language, and 0 when absent", async () => {
+    // "veri" is both a Turkish and an English keyword; "Ekonomi" both a Turkish and an
+    // English subject. Link rows carry no language, so a name present in both counts
+    // towards both — that is the data model, and the rebuild must not collapse it.
+    await syncTheses(client, [
+      thesis({
+        id: 1,
+        subjects: [{ name: "Ekonomi", language: "Turkish" }, { name: "Economics", language: "English" }],
+        keywords: [{ name: "veri", language: "Turkish" }, { name: "göç", language: "Turkish" }],
+      }),
+      thesis({
+        id: 2,
+        author: "ALİ VELİ",
+        subjects: [{ name: "Ekonomi", language: "English" }],
+        keywords: [{ name: "veri", language: "English" }, { name: "göç", language: "Turkish" }],
+      }),
+      // No keywords, no subjects: its university must still get a row, with zeros.
+      thesis({ id: 3, university: "Sessiz Üniversitesi", subjects: [], keywords: [] }),
+    ]);
+    await rebuildAggregates(client);
+
+    const row = async (sql: string) => {
+      const res = await client.query({ query: sql, format: "JSONEachRow" });
+      return (await res.json<Record<string, string | number>>())[0];
+    };
+
+    const yalova = await row("SELECT * FROM universities WHERE name = 'Yalova Üniversitesi'");
+    assert.equal(Number(yalova?.thesis_count), 2);
+    assert.equal(Number(yalova?.author_count), 2);
+    // Distinct keyword names: veri (Turkish), göç (Turkish); veri (English).
+    assert.equal(Number(yalova?.keyword_count_turkish), 2);
+    assert.equal(Number(yalova?.keyword_count_english), 1);
+    // Distinct subject names: Ekonomi (Turkish); Economics, Ekonomi (English).
+    assert.equal(Number(yalova?.subject_count_turkish), 1);
+    assert.equal(Number(yalova?.subject_count_english), 2);
+
+    const sessiz = await row("SELECT * FROM universities WHERE name = 'Sessiz Üniversitesi'");
+    assert.equal(Number(sessiz?.thesis_count), 1);
+    assert.equal(Number(sessiz?.keyword_count_turkish), 0);
+    assert.equal(Number(sessiz?.subject_count_english), 0);
+
+    // Both theses carry subject name "Ekonomi", so both language rows count both.
+    const ekonomiTr = await row("SELECT * FROM subject_stats WHERE name = 'Ekonomi' AND language = 'Turkish'");
+    const ekonomiEn = await row("SELECT * FROM subject_stats WHERE name = 'Ekonomi' AND language = 'English'");
+    for (const r of [ekonomiTr, ekonomiEn]) {
+      assert.equal(Number(r?.thesis_count), 2);
+      assert.equal(Number(r?.author_count), 2);
+      assert.equal(Number(r?.keyword_count_turkish), 2);
+      assert.equal(Number(r?.keyword_count_english), 1);
+    }
+    // Only thesis 1 has Economics; its "veri" resolves to both keyword languages.
+    const economics = await row("SELECT * FROM subject_stats WHERE name = 'Economics'");
+    assert.equal(Number(economics?.thesis_count), 1);
+    assert.equal(Number(economics?.keyword_count_turkish), 2);
+    assert.equal(Number(economics?.keyword_count_english), 1);
+
+    const byUni = await row(
+      "SELECT count FROM thesis_subjects_by_university " +
+      "WHERE university = 'Yalova Üniversitesi' AND subject_name = 'Ekonomi' AND subject_language = 'Turkish'",
+    );
+    assert.equal(Number(byUni?.count), 2);
+  });
+
   test("counts are not inflated by a re-push", async () => {
     await syncTheses(client, [thesis({ id: 1 })]);
     await syncTheses(client, [thesis({ id: 1 })]);
