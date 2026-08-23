@@ -10,7 +10,7 @@ export type SubjectPair = { tr: string; en: string; kod: string };
  */
 export async function fetchSubjectTaxonomy(s: Session): Promise<SubjectPair[]> {
   await s.throttle();
-  const html = await (await s.api.get("tarama.jsp")).text();
+  const html = await s.get("tarama.jsp");
   const start = html.indexOf("konu-items-container");
   if (start === -1) throw new Error("subject picker not found — YÖK markup changed");
 
