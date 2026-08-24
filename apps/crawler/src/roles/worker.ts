@@ -142,9 +142,11 @@ export async function runWorker(
           continue;
         }
 
-        // Hold the lease for as long as the job actually runs.
+        // Hold the lease for as long as the job actually runs. A Redis blip rejects the
+        // renew, and an unhandled rejection here would take the whole process down —
+        // swallow it: a lease we failed to renew is one the reaper requeues.
         const heartbeat = setInterval(() => {
-          void queue.renewLease(job);
+          queue.renewLease(job).catch(() => {});
         }, HEARTBEAT_MS);
         const startedAt = Date.now();
         try {

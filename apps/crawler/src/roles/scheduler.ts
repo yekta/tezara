@@ -40,8 +40,15 @@ export class Leader {
   }
 
   startHeartbeat(onLost: () => void): void {
-    this.#timer = setInterval(async () => {
-      if (!(await this.renew())) onLost();
+    // An async setInterval callback has nowhere to put a rejection: if Redis blips the
+    // renew throws and the process dies on an unhandled rejection. A renew we cannot
+    // complete is a lock we must assume we no longer hold, so treat it as lost and
+    // re-acquire on the next pass.
+    this.#timer = setInterval(() => {
+      this.renew().then(
+        (ok) => { if (!ok) onLost(); },
+        () => onLost(),
+      );
     }, Math.floor(this.#ttlMs / 3));
   }
 
