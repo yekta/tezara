@@ -213,12 +213,7 @@ await prepareTargets();
 try {
   await Promise.all([
     runScheduler(
-      {
-        redis, keys, queue, scan,
-        // The deeper of the two, so neither target can be starved into a memory problem.
-        outboxDepth: async () =>
-          Math.max(await outbox.depth(), await clickhouseOutbox.depth()),
-      },
+      { redis, keys, queue, scan },
       {
         signal: controller.signal,
         policy: { ...DEFAULT_POLICY, maxThesisId: config.CRAWLER_MAX_THESIS_ID },
