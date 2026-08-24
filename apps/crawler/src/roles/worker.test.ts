@@ -7,7 +7,39 @@ import { Outbox } from "../state/outbox.ts";
 import { createRedis } from "../state/redis.ts";
 import { ScanStore } from "../state/scan.ts";
 import type { JobContext } from "../jobs/context.ts";
+import type { MeiliSearch } from "@tezara/meili";
+import { INDEXES, INDEX_NAMES } from "@tezara/meili";
+import type { TCrawledThesis } from "@tezara/core";
 import { runWorker } from "./worker.ts";
+
+/** Enough of Meili for a drain to run: no settings drift, and every push succeeds. */
+function fakeMeili() {
+  let pushes = 0;
+  return {
+    getIndexes: async () => ({ results: INDEX_NAMES.map((uid) => ({ uid })) }),
+    index: (name: keyof typeof INDEXES) => ({
+      getSettings: async () => ({
+        filterableAttributes: INDEXES[name].filterable ?? [],
+        sortableAttributes: INDEXES[name].sortable ?? [],
+        pagination: { maxTotalHits: INDEXES[name].maxTotalHits },
+      }),
+      addDocuments: async () => {
+        await new Promise((r) => setTimeout(r, 5));
+        return { taskUid: ++pushes };
+      },
+      waitForTask: async (taskUid: number) => ({ status: "succeeded", taskUid }),
+    }),
+  } as unknown as MeiliSearch;
+}
+
+const thesis = (id: number) =>
+  ({
+    id, title_original: `t${id}`, title_translated: null, author: `A${id}`,
+    advisors: [], university: "U", institute: "I", department: null, branch: null,
+    detail_id_1: "k1", detail_id_2: "k2", year: 2023, thesis_type: "T", language: "L",
+    subjects: [], keywords: [], abstract_original: null, abstract_translated: null,
+    page_count: null, pdf_url: null, restricted: false,
+  }) as TCrawledThesis;
 
 let redis: Redis;
 let keys: Keys;
@@ -73,6 +105,29 @@ describe("worker", () => {
     assert.equal(seen.length, 12, "every job ran");
     assert.equal(new Set(seen).size, 12, "no job ran twice across lanes");
     assert.deepEqual(await queue.stats(), { pending: 0, leased: 0, dead: 0 });
+  });
+
+  test("a drain that runs out of budget re-queues itself instead of idling", async () => {
+    // The scheduler only queues a sync every minute, and the lanes that lose the drain
+    // lock consume those as instant skips — so a drain that stops with work left has
+    // nothing to pick it up again unless it re-arms here.
+    await ctx.outbox.push([...Array(10)].map((_, i) => thesis(i + 1)));
+    await queue.enqueue("sync-meili", { at: 1, batchSize: 2, budgetMs: 1 });
+
+    const details: unknown[] = [];
+    await runWorker(
+      { ...ctx, meili: fakeMeili() },
+      queue,
+      {
+        exitWhenDrained: true,
+        onEvent: ({ job, detail }) => {
+          if (job.kind === "sync-meili") details.push(detail);
+        },
+      },
+    );
+
+    assert.ok(details.length > 1, `expected the drain to re-arm, ran ${details.length} time(s)`);
+    assert.equal(await ctx.outbox.depth(), 0, "and to keep going until the outbox is empty");
   });
 
   test("an unknown job kind fails rather than silently succeeding", async () => {

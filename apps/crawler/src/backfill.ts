@@ -9,6 +9,7 @@
 import { createMeiliClient } from "@tezara/meili";
 import { buildLookups } from "./jobs/context.ts";
 import { syncMeili } from "./jobs/sync-meili.ts";
+import { DimensionCache } from "./state/dimensions.ts";
 import { Outbox } from "./state/outbox.ts";
 import { Queue } from "./queue/queue.ts";
 import { runWorker } from "./roles/worker.ts";
@@ -33,6 +34,7 @@ const keys = makeKeys(process.env.CRAWLER_REDIS_PREFIX ?? DEFAULT_PREFIX);
 const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
 const outbox = new Outbox(redis, keys);
+const dimensions = new DimensionCache(redis, keys);
 const meiliUrl = process.env.MEILI_URL_INTERNAL;
 const meili = meiliUrl
   ? createMeiliClient({ host: meiliUrl, apiKey: process.env.MEILI_ADMIN_KEY ?? "" })
@@ -66,7 +68,7 @@ try {
   );
 
   if (meili) {
-    const synced = await syncMeili({ client: meili, outbox });
+    const synced = await syncMeili({ client: meili, outbox, known: dimensions });
     console.error(`\nsynced to Meili: ${JSON.stringify(synced)}`);
   }
 
