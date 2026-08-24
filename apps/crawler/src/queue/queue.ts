@@ -98,6 +98,28 @@ for i = 1, #picked do redis.call('ZADD', leased, leaseUntil, picked[i]) end
 return picked
 `;
 
+/**
+ * Add to pending unless this exact job is already leased, i.e. running right now.
+ *
+ * Without the ZSCORE guard the id ends up in pending AND leased at once, and both ways
+ * out of that are wrong. A second worker can claim it from pending while the first is
+ * still running it — the same id crawled twice. And when the first finishes, complete()
+ * removes the lease and deletes the job hash, leaving an id in pending that no worker
+ * can ever load: claim moves it to leased, finds no data, the reaper puts it back, and
+ * it cycles there for the life of the deployment, taking a claim slot every time.
+ *
+ * Dropping the re-assert is safe because nothing here is queued only once. The scheduler
+ * re-derives its work every tick, so anything genuinely still outstanding when the
+ * running job finishes is queued a minute later.
+ */
+const ENQUEUE_LUA = `
+local job, pending, leased = KEYS[1], KEYS[2], KEYS[3]
+if redis.call('ZSCORE', leased, ARGV[1]) then return 0 end
+redis.call('HSETNX', job, 'data', ARGV[2])
+redis.call('ZADD', pending, 'LT', ARGV[3], ARGV[1])
+return 1
+`;
+
 /** Return every job whose lease expired to the pending set. This is crash recovery. */
 const REAP_LUA = `
 local leased, pending, now = KEYS[1], KEYS[2], tonumber(ARGV[1])
@@ -127,7 +149,8 @@ export class Queue {
 
   /**
    * Idempotent: enqueueing the same (kind, params) twice keeps the EARLIER runAfter,
-   * so a scheduler tick can safely re-assert work every minute forever.
+   * so a scheduler tick can safely re-assert work every minute forever. Work that is
+   * already running is left alone entirely — see ENQUEUE_LUA.
    */
   async enqueue(
     kind: JobKind,
@@ -136,10 +159,11 @@ export class Queue {
   ): Promise<string> {
     const id = jobId(kind, params);
     const job: Job = { id, kind, params, attempts: 0, runAfter };
-    const tx = this.#redis.multi();
-    tx.hsetnx(this.#keys.job(id), "data", JSON.stringify(job));
-    tx.zadd(this.#keys.jobsPending, "LT", String(runAfter), id);
-    await tx.exec();
+    await this.#redis.eval(
+      ENQUEUE_LUA, 3,
+      this.#keys.job(id), this.#keys.jobsPending, this.#keys.jobsLeased,
+      id, JSON.stringify(job), String(runAfter),
+    );
     return id;
   }
 
@@ -157,9 +181,21 @@ export class Queue {
     const results = (await pipeline.exec()) ?? [];
 
     const jobs: Job[] = [];
-    for (const [err, data] of results) {
-      if (err || typeof data !== "string") continue;
+    const dataless: string[] = [];
+    results.forEach(([err, data], i) => {
+      if (err || typeof data !== "string") {
+        dataless.push(ids[i]!);
+        return;
+      }
       jobs.push(JSON.parse(data) as Job);
+    });
+
+    // An id with no job behind it is not work, it is debris — from a crash between the
+    // two writes in enqueue, or from a deployment that ran the older enqueue. The claim
+    // above has already moved it to leased, so without this it would be reaped back to
+    // pending and re-claimed forever. Dropping it is the only way it ever leaves.
+    if (dataless.length > 0) {
+      await this.#redis.zrem(this.#keys.jobsLeased, ...dataless);
     }
     return jobs;
   }
@@ -233,6 +269,8 @@ export class Queue {
 
     const jobs: Job[] = [];
     for (const [err, data] of results) {
+      // Nothing to clean up here: this only reads, and a dead job whose hash has aged
+      // out is simply one this listing cannot describe.
       if (err || typeof data !== "string") continue;
       jobs.push(JSON.parse(data) as Job);
     }

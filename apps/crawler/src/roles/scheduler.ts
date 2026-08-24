@@ -61,6 +61,20 @@ export type SchedulerPolicy = {
   chunkSize: number;
   /** How many backfill chunks to keep queued at once. */
   backfillDepth: number;
+  /**
+   * Stop queueing new backfill once a projection outbox is this deep.
+   *
+   * The crawl has ten lanes and the outboxes drain one batch at a time, on purpose — so
+   * a target that slows down or goes away does not stop the crawl, it just means the
+   * backlog grows. Unbounded, that backlog is Redis memory: at ~4.6KB a thesis, 200,000
+   * queued records is most of a gigabyte, in a Redis the web app shares as its page
+   * cache. Above this the backfill pauses until the drain catches up; everything else
+   * (refresh, discover, reconcile) keeps running.
+   *
+   * A safety net, not a throttle. In normal operation the outboxes sit near zero and
+   * this never fires.
+   */
+  maxOutboxDepth: number;
   discoverHeadEveryMs: number;
   syncEveryMs: number;
   /** How often to reconcile ONE year; the corpus cycles through over time. */
@@ -77,6 +91,7 @@ export const DEFAULT_POLICY: SchedulerPolicy = {
   // single job monopolises a worker and starves sync-meili.
   chunkSize: 50,
   backfillDepth: 20,
+  maxOutboxDepth: 50_000,
   discoverHeadEveryMs: 30 * 60_000,
   syncEveryMs: 60_000,
   // One year every 20 minutes cycles the whole 1959-2026 corpus in about a day.
@@ -86,6 +101,8 @@ export const DEFAULT_POLICY: SchedulerPolicy = {
 
 export type TickReport = {
   backfillQueued: number;
+  /** Set when the backfill was held back; says how deep the outbox was. */
+  backfillPaused?: number;
   refreshQueued: number;
   discoverQueued: boolean;
   syncQueued: boolean;
@@ -97,7 +114,12 @@ export type TickReport = {
  * this every minute forever is safe and cheap.
  */
 export async function tick(
-  deps: { queue: Queue; scan: ScanStore },
+  deps: {
+    queue: Queue;
+    scan: ScanStore;
+    /** Deepest projection outbox. Omitted means no backpressure, as before. */
+    outboxDepth?: () => Promise<number>;
+  },
   policy: SchedulerPolicy = DEFAULT_POLICY,
   now = Date.now(),
 ): Promise<TickReport> {
@@ -106,9 +128,13 @@ export async function tick(
     reconcileQueued: null,
   };
 
-  // 1. Keep the backfill topped up, starting just past the highest scanned id.
+  // 1. Keep the backfill topped up, starting just past the highest scanned id — unless
+  // the projections are already too far behind to be given more.
   const { pending } = await deps.queue.stats();
-  if (pending < policy.backfillDepth) {
+  const outboxDepth = (await deps.outboxDepth?.()) ?? 0;
+  if (outboxDepth > policy.maxOutboxDepth) {
+    report.backfillPaused = outboxDepth;
+  } else if (pending < policy.backfillDepth) {
     const cursor = (await deps.scan.watermark("backfill")) ?? 1;
     let from = cursor;
     for (let i = pending; i < policy.backfillDepth && from <= policy.maxThesisId; i++) {
@@ -162,7 +188,10 @@ export async function tick(
 }
 
 export async function runScheduler(
-  deps: { redis: Redis; keys: Keys; queue: Queue; scan: ScanStore },
+  deps: {
+    redis: Redis; keys: Keys; queue: Queue; scan: ScanStore;
+    outboxDepth?: () => Promise<number>;
+  },
   opts: { policy?: SchedulerPolicy; intervalMs?: number; signal?: AbortSignal;
           onTick?: (r: TickReport) => void } = {},
 ): Promise<void> {

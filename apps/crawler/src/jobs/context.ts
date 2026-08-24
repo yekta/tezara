@@ -1,6 +1,7 @@
 import { foldTr } from "@tezara/core";
 import type { ClickHouseClient } from "@tezara/clickhouse";
 import type { MeiliSearch } from "@tezara/meili";
+import type { DimensionCache } from "../state/dimensions.ts";
 import type { Outbox } from "../state/outbox.ts";
 import type { ReconcileStore } from "../state/reconcile.ts";
 import type { Queue } from "../queue/queue.ts";
@@ -17,6 +18,11 @@ export type JobContext = {
   /** One outbox per projection target; each drains independently. */
   outbox: Outbox;
   clickhouseOutbox?: Outbox;
+  /**
+   * Dimension names already pushed to Meili. Absent just means every name is pushed in
+   * every batch, which is what the drain did before it existed.
+   */
+  dimensions?: DimensionCache;
   /** Absent when running a crawl-only worker with no projection target. */
   meili?: MeiliSearch;
   clickhouse?: ClickHouseClient;

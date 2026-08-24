@@ -117,6 +117,56 @@ describe("meili sync", () => {
     assert.equal(authors.numberOfDocuments, 2);
   });
 
+  test("a known-docs cache stops saturating indexes being re-pushed", async () => {
+    // Stands in for the crawler's Redis-backed cache.
+    const seen = new Map<string, Set<string>>();
+    const known = {
+      unseen: async (index: string, ids: readonly string[]) =>
+        new Set(ids.filter((id) => !seen.get(index)?.has(id))),
+      remember: async (index: string, ids: readonly string[]) => {
+        const set = seen.get(index) ?? new Set<string>();
+        for (const id of ids) set.add(id);
+        seen.set(index, set);
+      },
+    };
+
+    const first = await syncTheses(client, [thesis({ id: 50 })], { waitForTasks: true, known });
+    assert.equal(first.universities, 1, "first sight of a university is pushed");
+    assert.equal(first.subjects, 2);
+
+    // Same university, same subjects, different thesis: none of them need pushing again.
+    const second = await syncTheses(
+      client,
+      [thesis({ id: 51, author: "BAŞKA YAZAR" })],
+      { waitForTasks: true, known },
+    );
+    assert.equal(second.universities, 0, "already indexed, so not pushed again");
+    assert.equal(second.subjects, 0);
+    assert.equal(second.languages, 0);
+
+    // The two that must never be skipped: theses change on a re-crawl, and authors are
+    // one per record rather than a recurring dimension.
+    assert.equal(second.theses, 1);
+    assert.equal(second.authors, 1);
+
+    // Skipping is only sound if the documents really did land the first time.
+    const unis = await client.index("universities").getStats();
+    assert.equal(unis.numberOfDocuments, 1);
+    assert.equal(
+      (await client.index("universities").getDocument(md5("Yalova Üniversitesi"))).name,
+      "Yalova Üniversitesi",
+    );
+  });
+
+  test("a cache that has not seen an id pushes it, however old the id is", async () => {
+    const known = {
+      unseen: async (_index: string, ids: readonly string[]) => new Set(ids),
+      remember: async () => {},
+    };
+    const report = await syncTheses(client, [thesis({ id: 52 })], { waitForTasks: true, known });
+    assert.equal(report.universities, 1, "an empty cache must behave like no cache");
+  });
+
   test("an updated thesis overwrites rather than appends", async () => {
     await syncTheses(client, [thesis({ id: 20, author: "ESKI AD" })], { waitForTasks: true });
     await syncTheses(client, [thesis({ id: 20, author: "YENI AD" })], { waitForTasks: true });

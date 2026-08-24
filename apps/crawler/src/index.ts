@@ -13,6 +13,7 @@ import { describeJob, describeStatus } from "./roles/report.ts";
 import { DEFAULT_POLICY, runScheduler } from "./roles/scheduler.ts";
 import { runWorker } from "./roles/worker.ts";
 import { makeKeys } from "./state/keys.ts";
+import { DimensionCache } from "./state/dimensions.ts";
 import { Outbox } from "./state/outbox.ts";
 import { ReconcileStore } from "./state/reconcile.ts";
 import { createRedis } from "./state/redis.ts";
@@ -29,6 +30,7 @@ const queue = new Queue(redis, keys);
 const scan = new ScanStore(redis, keys);
 const outbox = new Outbox(redis, keys, "meili");
 const clickhouseOutbox = new Outbox(redis, keys, "clickhouse");
+const dimensions = new DimensionCache(redis, keys);
 const reconcile = new ReconcileStore(redis, keys);
 const breaker = new CircuitBreaker(redis, keys, {
   failureThreshold: config.CRAWLER_BREAKER_THRESHOLD,
@@ -175,7 +177,7 @@ async function crawlForever(): Promise<void> {
       await runWorker(
         {
           session: undefined as never, // each lane supplies its own
-          queue, scan, lookups, outbox, clickhouseOutbox, meili, clickhouse,
+          queue, scan, lookups, outbox, clickhouseOutbox, dimensions, meili, clickhouse,
           reconcile, countHeldForYear,
           log: info,
         },
@@ -211,7 +213,12 @@ await prepareTargets();
 try {
   await Promise.all([
     runScheduler(
-      { redis, keys, queue, scan },
+      {
+        redis, keys, queue, scan,
+        // The deeper of the two, so neither target can be starved into a memory problem.
+        outboxDepth: async () =>
+          Math.max(await outbox.depth(), await clickhouseOutbox.depth()),
+      },
       {
         signal: controller.signal,
         policy: { ...DEFAULT_POLICY, maxThesisId: config.CRAWLER_MAX_THESIS_ID },

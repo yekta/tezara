@@ -9,9 +9,14 @@ export type SyncReport = Record<IndexName, number>;
  * of seconds to index a thousand theses, so the default times the push out after it has
  * already been accepted: the batch is never committed, the outbox never drains, and the
  * same thousand documents are re-pushed forever.
+ *
+ * The poll interval is a floor on what a push can cost: a drain waits for every task it
+ * submits, one after another, so half a second of sleeping per task is half a second
+ * multiplied by every index a batch touches. Meili is our own service on the internal
+ * network, so polling it faster costs nothing worth counting.
  */
 const TASK_TIMEOUT_MS = 10 * 60_000;
-const TASK_POLL_MS = 500;
+const TASK_POLL_MS = 100;
 
 /** A task Meili accepted and then failed to process. */
 export class TaskFailedError extends Error {
@@ -56,9 +61,36 @@ export type Rejection = {
   dropped: boolean;
 };
 
+/**
+ * Remembers which saturating-index documents have already reached Meili, so they are
+ * pushed once and never again.
+ *
+ * The dimension indexes are derived from a stream of theses but they are not a stream:
+ * there are ~210 universities, five languages, four thesis types and a fixed subject
+ * taxonomy. Without this, every batch re-pushes the same names for the life of the
+ * crawl — at thesis 900,000 it is still writing "Türkçe" into the languages index — and
+ * because each index costs its own awaited task, most of a drain's wall clock is spent
+ * telling Meili things it already knows.
+ *
+ * Ids are opaque here; the crawler backs this with Redis sets so it survives restarts.
+ * Only indexes marked `saturates` are consulted, which keeps what has to be remembered
+ * to a few thousand ids rather than one per thesis.
+ */
+export type KnownDocs = {
+  /** Of `ids`, the ones not yet recorded as pushed. */
+  unseen(index: IndexName, ids: readonly string[]): Promise<ReadonlySet<string>>;
+  /** Record ids as pushed. Only ever called after Meili has accepted them. */
+  remember(index: IndexName, ids: readonly string[]): Promise<void>;
+};
+
 export type SyncOptions = {
   waitForTasks?: boolean;
   taskTimeoutMs?: number;
+  /**
+   * Skip documents already known to be indexed. Omit it and every name is pushed in
+   * every batch, which is correct but is most of a drain's round trips.
+   */
+  known?: KnownDocs;
   /**
    * Called for every push Meili refuses. Supplying it turns a refusal into a bisect:
    * the batch is halved until the offending document is alone, which is then reported
@@ -227,10 +259,29 @@ export async function syncTheses(
         byId.set(String(doc.id), doc);
       }
     }
+
+    // Drop the ones Meili already holds. An index whose names have all been seen before
+    // — which, past the first few thousand theses, is every dimension index but the
+    // handful with genuinely new authors — now has nothing to push, and the `continue`
+    // below skips the task entirely rather than waiting on a write that changes nothing.
+    if (def.saturates && opts.known && byId.size > 0) {
+      const unseen = await opts.known.unseen(name, [...byId.keys()]);
+      for (const id of byId.keys()) if (!unseen.has(id)) byId.delete(id);
+    }
     if (byId.size === 0) continue;
 
+    const sent: string[] = [];
     for (const batch of chunk([...byId.values()], def.batchSize)) {
       report[name] += await push(client, name, batch, opts);
+      // Recorded per chunk, after Meili accepted it: a push that throws leaves its ids
+      // unrecorded and the next drain retries them.
+      sent.push(...batch.map((doc) => String(doc.id)));
+    }
+    // Includes anything the bisect quarantined. Nothing retries a quarantined document,
+    // so remembering it is what stops a single poisonous name being re-pushed, refused
+    // and re-quarantined by every batch from here to the end of the crawl.
+    if (def.saturates && opts.known && sent.length > 0) {
+      await opts.known.remember(name, sent);
     }
   }
 

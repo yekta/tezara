@@ -99,6 +99,50 @@ describe("queue", () => {
     assert.equal(job?.kind, "scan-id-range", "a future-dated sync job is not due yet");
   });
 
+  test("re-asserting work that is already running does not queue a second copy", async () => {
+    // The refresh path re-derives the same due ids every tick, and a range job runs for
+    // minutes — so the scheduler really does ask for work that is already in flight.
+    await queue.enqueue("scan-id-range", { from: 1, to: 50 });
+    const [running] = await queue.claim(1);
+    assert.ok(running);
+
+    await queue.enqueue("scan-id-range", { from: 1, to: 50 });
+
+    assert.deepEqual(await queue.stats(), { pending: 0, leased: 1, dead: 0 });
+  });
+
+  test("a job that finished can be queued again", async () => {
+    await queue.enqueue("scan-id-range", { from: 1, to: 50 });
+    const [first] = await queue.claim(1);
+    await queue.complete(first!);
+
+    await queue.enqueue("scan-id-range", { from: 1, to: 50 });
+    const [again] = await queue.claim(1);
+    assert.equal(again?.id, first!.id, "the same work is claimable once it is not running");
+  });
+
+  test("completing a job leaves nothing behind that can be claimed again", async () => {
+    await queue.enqueue("scan-id-range", { from: 1, to: 50 });
+    const [running] = await queue.claim(1);
+    await queue.enqueue("scan-id-range", { from: 1, to: 50 });
+    await queue.complete(running!);
+
+    assert.deepEqual(await queue.stats(), { pending: 0, leased: 0, dead: 0 });
+    assert.deepEqual(await queue.claim(1), []);
+  });
+
+  test("an id with no job behind it is dropped instead of cycling forever", async () => {
+    // What older enqueues left in pending: an id in the set with its hash deleted.
+    await redis.zadd(keys.jobsPending, String(Date.now()), "scan-id-range:deadbeef");
+
+    assert.deepEqual(await queue.claim(1), [], "no job to hand back");
+    assert.deepEqual(
+      await queue.stats(),
+      { pending: 0, leased: 0, dead: 0 },
+      "and it is gone rather than parked in leased for the reaper to recycle",
+    );
+  });
+
   test("complete removes the job entirely", async () => {
     await queue.enqueue("scan-id-range", { from: 1, to: 5 });
     const [job] = await queue.claim(1);

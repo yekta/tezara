@@ -39,10 +39,28 @@ async function runJob(
     // forever.
     case "sync-meili": {
       if (!ctx.meili) return { skipped: "no Meili client configured" };
-      return syncMeili(
-        { client: ctx.meili, outbox: ctx.outbox, log: ctx.log },
+      const result = await syncMeili(
+        {
+          client: ctx.meili,
+          outbox: ctx.outbox,
+          known: ctx.dimensions,
+          log: ctx.log,
+        },
         job.params as SyncMeiliParams,
       );
+      // Out of budget with the outbox still full: carry on now rather than waiting for
+      // the scheduler's next tick. The id is the NEXT minute's bucket, so this job and
+      // the tick that follows it dedupe into one — enqueueing the current bucket would
+      // collide with the job we are about to complete, whose hash complete() then
+      // deletes, leaving an id pending that no worker can ever load.
+      //
+      // Keyed off budgetExpired rather than a non-zero `remaining`: a drain that emptied
+      // the outbox and only sees work because the crawl pushed more while it finished
+      // would re-arm within the same minute, which is that same collision.
+      if (result.budgetExpired) {
+        await ctx.queue.enqueue("sync-meili", { at: Math.floor(Date.now() / 60_000) + 1 });
+      }
+      return result;
     }
     case "sync-clickhouse": {
       if (!ctx.clickhouse || !ctx.clickhouseOutbox) {
