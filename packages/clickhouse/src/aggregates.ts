@@ -145,30 +145,41 @@ const TARGETS = [
   { table: "thesis_subjects_by_university", select: SUBJECTS_BY_UNIVERSITY_SELECT },
 ] as const;
 
-const MiB = 1024 * 1024;
-
 /**
  * Trade speed for a bounded memory footprint on the INSERT … SELECT.
  *
- * The rebuild is a background job on a server that also holds the live tables and their
- * merges, with a hard `max_server_memory_usage`; exceeding it kills the query outright
- * ("Query was selected to stop by OvercommitTracker"). Everything here makes ClickHouse
- * spill to `tmp_path` instead of dying:
+ * The rebuild is a background job on a server that also holds the live tables, their
+ * merges, and every query the web app makes, under one `max_server_memory_usage`.
+ * Exceeding that does not fail politely: the OvercommitTracker picks a query and kills
+ * it, and the one it picks is not necessarily this one. Keeping the rebuild well clear
+ * of the server limit is therefore as much about the site staying up as it is about the
+ * aggregates landing.
+ *
+ * Each spill threshold is expressed as a RATIO of memory still available rather than a
+ * byte count, because a byte count is only ever right for one machine.
  *
  *   - external GROUP BY / sort: aggregation states flush to disk past the threshold and
  *     are merged back at the end. Exact results, slower.
- *   - grace hash join: the right side of a hash join is normally held in RAM in full;
- *     grace hash partitions both sides into on-disk buckets and joins one bucket at a time.
- *   - max_threads: each aggregation thread builds its own hash table before the merge, so
- *     peak memory scales with thread count. Two is plenty for a job nobody is waiting on.
+ *   - external JOIN: this is the one that was missing. `max_bytes_ratio_before_external_join`
+ *     defaults to 0.5, and nothing here set it — so while aggregation was held to a few
+ *     hundred MB, the join side was left free to use half of whatever was available
+ *     before spilling, on the same query, at the same time.
+ *   - max_threads = 1: each aggregation thread builds its own hash table before the
+ *     merge, so peak memory scales with thread count. Nobody is waiting on this job.
  *   - join_use_nulls = 0: a university with no keywords gets 0, not NULL, from the LEFT
  *     JOIN — the target columns are non-nullable.
+ *
+ * The absolute thresholds are pinned to 0 (their default) so that the ratios are
+ * unambiguously the knob that governs this, and there is one number to change.
  */
 export const REBUILD_SETTINGS: ClickHouseSettings = {
-  max_bytes_before_external_group_by: String(256 * MiB),
-  max_bytes_before_external_sort: String(256 * MiB),
+  max_bytes_ratio_before_external_group_by: 0.15,
+  max_bytes_ratio_before_external_sort: 0.15,
+  max_bytes_ratio_before_external_join: 0.15,
+  max_bytes_before_external_group_by: "0",
+  max_bytes_before_external_sort: "0",
   join_algorithm: "grace_hash",
-  max_threads: 2,
+  max_threads: 1,
   join_use_nulls: 0,
 };
 

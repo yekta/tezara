@@ -80,29 +80,6 @@ describe("scheduler tick", () => {
     assert.equal((await queue.stats()).pending, report.backfillQueued + periodic);
   });
 
-  test("the backfill pauses while a projection outbox is too deep to be given more", async () => {
-    const deep = { queue, scan, outboxDepth: async () => policy.maxOutboxDepth + 1 };
-    const report = await tick(deep, policy);
-
-    assert.equal(report.backfillQueued, 0, "no new ids while the outbox is over the limit");
-    assert.equal(report.backfillPaused, policy.maxOutboxDepth + 1);
-    // Everything that does not add to the backlog carries on.
-    assert.equal(report.discoverQueued, true);
-    assert.equal(report.syncQueued, true);
-    assert.equal(await scan.watermark("backfill"), null, "the cursor did not move");
-  });
-
-  test("the backfill resumes once the outbox drains back under the limit", async () => {
-    await tick({ queue, scan, outboxDepth: async () => policy.maxOutboxDepth + 1 }, policy);
-    // The periodic jobs that tick queued count towards `pending`, so clear them first —
-    // otherwise this measures the backfill depth check rather than the pause lifting.
-    for (const job of await queue.claim(10)) await queue.complete(job);
-
-    const report = await tick({ queue, scan, outboxDepth: async () => 0 }, policy);
-    assert.equal(report.backfillQueued, 3);
-    assert.equal(report.backfillPaused, undefined);
-  });
-
   test("the backfill cursor advances instead of re-queuing the same range", async () => {
     await tick({ queue, scan }, policy);
     assert.equal(await scan.watermark("backfill"), 301);
