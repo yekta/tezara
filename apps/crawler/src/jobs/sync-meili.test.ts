@@ -29,6 +29,7 @@ function fakeClient(opts: { delayMs?: number } = {}) {
       getSettings: async () => ({
         filterableAttributes: INDEXES[name as keyof typeof INDEXES].filterable ?? [],
         sortableAttributes: INDEXES[name as keyof typeof INDEXES].sortable ?? [],
+        searchableAttributes: INDEXES[name as keyof typeof INDEXES].searchable ?? ["*"],
         pagination: { maxTotalHits: INDEXES[name as keyof typeof INDEXES].maxTotalHits },
       }),
       addDocuments: async (docs: unknown[]) => {
@@ -81,7 +82,7 @@ before(() => {
 beforeEach(async () => {
   const existing = await redis.keys(`${keys.prefix}*`);
   if (existing.length) await redis.del(...existing);
-  outbox = new Outbox(redis, keys, "meili");
+  outbox = new Outbox(redis, keys, ["meili"]);
 });
 
 after(async () => {
@@ -100,7 +101,7 @@ describe("syncMeili", () => {
     assert.equal(result.pushed, 25);
     assert.equal(result.batches, 5, "five batches of five, no cap in the way");
     assert.equal(result.remaining, 0);
-    assert.equal(await outbox.depth(), 0);
+    assert.equal(await outbox.depth("meili"), 0);
   });
 
   test("stops on its time budget and reports what is left", async () => {
@@ -116,7 +117,7 @@ describe("syncMeili", () => {
     assert.equal(result.batches, 1, "the budget is checked before starting a batch");
     assert.equal(result.remaining, 15, "the rest stays in the outbox for the next run");
     assert.equal(result.budgetExpired, true, "which is what tells the worker to re-arm");
-    assert.equal(await outbox.depth(), 15);
+    assert.equal(await outbox.depth("meili"), 15);
   });
 
   test("a drain that empties the outbox does not ask to be re-armed", async () => {

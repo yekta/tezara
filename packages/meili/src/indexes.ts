@@ -14,6 +14,14 @@ export type IndexDefinition = {
   /** Settings are declarative and applied by a migration step, never on every push. */
   filterable?: string[];
   sortable?: string[];
+  /**
+   * Explicit searchable attributes, in relevance order — Meili's attribute ranking rule
+   * ranks a match in an earlier attribute above a match in a later one, so this array is
+   * both a whitelist and a ranking decision. Left unset, Meili defaults to `["*"]` in
+   * arbitrary field order, which also drags machine fields (pdf_url, detail ids) into
+   * the search index for nothing.
+   */
+  searchable?: string[];
   maxTotalHits: number;
   batchSize: number;
   /**
@@ -53,14 +61,27 @@ const nameIndex = (
 export const INDEXES: Record<IndexName, IndexDefinition> = {
   theses: {
     maxTotalHits: 1_500_000,
+    // The subfield paths cover exactly what filters need; also declaring the bare
+    // `keywords`/`subjects` parents (as an earlier version did) makes every subfield
+    // filterable twice over and costs a facet database for the raw objects.
     filterable: [
       "year", "thesis_type", "university", "institute", "department", "branch",
       "language", "advisors", "author",
-      "keywords", "keywords.name", "keywords.language",
-      "subjects", "subjects.name", "subjects.language",
+      "keywords.name", "keywords.language",
+      "subjects.name", "subjects.language",
     ],
     sortable: ["id", "year"],
-    batchSize: 2_000,
+    // Every human-readable field, so the plain search box still matches a university or
+    // thesis-type name; only machine fields (pdf_url, detail ids, flags) are left out.
+    searchable: [
+      "title_original", "title_translated",
+      "author", "advisors",
+      "keywords.name", "subjects.name",
+      "university", "institute", "department", "branch",
+      "thesis_type", "language",
+      "abstract_original", "abstract_translated",
+    ],
+    batchSize: 10_000,
     derive: (t) => t as unknown as IndexDoc,
   },
   universities: nameIndex((t) => t.university),

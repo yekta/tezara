@@ -54,7 +54,7 @@ export const DEFAULT_REBUILD_EVERY_MS = 10 * 60_000;
  * Commit-after-push, same as the Meili sync — a partial failure re-pushes a batch,
  * which ReplacingMergeTree collapses, rather than losing theses.
  *
- * Staleness is tracked in Redis, not inferred from this run's `pushed`. The previous
+ * Staleness is tracked in durable marks, not inferred from this run's `pushed`. The previous
  * version rebuilt iff this run pushed something — so a rebuild that failed (memory
  * limit, say) was retried by the queue, found the outbox already drained, pushed
  * nothing, and "succeeded" without rebuilding. The aggregates then stayed stale until
@@ -81,16 +81,16 @@ export async function syncClickhouse(
   const rebuildEveryMs = params.rebuildEveryMs ?? DEFAULT_REBUILD_EVERY_MS;
   const now = deps.now ?? Date.now;
 
-  const drained = await deps.outbox.drain(async () => {
+  const drained = await deps.outbox.drain("clickhouse", async () => {
     let pushed = 0;
     let batches = 0;
 
     for (let i = 0; i < maxBatches; i++) {
-      const batch = await deps.outbox.peek(batchSize);
+      const batch = await deps.outbox.peek("clickhouse", batchSize);
       if (batch.length === 0) break;
       const started = Date.now();
       await syncTheses(deps.client, batch);
-      await deps.outbox.commit(batch.length);
+      await deps.outbox.commit("clickhouse", batch.map((t) => t.id));
       // Under the same lock as the rebuild below, so no run can observe the push
       // without also observing the dirt.
       await deps.marks.raiseWatermark(DIRTY_MARK, now());
@@ -98,7 +98,7 @@ export async function syncClickhouse(
       batches++;
       deps.log?.(
         `clickhouse batch ${batches}/${maxBatches}: ${batch.length} rows in ` +
-          `${Math.round((Date.now() - started) / 1000)}s, ${await deps.outbox.depth()} left`,
+          `${Math.round((Date.now() - started) / 1000)}s, ${await deps.outbox.depth("clickhouse")} left`,
       );
     }
 
@@ -138,11 +138,11 @@ export async function syncClickhouse(
     return {
       pushed: 0,
       batches: 0,
-      remaining: await deps.outbox.depth(),
+      remaining: await deps.outbox.depth("clickhouse"),
       rebuilt: [],
-      skipped: "another worker holds the drain lock",
+      skipped: "another drainer holds the lock",
     };
   }
 
-  return { ...drained, remaining: await deps.outbox.depth() };
+  return { ...drained, remaining: await deps.outbox.depth("clickhouse") };
 }

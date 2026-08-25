@@ -6,13 +6,27 @@ import type { Redis } from "ioredis";
 import { makeKeys, type Keys } from "../state/keys.ts";
 import { Outbox } from "../state/outbox.ts";
 import { createRedis } from "../state/redis.ts";
-import { ScanStore } from "../state/scan.ts";
-import { DIRTY_MARK, REBUILT_MARK, syncClickhouse } from "./sync-clickhouse.ts";
+import {
+  DIRTY_MARK, REBUILT_MARK, syncClickhouse, type RebuildMarks,
+} from "./sync-clickhouse.ts";
 
 let redis: Redis;
 let keys: Keys;
 let outbox: Outbox;
-let marks: ScanStore;
+let marks: RebuildMarks;
+
+/** In-memory marks — the real ones live in the ClickHouse-backed scan store. */
+function memoryMarks(): RebuildMarks {
+  const values = new Map<string, number>();
+  return {
+    watermark: async (name) => values.get(name) ?? null,
+    raiseWatermark: async (name, value) => {
+      const current = values.get(name) ?? 0;
+      if (value > current) values.set(name, value);
+      return values.get(name)!;
+    },
+  };
+}
 
 /**
  * A ClickHouse stand-in that records what it was asked to run. syncTheses only calls
@@ -78,8 +92,8 @@ before(() => {
 beforeEach(async () => {
   const existing = await redis.keys(`${keys.prefix}*`);
   if (existing.length) await redis.del(...existing);
-  outbox = new Outbox(redis, keys, "clickhouse");
-  marks = new ScanStore(redis, keys);
+  outbox = new Outbox(redis, keys, ["clickhouse"]);
+  marks = memoryMarks();
 });
 
 after(async () => {
@@ -127,7 +141,7 @@ describe("sync-clickhouse", () => {
       syncClickhouse({ client: ch.client, outbox, marks }),
       /memory limit exceeded/,
     );
-    assert.equal(await outbox.depth(), 0, "the drain itself landed");
+    assert.equal(await outbox.depth("clickhouse"), 0, "the drain itself landed");
     assert.equal(ch.rebuilds, 0);
 
     fail = false;
@@ -192,11 +206,11 @@ describe("sync-clickhouse", () => {
     const ch = fakeClient();
     await outbox.push([thesis(1)]);
     // While someone else holds the lock, a sync must neither drain nor rebuild.
-    const held = await outbox.drain(() => syncClickhouse({ client: ch.client, outbox, marks }));
-    assert.equal(held?.skipped, "another worker holds the drain lock");
+    const held = await outbox.drain("clickhouse", () => syncClickhouse({ client: ch.client, outbox, marks }));
+    assert.equal(held?.skipped, "another drainer holds the lock");
     assert.equal(held?.pushed, 0);
     assert.deepEqual(held?.rebuilt, []);
     assert.equal(ch.rebuilds, 0);
-    assert.equal(await outbox.depth(), 1, "nothing drained while the lock was held");
+    assert.equal(await outbox.depth("clickhouse"), 1, "nothing drained while the lock was held");
   });
 });

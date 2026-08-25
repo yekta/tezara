@@ -1,23 +1,23 @@
 /**
- * The crawler. One process: it serves /health, /ready and /metrics, schedules work, and
- * runs it. There is nothing to configure beyond the connection URLs.
+ * The crawler. One process: it serves /health, /ready and /metrics, plans its own work,
+ * crawls it, and drains the outbox into the projection targets. There is no job queue —
+ * durable state (which ids were visited, watermarks) lives in ClickHouse, the transient
+ * outbox buffer in Redis, and "what to do next" is derived in-process (see roles/loop).
  */
 import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
 import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
 import { error, info, warn } from "./log.ts";
 import { buildLookups } from "./jobs/context.ts";
-import { Queue } from "./queue/queue.ts";
 import { buildStatus, createApi } from "./roles/api.ts";
-import { describeJob, describeStatus } from "./roles/report.ts";
-import { DEFAULT_POLICY, runScheduler } from "./roles/scheduler.ts";
-import { runWorker } from "./roles/worker.ts";
+import { DEFAULT_POLICY, Planner, runCrawlLanes, runDrainers } from "./roles/loop.ts";
+import { describeDrain, describeStatus, describeUnit } from "./roles/report.ts";
 import { makeKeys } from "./state/keys.ts";
+import { ChScanStore } from "./state/ch-scan.ts";
 import { DimensionCache } from "./state/dimensions.ts";
 import { Outbox } from "./state/outbox.ts";
 import { ReconcileStore } from "./state/reconcile.ts";
 import { createRedis } from "./state/redis.ts";
-import { ScanStore } from "./state/scan.ts";
 import { CircuitBreaker } from "./yok/breaker.ts";
 import { redisGate } from "./yok/gate.ts";
 import { openSession } from "./yok/session.ts";
@@ -26,22 +26,20 @@ const config = loadConfig();
 const redis = createRedis(config.REDIS_URL);
 const keys = makeKeys(config.CRAWLER_REDIS_PREFIX);
 
-const queue = new Queue(redis, keys);
-const scan = new ScanStore(redis, keys);
-const outbox = new Outbox(redis, keys, "meili");
-const clickhouseOutbox = new Outbox(redis, keys, "clickhouse");
+const clickhouse = createClickhouseClient({ url: config.CLICKHOUSE_URL });
+const meili = createMeiliClient({
+  host: config.MEILI_URL_INTERNAL,
+  apiKey: config.MEILI_ADMIN_KEY,
+});
+
+const scan = new ChScanStore(clickhouse);
+const outbox = new Outbox(redis, keys);
 const dimensions = new DimensionCache(redis, keys);
 const reconcile = new ReconcileStore(redis, keys);
 const breaker = new CircuitBreaker(redis, keys, {
   failureThreshold: config.CRAWLER_BREAKER_THRESHOLD,
   cooldownMs: config.CRAWLER_BREAKER_COOLDOWN_MS,
 });
-
-const meili = createMeiliClient({
-  host: config.MEILI_URL_INTERNAL,
-  apiKey: config.MEILI_ADMIN_KEY,
-});
-const clickhouse = createClickhouseClient({ url: config.CLICKHOUSE_URL });
 
 const controller = new AbortController();
 
@@ -59,14 +57,14 @@ process.on("uncaughtException", (err) => {
 });
 
 const apiDeps = {
-  redis, queue, scan, outbox, clickhouseOutbox, breaker, reconcile, meili,
+  redis, scan, outbox, breaker, reconcile, meili,
   maxThesisId: config.CRAWLER_MAX_THESIS_ID,
 };
 const server = createApi(apiDeps);
 server.listen(config.PORT, () => info(`listening on :${config.PORT}`));
 
 /**
- * A per-job log never shows totals, and totals are the only way to tell a crawl that is
+ * A per-unit log never shows totals, and totals are the only way to tell a crawl that is
  * working from one that is busy failing. One summary line a minute, always.
  */
 const STATUS_EVERY_MS = 60_000;
@@ -86,9 +84,11 @@ async function shutdown(signal: string): Promise<void> {
   info(`${signal} — shutting down`);
   controller.abort();
   server.close();
-  // In-flight jobs keep their lease; if we die before completing them the reaper
-  // requeues them, so there is nothing to flush here.
+  // Buffered scan marks not yet flushed are simply re-crawled next run; the outbox and
+  // its queues live in Redis and survive as they are.
+  await scan.flush().catch(() => {});
   await redis.quit().catch(() => {});
+  await clickhouse.close().catch(() => {});
   process.exit(0);
 }
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
@@ -108,13 +108,11 @@ const countHeldForYear = async (year: number) => {
 /**
  * Bring the projection targets up to date before crawling.
  *
- * Pointing the crawler at a fresh Meili or ClickHouse should be all it takes. Leaving
- * this to a deploy-time command means a new service quietly collects nothing: the crawl
- * runs, the outboxes fill, and every sync job fails on a missing table or index.
- *
- * Never fatal. A target that is unreachable at boot is a target that will be reachable
- * later, and the sync jobs retry on their own — taking the process down would only stop
- * the crawl as well.
+ * Pointing the crawler at a fresh Meili or ClickHouse should be all it takes. Never
+ * fatal: a target that is unreachable at boot is a target that will be reachable later,
+ * and the drainers retry on their own — taking the process down would only stop the
+ * crawl as well. (The ClickHouse migration IS load-bearing for the crawl itself now —
+ * crawl_state lives there — but the lanes fail soft and retry, so the same rule holds.)
  *
  * What it will NOT do is change settings on an index that already holds documents: that
  * forces a full reindex, so it stays a deliberate `pnpm --filter @tezara/crawler migrate`.
@@ -153,10 +151,15 @@ async function prepareTargets(): Promise<void> {
   }
 }
 
+const planner = new Planner(scan, outbox, {
+  ...DEFAULT_POLICY,
+  maxThesisId: config.CRAWLER_MAX_THESIS_ID,
+});
+
 /**
  * Establishing a YÖK session can fail — maintenance, blocked egress, slow DNS. That must
- * not take the process down: /metrics still needs serving and work still needs queueing,
- * so the crawl loop retries on its own with backoff.
+ * not take the process down: /metrics still needs serving, so the crawl loop retries on
+ * its own with backoff.
  */
 async function crawlForever(): Promise<void> {
   let attempt = 0;
@@ -174,24 +177,23 @@ async function crawlForever(): Promise<void> {
       );
       attempt = 0;
 
-      await runWorker(
+      await runCrawlLanes(
         {
           session: undefined as never, // each lane supplies its own
-          queue, scan, lookups, outbox, clickhouseOutbox, dimensions, meili, clickhouse,
+          scan, lookups, outbox, dimensions, meili, clickhouse,
           reconcile, countHeldForYear,
           log: info,
         },
-        queue,
+        planner,
         {
           signal: controller.signal,
           concurrency: config.CRAWLER_CONCURRENCY,
           newSession: () => openSession({ gate: redisGate(breaker) }),
-          // A retry or a dead-letter is the only job outcome worth stderr.
-          onEvent: ({ job, outcome, detail, elapsedMs }) => {
-            if (job.kind === "scan-id-range" && outcome === "ok") {
+          onEvent: ({ unit, outcome, detail, elapsedMs }) => {
+            if (unit.kind !== "reconcile-year" && outcome === "ok") {
               idsCrawledSinceStatus += (detail as { ok?: number }).ok ?? 0;
             }
-            const line = describeJob(job, outcome, detail, elapsedMs);
+            const line = describeUnit(unit, outcome, detail, elapsedMs);
             if (line !== null) (outcome === "ok" ? info : warn)(line);
           },
         },
@@ -208,20 +210,38 @@ async function crawlForever(): Promise<void> {
   }
 }
 
+/** The drainers restart on their own the same way the crawl does. */
+async function drainForever(): Promise<void> {
+  let attempt = 0;
+  while (!controller.signal.aborted) {
+    try {
+      await runDrainers(
+        {
+          outbox, scan, meili, dimensions, clickhouse, log: info,
+          onEvent: ({ target, detail }) => {
+            const line = describeDrain(target, detail);
+            if (line !== null) info(line);
+          },
+        },
+        { signal: controller.signal },
+      );
+      return; // only exits when aborted
+    } catch (err) {
+      attempt++;
+      const wait = Math.min(30_000 * 2 ** (attempt - 1), 5 * 60_000);
+      error(
+        `drainers failed (attempt ${attempt}), retrying in ${wait / 1000}s: ` +
+          `${err instanceof Error ? err.message : String(err)}`,
+      );
+      await new Promise((r) => setTimeout(r, wait));
+    }
+  }
+}
+
 await prepareTargets();
 
 try {
-  await Promise.all([
-    runScheduler(
-      { redis, keys, queue, scan },
-      {
-        signal: controller.signal,
-        policy: { ...DEFAULT_POLICY, maxThesisId: config.CRAWLER_MAX_THESIS_ID },
-        onTick: (r) => info(`scheduled ${JSON.stringify(r)}`),
-      },
-    ),
-    crawlForever(),
-  ]);
+  await Promise.all([crawlForever(), drainForever()]);
 } catch (err) {
   error(`FATAL: ${err instanceof Error ? err.stack : String(err)}`);
   process.exit(1);

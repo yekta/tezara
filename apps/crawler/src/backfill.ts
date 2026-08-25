@@ -1,21 +1,22 @@
 /**
- * Enqueue and run a slice of the id-space backfill, then drain the outbox into Meili.
+ * Crawl a slice of the id space, then drain the outbox into Meili.
  *   pnpm --filter @tezara/crawler backfill 200 260 [--chunk 20]
  *
  * Resumable: re-running the same range skips ids already in the scan store, so an
- * interrupted run costs only the ids it had not reached. Set MEILI_URL_INTERNAL + MEILI_ADMIN_KEY to
- * also project the results; without them the crawl still runs and the outbox just grows.
+ * interrupted run costs only the ids it had not reached. Set MEILI_URL_INTERNAL +
+ * MEILI_ADMIN_KEY to also project the results; without them the crawl still runs and
+ * the outbox just holds the work. CLICKHOUSE_URL is required — crawl state lives there.
  */
+import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
 import { createMeiliClient } from "@tezara/meili";
 import { buildLookups } from "./jobs/context.ts";
+import { scanRange } from "./jobs/crawl.ts";
 import { syncMeili } from "./jobs/sync-meili.ts";
 import { DimensionCache } from "./state/dimensions.ts";
 import { Outbox } from "./state/outbox.ts";
-import { Queue } from "./queue/queue.ts";
-import { runWorker } from "./roles/worker.ts";
 import { DEFAULT_PREFIX, makeKeys } from "./state/keys.ts";
 import { createRedis } from "./state/redis.ts";
-import { ScanStore } from "./state/scan.ts";
+import { ChScanStore } from "./state/ch-scan.ts";
 import { openSession } from "./yok/session.ts";
 
 const args = process.argv.slice(2);
@@ -29,10 +30,16 @@ if (!Number.isInteger(from) || !Number.isInteger(to) || from < 1 || to < from) {
   process.exit(1);
 }
 
+const chUrl = process.env.CLICKHOUSE_URL;
+if (!chUrl) {
+  console.error("CLICKHOUSE_URL is required — the scan store lives there");
+  process.exit(1);
+}
+
 const redis = createRedis();
 const keys = makeKeys(process.env.CRAWLER_REDIS_PREFIX ?? DEFAULT_PREFIX);
-const queue = new Queue(redis, keys);
-const scan = new ScanStore(redis, keys);
+const clickhouse = createClickhouseClient({ url: chUrl });
+const scan = new ChScanStore(clickhouse);
 const outbox = new Outbox(redis, keys);
 const dimensions = new DimensionCache(redis, keys);
 const meiliUrl = process.env.MEILI_URL_INTERNAL;
@@ -48,37 +55,28 @@ process.on("SIGINT", () => {
 });
 
 try {
+  await migrateClickhouse(clickhouse);
   const lookups = await buildLookups(session);
-  for (let start = from; start <= to; start += chunk) {
-    await queue.enqueue("scan-id-range", { from: start, to: Math.min(start + chunk - 1, to) });
-  }
-  console.error(`queued ${Math.ceil((to - from + 1) / chunk)} range job(s) over ${from}..${to}`);
+  const ctx = { session, scan, lookups, outbox, dimensions, meili, clickhouse };
 
-  await runWorker(
-    { session, queue, scan, lookups, outbox, meili },
-    queue,
-    {
-      signal: controller.signal,
-      exitWhenDrained: true,
-      onEvent: ({ job, outcome, detail }) => {
-        const p = job.params as { from: number; to: number };
-        console.error(`  ${job.kind} ${p.from}..${p.to} -> ${outcome} ${JSON.stringify(detail)}`);
-      },
-    },
-  );
+  for (let start = from; start <= to && !controller.signal.aborted; start += chunk) {
+    const end = Math.min(start + chunk - 1, to);
+    const counts = await scanRange(ctx, { from: start, to: end }, controller.signal);
+    await scan.flush();
+    console.error(`  ${start}..${end} -> ${JSON.stringify(counts)}`);
+  }
 
   if (meili) {
     const synced = await syncMeili({ client: meili, outbox, known: dimensions });
     console.error(`\nsynced to Meili: ${JSON.stringify(synced)}`);
   }
 
-  const stats = await queue.stats();
   const counts = await scan.counts();
-  console.error(`\noutbox depth: ${await outbox.depth()}`);
-  console.error(`queue: ${JSON.stringify(stats)}`);
+  console.error(`\noutbox depth: meili ${await outbox.depth("meili")}, clickhouse ${await outbox.depth("clickhouse")}`);
   console.error(`scan store: ${counts.tracked} ids tracked`);
   console.error(`watermark: ${await scan.watermark("head")}`);
 } finally {
   await session.close();
   await redis.quit();
+  await clickhouse.close().catch(() => {});
 }

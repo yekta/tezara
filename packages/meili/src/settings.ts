@@ -26,6 +26,7 @@ export async function applySettings(
     const task = await index.updateSettings({
       ...(def.filterable ? { filterableAttributes: def.filterable } : {}),
       ...(def.sortable ? { sortableAttributes: def.sortable } : {}),
+      ...(def.searchable ? { searchableAttributes: def.searchable } : {}),
       pagination: { maxTotalHits: def.maxTotalHits },
     });
     if (opts.waitForTasks) await index.waitForTask(task.taskUid);
@@ -41,6 +42,12 @@ export type SettingsDrift = {
   missing: boolean;
   missingFilterable: string[];
   missingSortable: string[];
+  /**
+   * Order-sensitive: searchable order IS the attribute ranking, so a reordering is
+   * drift even when the set is identical. Null when this index declares none (its
+   * documents are name-only, so Meili's `["*"]` default is already right).
+   */
+  searchable: { expected: string[]; actual: string[] } | null;
   maxTotalHits: { expected: number; actual: number | null | undefined };
 };
 
@@ -71,6 +78,7 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
         missing: true,
         missingFilterable: def.filterable ?? [],
         missingSortable: def.sortable ?? [],
+        searchable: def.searchable ? { expected: def.searchable, actual: [] } : null,
         maxTotalHits: { expected: def.maxTotalHits, actual: undefined },
       });
       continue;
@@ -85,12 +93,23 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
     const missingFilterable = (def.filterable ?? []).filter((a) => !filterable.has(a));
     const missingSortable = (def.sortable ?? []).filter((a) => !sortable.has(a));
 
-    if (missingFilterable.length || missingSortable.length || actual !== def.maxTotalHits) {
+    const actualSearchable = settings.searchableAttributes ?? ["*"];
+    const searchableDrifted =
+      def.searchable !== undefined &&
+      JSON.stringify(actualSearchable) !== JSON.stringify(def.searchable);
+
+    if (
+      missingFilterable.length || missingSortable.length ||
+      searchableDrifted || actual !== def.maxTotalHits
+    ) {
       drift.push({
         index: name,
         missing: false,
         missingFilterable,
         missingSortable,
+        searchable: searchableDrifted
+          ? { expected: def.searchable!, actual: actualSearchable }
+          : null,
         maxTotalHits: { expected: def.maxTotalHits, actual },
       });
     }

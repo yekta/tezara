@@ -24,6 +24,8 @@ const CLICKHOUSE_TABLES = [
   "theses", "subjects", "keywords", "advisors",
   "thesis_subjects", "thesis_keywords", "thesis_advisors",
   "universities", "subject_stats", "thesis_subjects_by_university",
+  // The crawl's own state — wiping it is what makes the crawler start over.
+  "crawl_state", "crawl_watermarks",
 ];
 
 const config = loadConfig();
