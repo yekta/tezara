@@ -10,7 +10,14 @@ let redis: Redis;
 let keys: Keys;
 let outbox: Outbox;
 
-const thesis = (id: number) => ({ id, title_original: `t${id}` }) as TCrawledThesis;
+const thesis = (id: number, title = `t${id}`) =>
+  ({
+    id, title_original: title, title_translated: null, author: `A${id}`,
+    advisors: [], university: "U", institute: "I", department: null, branch: null,
+    detail_id_1: "k1", detail_id_2: "k2", year: 2023, thesis_type: "T", language: "L",
+    subjects: [], keywords: [], abstract_original: null, abstract_translated: null,
+    page_count: null, pdf_url: null, restricted: false,
+  }) as TCrawledThesis;
 
 before(() => {
   redis = createRedis();
@@ -20,7 +27,7 @@ before(() => {
 beforeEach(async () => {
   const existing = await redis.keys(`${keys.prefix}*`);
   if (existing.length) await redis.del(...existing);
-  outbox = new Outbox(redis, keys, "meili");
+  outbox = new Outbox(redis, keys);
 });
 
 after(async () => {
@@ -29,76 +36,104 @@ after(async () => {
   await redis.quit();
 });
 
-describe("outbox", () => {
-  test("peek reads the head without removing it; commit removes it", async () => {
-    await outbox.push([thesis(1), thesis(2), thesis(3)]);
+/** How many payload copies exist — the whole point of the shared outbox is: one. */
+async function docCount(): Promise<number> {
+  return (await redis.keys(`${keys.prefix}:outbox:doc:*`)).length;
+}
 
-    assert.deepEqual((await outbox.peek(2)).map((t) => t.id), [1, 2]);
-    assert.equal(await outbox.depth(), 3, "peek is not destructive");
-
-    await outbox.commit(2);
-    assert.deepEqual((await outbox.peek(10)).map((t) => t.id), [3]);
-  });
-
-  test("only one drain runs at a time", async () => {
+describe("shared outbox", () => {
+  test("one push stores one payload but queues for both targets", async () => {
     await outbox.push([thesis(1), thesis(2)]);
 
-    let running = 0;
-    let overlapped = false;
-    const drain = () =>
-      outbox.drain(async () => {
-        overlapped ||= ++running > 1;
-        await new Promise((r) => setTimeout(r, 50));
-        running--;
-        return "ran";
-      });
-
-    const results = await Promise.all([drain(), drain(), drain()]);
-
-    assert.equal(overlapped, false);
-    assert.equal(results.filter((r) => r === "ran").length, 1);
-    assert.equal(results.filter((r) => r === null).length, 2, "the losers skip, not wait");
+    assert.equal(await outbox.depth("meili"), 2);
+    assert.equal(await outbox.depth("clickhouse"), 2);
+    assert.equal(await docCount(), 2, "payload stored once, not per target");
   });
 
-  test("a released lock lets the next drain through", async () => {
-    assert.equal(await outbox.drain(async () => 1), 1);
-    assert.equal(await outbox.drain(async () => 2), 2);
+  test("peek returns the documents without removing them", async () => {
+    await outbox.push([thesis(1), thesis(2), thesis(3)]);
+
+    const batch = await outbox.peek("meili", 2);
+    assert.deepEqual(batch.map((t) => t.id), [1, 2]);
+    assert.equal(await outbox.depth("meili"), 3, "peek is not destructive");
   });
 
-  test("the lock is released even when the drain throws", async () => {
-    await assert.rejects(() => outbox.drain(async () => { throw new Error("boom"); }));
-    assert.equal(await outbox.drain(async () => "free"), "free");
-  });
-
-  test("quarantined documents are parked with their reason, not lost silently", async () => {
-    await outbox.quarantine([thesis(9)], "Document identifier `9.5` is invalid");
-
-    assert.equal(await outbox.deadDepth(), 1);
-    const [raw] = await redis.lrange(`${keys.prefix}:outbox:meili:dead`, 0, -1);
-    const entry = JSON.parse(raw!) as { reason: string; doc: { id: number }; at: string };
-    assert.match(entry.reason, /Document identifier/);
-    assert.equal(entry.doc.id, 9);
-    assert.ok(Date.parse(entry.at) > 0);
-  });
-
-  test("quarantined documents read back newest first", async () => {
-    await outbox.quarantine([thesis(1)], "first");
-    await outbox.quarantine([thesis(2)], "second");
-
-    const dead = await outbox.dead(10);
-    assert.deepEqual(dead.map((d) => d.reason), ["second", "first"]);
-    assert.deepEqual(await outbox.dead(1), [dead[0]], "the limit takes the newest");
-    assert.deepEqual(await outbox.dead(0), [], "an empty window reads as empty");
-  });
-
-  test("quarantining nothing is a no-op", async () => {
-    await outbox.quarantine([], "unused");
-    assert.equal(await outbox.deadDepth(), 0);
-  });
-
-  test("each target keeps its own queue", async () => {
-    const clickhouse = new Outbox(redis, keys, "clickhouse");
+  test("committing one target keeps the payload for the other", async () => {
     await outbox.push([thesis(1)]);
-    assert.equal(await clickhouse.depth(), 0);
+
+    await outbox.commit("meili", [1]);
+
+    assert.equal(await outbox.depth("meili"), 0);
+    assert.equal(await outbox.depth("clickhouse"), 1);
+    assert.equal(await docCount(), 1, "clickhouse still needs it");
+    assert.equal((await outbox.peek("clickhouse", 1))[0]?.id, 1);
+  });
+
+  test("committing the last target deletes the payload", async () => {
+    await outbox.push([thesis(1)]);
+
+    await outbox.commit("meili", [1]);
+    await outbox.commit("clickhouse", [1]);
+
+    assert.equal(await docCount(), 0, "nothing left once every target has it");
+  });
+
+  test("re-pushing a pending id overwrites the payload without duplicating it", async () => {
+    await outbox.push([thesis(1, "old title")]);
+    await outbox.push([thesis(1, "new title")]);
+
+    assert.equal(await outbox.depth("meili"), 1, "same id, one queue entry");
+    assert.equal(await docCount(), 1);
+    assert.equal((await outbox.peek("meili", 1))[0]?.title_original, "new title");
+  });
+
+  test("pushes drain in arrival order", async () => {
+    await outbox.push([thesis(5)]);
+    await outbox.push([thesis(2)]);
+    await outbox.push([thesis(9)]);
+
+    const batch = await outbox.peek("meili", 10);
+    assert.deepEqual(batch.map((t) => t.id), [5, 2, 9], "FIFO by push, not by id");
+  });
+
+  test("a Meili-only outbox never queues for clickhouse", async () => {
+    const meiliOnly = new Outbox(redis, keys, ["meili"]);
+    await meiliOnly.push([thesis(1)]);
+
+    assert.equal(await meiliOnly.depth("meili"), 1);
+    assert.equal(await meiliOnly.depth("clickhouse"), 0);
+
+    await meiliOnly.commit("meili", [1]);
+    assert.equal(await docCount(), 0, "the sole target's commit frees the payload");
+  });
+
+  test("an id whose payload vanished is dropped from the queue, not peeked forever", async () => {
+    await outbox.push([thesis(1), thesis(2)]);
+    await redis.del(`${keys.prefix}:outbox:doc:1`);
+
+    const batch = await outbox.peek("meili", 10);
+    assert.deepEqual(batch.map((t) => t.id), [2]);
+    assert.equal(await outbox.depth("meili"), 1, "the debris entry is gone");
+  });
+
+  test("quarantine keeps its own bounded list per target", async () => {
+    await outbox.quarantine("meili", [{ id: 7 }], "invalid_document_fields");
+    const dead = await outbox.dead("meili");
+    assert.equal(dead.length, 1);
+    assert.equal(dead[0]?.reason, "invalid_document_fields");
+    assert.equal(await outbox.deadDepth("meili"), 1);
+    assert.equal(await outbox.deadDepth("clickhouse"), 0);
+  });
+
+  test("drain locks per target, not globally", async () => {
+    const both = await outbox.drain("meili", async () =>
+      outbox.drain("clickhouse", async () => "ran"),
+    );
+    assert.equal(both, "ran", "one target's drain must not block the other's");
+
+    const nested = await outbox.drain("meili", async () =>
+      outbox.drain("meili", async () => "ran"),
+    );
+    assert.equal(nested, null, "the same target is single-drainer");
   });
 });

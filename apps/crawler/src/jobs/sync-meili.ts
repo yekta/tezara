@@ -51,18 +51,11 @@ export type SyncMeiliResult = {
 };
 
 /**
- * How long one job drains for before handing its lane back.
+ * How long one drain runs before returning.
  *
- * The drain used to stop after a fixed twenty batches, which on a backlog meant it quit
- * with work still queued and then waited for the scheduler's next tick to be told to
- * carry on. Meanwhile the other lanes had already claimed and skipped every sync job the
- * ticks in between had queued, so there was nothing left to pick up: the one drainer sat
- * idle while the outbox grew. Now it drains until the outbox is empty, and a job that
- * runs out of budget re-queues itself immediately (see the worker) instead of idling.
- *
- * Five minutes is a compromise: long enough that the re-queue is rare, short enough that
- * a lane comes back for the crawl, a redeploy does not lose much work, and the job's
- * completion still shows up in the log at a useful interval.
+ * The dedicated drainer loop calls this again immediately while work remains, so the
+ * budget is a checkpoint, not a cap: it bounds how much progress a redeploy can lose
+ * and gives the log a completion line at a useful interval.
  */
 const DEFAULT_BUDGET_MS = 5 * 60_000;
 
@@ -74,14 +67,12 @@ const n = (value: number) => value.toLocaleString("en-US");
 /**
  * Drain the outbox into Meili.
  *
- * Commit-after-push: if the push throws, nothing is trimmed and the same batch is
+ * Commit-after-push: if the push throws, nothing is committed and the same batch is
  * retried on the next run. That makes a partial failure a duplicate write (harmless —
  * Meili upserts by primary key) rather than a lost thesis.
  *
- * Held under the outbox drain lock, because peek/commit is only safe for one worker at
- * a time. Sync jobs are queued every minute under a fresh id and claimed ahead of
- * everything else, so several lanes otherwise run this at once, and two commits of the
- * same head trim a batch that was never pushed.
+ * Held under the target's drain lock: the service runs one drainer, but the backfill
+ * CLI can drain concurrently, and peek/commit is only safe for one drainer at a time.
  *
  * A document Meili refuses is bisected out and quarantined rather than retried forever.
  * The alternative is what the outbox does by default: one poisonous record at the head
@@ -105,7 +96,8 @@ export async function syncMeili(
 ): Promise<SyncMeiliResult> {
   // Matches INDEXES.theses.batchSize, so each index costs exactly one task per batch:
   // a smaller number just multiplies the fixed per-task cost across more of them.
-  const batchSize = params.batchSize ?? 2_000;
+  // ~10K theses is ~40MB of payload, comfortably under Meili's 100MB default cap.
+  const batchSize = params.batchSize ?? 10_000;
   const maxBatches = params.maxBatches ?? Number.POSITIVE_INFINITY;
   const budgetMs = params.budgetMs ?? DEFAULT_BUDGET_MS;
   const log = deps.log ?? (() => {});
@@ -116,7 +108,7 @@ export async function syncMeili(
   const onReject = async (r: Rejection): Promise<void> => {
     if (r.dropped) {
       quarantined += r.docs.length;
-      await deps.outbox.quarantine(r.docs, r.reason);
+      await deps.outbox.quarantine("meili", r.docs, r.reason);
     }
     // Logged as it happens: a drain of twenty batches takes minutes, and the job's own
     // completion event is far too late to tell you which push Meili is refusing.
@@ -142,16 +134,16 @@ export async function syncMeili(
 
   let budgetExpired = false;
 
-  const drained = await deps.outbox.drain(async () => {
+  const drained = await deps.outbox.drain("meili", async () => {
     let pushed = 0;
     let batches = 0;
 
-    const depth = await deps.outbox.depth();
+    const depth = await deps.outbox.depth("meili");
     if (depth === 0) return { pushed, batches };
     log(`meili drain starting: ${n(depth)} queued, up to ${Math.round(budgetMs / 1000)}s`);
 
-    // Inside the lock, so the nine lanes that lose the race do no work at all rather
-    // than each spending a round trip verifying settings they will not use.
+    // Inside the lock, so a drainer that loses the race does no work at all rather
+    // than spending a round trip verifying settings it will not use.
     const drift = await verifySettings(deps.client);
 
     // An index that does not exist yet is not a migration decision. If we do nothing,
@@ -177,17 +169,17 @@ export async function syncMeili(
         budgetExpired = true;
         break;
       }
-      const batch = await deps.outbox.peek(batchSize);
+      const batch = await deps.outbox.peek("meili", batchSize);
       if (batch.length === 0) break;
 
       const started = Date.now();
       await syncTheses(deps.client, batch, { waitForTasks: true, onReject, known: deps.known });
-      await deps.outbox.commit(batch.length);
+      await deps.outbox.commit("meili", batch.map((t) => t.id));
       pushed += batch.length;
       batches++;
       log(
         `meili batch ${batches}: ${n(batch.length)} docs in ` +
-          `${Math.round((Date.now() - started) / 1000)}s, ${n(await deps.outbox.depth())} left`,
+          `${Math.round((Date.now() - started) / 1000)}s, ${n(await deps.outbox.depth("meili"))} left`,
       );
     }
 
@@ -198,12 +190,12 @@ export async function syncMeili(
     return {
       pushed: 0,
       batches: 0,
-      remaining: await deps.outbox.depth(),
-      skipped: "another worker holds the drain lock",
+      remaining: await deps.outbox.depth("meili"),
+      skipped: "another drainer holds the lock",
     };
   }
 
-  const remaining = await deps.outbox.depth();
+  const remaining = await deps.outbox.depth("meili");
   return {
     ...drained,
     remaining,

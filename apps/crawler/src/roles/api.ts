@@ -1,22 +1,19 @@
 import { createServer, type Server, type ServerResponse } from "node:http";
 import type { MeiliSearch } from "@tezara/meili";
 import type { Redis } from "ioredis";
-import type { Queue } from "../queue/queue.ts";
 import type { Outbox } from "../state/outbox.ts";
 import type { ReconcileStore } from "../state/reconcile.ts";
-import type { ScanStore } from "../state/scan.ts";
+import type { ChScanStore } from "../state/ch-scan.ts";
 import type { CircuitBreaker } from "../yok/breaker.ts";
 
 export type ApiDeps = {
   redis: Redis;
-  queue: Queue;
-  scan: ScanStore;
+  scan: ChScanStore;
   outbox: Outbox;
-  clickhouseOutbox?: Outbox;
   breaker: CircuitBreaker;
   reconcile?: ReconcileStore;
   maxThesisId: number;
-  /** Only for reporting — the sync jobs get their own handle from the job context. */
+  /** Only for reporting — the drainers get their own handle. */
   meili?: MeiliSearch;
 };
 
@@ -42,13 +39,12 @@ async function meiliStats(client: MeiliSearch | undefined) {
 }
 
 export async function buildStatus(deps: ApiDeps) {
-  const [queue, scan, meiliOutbox, clickhouseOutbox, meiliDead, breaker, search] =
+  const [scan, meiliOutbox, clickhouseOutbox, meiliDead, breaker, search] =
     await Promise.all([
-      deps.queue.stats(),
       deps.scan.counts(),
-      deps.outbox.depth(),
-      deps.clickhouseOutbox?.depth() ?? Promise.resolve(0),
-      deps.outbox.deadDepth(),
+      deps.outbox.depth("meili"),
+      deps.outbox.depth("clickhouse"),
+      deps.outbox.deadDepth("meili"),
       deps.breaker.stats(),
       meiliStats(deps.meili),
     ]);
@@ -70,14 +66,9 @@ export async function buildStatus(deps: ApiDeps) {
       ),
       highestIdSeenUpstream: head,
     },
-    queue: {
-      pending: queue.pending,
-      running: queue.leased,
-      dead: queue.dead,
-    },
     pendingProjection: {
       // Crawled but not yet indexed. Should hover near zero; a number that only grows
-      // means the sync jobs are not running.
+      // means the drainers are not keeping up (or a target is down).
       meili: meiliOutbox,
       clickhouse: clickhouseOutbox,
       // Documents Meili refused one at a time. Nothing retries these; a non-zero count
@@ -106,22 +97,11 @@ export async function buildStatus(deps: ApiDeps) {
  * Everything that went wrong recently, in one place.
  *
  * Hunting a failure in a hosted log viewer means knowing it happened and roughly when.
- * These two lists are the durable copy: jobs that exhausted their retries, and documents
- * a projection target refused.
+ * The quarantine lists are the durable copy: documents a projection target refused.
  */
 async function buildFailures(deps: ApiDeps, limit: number) {
-  const [jobs, quarantined] = await Promise.all([
-    deps.queue.deadJobs(limit),
-    deps.outbox.dead(limit),
-  ]);
-
+  const quarantined = await deps.outbox.dead("meili", limit);
   return {
-    deadJobs: jobs.map((j) => ({
-      kind: j.kind,
-      params: j.params,
-      attempts: j.attempts,
-      lastError: j.lastError ?? null,
-    })),
     quarantined: quarantined.map((q) => ({
       at: q.at,
       reason: q.reason,

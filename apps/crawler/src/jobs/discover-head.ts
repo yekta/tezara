@@ -1,5 +1,5 @@
 import type { JobContext } from "./context.ts";
-import { fetchThesisById } from "../yok/client.ts";
+import { scanRange } from "./crawl.ts";
 
 export type DiscoverHeadParams = { probe?: number };
 
@@ -9,34 +9,26 @@ export type DiscoverHeadParams = { probe?: number };
  * one-shot job.
  *
  * The id space has real holes — 500,000–500,079 is entirely empty — so a single miss
- * proves nothing. Probe a window and take the highest hit.
+ * proves nothing. Probe a window and take the highest hit; every `ok` raises the head
+ * watermark from inside the crawl itself.
+ *
+ * Ids already recorded (gaps from earlier probes of the same window) are skipped —
+ * their own gap schedule re-checks them — so a static head costs almost nothing to
+ * keep probing.
  */
 export async function discoverHead(
   ctx: JobContext,
   params: DiscoverHeadParams = {},
   signal?: AbortSignal,
-): Promise<{ from: number; found: number[]; watermark: number }> {
+): Promise<{ from: number; found: number; watermark: number }> {
   const probe = params.probe ?? 100;
   const head = (await ctx.scan.watermark("head")) ?? 0;
-  const found: number[] = [];
 
-  for (let id = head + 1; id <= head + probe; id++) {
-    if (signal?.aborted) break;
-    if (await ctx.scan.get(id)) continue;
+  const counts = await scanRange(ctx, { from: head + 1, to: head + probe }, signal);
 
-    const outcome = await fetchThesisById(ctx.session, id, ctx.lookups);
-    if (outcome.status === "ok") {
-      await ctx.outbox.push([outcome.thesis]);
-        await ctx.clickhouseOutbox?.push([outcome.thesis]);
-      await ctx.scan.record(id, "ok");
-      await ctx.scan.raiseWatermark("head", id);
-      found.push(id);
-    } else if (outcome.status === "gap") {
-      await ctx.scan.record(id, "gap");
-    } else {
-      await ctx.scan.record(id, "error");
-    }
-  }
-
-  return { from: head + 1, found, watermark: (await ctx.scan.watermark("head")) ?? head };
+  return {
+    from: head + 1,
+    found: counts.ok,
+    watermark: (await ctx.scan.watermark("head")) ?? head,
+  };
 }

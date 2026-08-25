@@ -4,20 +4,17 @@ import type { MeiliSearch } from "@tezara/meili";
 import type { DimensionCache } from "../state/dimensions.ts";
 import type { Outbox } from "../state/outbox.ts";
 import type { ReconcileStore } from "../state/reconcile.ts";
-import type { Queue } from "../queue/queue.ts";
-import type { ScanStore } from "../state/scan.ts";
+import type { ChScanStore } from "../state/ch-scan.ts";
 import type { Lookups } from "../yok/client.ts";
 import type { Session } from "../yok/session.ts";
 import { fetchSubjectTaxonomy } from "../yok/taxonomy.ts";
 
 export type JobContext = {
   session: Session;
-  queue: Queue;
-  scan: ScanStore;
+  scan: ChScanStore;
   lookups: Lookups;
-  /** One outbox per projection target; each drains independently. */
+  /** One shared payload store with a queue per projection target. */
   outbox: Outbox;
-  clickhouseOutbox?: Outbox;
   /**
    * Dimension names already pushed to Meili. Absent just means every name is pushed in
    * every batch, which is what the drain did before it existed.

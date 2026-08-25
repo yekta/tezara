@@ -167,6 +167,53 @@ function offsetContext(payload: Buffer, reason: string): Rejection["atOffset"] {
  */
 const annotated = new WeakSet<Error>();
 
+/**
+ * A push Meili refused: bisect it out or throw, depending on whose fault it is.
+ * Shared by the serial fallback path and the parallel wait in syncTheses.
+ */
+async function recover(
+  client: MeiliSearch,
+  name: IndexName,
+  docs: IndexDoc[],
+  opts: SyncOptions,
+  err: unknown,
+): Promise<number> {
+  const refused = refusal(err);
+  const payload = Buffer.from(JSON.stringify(docs), "utf8");
+
+  // Say what we sent, whatever the failure turns out to be. An offset in a parse error
+  // means nothing without the size of the payload it refers to, and this is the only
+  // place that still knows it.
+  const annotate = (e: unknown): unknown => {
+    if (e instanceof Error && !annotated.has(e)) {
+      annotated.add(e);
+      e.message = `${e.message} [${name}: ${docs.length} docs, ${payload.byteLength} byte payload]`;
+    }
+    return e;
+  };
+
+  // A refusal that is not about the documents is a symptom, not poison: fail the job,
+  // leave the outbox intact, and let the operator fix the server.
+  if (refused === null || !refused.worthSplitting || !opts.onReject) throw annotate(err);
+  if (docs.length === 1 && !refused.blamesDocument) throw annotate(err);
+
+  await opts.onReject({
+    index: name,
+    docs,
+    reason: refused.reason,
+    payloadBytes: payload.byteLength,
+    atOffset: offsetContext(payload, refused.reason),
+    dropped: docs.length === 1,
+  });
+  if (docs.length === 1) return 0;
+
+  const mid = Math.ceil(docs.length / 2);
+  return (
+    (await push(client, name, docs.slice(0, mid), opts)) +
+    (await push(client, name, docs.slice(mid), opts))
+  );
+}
+
 /** Push one chunk, halving it until Meili accepts it or a single document is to blame. */
 async function push(
   client: MeiliSearch,
@@ -193,40 +240,7 @@ async function push(
     }
     return docs.length;
   } catch (err) {
-    const refused = refusal(err);
-    const payload = Buffer.from(JSON.stringify(docs), "utf8");
-
-    // Say what we sent, whatever the failure turns out to be. An offset in a parse error
-    // means nothing without the size of the payload it refers to, and this is the only
-    // place that still knows it.
-    const annotate = (e: unknown): unknown => {
-      if (e instanceof Error && !annotated.has(e)) {
-        annotated.add(e);
-        e.message = `${e.message} [${name}: ${docs.length} docs, ${payload.byteLength} byte payload]`;
-      }
-      return e;
-    };
-
-    // A refusal that is not about the documents is a symptom, not poison: fail the job,
-    // leave the outbox intact, and let the operator fix the server.
-    if (refused === null || !refused.worthSplitting || !opts.onReject) throw annotate(err);
-    if (docs.length === 1 && !refused.blamesDocument) throw annotate(err);
-
-    await opts.onReject({
-      index: name,
-      docs,
-      reason: refused.reason,
-      payloadBytes: payload.byteLength,
-      atOffset: offsetContext(payload, refused.reason),
-      dropped: docs.length === 1,
-    });
-    if (docs.length === 1) return 0;
-
-    const mid = Math.ceil(docs.length / 2);
-    return (
-      (await push(client, name, docs.slice(0, mid), opts)) +
-      (await push(client, name, docs.slice(mid), opts))
-    );
+    return recover(client, name, docs, opts, err);
   }
 }
 
@@ -247,6 +261,16 @@ export async function syncTheses(
 ): Promise<SyncReport> {
   const report = Object.fromEntries(INDEX_NAMES.map((n) => [n, 0])) as SyncReport;
   if (theses.length === 0) return report;
+
+  // Submit every chunk of every index BEFORE waiting on anything. Meili's scheduler
+  // merges consecutive queued tasks per index into one indexing pass, and a pass has a
+  // large fixed cost — so submit-then-wait indexes a batch in roughly one pass per
+  // index, where the old submit-wait-submit-wait paid that fixed cost per chunk, one
+  // index at a time, with the drain idle in between.
+  type Submitted = { name: IndexName; docs: IndexDoc[]; taskUid: number };
+  const submitted: Submitted[] = [];
+  const failures: { name: IndexName; docs: IndexDoc[]; err: unknown }[] = [];
+  const sentByIndex = new Map<IndexName, string[]>();
 
   for (const name of INDEX_NAMES) {
     const def = INDEXES[name];
@@ -270,19 +294,72 @@ export async function syncTheses(
     }
     if (byId.size === 0) continue;
 
-    const sent: string[] = [];
-    for (const batch of chunk([...byId.values()], def.batchSize)) {
-      report[name] += await push(client, name, batch, opts);
-      // Recorded per chunk, after Meili accepted it: a push that throws leaves its ids
-      // unrecorded and the next drain retries them.
-      sent.push(...batch.map((doc) => String(doc.id)));
+    for (const docs of chunk([...byId.values()], def.batchSize)) {
+      try {
+        const task = await client.index(name).addDocuments(docs, { primaryKey: "id" });
+        submitted.push({ name, docs, taskUid: task.taskUid });
+      } catch (err) {
+        // A refusal at submission (413, malformed payload) — recovered below, after the
+        // accepted work is in flight, so one bad chunk does not stall the rest.
+        failures.push({ name, docs, err });
+      }
     }
+  }
+
+  const recordSent = (name: IndexName, docs: IndexDoc[]) => {
+    if (!INDEXES[name].saturates || !opts.known) return;
+    const sent = sentByIndex.get(name) ?? [];
+    sent.push(...docs.map((doc) => String(doc.id)));
+    sentByIndex.set(name, sent);
+  };
+
+  if (opts.waitForTasks) {
+    // All waits in parallel: total wall clock is Meili's queue completion, not the sum
+    // of every task's completion observed one at a time.
+    await Promise.all(
+      submitted.map(async (s) => {
+        try {
+          const done = await client.index(s.name).waitForTask(s.taskUid, {
+            timeOutMs: opts.taskTimeoutMs ?? TASK_TIMEOUT_MS,
+            intervalMs: TASK_POLL_MS,
+          });
+          // A failed task used to pass silently: the batch was committed and its
+          // theses were dropped without ever reaching the index.
+          if (done.status === "failed") {
+            throw new TaskFailedError(
+              done.error?.message ?? `task ${s.taskUid} failed`,
+              done.error?.code,
+            );
+          }
+          report[s.name] += s.docs.length;
+          recordSent(s.name, s.docs);
+        } catch (err) {
+          failures.push({ name: s.name, docs: s.docs, err });
+        }
+      }),
+    );
+  } else {
+    for (const s of submitted) {
+      report[s.name] += s.docs.length;
+      recordSent(s.name, s.docs);
+    }
+  }
+
+  // The slow path, serial and rare: bisect a refused chunk down to the document to
+  // blame, or throw if the failure is the server's fault. Runs after the parallel wait
+  // so an isolated bad chunk costs only its own time.
+  for (const f of failures) {
+    report[f.name] += await recover(client, f.name, f.docs, opts, f.err);
     // Includes anything the bisect quarantined. Nothing retries a quarantined document,
     // so remembering it is what stops a single poisonous name being re-pushed, refused
     // and re-quarantined by every batch from here to the end of the crawl.
-    if (def.saturates && opts.known && sent.length > 0) {
-      await opts.known.remember(name, sent);
-    }
+    recordSent(f.name, f.docs);
+  }
+
+  // Recorded only after Meili accepted (or the bisect settled) — a chunk whose recover
+  // threw never reaches here, so the next drain retries it.
+  for (const [name, sent] of sentByIndex) {
+    if (sent.length > 0) await opts.known!.remember(name, sent);
   }
 
   return report;

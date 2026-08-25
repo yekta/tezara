@@ -151,6 +151,37 @@ export const MIGRATIONS: Migration[] = [
       ) ENGINE = MergeTree() ORDER BY (subject_name, language)`,
   },
   {
+    // Per-thesis-id crawl state — the durable "marks" the crawler runs on. Previously
+    // ~300MB of non-evictable Redis (1M hashes plus a due ZSET); here it is a few MB of
+    // compressed disk. Timestamps are epoch milliseconds (UInt64) so they round-trip
+    // through JS without timezone parsing. Single writer: the one crawler process.
+    // Reads use FINAL; ReplacingMergeTree collapses re-records by id at merge time.
+    id: "0016_crawl_state",
+    sql: `
+      CREATE TABLE IF NOT EXISTS crawl_state (
+        id UInt32,
+        state LowCardinality(String),
+        last_checked UInt64,
+        next_check_at UInt64,
+        attempts UInt16,
+        content_hash String,
+        version UInt64 DEFAULT toUnixTimestamp64Milli(now64(3))
+      ) ENGINE = ReplacingMergeTree(version)
+      ORDER BY id`,
+  },
+  {
+    // Named cursors (backfill position, head watermark, last-run stamps). Values only
+    // ever rise, so reads take max(value) and never need FINAL.
+    id: "0017_crawl_watermarks",
+    sql: `
+      CREATE TABLE IF NOT EXISTS crawl_watermarks (
+        name String,
+        value UInt64,
+        version UInt64 DEFAULT toUnixTimestamp64Milli(now64(3))
+      ) ENGINE = ReplacingMergeTree(version)
+      ORDER BY name`,
+  },
+  {
     id: "0011_migrations_log",
     sql: `
       CREATE TABLE IF NOT EXISTS schema_migrations (
