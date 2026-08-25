@@ -8,8 +8,9 @@ import { Outbox } from "../state/outbox.ts";
 import { createRedis } from "../state/redis.ts";
 import { DEFAULT_POLICY, Planner, type LoopPolicy } from "./loop.ts";
 
-const chUrl =
-  process.env.CLICKHOUSE_TEST_URL ?? "http://default:testch123@127.0.0.1:8123/tezara_test";
+// CLICKHOUSE_TEST_URL is a BASE url without a database; see packages/clickhouse tests.
+const chBase = process.env.CLICKHOUSE_TEST_URL ?? "http://default:chpass@127.0.0.1:8123";
+const chUrl = `${chBase.replace(/\/$/, "")}/tezara_test`;
 
 let ch: ClickHouseClient;
 let redis: Redis;

@@ -7,10 +7,12 @@ import { ChScanStore, RECHECK_MS } from "./ch-scan.ts";
  * Integration test against a real ClickHouse — the store is thin SQL, and faking the
  * SQL would test the fake. Run one locally with:
  *   docker run -d -p 127.0.0.1:8123:8123 -e CLICKHOUSE_DB=tezara_test \
- *     -e CLICKHOUSE_PASSWORD=testch123 clickhouse/clickhouse-server:24.8-alpine
+ *     -e CLICKHOUSE_PASSWORD=chpass clickhouse/clickhouse-server:24.8-alpine
  */
-const url =
-  process.env.CLICKHOUSE_TEST_URL ?? "http://default:testch123@127.0.0.1:8123/tezara_test";
+// Same convention as packages/clickhouse: CLICKHOUSE_TEST_URL is a BASE url without
+// a database, and the test database is appended here.
+const base = process.env.CLICKHOUSE_TEST_URL ?? "http://default:chpass@127.0.0.1:8123";
+const url = `${base.replace(/\/$/, "")}/tezara_test`;
 
 let ch: ClickHouseClient;
 let store: ChScanStore;
