@@ -49,7 +49,8 @@ export const DEFAULT_POLICY: LoopPolicy = {
   // ~50 ids at 3 requests each is a couple of minutes per unit: small enough that a
   // crash or redeploy costs little repeated work.
   chunkSize: 50,
-  discoverEveryMs: 30 * 60_000,
+  // Theses land in batches, not continuously; a wide probe a few times a day keeps up.
+  discoverEveryMs: 6 * 60 * 60_000,
   // One year every 20 minutes cycles the whole 1959-2026 corpus in about a day.
   reconcileEveryMs: 20 * 60_000,
   reconcileYears: { from: 1959, to: 2026 },
