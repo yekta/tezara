@@ -111,11 +111,38 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const n = (value: number) => value.toLocaleString("en-US");
 
+/** True when the server is working on ANY task — ours or another client's. */
+async function serverBusy(client: MeiliSearch): Promise<boolean> {
+  const busy = await client.getTasks({ statuses: ["processing"], limit: 1 });
+  return busy.total > 0;
+}
+
+/** Within-pass progress for the heartbeat, best effort — older servers lack /batches. */
+async function batchProgress(client: MeiliSearch, batchUid: number | null): Promise<string> {
+  if (batchUid === null || batchUid === undefined) return "";
+  try {
+    const batch = await client.getBatch(batchUid);
+    return batch.progress === null ? "" : ` (${Math.round(batch.progress.percentage)}%)`;
+  } catch {
+    return "";
+  }
+}
+
 /**
  * The client's waitForTask, replaced with our own poll so the wait can narrate.
  * Indexing a large batch into a large index runs for minutes, and between submission
  * and completion the client's wait produces nothing — an operator watching the log
  * cannot tell a slow indexing pass from a wedged one. A heartbeat every 30s can.
+ *
+ * There is deliberately no clock on work in flight. An indexing pass legitimately
+ * outlives any fixed timeout, and abandoning one wastes exactly the work being waited
+ * for: the pass completes server-side uncommitted, and the retry re-submits the same
+ * documents for another full pass. A backlog once fed on itself this way — every
+ * "timeout" re-queued ten minutes of real indexing. The deadline advances while the
+ * task is being processed, or while the server is busy with anything at all (a
+ * predecessor, another client's work, a dump); it runs down only when this task sits
+ * enqueued against a provably idle server, which is a wedged scheduler and the one
+ * case worth giving up on.
  */
 async function awaitTask(
   client: MeiliSearch,
@@ -128,13 +155,7 @@ async function awaitTask(
   const timeoutMs = opts.taskTimeoutMs ?? TASK_TIMEOUT_MS;
   const startedAt = Date.now();
   let nextReport = startedAt + WAIT_REPORT_MS;
-  // The timeout is per phase, not end-to-end: it exists to catch a wedged server, and
-  // a task that moves from enqueued to processing is not wedged. A single clock here
-  // is how a drain once timed out on queue congestion it caused itself — each retry
-  // re-enqueued the same documents behind its own predecessors and raced the whole
-  // queue, which only ever got longer.
   let deadline = startedAt + timeoutMs;
-  let queued = true;
 
   while (true) {
     const task = await client.getTask(taskUid);
@@ -146,24 +167,23 @@ async function awaitTask(
         task.error?.code,
       );
     }
-    if (queued && task.status === "processing") {
-      queued = false;
-      deadline = Date.now() + timeoutMs;
-    }
 
     const elapsed = Date.now() - startedAt;
-    if (Date.now() >= deadline) {
+    if (task.status === "processing" || (await serverBusy(client))) {
+      deadline = Date.now() + timeoutMs;
+    } else if (Date.now() >= deadline) {
       throw new Error(
-        `gave up waiting for meili task ${taskUid} (${name}, ${n(docCount)} ${unit}) ` +
-          `after ${Math.round(elapsed / 1000)}s, last status ${task.status} — ` +
-          `the task itself keeps running server-side`,
+        `gave up on meili task ${taskUid} (${name}, ${n(docCount)} ${unit}) after ` +
+          `${Math.round(elapsed / 1000)}s: still enqueued and the server is processing nothing`,
       );
     }
     if (Date.now() >= nextReport) {
       nextReport += WAIT_REPORT_MS;
+      const pct =
+        task.status === "processing" ? await batchProgress(client, task.batchUid) : "";
       opts.log?.(
         `meili task ${taskUid} (${name}, ${n(docCount)} ${unit}): ` +
-          `${task.status} for ${Math.round(elapsed / 1000)}s`,
+          `${task.status} for ${Math.round(elapsed / 1000)}s${pct}`,
       );
     }
     await sleep(TASK_POLL_MS);
@@ -176,13 +196,13 @@ type Submitted = { name: IndexName; docs: IndexDoc[]; taskUid: number };
  * Wait for every task of one submission, polling the whole set with one request per
  * tick instead of one per task.
  *
- * The timeout is on PROGRESS, not on any one task. A submission is up to ten tasks
- * that Meili works through one pass at a time, and on a large index a single pass
- * runs for many minutes — a per-task clock times out the last task in line for no sin
- * except being behind the others, fails the batch, and the retry re-submits the same
- * documents into an even longer line. The clock resets whenever any watched task
- * changes status, so it fires only when the queue sat completely still for the full
- * timeout: a wedged server, not a busy one.
+ * Same no-clock-on-work-in-flight rule as awaitTask, applied to the set: a submission
+ * is up to ten tasks that Meili works through one pass at a time, so most of them
+ * spend most of the wait correctly enqueued behind a sibling. The deadline advances
+ * while any of ours is processing, any status changed, or the server is busy with
+ * anything else; it runs down only when every task sits enqueued against an idle
+ * server. Aborting for any lesser reason re-submits documents whose indexing was
+ * already underway — the backlog that inspired all of this fed on exactly that.
  */
 async function awaitSubmission(
   client: MeiliSearch,
@@ -199,7 +219,7 @@ async function awaitSubmission(
   while (pending.size > 0) {
     const tasks = await client.getTasks({ uids: [...pending.keys()], limit: pending.size });
     let progressed = false;
-    const processing: string[] = [];
+    const processing: { s: Submitted; task: { startedAt: Date; batchUid: number | null } }[] = [];
 
     for (const task of tasks.results) {
       const s = pending.get(task.uid);
@@ -221,26 +241,34 @@ async function awaitSubmission(
           ),
         );
       } else if (task.status === "processing") {
-        const age = Math.round((Date.now() - task.startedAt.getTime()) / 1000);
-        processing.push(`${s.name} ${n(s.docs.length)} docs, processing for ${age}s`);
+        processing.push({ s, task });
       }
     }
     if (pending.size === 0) return;
 
-    if (progressed) deadline = Date.now() + timeoutMs;
-    if (Date.now() >= deadline) {
+    if (progressed || processing.length > 0 || (await serverBusy(client))) {
+      deadline = Date.now() + timeoutMs;
+    } else if (Date.now() >= deadline) {
       const err = new Error(
-        `meili made no task progress for ${Math.round(timeoutMs / 1000)}s with ` +
-          `${pending.size} task(s) outstanding — the tasks keep running server-side`,
+        `gave up on ${pending.size} meili task(s) still enqueued after the server ` +
+          `processed nothing for ${Math.round(timeoutMs / 1000)}s`,
       );
       for (const s of pending.values()) handle.onFail(s, err);
       return;
     }
     if (Date.now() >= nextReport) {
       nextReport += WAIT_REPORT_MS;
+      const lines: string[] = [];
+      for (const { s, task } of processing) {
+        const age = Math.round((Date.now() - task.startedAt.getTime()) / 1000);
+        lines.push(
+          `${s.name} ${n(s.docs.length)} docs, processing for ${age}s` +
+            `${await batchProgress(client, task.batchUid)}`,
+        );
+      }
       opts.log?.(
         `meili: ${pending.size} task(s) pending — ` +
-          `${processing.length > 0 ? processing.join("; ") : "between passes"}` +
+          `${lines.length > 0 ? lines.join("; ") : "between passes"}` +
           `${pending.size > processing.length ? `; ${pending.size - processing.length} enqueued` : ""}`,
       );
     }
@@ -292,7 +320,7 @@ export async function settleTaskQueue(
       const age = Math.round((Date.now() - task.startedAt.getTime()) / 1000);
       opts.log?.(
         `meili task ${task.uid} (${task.indexUid ?? "?"}) from a previous drain: ` +
-          `processing for ${age}s, waiting it out`,
+          `processing for ${age}s${await batchProgress(client, task.batchUid)}, waiting it out`,
       );
     }
     await sleep(TASK_POLL_MS);
