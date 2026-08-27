@@ -68,8 +68,11 @@ const Env = z.object({
   CRAWLER_BREAKER_COOLDOWN_MS: z.coerce.number().positive().default(300_000),
   /** Measured max Tez No was 1,020,391 in Aug 2026. */
   CRAWLER_MAX_THESIS_ID: z.coerce.number().positive().default(1_030_000),
-  /** Crawling pauses while a projection outbox holds this many undrained theses. */
-  CRAWLER_MAX_OUTBOX_DEPTH: z.coerce.number().positive().default(20_000),
+  /**
+   * Crawling pauses while a projection outbox holds this many undrained theses.
+   * Unset, it tracks the Meili drain batch size (see DEFAULT_POLICY.maxOutboxDepth).
+   */
+  CRAWLER_MAX_OUTBOX_DEPTH: z.coerce.number().positive().optional(),
   PORT: z.coerce.number().positive().default(3000),
 });
 

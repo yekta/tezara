@@ -157,7 +157,9 @@ const planner = new Planner(
   {
     ...DEFAULT_POLICY,
     maxThesisId: config.CRAWLER_MAX_THESIS_ID,
-    maxOutboxDepth: config.CRAWLER_MAX_OUTBOX_DEPTH,
+    ...(config.CRAWLER_MAX_OUTBOX_DEPTH !== undefined
+      ? { maxOutboxDepth: config.CRAWLER_MAX_OUTBOX_DEPTH }
+      : {}),
   },
   info,
 );
