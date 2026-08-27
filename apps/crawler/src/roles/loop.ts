@@ -1,4 +1,5 @@
 import type { ClickHouseClient } from "@tezara/clickhouse";
+import { INDEXES } from "@tezara/meili";
 import type { JobContext } from "../jobs/context.ts";
 import type { ChScanStore } from "../state/ch-scan.ts";
 import type { Outbox } from "../state/outbox.ts";
@@ -57,10 +58,10 @@ export const DEFAULT_POLICY: LoopPolicy = {
   reconcileEveryMs: 20 * 60_000,
   reconcileYears: { from: 1959, to: 2026 },
   projectionsEveryMs: 24 * 60 * 60_000,
-  // About an hour of crawl at full concurrency, two Meili batches — deep enough that
-  // a healthy drain never stalls the crawl, shallow enough that a stopped one halts
-  // it before the backlog stops being transient.
-  maxOutboxDepth: 20_000,
+  // Three Meili drain batches, and derived from the same constant so the two cannot
+  // drift apart — deep enough that a healthy drain never stalls the crawl, shallow
+  // enough that a stopped one halts it before the backlog stops being transient.
+  maxOutboxDepth: 3 * INDEXES.theses.batchSize,
 };
 
 /**

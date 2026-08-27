@@ -1,5 +1,5 @@
 import type { KnownDocs, MeiliSearch, Rejection } from "@tezara/meili";
-import { applySettings, settleTaskQueue, syncTheses, verifySettings } from "@tezara/meili";
+import { INDEXES, applySettings, settleTaskQueue, syncTheses, verifySettings } from "@tezara/meili";
 import type { Outbox } from "../state/outbox.ts";
 
 export class SettingsNotMigratedError extends Error {
@@ -94,10 +94,10 @@ export async function syncMeili(
   },
   params: SyncMeiliParams = {},
 ): Promise<SyncMeiliResult> {
-  // Matches INDEXES.theses.batchSize, so each index costs exactly one task per batch:
+  // The theses index's own batch size, so each index costs exactly one task per batch:
   // a smaller number just multiplies the fixed per-task cost across more of them.
   // ~10K theses is ~40MB of payload, comfortably under Meili's 100MB default cap.
-  const batchSize = params.batchSize ?? 10_000;
+  const batchSize = params.batchSize ?? INDEXES.theses.batchSize;
   const maxBatches = params.maxBatches ?? Number.POSITIVE_INFINITY;
   const budgetMs = params.budgetMs ?? DEFAULT_BUDGET_MS;
   const log = deps.log ?? (() => {});
