@@ -10,7 +10,7 @@ import { createClient, type ClickHouseClient } from "@clickhouse/client";
  * finishes the work anyway, but the caller sees a failure and retries it forever.
  */
 export function createClickhouseClient(opts: { url: string }): ClickHouseClient {
-  return createClient({ url: opts.url, request_timeout: 1_200_000 });
+  return createClient({ url: opts.url, request_timeout: 300_000 });
 }
 
 export type { ClickHouseClient };

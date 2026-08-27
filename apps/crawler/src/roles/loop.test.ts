@@ -18,6 +18,15 @@ let keys: Keys;
 let scan: ChScanStore;
 let outbox: Outbox;
 
+/** A minimal outbox document; the planner only ever looks at queue depths. */
+const THESIS = {
+  id: 1, title_original: "t", title_translated: null, author: "a", advisors: [],
+  university: "u", institute: "i", department: null, branch: null,
+  detail_id_1: "k", detail_id_2: "k", year: 2020, thesis_type: "T", language: "L",
+  subjects: [], keywords: [], abstract_original: null, abstract_translated: null,
+  page_count: null, pdf_url: null, restricted: false,
+} as never;
+
 /** Timed units pushed out of the way so a test only sees what it enables. */
 const CRAWL_ONLY: LoopPolicy = {
   ...DEFAULT_POLICY,
@@ -164,15 +173,7 @@ describe("planner", () => {
     const policy = { ...CRAWL_ONLY, projectionsEveryMs: 24 * 60 * 60_000 };
     const planner = new Planner(scan, outbox, policy);
 
-    await outbox.push([
-      {
-        id: 1, title_original: "t", title_translated: null, author: "a", advisors: [],
-        university: "u", institute: "i", department: null, branch: null,
-        detail_id_1: "k", detail_id_2: "k", year: 2020, thesis_type: "T", language: "L",
-        subjects: [], keywords: [], abstract_original: null, abstract_translated: null,
-        page_count: null, pdf_url: null, restricted: false,
-      } as never,
-    ]);
+    await outbox.push([THESIS]);
     assert.equal(
       (await planner.next())?.kind,
       "backfill",
@@ -182,5 +183,18 @@ describe("planner", () => {
     await outbox.commit("meili", [1]);
     await outbox.commit("clickhouse", [1]);
     assert.equal((await planner.next())?.kind, "reconcile-projections");
+  });
+
+  test("crawl work pauses while a projection backlog is at the cap", async () => {
+    const planner = new Planner(scan, outbox, { ...CRAWL_ONLY, maxOutboxDepth: 1 });
+
+    await outbox.push([THESIS]);
+    assert.equal(await planner.next(), null, "backfill held while a queue is at the cap");
+
+    await outbox.commit("meili", [1]);
+    assert.equal(await planner.next(), null, "the clickhouse queue still holds it");
+
+    await outbox.commit("clickhouse", [1]);
+    assert.equal((await planner.next())?.kind, "backfill", "resumes once both drain");
   });
 });
