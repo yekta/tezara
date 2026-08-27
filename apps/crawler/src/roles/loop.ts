@@ -58,9 +58,10 @@ export const DEFAULT_POLICY: LoopPolicy = {
   reconcileEveryMs: 20 * 60_000,
   reconcileYears: { from: 1959, to: 2026 },
   projectionsEveryMs: 24 * 60 * 60_000,
-  // Three Meili drain batches, and derived from the same constant so the two cannot
-  // drift apart — deep enough that a healthy drain never stalls the crawl, shallow
-  // enough that a stopped one halts it before the backlog stops being transient.
+  // The drains are fire-and-forget, so the outbox only backs up when a target is
+  // actually unreachable or refusing submissions — this cap is the brake for that
+  // outage, halting the crawl while the backlog is still transient. Derived from the
+  // drain's batch size so the two cannot drift apart.
   maxOutboxDepth: 3 * INDEXES.theses.batchSize,
 };
 

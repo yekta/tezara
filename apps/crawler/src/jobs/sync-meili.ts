@@ -1,5 +1,5 @@
 import type { KnownDocs, MeiliSearch, Rejection } from "@tezara/meili";
-import { INDEXES, applySettings, settleTaskQueue, syncTheses, verifySettings } from "@tezara/meili";
+import { INDEXES, applySettings, syncTheses, verifySettings } from "@tezara/meili";
 import type { Outbox } from "../state/outbox.ts";
 
 export class SettingsNotMigratedError extends Error {
@@ -65,11 +65,21 @@ const MAX_LOGGED_REJECTS = 5;
 const n = (value: number) => value.toLocaleString("en-US");
 
 /**
- * Drain the outbox into Meili.
+ * Drain the outbox into Meili — fire and forget.
  *
- * Commit-after-push: if the push throws, nothing is committed and the same batch is
- * retried on the next run. That makes a partial failure a duplicate write (harmless —
- * Meili upserts by primary key) rather than a lost thesis.
+ * A batch is committed out of the outbox as soon as Meili ACCEPTS the submission; no
+ * one waits for indexing. Meili's scheduler merges consecutively queued submissions
+ * into one indexing pass per index and runs them at its own pace — waiting per batch
+ * forced it into one expensive pass per batch, and the wait-retry machinery around
+ * that once re-submitted the same documents for hours (the drain raced its own queue).
+ * The best case is the designed-for case: push, delete, move on.
+ *
+ * The cost is deliberate: a task that later fails inside Meili is not noticed here,
+ * and its theses simply never appear in the index. That loss is what the projection
+ * reconcile exists for — it compares Meili against the crawl marks and re-queues the
+ * difference, so a lost batch costs a re-crawl, not data. A crash between accept and
+ * commit re-pushes a batch, which Meili upserts by primary key. Both are rare and
+ * self-healing; neither justifies stalling the common path.
  *
  * Held under the target's drain lock: the service runs one drainer, but the backfill
  * CLI can drain concurrently, and peek/commit is only safe for one drainer at a time.
@@ -94,9 +104,10 @@ export async function syncMeili(
   },
   params: SyncMeiliParams = {},
 ): Promise<SyncMeiliResult> {
-  // The theses index's own batch size, so each index costs exactly one task per batch:
-  // a smaller number just multiplies the fixed per-task cost across more of them.
-  // ~10K theses is ~40MB of payload, comfortably under Meili's 100MB default cap.
+  // One theses chunk per iteration (~57MB of payload, under Meili's 100MB cap). No
+  // reason to hold more in memory: nothing waits between iterations, so consecutive
+  // batches land back-to-back in Meili's queue and its scheduler merges them into one
+  // indexing pass regardless of how we split the upload.
   const batchSize = params.batchSize ?? INDEXES.theses.batchSize;
   const maxBatches = params.maxBatches ?? Number.POSITIVE_INFINITY;
   const budgetMs = params.budgetMs ?? DEFAULT_BUDGET_MS;
@@ -163,10 +174,6 @@ export async function syncMeili(
     const drifted = drift.filter((d) => !d.missing);
     if (drifted.length > 0) throw new SettingsNotMigratedError(drifted.map((d) => d.index));
 
-    // Interrupted drains leave duplicate submissions queued in Meili; pushing behind
-    // them re-creates the pile-up this exists to clear. See settleTaskQueue.
-    await settleTaskQueue(deps.client, { log });
-
     const deadline = Date.now() + budgetMs;
     for (let i = 0; i < maxBatches; i++) {
       if (Date.now() >= deadline) {
@@ -177,12 +184,12 @@ export async function syncMeili(
       if (batch.length === 0) break;
 
       const started = Date.now();
-      await syncTheses(deps.client, batch, { waitForTasks: true, onReject, known: deps.known, log });
+      await syncTheses(deps.client, batch, { waitForTasks: false, onReject, known: deps.known, log });
       await deps.outbox.commit("meili", batch.map((t) => t.id));
       pushed += batch.length;
       batches++;
       log(
-        `meili batch ${batches}: ${n(batch.length)} docs in ` +
+        `meili batch ${batches}: ${n(batch.length)} docs submitted in ` +
           `${Math.round((Date.now() - started) / 1000)}s, ${n(await deps.outbox.depth("meili"))} left`,
       );
     }
