@@ -40,6 +40,8 @@ export type LoopPolicy = {
   reconcileYears: { from: number; to: number };
   /** How often to compare the projections against the marks and re-queue losses. */
   projectionsEveryMs: number;
+  /** Pause backfill/refresh while either projection outbox holds this many theses. */
+  maxOutboxDepth: number;
 };
 
 export const DEFAULT_POLICY: LoopPolicy = {
@@ -55,6 +57,10 @@ export const DEFAULT_POLICY: LoopPolicy = {
   reconcileEveryMs: 20 * 60_000,
   reconcileYears: { from: 1959, to: 2026 },
   projectionsEveryMs: 24 * 60 * 60_000,
+  // About an hour of crawl at full concurrency, two Meili batches — deep enough that
+  // a healthy drain never stalls the crawl, shallow enough that a stopped one halts
+  // it before the backlog stops being transient.
+  maxOutboxDepth: 20_000,
 };
 
 /**
@@ -65,16 +71,25 @@ export class Planner {
   readonly #scan: ChScanStore;
   readonly #outbox: Outbox;
   readonly #policy: LoopPolicy;
+  readonly #log?: (message: string) => void;
   /** Refresh ids handed out and not yet completed. */
   readonly #inFlight = new Set<number>();
   /** Singleton units currently running. */
   readonly #busy = new Set<WorkUnit["kind"]>();
+  /** Crawl work is currently held back by a projection backlog; logged on transition. */
+  #held = false;
   #chain: Promise<unknown> = Promise.resolve();
 
-  constructor(scan: ChScanStore, outbox: Outbox, policy: LoopPolicy = DEFAULT_POLICY) {
+  constructor(
+    scan: ChScanStore,
+    outbox: Outbox,
+    policy: LoopPolicy = DEFAULT_POLICY,
+    log?: (message: string) => void,
+  ) {
     this.#scan = scan;
     this.#outbox = outbox;
     this.#policy = policy;
+    this.#log = log;
   }
 
   next(now = Date.now()): Promise<WorkUnit | null> {
@@ -133,6 +148,29 @@ export class Planner {
       this.#busy.add("reconcile-projections");
       await this.#scan.raiseWatermark("projections:lastRun", now);
       return { kind: "reconcile-projections" };
+    }
+
+    // Backpressure: backfill and refresh are the only units that push into the outbox,
+    // and a projection target that stops draining (a Meili reindex, an outage) must
+    // eventually stop the crawl — every queued thesis is a JSON payload held in Redis.
+    // The timed units above stay exempt; the lanes idle and re-ask every few seconds,
+    // so crawling resumes on its own once the drain gets back under the cap.
+    const deepest = Math.max(
+      ...(await Promise.all([this.#outbox.depth("meili"), this.#outbox.depth("clickhouse")])),
+    );
+    if (deepest >= p.maxOutboxDepth) {
+      if (!this.#held) {
+        this.#held = true;
+        this.#log?.(
+          `crawl paused: a projection backlog is at ${deepest} (cap ${p.maxOutboxDepth}); ` +
+            `waiting for the drain`,
+        );
+      }
+      return null;
+    }
+    if (this.#held) {
+      this.#held = false;
+      this.#log?.(`crawl resumed: projection backlogs back under ${p.maxOutboxDepth}`);
     }
 
     // Re-visits before new ground: error retries and forced re-pushes are time-critical

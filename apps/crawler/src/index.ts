@@ -151,10 +151,16 @@ async function prepareTargets(): Promise<void> {
   }
 }
 
-const planner = new Planner(scan, outbox, {
-  ...DEFAULT_POLICY,
-  maxThesisId: config.CRAWLER_MAX_THESIS_ID,
-});
+const planner = new Planner(
+  scan,
+  outbox,
+  {
+    ...DEFAULT_POLICY,
+    maxThesisId: config.CRAWLER_MAX_THESIS_ID,
+    maxOutboxDepth: config.CRAWLER_MAX_OUTBOX_DEPTH,
+  },
+  info,
+);
 
 /**
  * Establishing a YÖK session can fail — maintenance, blocked egress, slow DNS. That must
