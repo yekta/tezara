@@ -10,13 +10,15 @@ export type SyncReport = Record<IndexName, number>;
  * already been accepted: the batch is never committed, the outbox never drains, and the
  * same thousand documents are re-pushed forever.
  *
- * The poll interval is a floor on what a push can cost: a drain waits for every task it
- * submits, one after another, so half a second of sleeping per task is half a second
- * multiplied by every index a batch touches. Meili is our own service on the internal
- * network, so polling it faster costs nothing worth counting.
+ * The poll interval trades wasted requests against wasted latency. Indexing a batch
+ * takes minutes, the waits run in parallel, and every in-flight task polls on its own
+ * timer — sub-second polling is thousands of status requests per batch against the same
+ * instance that is busy indexing, to notice completion a few hundred milliseconds
+ * sooner. One second bounds the overhead at one request per task per second and adds at
+ * most that second to a wait measured in minutes.
  */
 const TASK_TIMEOUT_MS = 10 * 60_000;
-const TASK_POLL_MS = 100;
+const TASK_POLL_MS = 1_000;
 
 /** A task Meili accepted and then failed to process. */
 export class TaskFailedError extends Error {
@@ -86,6 +88,8 @@ export type KnownDocs = {
 export type SyncOptions = {
   waitForTasks?: boolean;
   taskTimeoutMs?: number;
+  /** Where the wait's heartbeat goes; omit it and long waits are silent. */
+  log?: (message: string) => void;
   /**
    * Skip documents already known to be indexed. Omit it and every name is pushed in
    * every batch, which is correct but is most of a drain's round trips.
@@ -99,6 +103,122 @@ export type SyncOptions = {
    */
   onReject?: (rejection: Rejection) => void | Promise<void>;
 };
+
+/** How often a wait says it is still waiting. */
+const WAIT_REPORT_MS = 30_000;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+const n = (value: number) => value.toLocaleString("en-US");
+
+/**
+ * The client's waitForTask, replaced with our own poll so the wait can narrate.
+ * Indexing a large batch into a large index runs for minutes, and between submission
+ * and completion the client's wait produces nothing — an operator watching the log
+ * cannot tell a slow indexing pass from a wedged one. A heartbeat every 30s can.
+ */
+async function awaitTask(
+  client: MeiliSearch,
+  name: string,
+  taskUid: number,
+  docCount: number,
+  opts: SyncOptions,
+): Promise<void> {
+  const timeoutMs = opts.taskTimeoutMs ?? TASK_TIMEOUT_MS;
+  const startedAt = Date.now();
+  let nextReport = startedAt + WAIT_REPORT_MS;
+  // The timeout is per phase, not end-to-end: it exists to catch a wedged server, and
+  // a task that moves from enqueued to processing is not wedged. A single clock here
+  // is how a drain once timed out on queue congestion it caused itself — each retry
+  // re-enqueued the same documents behind its own predecessors and raced the whole
+  // queue, which only ever got longer.
+  let deadline = startedAt + timeoutMs;
+  let queued = true;
+
+  while (true) {
+    const task = await client.getTask(taskUid);
+    if (task.status === "succeeded") return;
+    // `canceled` used to sail through the old wait as if it had indexed; it has not.
+    if (task.status === "failed" || task.status === "canceled") {
+      throw new TaskFailedError(
+        task.error?.message ?? `task ${taskUid} ${task.status}`,
+        task.error?.code,
+      );
+    }
+    if (queued && task.status === "processing") {
+      queued = false;
+      deadline = Date.now() + timeoutMs;
+    }
+
+    const elapsed = Date.now() - startedAt;
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `gave up waiting for meili task ${taskUid} (${name}, ${n(docCount)} docs) ` +
+          `after ${Math.round(elapsed / 1000)}s, last status ${task.status} — ` +
+          `the task itself keeps running server-side`,
+      );
+    }
+    if (Date.now() >= nextReport) {
+      nextReport += WAIT_REPORT_MS;
+      opts.log?.(
+        `meili task ${taskUid} (${name}, ${n(docCount)} docs): ` +
+          `${task.status} for ${Math.round(elapsed / 1000)}s`,
+      );
+    }
+    await sleep(TASK_POLL_MS);
+  }
+}
+
+/**
+ * Clear the wreckage of interrupted drains before pushing anything new.
+ *
+ * A wait that times out leaves its submission ENQUEUED: Meili keeps the task, and its
+ * multi-MB payload on disk, until it is processed. The drain's retry then pushes the
+ * same documents again as a new task behind the stale one and waits on that — a wait
+ * that must outlast every predecessor before its own task even starts. Past the point
+ * where the queue is longer than one timeout, no drain can ever succeed again, and
+ * every attempt adds another payload to the queue and to Meili's disk.
+ *
+ * Cancelling the stale enqueued additions is lossless by construction: a batch is
+ * committed out of the outbox only when its task SUCCEEDS, so every document in a
+ * cancelled task is still in the outbox — it is exactly what the caller is about to
+ * push again. Only `documentAdditionOrUpdate` is touched; anything else in the queue
+ * (settings, deletions, an operator's dump) is not ours to discard.
+ *
+ * The task already mid-pass is left to finish, and this returns only once it has:
+ * cancelling it would waste the indexing work already sunk into it, but pushing behind
+ * it would hand the next wait a predecessor again. No timeout on that — the outbox
+ * holds the line, nothing here grows, and the heartbeat says what is being waited on.
+ */
+export async function settleTaskQueue(
+  client: MeiliSearch,
+  opts: { log?: (message: string) => void } = {},
+): Promise<{ canceled: number }> {
+  const query = { types: ["documentAdditionOrUpdate" as const] };
+
+  const stale = await client.getTasks({ ...query, statuses: ["enqueued"], limit: 1 });
+  if (stale.total > 0) {
+    opts.log?.(`meili: cancelling ${n(stale.total)} stale enqueued push(es) from interrupted drains`);
+    const cancellation = await client.cancelTasks({ ...query, statuses: ["enqueued"] });
+    await awaitTask(client, "task cancellation", cancellation.taskUid, stale.total, opts);
+  }
+
+  let nextReport = Date.now() + WAIT_REPORT_MS;
+  while (true) {
+    const busy = await client.getTasks({ ...query, statuses: ["processing"], limit: 1 });
+    if (busy.total === 0) return { canceled: stale.total };
+    const task = busy.results[0]!;
+    if (Date.now() >= nextReport) {
+      nextReport += WAIT_REPORT_MS;
+      const age = Math.round((Date.now() - task.startedAt.getTime()) / 1000);
+      opts.log?.(
+        `meili task ${task.uid} (${task.indexUid ?? "?"}) from a previous drain: ` +
+          `processing for ${age}s, waiting it out`,
+      );
+    }
+    await sleep(TASK_POLL_MS);
+  }
+}
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -224,20 +344,7 @@ async function push(
   const index = client.index(name);
   try {
     const task = await index.addDocuments(docs, { primaryKey: "id" });
-    if (opts.waitForTasks) {
-      const done = await index.waitForTask(task.taskUid, {
-        timeOutMs: opts.taskTimeoutMs ?? TASK_TIMEOUT_MS,
-        intervalMs: TASK_POLL_MS,
-      });
-      // A failed task used to pass silently: the batch was committed and its theses
-      // were dropped without ever reaching the index.
-      if (done.status === "failed") {
-        throw new TaskFailedError(
-          done.error?.message ?? `task ${task.taskUid} failed`,
-          done.error?.code,
-        );
-      }
-    }
+    if (opts.waitForTasks) await awaitTask(client, name, task.taskUid, docs.length, opts);
     return docs.length;
   } catch (err) {
     return recover(client, name, docs, opts, err);
@@ -314,23 +421,18 @@ export async function syncTheses(
   };
 
   if (opts.waitForTasks) {
+    // Marks the moment the payload upload is done and Meili owns the work — everything
+    // logged after this line is indexing time, not ours.
+    if (submitted.length > 0) {
+      const total = submitted.reduce((sum, s) => sum + s.docs.length, 0);
+      opts.log?.(`meili accepted ${n(total)} docs in ${submitted.length} task(s); indexing…`);
+    }
     // All waits in parallel: total wall clock is Meili's queue completion, not the sum
     // of every task's completion observed one at a time.
     await Promise.all(
       submitted.map(async (s) => {
         try {
-          const done = await client.index(s.name).waitForTask(s.taskUid, {
-            timeOutMs: opts.taskTimeoutMs ?? TASK_TIMEOUT_MS,
-            intervalMs: TASK_POLL_MS,
-          });
-          // A failed task used to pass silently: the batch was committed and its
-          // theses were dropped without ever reaching the index.
-          if (done.status === "failed") {
-            throw new TaskFailedError(
-              done.error?.message ?? `task ${s.taskUid} failed`,
-              done.error?.code,
-            );
-          }
+          await awaitTask(client, s.name, s.taskUid, s.docs.length, opts);
           report[s.name] += s.docs.length;
           recordSent(s.name, s.docs);
         } catch (err) {
@@ -375,16 +477,10 @@ export async function syncTheses(
 export async function deleteTheses(
   client: MeiliSearch,
   ids: readonly number[],
-  opts: { waitForTasks?: boolean; taskTimeoutMs?: number } = {},
+  opts: { waitForTasks?: boolean; taskTimeoutMs?: number; log?: (message: string) => void } = {},
 ): Promise<number> {
   if (ids.length === 0) return 0;
-  const index = client.index("theses");
-  const task = await index.deleteDocuments([...ids]);
-  if (opts.waitForTasks) {
-    await index.waitForTask(task.taskUid, {
-      timeOutMs: opts.taskTimeoutMs ?? TASK_TIMEOUT_MS,
-      intervalMs: TASK_POLL_MS,
-    });
-  }
+  const task = await client.index("theses").deleteDocuments([...ids]);
+  if (opts.waitForTasks) await awaitTask(client, "theses", task.taskUid, ids.length, opts);
   return ids.length;
 }

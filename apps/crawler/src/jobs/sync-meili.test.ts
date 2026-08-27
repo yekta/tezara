@@ -25,6 +25,9 @@ function fakeClient(opts: { delayMs?: number } = {}) {
   const pushes: { index: string; docs: number }[] = [];
   const client = {
     getIndexes: async () => ({ results: INDEX_NAMES.map((uid) => ({ uid })) }),
+    // The task queue as the drain sees it: always settled, every push already done.
+    getTask: async (uid: number) => ({ uid, status: "succeeded" }),
+    getTasks: async () => ({ results: [], total: 0 }),
     index: (name: string) => ({
       getSettings: async () => ({
         filterableAttributes: INDEXES[name as keyof typeof INDEXES].filterable ?? [],
@@ -37,7 +40,6 @@ function fakeClient(opts: { delayMs?: number } = {}) {
         pushes.push({ index: name, docs: docs.length });
         return { taskUid: pushes.length };
       },
-      waitForTask: async (taskUid: number) => ({ status: "succeeded", taskUid }),
     }),
   };
   return {

@@ -1,5 +1,5 @@
 import type { KnownDocs, MeiliSearch, Rejection } from "@tezara/meili";
-import { applySettings, syncTheses, verifySettings } from "@tezara/meili";
+import { applySettings, settleTaskQueue, syncTheses, verifySettings } from "@tezara/meili";
 import type { Outbox } from "../state/outbox.ts";
 
 export class SettingsNotMigratedError extends Error {
@@ -163,6 +163,10 @@ export async function syncMeili(
     const drifted = drift.filter((d) => !d.missing);
     if (drifted.length > 0) throw new SettingsNotMigratedError(drifted.map((d) => d.index));
 
+    // Interrupted drains leave duplicate submissions queued in Meili; pushing behind
+    // them re-creates the pile-up this exists to clear. See settleTaskQueue.
+    await settleTaskQueue(deps.client, { log });
+
     const deadline = Date.now() + budgetMs;
     for (let i = 0; i < maxBatches; i++) {
       if (Date.now() >= deadline) {
@@ -173,7 +177,7 @@ export async function syncMeili(
       if (batch.length === 0) break;
 
       const started = Date.now();
-      await syncTheses(deps.client, batch, { waitForTasks: true, onReject, known: deps.known });
+      await syncTheses(deps.client, batch, { waitForTasks: true, onReject, known: deps.known, log });
       await deps.outbox.commit("meili", batch.map((t) => t.id));
       pushed += batch.length;
       batches++;
