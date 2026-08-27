@@ -123,6 +123,7 @@ async function awaitTask(
   taskUid: number,
   docCount: number,
   opts: SyncOptions,
+  unit = "docs",
 ): Promise<void> {
   const timeoutMs = opts.taskTimeoutMs ?? TASK_TIMEOUT_MS;
   const startedAt = Date.now();
@@ -153,7 +154,7 @@ async function awaitTask(
     const elapsed = Date.now() - startedAt;
     if (Date.now() >= deadline) {
       throw new Error(
-        `gave up waiting for meili task ${taskUid} (${name}, ${n(docCount)} docs) ` +
+        `gave up waiting for meili task ${taskUid} (${name}, ${n(docCount)} ${unit}) ` +
           `after ${Math.round(elapsed / 1000)}s, last status ${task.status} — ` +
           `the task itself keeps running server-side`,
       );
@@ -161,8 +162,86 @@ async function awaitTask(
     if (Date.now() >= nextReport) {
       nextReport += WAIT_REPORT_MS;
       opts.log?.(
-        `meili task ${taskUid} (${name}, ${n(docCount)} docs): ` +
+        `meili task ${taskUid} (${name}, ${n(docCount)} ${unit}): ` +
           `${task.status} for ${Math.round(elapsed / 1000)}s`,
+      );
+    }
+    await sleep(TASK_POLL_MS);
+  }
+}
+
+type Submitted = { name: IndexName; docs: IndexDoc[]; taskUid: number };
+
+/**
+ * Wait for every task of one submission, polling the whole set with one request per
+ * tick instead of one per task.
+ *
+ * The timeout is on PROGRESS, not on any one task. A submission is up to ten tasks
+ * that Meili works through one pass at a time, and on a large index a single pass
+ * runs for many minutes — a per-task clock times out the last task in line for no sin
+ * except being behind the others, fails the batch, and the retry re-submits the same
+ * documents into an even longer line. The clock resets whenever any watched task
+ * changes status, so it fires only when the queue sat completely still for the full
+ * timeout: a wedged server, not a busy one.
+ */
+async function awaitSubmission(
+  client: MeiliSearch,
+  submitted: readonly Submitted[],
+  opts: SyncOptions,
+  handle: { onDone: (s: Submitted) => void; onFail: (s: Submitted, err: unknown) => void },
+): Promise<void> {
+  const timeoutMs = opts.taskTimeoutMs ?? TASK_TIMEOUT_MS;
+  const pending = new Map(submitted.map((s) => [s.taskUid, s]));
+  const lastSeen = new Map<number, string>();
+  let deadline = Date.now() + timeoutMs;
+  let nextReport = Date.now() + WAIT_REPORT_MS;
+
+  while (pending.size > 0) {
+    const tasks = await client.getTasks({ uids: [...pending.keys()], limit: pending.size });
+    let progressed = false;
+    const processing: string[] = [];
+
+    for (const task of tasks.results) {
+      const s = pending.get(task.uid);
+      if (!s) continue;
+      if (lastSeen.get(task.uid) !== task.status) {
+        lastSeen.set(task.uid, task.status);
+        progressed = true;
+      }
+      if (task.status === "succeeded") {
+        pending.delete(task.uid);
+        handle.onDone(s);
+      } else if (task.status === "failed" || task.status === "canceled") {
+        pending.delete(task.uid);
+        handle.onFail(
+          s,
+          new TaskFailedError(
+            task.error?.message ?? `task ${task.uid} ${task.status}`,
+            task.error?.code,
+          ),
+        );
+      } else if (task.status === "processing") {
+        const age = Math.round((Date.now() - task.startedAt.getTime()) / 1000);
+        processing.push(`${s.name} ${n(s.docs.length)} docs, processing for ${age}s`);
+      }
+    }
+    if (pending.size === 0) return;
+
+    if (progressed) deadline = Date.now() + timeoutMs;
+    if (Date.now() >= deadline) {
+      const err = new Error(
+        `meili made no task progress for ${Math.round(timeoutMs / 1000)}s with ` +
+          `${pending.size} task(s) outstanding — the tasks keep running server-side`,
+      );
+      for (const s of pending.values()) handle.onFail(s, err);
+      return;
+    }
+    if (Date.now() >= nextReport) {
+      nextReport += WAIT_REPORT_MS;
+      opts.log?.(
+        `meili: ${pending.size} task(s) pending — ` +
+          `${processing.length > 0 ? processing.join("; ") : "between passes"}` +
+          `${pending.size > processing.length ? `; ${pending.size - processing.length} enqueued` : ""}`,
       );
     }
     await sleep(TASK_POLL_MS);
@@ -200,7 +279,7 @@ export async function settleTaskQueue(
   if (stale.total > 0) {
     opts.log?.(`meili: cancelling ${n(stale.total)} stale enqueued push(es) from interrupted drains`);
     const cancellation = await client.cancelTasks({ ...query, statuses: ["enqueued"] });
-    await awaitTask(client, "task cancellation", cancellation.taskUid, stale.total, opts);
+    await awaitTask(client, "task cancellation", cancellation.taskUid, stale.total, opts, "stale tasks");
   }
 
   let nextReport = Date.now() + WAIT_REPORT_MS;
@@ -374,7 +453,6 @@ export async function syncTheses(
   // large fixed cost — so submit-then-wait indexes a batch in roughly one pass per
   // index, where the old submit-wait-submit-wait paid that fixed cost per chunk, one
   // index at a time, with the drain idle in between.
-  type Submitted = { name: IndexName; docs: IndexDoc[]; taskUid: number };
   const submitted: Submitted[] = [];
   const failures: { name: IndexName; docs: IndexDoc[]; err: unknown }[] = [];
   const sentByIndex = new Map<IndexName, string[]>();
@@ -426,20 +504,14 @@ export async function syncTheses(
     if (submitted.length > 0) {
       const total = submitted.reduce((sum, s) => sum + s.docs.length, 0);
       opts.log?.(`meili accepted ${n(total)} docs in ${submitted.length} task(s); indexing…`);
-    }
-    // All waits in parallel: total wall clock is Meili's queue completion, not the sum
-    // of every task's completion observed one at a time.
-    await Promise.all(
-      submitted.map(async (s) => {
-        try {
-          await awaitTask(client, s.name, s.taskUid, s.docs.length, opts);
+      await awaitSubmission(client, submitted, opts, {
+        onDone: (s) => {
           report[s.name] += s.docs.length;
           recordSent(s.name, s.docs);
-        } catch (err) {
-          failures.push({ name: s.name, docs: s.docs, err });
-        }
-      }),
-    );
+        },
+        onFail: (s, err) => failures.push({ name: s.name, docs: s.docs, err }),
+      });
+    }
   } else {
     for (const s of submitted) {
       report[s.name] += s.docs.length;
