@@ -18,12 +18,21 @@ export async function generateSitemaps() {
   return Array.from({ length: pages }, (_, i) => ({ id: i + 1 }));
 }
 
+/**
+ * Since Next 15 `id` arrives as a Promise of the string segment, not the number
+ * `generateSitemaps` returned. The previous `Number(id)` on the promise was NaN, which
+ * Meili's search silently treated as page 1 — every sitemap served the same 5k theses.
+ */
 export default async function sitemap({
   id,
 }: {
-  id: number;
+  id: Promise<string> | string | number;
 }): Promise<MetadataRoute.Sitemap> {
-  const { results } = await getThesisIds({ page: Number(id) });
+  const page = Number.parseInt(String(await id), 10);
+  if (!Number.isInteger(page) || page < 1) {
+    throw new Error(`theses sitemap: invalid id ${JSON.stringify(await id)}`);
+  }
+  const { results } = await getThesisIds({ page });
 
   return results.map((t) => ({
     url: `${env.NEXT_PUBLIC_SITE_URL}${thesesRoute}/${t.id}`,
