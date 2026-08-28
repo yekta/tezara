@@ -2,22 +2,43 @@ import type { MeiliSearch } from "meilisearch";
 import { INDEXES, INDEX_NAMES, type IndexName } from "./indexes.ts";
 
 /**
+ * The client waits 5s for a task, polling every 50ms. A settings change on an index that
+ * already holds documents forces a reindex — minutes on a million theses — so the default
+ * reports a timeout for a migration that is in fact still running fine, and the caller
+ * cannot tell that from a real failure. Wait as long as a reindex plausibly takes, and
+ * poll slowly: nothing here is latency-sensitive.
+ */
+const TASK_TIMEOUT_MS = 60 * 60_000;
+const TASK_POLL_MS = 1_000;
+
+/**
  * Apply index settings declaratively. Deliberately a separate migration step: the old
  * pipeline re-pushed settings on every data load, which makes every ingest a schema
  * change and costs a full reindex each time.
  */
 export async function applySettings(
   client: MeiliSearch,
-  opts: { waitForTasks?: boolean; only?: readonly IndexName[] } = {},
+  opts: {
+    waitForTasks?: boolean;
+    only?: readonly IndexName[];
+    taskTimeoutMs?: number;
+    /** Where progress goes; a reindex is long enough that silence looks like a hang. */
+    log?: (message: string) => void;
+  } = {},
 ): Promise<IndexName[]> {
   const applied: IndexName[] = [];
   const targets = opts.only ?? INDEX_NAMES;
+  const wait = (taskUid: number) =>
+    client.waitForTask(taskUid, {
+      timeOutMs: opts.taskTimeoutMs ?? TASK_TIMEOUT_MS,
+      intervalMs: TASK_POLL_MS,
+    });
 
   for (const name of targets) {
     const def = INDEXES[name];
     try {
       const task = await client.createIndex(name, { primaryKey: "id" });
-      if (opts.waitForTasks) await client.waitForTask(task.taskUid);
+      if (opts.waitForTasks) await wait(task.taskUid);
     } catch {
       // index_already_exists is the normal path on every run after the first
     }
@@ -29,7 +50,12 @@ export async function applySettings(
       ...(def.searchable ? { searchableAttributes: def.searchable } : {}),
       pagination: { maxTotalHits: def.maxTotalHits },
     });
-    if (opts.waitForTasks) await index.waitForTask(task.taskUid);
+    if (opts.waitForTasks) {
+      const started = Date.now();
+      opts.log?.(`meili: applying settings to ${name}, this reindexes the index`);
+      await wait(task.taskUid);
+      opts.log?.(`meili: ${name} settled in ${Math.round((Date.now() - started) / 1000)}s`);
+    }
     applied.push(name);
   }
 

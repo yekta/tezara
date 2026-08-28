@@ -70,7 +70,13 @@ export const INDEXES: Record<IndexName, IndexDefinition> = {
     // The subfield paths cover exactly what filters need; also declaring the bare
     // `keywords`/`subjects` parents (as an earlier version did) makes every subfield
     // filterable twice over and costs a facet database for the raw objects.
+    // `id` is filterable for one caller: the theses sitemap partitions the corpus into
+    // id ranges (`id >= a AND id < b`) to enumerate ~1M documents. Search paging cannot
+    // do it (capped by maxTotalHits) and offset paging is unstable — the crawler keeps
+    // writing during a build, so offsets shift and theses are duplicated or skipped
+    // between sitemaps. An id range is fixed regardless of what else is being indexed.
     filterable: [
+      "id",
       "year", "thesis_type", "university", "institute", "department", "branch",
       "language", "advisors", "author",
       "keywords.name", "keywords.language",
