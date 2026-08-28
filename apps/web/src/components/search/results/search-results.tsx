@@ -3,6 +3,7 @@
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import PaginationBar from "@/components/navigation/pagination-bar";
 import { formatForDownload } from "@/components/search/format-for-download";
+import { THESES_MAX_TOTAL_HITS } from "@/components/search/constants";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-row-list";
 import { Button } from "@/components/ui/button";
@@ -216,7 +217,11 @@ export default function SearchResults({}: Props) {
             </span>
           ) : (
             <span className="text-foreground">
-              {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
+              {data.hits.length === 0
+                ? 0
+                : data.totalHits >= THESES_MAX_TOTAL_HITS
+                ? `${THESES_MAX_TOTAL_HITS.toLocaleString()}+`
+                : data.totalHits.toLocaleString()}
             </span>
           )}
           <span className="text-foreground/30 px-[0.75ch]">|</span>
