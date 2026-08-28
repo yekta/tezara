@@ -60,7 +60,13 @@ const nameIndex = (
 
 export const INDEXES: Record<IndexName, IndexDefinition> = {
   theses: {
-    maxTotalHits: 1_500_000,
+    // Deliberately NOT the corpus size. The web app paginates with `page`/`hitsPerPage`,
+    // which makes every search exhaustive up to this cap — Meili documents that values
+    // over 20k "may result in queries taking seconds", and at 1.5M a 20-hit page took
+    // 1s+ against ~10ms. 20k covers the bulk download (15k) with room to spare; anything
+    // that has to walk the whole corpus (sitemaps) goes through the documents endpoint,
+    // which this cap does not govern.
+    maxTotalHits: 20_000,
     // The subfield paths cover exactly what filters need; also declaring the bare
     // `keywords`/`subjects` parents (as an earlier version did) makes every subfield
     // filterable twice over and costs a facet database for the raw objects.

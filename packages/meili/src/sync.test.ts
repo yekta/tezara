@@ -78,7 +78,7 @@ describe("meili sync", () => {
       [...(settings.sortableAttributes ?? [])].sort(),
       [...INDEXES.theses.sortable!].sort(),
     );
-    assert.equal(settings.pagination?.maxTotalHits, 1_500_000);
+    assert.equal(settings.pagination?.maxTotalHits, INDEXES.theses.maxTotalHits);
   });
 
   test("a thesis lands in every derived index", async () => {
