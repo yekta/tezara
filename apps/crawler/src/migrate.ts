@@ -2,8 +2,9 @@
  * Apply Meili index settings, then verify them.
  *   MEILI_URL_INTERNAL=… MEILI_ADMIN_KEY=… pnpm --filter @tezara/crawler migrate
  *
- * Must run before the first sync: addDocuments silently auto-creates indexes with
- * Meili's defaults, which leaves every filter the web app relies on returning nothing.
+ * Not normally needed: the crawler applies settings on boot (see prepareTargets in
+ * index.ts), which is what makes a container deploy self-migrating. This stays as the
+ * way to migrate without starting a crawler — a fresh Meili, or a targeted re-apply.
  */
 import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
 import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
@@ -18,7 +19,7 @@ if (!host && !chUrl) {
 
 if (host) {
   const client = createMeiliClient({ host, apiKey: process.env.MEILI_ADMIN_KEY ?? "" });
-  const applied = await applySettings(client, { waitForTasks: true });
+  const applied = await applySettings(client, { waitForTasks: true, log: info });
   info(`meili: applied settings to ${applied.length} indexes`);
 
   const drift = await verifySettings(client);

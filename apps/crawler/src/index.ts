@@ -132,18 +132,32 @@ async function prepareTargets(): Promise<void> {
   try {
     const drift = await verifySettings(meili);
     const absent = drift.filter((d) => d.missing).map((d) => d.index);
-    if (absent.length > 0) {
-      await applySettings(meili, { only: absent, waitForTasks: true });
-      info(`meili: created and configured ${absent.length} index(es): ${absent.join(", ")}`);
+    const drifted = drift.filter((d) => !d.missing).map((d) => d.index);
+
+    // Drift on a populated index is applied here rather than left to an operator. The
+    // gate used to exist because applying it forces a reindex, but this ships as a
+    // container: there is no shell to run a migration in, and the alternative is a boot
+    // that warns and then refuses every sync (see SettingsNotMigratedError) until someone
+    // notices. Deploying the image IS the deliberate act the gate was asking for, and
+    // drift only exists when the declarative definitions were changed on purpose.
+    const targets = [...absent, ...drifted];
+    if (targets.length > 0) {
+      await applySettings(meili, { only: targets, waitForTasks: true, log: info });
+      if (absent.length > 0) {
+        info(`meili: created and configured ${absent.length} index(es): ${absent.join(", ")}`);
+      }
+      if (drifted.length > 0) {
+        info(`meili: migrated settings drift on ${drifted.join(", ")}`);
+      }
     } else {
-      info("meili: all indexes present");
+      info("meili: all indexes present and settings up to date");
     }
 
-    const drifted = drift.filter((d) => !d.missing).map((d) => d.index);
-    if (drifted.length > 0) {
+    const remaining = await verifySettings(meili);
+    if (remaining.length > 0) {
       warn(
-        `meili: settings drift on ${drifted.join(", ")} — syncs will fail until ` +
-          "`pnpm --filter @tezara/crawler migrate` is run (it forces a reindex)",
+        `meili: settings drift remains on ${remaining.map((d) => d.index).join(", ")} — ` +
+          "syncs will fail until it is resolved",
       );
     }
   } catch (err) {
