@@ -73,6 +73,14 @@ const Env = z.object({
    * Unset, it tracks the Meili drain batch size (see DEFAULT_POLICY.maxOutboxDepth).
    */
   CRAWLER_MAX_OUTBOX_DEPTH: z.coerce.number().positive().optional(),
+  /**
+   * Documents between compaction checks. Compaction needs free space for a second copy
+   * of the index, so doing it repeatedly while the index is still small keeps the volume
+   * requirement at ~2x the CURRENT size rather than 2x the finished one. Zero disables.
+   */
+  CRAWLER_COMPACT_EVERY_DOCS: z.coerce.number().nonnegative().default(100_000),
+  /** Only compact when the file is at least this many times the live data it holds. */
+  CRAWLER_COMPACT_MIN_RATIO: z.coerce.number().positive().default(1.4),
   PORT: z.coerce.number().positive().default(3000),
 });
 

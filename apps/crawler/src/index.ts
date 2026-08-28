@@ -8,6 +8,7 @@ import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/cl
 import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
 import { error, info, warn } from "./log.ts";
+import { createCompactionPolicy } from "./jobs/compact-meili.ts";
 import { buildLookups } from "./jobs/context.ts";
 import { buildStatus, createApi } from "./roles/api.ts";
 import { DEFAULT_POLICY, Planner, runCrawlLanes, runDrainers } from "./roles/loop.ts";
@@ -233,13 +234,26 @@ async function crawlForever(): Promise<void> {
 }
 
 /** The drainers restart on their own the same way the crawl does. */
+/**
+ * Undefined when the cadence is set to zero, which turns compaction off entirely.
+ */
+const compaction =
+  config.CRAWLER_COMPACT_EVERY_DOCS > 0
+    ? createCompactionPolicy({
+        client: meili,
+        everyDocs: config.CRAWLER_COMPACT_EVERY_DOCS,
+        minRatio: config.CRAWLER_COMPACT_MIN_RATIO,
+        log: info,
+      })
+    : undefined;
+
 async function drainForever(): Promise<void> {
   let attempt = 0;
   while (!controller.signal.aborted) {
     try {
       await runDrainers(
         {
-          outbox, scan, meili, dimensions, clickhouse, log: info,
+          outbox, scan, meili, dimensions, clickhouse, log: info, compaction,
           onEvent: ({ target, detail }) => {
             const line = describeDrain(target, detail);
             if (line !== null) info(line);

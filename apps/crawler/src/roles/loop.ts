@@ -9,6 +9,7 @@ import { discoverHead } from "../jobs/discover-head.ts";
 import { reconcileProjections } from "../jobs/reconcile-projections.ts";
 import { reconcileYear } from "../jobs/reconcile-year.ts";
 import { syncClickhouse } from "../jobs/sync-clickhouse.ts";
+import type { CompactionPolicy } from "../jobs/compact-meili.ts";
 import { syncMeili } from "../jobs/sync-meili.ts";
 
 /**
@@ -323,6 +324,8 @@ export type DrainerDeps = {
   clickhouse?: ClickHouseClient;
   log?: (message: string) => void;
   onEvent?: (event: { target: "meili" | "clickhouse"; detail: unknown }) => void;
+  /** Keeps Meili's file dense as the corpus grows; omit to never compact. */
+  compaction?: CompactionPolicy;
 };
 
 /**
@@ -371,6 +374,12 @@ export async function runDrainers(
           client, outbox: deps.outbox, known: deps.dimensions, log: deps.log,
         });
         deps.onEvent?.({ target: "meili", detail: result });
+        // Between drains, never during one: compaction is a Meili task, so a push
+        // issued while it runs would queue behind it anyway. A failure here (a full
+        // volume, most likely) must not stop the drain — the outbox is what matters.
+        await deps.compaction?.afterDrain().catch((err: unknown) => {
+          log(`meili: compaction skipped — ${err instanceof Error ? err.message : String(err)}`);
+        });
         return result;
       }),
     );
