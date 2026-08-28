@@ -72,10 +72,11 @@ export const INDEXES: Record<IndexName, IndexDefinition> = {
     // Must stay above the largest reachable result set, not tuned down for speed.
     // Lowering it to 20k made deep pages catastrophically worse, measured against
     // production: page 500 took 32.7s and anything past page 1000 returned zero hits
-    // while the UI still advertised 15,765 pages. The 1.24 instance runs this cap and
-    // answers page 5000 in 39ms. Search latency is governed by the query shape (see
-    // matchingStrategy in apps/web/src/server/meili/repo/thesis.ts), not by this.
-    maxTotalHits: 1_500_000,
+    // while the UI still advertised 15,765 pages. The 1.24 instance ran 1.5M and
+    // answered page 5000 in 39ms. Search latency is governed by document retrieval —
+    // ~12ms per hit fetched, see the `format` step in Meili's search trace — not by
+    // this cap. Set well above the ~1M corpus so it stays headroom, not a limit.
+    maxTotalHits: 10_000_000,
     // The subfield paths cover exactly what filters need; also declaring the bare
     // `keywords`/`subjects` parents (as an earlier version did) makes every subfield
     // filterable twice over and costs a facet database for the raw objects.
