@@ -48,6 +48,7 @@ export async function applySettings(
       ...(def.filterable ? { filterableAttributes: def.filterable } : {}),
       ...(def.sortable ? { sortableAttributes: def.sortable } : {}),
       ...(def.searchable ? { searchableAttributes: def.searchable } : {}),
+      ...(def.proximityPrecision ? { proximityPrecision: def.proximityPrecision } : {}),
       pagination: { maxTotalHits: def.maxTotalHits },
     });
     if (opts.waitForTasks) {
@@ -75,6 +76,8 @@ export type SettingsDrift = {
    */
   searchable: { expected: string[]; actual: string[] } | null;
   maxTotalHits: { expected: number; actual: number | null | undefined };
+  /** Null when this index declares none, so Meili's `byWord` default is left alone. */
+  proximityPrecision: { expected: string; actual: string | undefined } | null;
 };
 
 /**
@@ -106,6 +109,9 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
         missingSortable: def.sortable ?? [],
         searchable: def.searchable ? { expected: def.searchable, actual: [] } : null,
         maxTotalHits: { expected: def.maxTotalHits, actual: undefined },
+        proximityPrecision: def.proximityPrecision
+          ? { expected: def.proximityPrecision, actual: undefined }
+          : null,
       });
       continue;
     }
@@ -119,6 +125,10 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
     const missingFilterable = (def.filterable ?? []).filter((a) => !filterable.has(a));
     const missingSortable = (def.sortable ?? []).filter((a) => !sortable.has(a));
 
+    const actualProximity = settings.proximityPrecision;
+    const proximityDrifted =
+      def.proximityPrecision !== undefined && actualProximity !== def.proximityPrecision;
+
     const actualSearchable = settings.searchableAttributes ?? ["*"];
     const searchableDrifted =
       def.searchable !== undefined &&
@@ -126,7 +136,7 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
 
     if (
       missingFilterable.length || missingSortable.length ||
-      searchableDrifted || actual !== def.maxTotalHits
+      searchableDrifted || proximityDrifted || actual !== def.maxTotalHits
     ) {
       drift.push({
         index: name,
@@ -137,6 +147,9 @@ export async function verifySettings(client: MeiliSearch): Promise<SettingsDrift
           ? { expected: def.searchable!, actual: actualSearchable }
           : null,
         maxTotalHits: { expected: def.maxTotalHits, actual },
+        proximityPrecision: proximityDrifted
+          ? { expected: def.proximityPrecision!, actual: actualProximity }
+          : null,
       });
     }
   }
