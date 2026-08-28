@@ -22,6 +22,15 @@ export type IndexDefinition = {
    * the search index for nothing.
    */
   searchable?: string[];
+  /**
+   * `byWord` (Meili's default) stores the distance between every pair of nearby words so
+   * the proximity ranking rule can order multi-word matches precisely. On this corpus
+   * that database was ~16GB — 45% of the whole index — and building it dominates every
+   * reindex ("extracting word proximity" is the long pole in the batch progress).
+   * `byAttribute` keeps only "same attribute or not", which measured identically on
+   * search latency here while nearly halving the index. Left unset, Meili uses byWord.
+   */
+  proximityPrecision?: "byWord" | "byAttribute";
   maxTotalHits: number;
   batchSize: number;
   /**
@@ -83,6 +92,7 @@ export const INDEXES: Record<IndexName, IndexDefinition> = {
       "subjects.name", "subjects.language",
     ],
     sortable: ["id", "year"],
+    proximityPrecision: "byAttribute",
     // Every human-readable field, so the plain search box still matches a university or
     // thesis-type name; only machine fields (pdf_url, detail ids, flags) are left out.
     searchable: [

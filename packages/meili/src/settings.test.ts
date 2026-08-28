@@ -69,6 +69,12 @@ describe("settings", () => {
     assert.ok(theses, "drift must be reported");
     assert.ok(theses.missingFilterable.includes("year"));
     assert.equal(theses.maxTotalHits.actual, 1000);
+    // Undeclared settings are the ones that silently revert on a fresh index, so the
+    // drift check has to cover proximityPrecision too, not just filters and pagination.
+    assert.deepEqual(theses.proximityPrecision, {
+      expected: "byAttribute",
+      actual: "byWord",
+    });
   });
 
   test("applySettings fixes the drift", async () => {
