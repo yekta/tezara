@@ -1,6 +1,5 @@
 import {
   PAGE_DEFAULT,
-  RANKING_SCORE_THRESHOLD_DEFAULT,
   TSearchLikePageParamsSearchProps,
 } from "@/components/search/constants";
 import {
@@ -192,10 +191,23 @@ export async function searchTheses({
     attributesToRetrieve: attributes_to_retrieve,
     attributesToSearchOn:
       attributesToSearchOn.length > 0 ? attributesToSearchOn : undefined,
-    rankingScoreThreshold:
-      q === "" || disable_ranking_score_threshold
-        ? undefined
-        : RANKING_SCORE_THRESHOLD_DEFAULT,
+    /**
+     * `matchingStrategy: "all"` rather than a rankingScoreThreshold.
+     *
+     * Both exist to cut the any-word matches that make a multi-word query claim
+     * hundreds of thousands of hits — Meili matches a document containing ANY query
+     * word, so "eğitim yönetimi sistemi" hits 298,246 theses unfiltered. But the
+     * threshold does it by scoring every one of those candidates, and `page`/
+     * `hitsPerPage` is exhaustive, so the query pays that in full. Requiring every word
+     * is a cheap index-level intersection instead.
+     *
+     * Measured against production, same corpus, identical top results and hit counts:
+     * "mehmet demir" 2094ms -> 47ms, five words 2626ms -> 41ms, three words 1502ms ->
+     * 73ms. The threshold was also reporting unstable counts (meilisearch#5274): the
+     * same three-word query returned totalHits 45,996 and 9,508 seconds apart.
+     */
+    matchingStrategy:
+      q === "" || disable_ranking_score_threshold ? undefined : "all",
   });
 
   return result;

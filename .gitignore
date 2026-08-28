@@ -47,3 +47,7 @@ next-env.d.ts
 
 # agent scratch (docs, probes, prototypes) - never commit
 .tests
+
+# Editor swap files (.env* does not match ..env.swp)
+*.swp
+*.swo
