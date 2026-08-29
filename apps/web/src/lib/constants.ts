@@ -16,6 +16,17 @@ export const getPreviewUrl = (slug: string) =>
 
 export const TURKISH = "Türkçe";
 
+/**
+ * Floor for anything that treats a thesis year as a real year.
+ *
+ * A handful of theses reach ClickHouse with `year = 0`: YÖK's list page omits the metadata
+ * blob for them, so the crawler stores a null year and the non-nullable `year UInt32` column
+ * coerces it to zero. The oldest genuine thesis in the corpus is from 1959, so a value under
+ * this floor is always bad data — and leaving even one in stretches a per-year chart's
+ * category axis across two thousand empty years.
+ */
+export const earliestThesisYear = 1950;
+
 export type TScOption = "x" | "github" | "buymeacoffee";
 
 export const sc: Record<

@@ -3,6 +3,7 @@ import {
   getSubjectPageData,
   getSubjectStat,
 } from "@/server/clickhouse/repo/subject";
+import { earliestThesisYear } from "@/lib/constants";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { searchTheses } from "@/server/meili/repo/thesis";
 import { cache } from "react";
@@ -66,7 +67,14 @@ export async function getPageData({ name }: { name: string }) {
   );
   const thesisTypes = new Map<string, number>();
 
-  thesisCountsByYearsData.forEach(({ year, thesis_type, count }) => {
+  // A year below the floor is unusable metadata stored as 0, not a real thesis year.
+  // It has to go before the aggregation, not just before the chart: it would otherwise
+  // also win `minThesisYear` and put a blank thesis type in the legend.
+  const datedRows = thesisCountsByYearsData.filter(
+    ({ year }) => year >= earliestThesisYear
+  );
+
+  datedRows.forEach(({ year, thesis_type, count }) => {
     const thesisTypeCount = thesisTypes.get(thesis_type) || 0;
     thesisTypes.set(thesis_type, thesisTypeCount + count);
 
@@ -99,6 +107,11 @@ export async function getPageData({ name }: { name: string }) {
 
     thesesCountsByYears[year][thesis_type] += count;
   });
+
+  if (!Number.isFinite(minYear) || !Number.isFinite(maxYear)) {
+    minYear = new Date().getFullYear();
+    maxYear = minYear;
+  }
 
   const thesesCountsByYearsChartData: { [key: string]: string }[] = Array.from(
     { length: maxYear - minYear + 1 },

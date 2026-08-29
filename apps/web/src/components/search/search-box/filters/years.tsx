@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { earliestThesisYear } from "@/lib/constants";
 import { yearGteKeyAtom, yearLteKeyAtom } from "@/lib/store/main";
 import { useAtom } from "jotai";
 import { CalendarArrowDownIcon, CalendarArrowUpIcon } from "lucide-react";
@@ -15,7 +16,7 @@ import { useEffect } from "react";
 
 const clearButtonText = "Temizle";
 
-const minYear = 1950;
+const minYear = earliestThesisYear;
 const maxYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: maxYear - minYear + 1 }, (_, i) => ({
   value: `${maxYear - i}`,
