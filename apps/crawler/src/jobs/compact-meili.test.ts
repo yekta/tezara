@@ -33,6 +33,47 @@ function fakeClient(script: { file: number; live: number; documents: number }[])
 const GB = 1e9;
 
 describe("meili compaction policy", () => {
+  test("compacts a fragmented index on boot", async () => {
+    // The whole point: a crawler restarting on a finished corpus never reaches the
+    // document cadence again, so boot is its only chance to reclaim the file.
+    const { client, compactions } = fakeClient([
+      { file: 40 * GB, live: 10 * GB, documents: 1_000_000 }, // boot check, ratio 4.0
+      { file: 40 * GB, live: 10 * GB, documents: 1_000_000 }, // compactIndex: before
+      { file: 11 * GB, live: 10 * GB, documents: 1_000_000 }, // compactIndex: after
+    ]);
+    const policy = createCompactionPolicy({ client, everyDocs: 100_000, minRatio: 1.4 });
+    const report = await policy.onBoot();
+    assert.ok(report, "a fragmented index should compact at boot");
+    assert.equal(compactions.length, 1);
+  });
+
+  test("boot leaves an already dense index alone", async () => {
+    // What keeps a restart loop from becoming a compaction loop: the previous boot's
+    // compaction is visible in the ratio, so the next one declines.
+    const { client, compactions } = fakeClient([
+      { file: 11 * GB, live: 10 * GB, documents: 1_000_000 },
+    ]);
+    const policy = createCompactionPolicy({ client, everyDocs: 100_000, minRatio: 1.4 });
+    assert.equal(await policy.onBoot(), null);
+    assert.deepEqual(compactions, []);
+  });
+
+  test("the boot check anchors the watermark for the drains that follow", async () => {
+    const { client, compactions } = fakeClient([
+      { file: 11 * GB, live: 10 * GB, documents: 500_000 }, // boot: dense, anchors at 500k
+      { file: 20 * GB, live: 10 * GB, documents: 560_000 }, // +60k, under the cadence
+      { file: 20 * GB, live: 10 * GB, documents: 620_000 }, // +120k, ratio 2.0 -> fire
+      { file: 20 * GB, live: 10 * GB, documents: 620_000 }, // compactIndex: before
+      { file: 11 * GB, live: 10 * GB, documents: 620_000 }, // compactIndex: after
+    ]);
+    const policy = createCompactionPolicy({ client, everyDocs: 100_000, minRatio: 1.4 });
+    await policy.onBoot();
+    // Without the boot anchor this drain would be the one to burn the anchoring slot.
+    assert.equal(await policy.afterDrain(), null, "under the cadence");
+    assert.ok(await policy.afterDrain(), "cadence reached, measured from the boot anchor");
+    assert.equal(compactions.length, 1);
+  });
+
   test("the first drain only anchors the watermark", async () => {
     // Otherwise a crawler that restarts often would compact on every boot.
     const { client, compactions } = fakeClient([{ file: 40 * GB, live: 10 * GB, documents: 500_000 }]);
