@@ -107,6 +107,19 @@ const countHeldForYear = async (year: number) => {
 };
 
 /**
+ * Undefined when the cadence is set to zero, which turns compaction off entirely.
+ */
+const compaction =
+  config.CRAWLER_COMPACT_EVERY_DOCS > 0
+    ? createCompactionPolicy({
+        client: meili,
+        everyDocs: config.CRAWLER_COMPACT_EVERY_DOCS,
+        minRatio: config.CRAWLER_COMPACT_MIN_RATIO,
+        log: info,
+      })
+    : undefined;
+
+/**
  * Bring the projection targets up to date before crawling.
  *
  * Pointing the crawler at a fresh Meili or ClickHouse should be all it takes. Never
@@ -163,6 +176,15 @@ async function prepareTargets(): Promise<void> {
     }
   } catch (err) {
     warn(`meili: could not verify settings — ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // Last, because applying settings drift above triggers a reindex — which is precisely
+  // what leaves the file holding freed pages, and it has been waited on by now. Failing
+  // here (a full volume, most likely) costs disk, never data, so it only warns.
+  try {
+    await compaction?.onBoot();
+  } catch (err) {
+    warn(`meili: boot compaction failed — ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 
@@ -234,19 +256,6 @@ async function crawlForever(): Promise<void> {
 }
 
 /** The drainers restart on their own the same way the crawl does. */
-/**
- * Undefined when the cadence is set to zero, which turns compaction off entirely.
- */
-const compaction =
-  config.CRAWLER_COMPACT_EVERY_DOCS > 0
-    ? createCompactionPolicy({
-        client: meili,
-        everyDocs: config.CRAWLER_COMPACT_EVERY_DOCS,
-        minRatio: config.CRAWLER_COMPACT_MIN_RATIO,
-        log: info,
-      })
-    : undefined;
-
 async function drainForever(): Promise<void> {
   let attempt = 0;
   while (!controller.signal.aborted) {
