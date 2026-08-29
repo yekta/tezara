@@ -80,7 +80,7 @@ const Env = z.object({
    */
   CRAWLER_COMPACT_EVERY_DOCS: z.coerce.number().nonnegative().default(100_000),
   /** Only compact when the file is at least this many times the live data it holds. */
-  CRAWLER_COMPACT_MIN_RATIO: z.coerce.number().positive().default(1.4),
+  CRAWLER_COMPACT_MIN_RATIO: z.coerce.number().positive().default(1.1),
   PORT: z.coerce.number().positive().default(3000),
 });
 
