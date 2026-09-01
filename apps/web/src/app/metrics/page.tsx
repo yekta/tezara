@@ -379,12 +379,25 @@ async function getStats() {
     Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
     "Content-Type": "application/json",
   };
+  // Excludes bot UAs plus the fingerprints of two observed scraper waves
+  // (Linux Chrome desktop; viewports exactly 1905x2019 / 1280x1200), anchored
+  // on $direct so visitors arriving via any referrer are never filtered out.
+  const botFilter = `
+      AND NOT coalesce(match(properties['$raw_user_agent'], '(?i)(bot|crawl|spider|slurp|scrape|headless|phantom|selenium|puppeteer|playwright|lighthouse|pingdom|uptime|monitor|python|aiohttp|go-http|okhttp|curl|wget|libwww|java/|jsdom|node-fetch|axios|semrush|ahrefs|mj12|petal|bytespider|gptbot|ccbot|facebookexternalhit|prerender)'), false)
+      AND NOT coalesce(
+        properties['$referring_domain'] = '$direct'
+        AND (
+          (properties['$os'] = 'Linux' AND properties['$browser'] = 'Chrome' AND properties['$device_type'] = 'Desktop')
+          OR (properties['$viewport_width'] = 1905 AND properties['$viewport_height'] = 2019)
+          OR (properties['$viewport_width'] = 1280 AND properties['$viewport_height'] = 1200)
+        ), false)`;
   const filtersQuery = `
-    SELECT 
+    SELECT
         concat('|Filter|', properties['Filter Type']) AS key,
         count(uuid) AS count,
     FROM events
     WHERE event = 'Filtered'
+    ${botFilter}
     GROUP BY key
     ORDER BY count DESC
   `;
@@ -400,19 +413,21 @@ async function getStats() {
         }`
       : "";
     const baseQuery = `
-      SELECT 
-          '${key}' AS key, 
+      SELECT
+          '${key}' AS key,
           ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
       FROM events
       WHERE event = '${event}'
+      ${botFilter}
     `;
     const prevQuery = queryInterval
       ? `
-      SELECT 
-          '${key}_prev' AS key, 
+      SELECT
+          '${key}_prev' AS key,
           ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
       FROM events
       WHERE event = '${event}'
+      ${botFilter}
     `
       : "";
     let query = baseQuery + and;
