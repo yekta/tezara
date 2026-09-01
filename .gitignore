@@ -51,3 +51,4 @@ next-env.d.ts
 # Editor swap files (.env* does not match ..env.swp)
 *.swp
 *.swo
+*.save
