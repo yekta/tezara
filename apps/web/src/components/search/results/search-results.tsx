@@ -37,6 +37,7 @@ export default function SearchResults({}: Props) {
     currentPage,
     hasNext,
     hasPrev,
+    hasLast,
     goToNextPage,
     goToPrevPage,
     goToPage,
@@ -260,6 +261,7 @@ export default function SearchResults({}: Props) {
           eventName="Prev/Next Search Result Page Button Clicked"
           hasNext={hasNext}
           hasPrev={hasPrev}
+          hasLast={hasLast}
           prevPage={prevPage}
           nextPage={nextPage}
           goToPage={goToPage}
@@ -296,6 +298,7 @@ export default function SearchResults({}: Props) {
             eventName="Prev/Next Search Result Page Button Clicked"
             hasNext={hasNext}
             hasPrev={hasPrev}
+            hasLast={hasLast}
             prevPage={prevPage}
             nextPage={nextPage}
             goToPage={goToPage}

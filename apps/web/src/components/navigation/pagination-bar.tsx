@@ -13,6 +13,7 @@ type Props = {
   className?: string;
   hasPrev: boolean;
   hasNext: boolean;
+  hasLast?: boolean;
   prevPage: number | undefined;
   nextPage: number | undefined;
   currentPage: number;
@@ -29,6 +30,7 @@ export default function PaginationBar({
   className,
   hasPrev,
   hasNext,
+  hasLast = hasNext,
   prevPage,
   nextPage,
   currentPage,
@@ -107,7 +109,7 @@ export default function PaginationBar({
           <PaginationNext
             variant="last"
             isButton
-            disabled={!hasNext}
+            disabled={!hasLast}
             onClick={() => {
               goToPage(lastPage);
               sendEvent(lastPage);
