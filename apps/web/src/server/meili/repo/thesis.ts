@@ -1,5 +1,6 @@
 import {
   PAGE_DEFAULT,
+  PAGE_MAX,
   TSearchLikePageParamsSearchProps,
 } from "@/components/search/constants";
 import {
@@ -51,6 +52,10 @@ export async function searchTheses({
   attributes_to_not_retrieve: TThesisAttribute[] | undefined;
   client: MeiliSearch;
 } & TSearchLikePageParamsSearchProps) {
+  if (page > PAGE_MAX) {
+    throw new Error(`Page ${page} is beyond the maximum of ${PAGE_MAX}.`);
+  }
+
   const index = client.index<TThesis>(indexName);
   let filter = "";
   let languageFilter = "";

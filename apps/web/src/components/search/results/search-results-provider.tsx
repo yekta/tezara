@@ -5,6 +5,7 @@ import {
   HITS_PER_PAGE_BULK,
   HITS_PER_PAGE_DEFAULT,
   PAGE_DEFAULT,
+  PAGE_MAX,
   searchLikePageParamKeys,
   searchLikePageParamParsers,
   searchRoute,
@@ -30,6 +31,7 @@ type TSearchResultsContext = UseQueryResult<TSearchThesesResult> & {
   lastPage: number;
   hasNext: boolean;
   hasPrev: boolean;
+  hasLast: boolean;
   prevPage: number | undefined;
   nextPage: number | undefined;
   currentPage: number;
@@ -190,14 +192,18 @@ export const SearchResultsProvider: React.FC<{
   };
 
   const totalPages = searchThesesQuery.data?.totalPages;
+  const maxPage =
+    totalPages === undefined ? undefined : Math.min(totalPages, PAGE_MAX);
 
   const hasPrev = totalPages !== undefined ? page > 1 : false;
   const hasNext =
     page <= 0
       ? true
-      : totalPages !== undefined
-      ? page < totalPages && totalPages > 1
+      : maxPage !== undefined
+      ? page < maxPage && maxPage > 1
       : false;
+  const hasLast =
+    hasNext && totalPages !== undefined && totalPages <= PAGE_MAX;
 
   const prevPage =
     hasPrev && totalPages !== undefined
@@ -206,8 +212,8 @@ export const SearchResultsProvider: React.FC<{
   const nextPage =
     page <= 0
       ? 1
-      : hasNext && totalPages !== undefined
-      ? Math.min(Math.max(totalPages, 1), Math.max(1, page + 1))
+      : hasNext && maxPage !== undefined
+      ? Math.min(Math.max(maxPage, 1), Math.max(1, page + 1))
       : undefined;
 
   const goToPrevPage = () => {
@@ -239,6 +245,7 @@ export const SearchResultsProvider: React.FC<{
         lastPage,
         hasNext,
         hasPrev,
+        hasLast,
         prevPage,
         nextPage,
         currentPage: page,
