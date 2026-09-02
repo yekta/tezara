@@ -79,13 +79,13 @@ export default function ThesisRow({
         className
       )}
     >
-      <div className="flex w-full sm:w-20 items-center sm:items-end sm:justify-start -mt-1 sm:-mt-0.5 flex-row flex-wrap sm:flex-col sm:-ml-0 -ml-1.5">
+      <div className="flex w-full sm:w-20 min-w-0 items-center sm:items-end sm:justify-start -mt-1 sm:-mt-0.5 flex-row flex-wrap sm:flex-col sm:-ml-0 -ml-1.5">
         {isPlaceholder ? (
-          <div className="sm:w-full min-w-0 flex flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md">
-            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-medium leading-tight font-sans text-transparent bg-muted-foreground animate-skeleton rounded-sm">
+          <div className="min-w-0 flex flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md">
+            <p className="text-left sm:text-right max-w-full min-w-0 break-words font-medium leading-tight font-sans text-transparent bg-muted-foreground animate-skeleton rounded-sm">
               Tez No
             </p>
-            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-bold text-transparent bg-foreground animate-skeleton rounded-sm">
+            <p className="text-left sm:text-right max-w-full min-w-0 break-words font-bold text-transparent bg-foreground animate-skeleton rounded-sm">
               100000
             </p>
           </div>
@@ -93,12 +93,12 @@ export default function ThesisRow({
           <LinkButton
             variant="ghost"
             {...thesisLinkProps}
-            className="sm:w-full min-w-0 flex flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md"
+            className="min-w-0 flex flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md"
           >
-            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-medium leading-tight font-sans text-muted-foreground">
+            <p className="text-left sm:text-right max-w-full min-w-0 break-words font-medium leading-tight font-sans text-muted-foreground">
               Tez No
             </p>
-            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-bold">
+            <p className="text-left sm:text-right max-w-full min-w-0 break-words font-bold">
               {isPlaceholder ? "100000" : thesis.id}
             </p>
           </LinkButton>
@@ -136,7 +136,7 @@ export default function ThesisRow({
           </Button>
         )}
       </div>
-      <div className="w-full min-w-0 flex flex-col items-start -mt-1 sm:-mt-0.5">
+      <div className="w-full flex-1 min-w-0 flex flex-col items-start -mt-1 sm:-mt-0.5">
         {isPlaceholder ? (
           <div className="max-w-full text-balance pr-2 min-w-0 text-base font-semibold leading-tight bg-foreground text-transparent animate-skeleton py-0.5 rounded-md">
             Başlık yükleniyor................................
