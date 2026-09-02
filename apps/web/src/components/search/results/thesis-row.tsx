@@ -79,13 +79,13 @@ export default function ThesisRow({
         className
       )}
     >
-      <div className="flex shrink-0 items-center sm:items-end sm:justify-start -mt-1 sm:-mt-0.5 flex-row flex-wrap sm:flex-col sm:-ml-0 -ml-1.5">
+      <div className="flex w-full sm:w-20 items-center sm:items-end sm:justify-start -mt-1 sm:-mt-0.5 flex-row flex-wrap sm:flex-col sm:-ml-0 -ml-1.5">
         {isPlaceholder ? (
-          <div className="sm:min-w-14 flex shrink flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md">
-            <p className="text-left sm:text-right flex-1 min-w-0 font-medium leading-tight font-sans text-transparent bg-muted-foreground animate-skeleton rounded-sm">
+          <div className="sm:w-full min-w-0 flex flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md">
+            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-medium leading-tight font-sans text-transparent bg-muted-foreground animate-skeleton rounded-sm">
               Tez No
             </p>
-            <p className="text-left sm:text-right flex-1 min-w-0 font-bold text-transparent bg-foreground animate-skeleton rounded-sm">
+            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-bold text-transparent bg-foreground animate-skeleton rounded-sm">
               100000
             </p>
           </div>
@@ -93,12 +93,12 @@ export default function ThesisRow({
           <LinkButton
             variant="ghost"
             {...thesisLinkProps}
-            className="sm:min-w-14 flex shrink flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md"
+            className="sm:w-full min-w-0 flex flex-col text-xs font-mono justify-start items-start sm:items-end gap-0.5 px-1.5 py-1 rounded-md"
           >
-            <p className="text-left sm:text-right flex-1 min-w-0 font-medium leading-tight font-sans text-muted-foreground">
+            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-medium leading-tight font-sans text-muted-foreground">
               Tez No
             </p>
-            <p className="text-left sm:text-right flex-1 min-w-11 font-bold">
+            <p className="text-left sm:text-right max-w-full min-w-0 truncate font-bold">
               {isPlaceholder ? "100000" : thesis.id}
             </p>
           </LinkButton>
