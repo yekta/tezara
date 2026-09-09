@@ -1,4 +1,4 @@
-# Build context is the REPO ROOT.
+# Build context is the repo root.
 #   Coolify: Build Pack = Dockerfile, Base Directory = /, Dockerfile = /apps/crawler/Dockerfile
 #
 # No Chromium: the whole YÖK flow runs over playwright's APIRequestContext (plain HTTP),
