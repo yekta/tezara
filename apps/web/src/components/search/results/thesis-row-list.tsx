@@ -10,7 +10,7 @@ type Props = {
   classNameRow?: string;
   disableUniversityLink?: boolean;
   disableSubjectLink?: boolean;
-  data: TSearchThesesResult | undefined;
+  data: Pick<TSearchThesesResult, "hits"> | undefined;
 };
 
 export default function ThesisRowList({

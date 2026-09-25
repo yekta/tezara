@@ -1,5 +1,6 @@
 import NavigationSection from "@/app/theses/[id]/_components/NavigationSection";
 import GoBackBar from "@/app/theses/[id]/go-back-bar";
+import { getSimilarTheses } from "@/app/theses/[id]/helpers";
 import { thesesRoute } from "@/app/theses/_components/constants";
 import DetailsListItem from "@/app/theses/_components/details-list-item";
 import DetailsListItemSubjects from "@/app/theses/_components/details-list-item-subjects";
@@ -10,7 +11,8 @@ import { Button, LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
 import { meiliAdmin } from "@/server/meili/constants-server";
-import { getThesis, searchTheses } from "@/server/meili/repo/thesis";
+import { getThesis } from "@/server/meili/repo/thesis";
+import { TThesis } from "@/server/meili/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -34,7 +36,7 @@ export default async function Page({ params }: Props) {
   }
 
   let thesis: Awaited<ReturnType<typeof getThesis>> | null = null;
-  let similarTheses: Awaited<ReturnType<typeof searchTheses>> | null = null;
+  let similarTheses: { hits: TThesis[] } | null = null;
 
   try {
     const start = performance.now();
@@ -53,29 +55,7 @@ export default async function Page({ params }: Props) {
 
   const start = performance.now();
   try {
-    similarTheses = await searchTheses({
-      q: thesis.title_original || thesis.title_translated || "",
-      disable_ranking_score_threshold: true,
-      hits_per_page: 6,
-      page: 1,
-      languages: [],
-      thesis_types: [],
-      universities: [],
-      departments: [],
-      authors: [],
-      advisors: [],
-      subjects: [],
-      sort: undefined,
-      year_gte: null,
-      year_lte: null,
-      search_on: [],
-      attributes_to_retrieve: undefined,
-      attributes_to_not_retrieve: ["abstract_original", "abstract_translated"],
-      client: meiliAdmin,
-    });
-    similarTheses.hits = similarTheses.hits.filter(
-      (hit) => hit.id !== idNumber
-    );
+    similarTheses = { hits: await getSimilarTheses(thesis) };
   } catch (error) {
     console.log("Failed to fetch similar theses.", error);
   }

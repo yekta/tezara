@@ -8,7 +8,11 @@ import {
   TThesisAttribute,
   TThesis,
 } from "@/server/meili/types";
-import { MeiliSearch } from "meilisearch";
+import {
+  ErrorStatusCode,
+  MeiliSearch,
+  MeiliSearchApiError,
+} from "meilisearch";
 
 const indexName = "theses";
 
@@ -20,10 +24,42 @@ export async function getThesis({
   id: number;
 }) {
   const index = client.index<TThesis>(indexName);
-  const result = await index.getDocument(id);
-  return result;
+  try {
+    return await index.getDocument(id);
+  } catch (error) {
+    if (
+      error instanceof MeiliSearchApiError &&
+      error.cause?.code === ErrorStatusCode.DOCUMENT_NOT_FOUND
+    ) {
+      return null;
+    }
+    throw error;
+  }
 }
 export type TGetThesisResult = Awaited<ReturnType<typeof getThesis>>;
+
+export async function getThesesByIds({
+  client,
+  ids,
+  fields,
+}: {
+  client: MeiliSearch;
+  ids: number[];
+  fields: TThesisAttribute[];
+}) {
+  if (ids.length === 0) return [];
+
+  const index = client.index<TThesis>(indexName);
+  const { results } = await index.getDocuments({
+    filter: `id IN [${ids.join(",")}]`,
+    fields,
+    limit: ids.length,
+  });
+  const byId = new Map(results.map((thesis) => [thesis.id, thesis]));
+  return ids
+    .map((id) => byId.get(id))
+    .filter((thesis) => thesis !== undefined);
+}
 
 export async function searchTheses({
   client,
