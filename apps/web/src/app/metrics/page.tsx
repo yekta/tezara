@@ -152,7 +152,8 @@ const cards: Card[] = [
   },
 ];
 
-const getStatsCached = cacheWithRedis("metrics", getStats, "short");
+const POSTHOG_TIMEOUT_MS = 60_000;
+const getStatsCached = cacheWithRedis("metrics", getStats, "metrics");
 
 export default async function Page() {
   await headers();
@@ -374,89 +375,106 @@ const filterMap: Record<
 };
 
 async function getStats() {
-  const posthogUrl = `https://us.posthog.com/api/projects/${env.POSTHOG_PROJECT_ID}/query/`;
-  const posthogHeaders = {
-    Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
-    "Content-Type": "application/json",
-  };
-  // Excludes bot UAs plus the fingerprints of two observed scraper waves
-  // (Linux Chrome desktop; viewports exactly 1905x2019 / 1280x1200), anchored
-  // on $direct so visitors arriving via any referrer are never filtered out.
-  const botFilter = `
-      AND NOT coalesce(match(properties['$raw_user_agent'], '(?i)(bot|crawl|spider|slurp|scrape|headless|phantom|selenium|puppeteer|playwright|lighthouse|pingdom|uptime|monitor|python|aiohttp|go-http|okhttp|curl|wget|libwww|java/|jsdom|node-fetch|axios|semrush|ahrefs|mj12|petal|bytespider|gptbot|ccbot|facebookexternalhit|prerender)'), false)
-      AND NOT coalesce(
-        properties['$referring_domain'] = '$direct'
-        AND (
-          (properties['$os'] = 'Linux' AND properties['$browser'] = 'Chrome' AND properties['$device_type'] = 'Desktop')
-          OR (properties['$viewport_width'] = 1905 AND properties['$viewport_height'] = 2019)
-          OR (properties['$viewport_width'] = 1280 AND properties['$viewport_height'] = 1200)
-        ), false)`;
-  const filtersQuery = `
-    SELECT
-        concat('|Filter|', properties['Filter Type']) AS key,
-        count(uuid) AS count,
+  const events = [...new Set(cards.map((c) => c.event))];
+  const [filterRows, ...eventRows] = await Promise.all([
+    queryPosthog(filtersQuery),
+    ...events.map((event) => queryPosthog(eventStatsQuery(event))),
+  ]);
+
+  const results: [string, number][] = [];
+  events.forEach((event, i) => {
+    const row = eventRows[i].results[0];
+    if (!row) return;
+    eventStatKeys(event).forEach((key, j) => {
+      const count = row[j];
+      if (typeof count !== "number") return;
+      results.push([key, count]);
+    });
+  });
+  for (const [key, count] of filterRows.results) {
+    if (typeof key !== "string" || typeof count !== "number") continue;
+    results.push([key, count]);
+  }
+
+  if (results.length === 0) throw new Error("No metrics returned");
+  return { results, last_refresh: filterRows.last_refresh };
+}
+
+// Excludes bot UAs plus the fingerprints of two observed scraper waves
+// (Linux Chrome desktop; viewports exactly 1905x2019 / 1280x1200), anchored
+// on $direct so visitors arriving via any referrer are never filtered out.
+const botFilter = `
+  AND NOT coalesce(match(properties['$raw_user_agent'], '(?i)(bot|crawl|spider|slurp|scrape|headless|phantom|selenium|puppeteer|playwright|lighthouse|pingdom|uptime|monitor|python|aiohttp|go-http|okhttp|curl|wget|libwww|java/|jsdom|node-fetch|axios|semrush|ahrefs|mj12|petal|bytespider|gptbot|ccbot|facebookexternalhit|prerender)'), false)
+  AND NOT coalesce(
+    properties['$referring_domain'] = '$direct'
+    AND (
+      (properties['$os'] = 'Linux' AND properties['$browser'] = 'Chrome' AND properties['$device_type'] = 'Desktop')
+      OR (properties['$viewport_width'] = 1905 AND properties['$viewport_height'] = 2019)
+      OR (properties['$viewport_width'] = 1280 AND properties['$viewport_height'] = 1200)
+    ), false)`;
+
+const filtersQuery = `
+  SELECT
+    concat('${filterSeparator}', properties['Filter Type']) AS key,
+    count() AS count
+  FROM events
+  WHERE event = 'Filtered'
+  ${botFilter}
+  GROUP BY key
+  ORDER BY count DESC
+`;
+
+function eventStatKeys(event: string) {
+  return cards
+    .filter((c) => c.event === event)
+    .flatMap((c) => (c.queryInterval ? [c.key, `${c.key}_prev`] : [c.key]));
+}
+
+function eventStatsQuery(event: string) {
+  const columns = cards
+    .filter((c) => c.event === event)
+    .flatMap(({ distinct, queryInterval }) => {
+      if (!queryInterval) {
+        return [distinct ? "uniqExact(distinct_id)" : "count()"];
+      }
+      const { type, count } = queryInterval;
+      const current = `timestamp > now() - INTERVAL ${count} ${type}`;
+      const previous = `timestamp > now() - INTERVAL ${count * 2} ${type} AND timestamp <= now() - INTERVAL ${count} ${type}`;
+      return [current, previous].map((condition) =>
+        distinct
+          ? `uniqExactIf(distinct_id, ${condition})`
+          : `countIf(${condition})`
+      );
+    });
+
+  return `
+    SELECT ${columns.join(",\n      ")}
     FROM events
-    WHERE event = 'Filtered'
+    WHERE event = '${event}'
     ${botFilter}
-    GROUP BY key
-    ORDER BY count DESC
   `;
-  const queries = cards.map(({ key, event, distinct, queryInterval }) => {
-    const and = queryInterval
-      ? ` AND timestamp > now() - INTERVAL ${queryInterval.count} ${queryInterval.type}`
-      : "";
-    const prevAnd = queryInterval
-      ? ` AND timestamp > now() - INTERVAL ${queryInterval.count * 2} ${
-          queryInterval.type
-        } AND timestamp < now() - INTERVAL ${queryInterval.count} ${
-          queryInterval.type
-        }`
-      : "";
-    const baseQuery = `
-      SELECT
-          '${key}' AS key,
-          ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
-      FROM events
-      WHERE event = '${event}'
-      ${botFilter}
-    `;
-    const prevQuery = queryInterval
-      ? `
-      SELECT
-          '${key}_prev' AS key,
-          ${distinct ? "count(DISTINCT distinct_id)" : "count(uuid)"} AS count
-      FROM events
-      WHERE event = '${event}'
-      ${botFilter}
-    `
-      : "";
-    let query = baseQuery + and;
-    if (!queryInterval) return query;
-    query += "\nUNION ALL\n" + prevQuery + prevAnd;
-    return query;
-  });
+}
 
-  const query = queries.join("\nUNION ALL\n") + "\nUNION ALL\n" + filtersQuery;
-  const payload = {
-    query: {
-      kind: "HogQLQuery",
-      query,
+const PosthogResponseSchema = z.object({
+  results: z.array(z.array(z.union([z.string(), z.number(), z.null()]))),
+  last_refresh: z.string().nonempty(),
+});
+
+async function queryPosthog(query: string) {
+  const res = await fetchWithTimeout(
+    `https://us.posthog.com/api/projects/${env.POSTHOG_PROJECT_ID}/query/`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: { kind: "HogQLQuery", query } }),
     },
-  };
-
-  const res = await fetchWithTimeout(posthogUrl, {
-    method: "POST",
-    headers: posthogHeaders,
-    body: JSON.stringify(payload),
-  });
-
-  const StatsSchema = z.object({
-    results: z.array(z.tuple([z.string(), z.number()])).min(1),
-    last_refresh: z.string().nonempty(),
-  });
-
-  const json = await res.json();
-  const parsed = StatsSchema.parse(json);
-
-  return { results: parsed.results, last_refresh: parsed.last_refresh };
+    POSTHOG_TIMEOUT_MS
+  );
+  if (!res.ok) {
+    throw new Error(`PostHog query failed: ${res.status} ${await res.text()}`);
+  }
+  return PosthogResponseSchema.parse(await res.json());
 }
