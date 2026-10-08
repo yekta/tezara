@@ -28,7 +28,7 @@ Tezara'da YÖK'ün sisteminden farklılıkları şu şekilde:
 
 - 🟡 Toplu PDF indirme
 
-- 🟡 Fitreleme özelliklerini manuel olarak kullanmadan, doğal konuşma tarzında arama yapma. Örneğin: "2020 ve 2015 yılları arasında yapılmış, adında sosyoloji geçen yüksek lisans tezleri". Şu linki ziyaret ederek bunun bir örneğini görebilirsiniz: [Tezara doğal arama modu](https://tezara.org/search?q=2020%20ve%202015%20y%C4%B1llar%C4%B1%20aras%C4%B1nda%20yap%C4%B1lm%C4%B1%C5%9F,%20ad%C4%B1nda%20sosyoloji%20ge%C3%A7en%20y%C3%BCksek%20lisans%20tezleri&fcall=true)
+- 🟡 Filtreleme özelliklerini manuel olarak kullanmadan, doğal konuşma tarzında arama yapma. Örneğin: "2020 ve 2015 yılları arasında yapılmış, adında sosyoloji geçen yüksek lisans tezleri". Şu linki ziyaret ederek bunun bir örneğini görebilirsiniz: [Tezara doğal arama modu](https://tezara.org/search?q=2020%20ve%202015%20y%C4%B1llar%C4%B1%20aras%C4%B1nda%20yap%C4%B1lm%C4%B1%C5%9F,%20ad%C4%B1nda%20sosyoloji%20ge%C3%A7en%20y%C3%BCksek%20lisans%20tezleri&fcall=true)
 
 Notlar:
 
