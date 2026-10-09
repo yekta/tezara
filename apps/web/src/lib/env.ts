@@ -21,6 +21,8 @@ export const env = createEnv({
      */
     CLICKHOUSE_URL_BUILD: z.url().optional(),
     REDIS_URL: z.url(),
+    /** Comma-separated thesis ids removed at the author's request. */
+    BLOCKED_THESES: z.string().optional(),
     POSTHOG_PERSONAL_API_KEY: z.string(),
     POSTHOG_PROJECT_ID: z.string(),
     NODE_ENV: z
@@ -56,6 +58,7 @@ export const env = createEnv({
     CLICKHOUSE_URL: process.env.CLICKHOUSE_URL,
     CLICKHOUSE_URL_BUILD: process.env.CLICKHOUSE_URL_BUILD,
     REDIS_URL: process.env.REDIS_URL,
+    BLOCKED_THESES: process.env.BLOCKED_THESES,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_POSTHOG_HOST_ASSETS:

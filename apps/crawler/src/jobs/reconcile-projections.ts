@@ -31,6 +31,8 @@ export async function reconcileProjections(
   deps: {
     clickhouse: ClickHouseClient;
     meili?: MeiliSearch;
+    /** Deliberately absent from Meili, so never counted as missing there. */
+    blocked?: ReadonlySet<number>;
     scan: ChScanStore;
     log?: (message: string) => void;
     now?: () => number;
@@ -74,8 +76,12 @@ export async function reconcileProjections(
   //    (one request), then id-by-id only for years that actually drift. ClickHouse is a
   //    fair reference here: an id missing from BOTH targets was already handled above.
   if (deps.meili) {
+    const blocked = [...(deps.blocked ?? [])];
     const chYears = await deps.clickhouse.query({
-      query: "SELECT year, uniqExact(id) AS c FROM theses FINAL GROUP BY year",
+      query: `
+        SELECT year, uniqExact(id) AS c FROM theses FINAL
+        WHERE id NOT IN {blocked:Array(UInt32)} GROUP BY year`,
+      query_params: { blocked },
       format: "JSONEachRow",
     });
     const chByYear = new Map(
@@ -106,8 +112,10 @@ export async function reconcileProjections(
       }
 
       const chIds = await deps.clickhouse.query({
-        query: "SELECT DISTINCT id FROM theses WHERE year = {year:UInt32}",
-        query_params: { year },
+        query: `
+          SELECT DISTINCT id FROM theses
+          WHERE year = {year:UInt32} AND id NOT IN {blocked:Array(UInt32)}`,
+        query_params: { year, blocked },
         format: "JSONEachRow",
       });
       const missing = (await chIds.json<{ id: number }>())

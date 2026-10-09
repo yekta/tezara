@@ -8,6 +8,7 @@
  * the outbox just holds the work. CLICKHOUSE_URL is required — crawl state lives there.
  */
 import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
+import { parseBlockedTheses } from "@tezara/core";
 import { createMeiliClient } from "@tezara/meili";
 import { buildLookups } from "./jobs/context.ts";
 import { scanRange } from "./jobs/crawl.ts";
@@ -46,6 +47,7 @@ const meiliUrl = process.env.MEILI_URL_INTERNAL;
 const meili = meiliUrl
   ? createMeiliClient({ host: meiliUrl, apiKey: process.env.MEILI_ADMIN_KEY ?? "" })
   : undefined;
+const blocked = parseBlockedTheses(process.env.BLOCKED_THESES);
 const session = await openSession({ delayMs: Number(process.env.CRAWLER_DELAY_MS ?? 400) });
 
 const controller = new AbortController();
@@ -67,7 +69,7 @@ try {
   }
 
   if (meili) {
-    const synced = await syncMeili({ client: meili, outbox, known: dimensions });
+    const synced = await syncMeili({ client: meili, outbox, known: dimensions, blocked });
     console.error(`\nsynced to Meili: ${JSON.stringify(synced)}`);
   }
 

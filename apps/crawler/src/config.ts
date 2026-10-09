@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { parseBlockedTheses } from "@tezara/core";
 import { z } from "zod";
 import { error, info } from "./log.ts";
 
@@ -82,6 +83,12 @@ const Env = z.object({
   /** Only compact when the file is at least this many times the live data it holds. */
   CRAWLER_COMPACT_MIN_RATIO: z.coerce.number().positive().default(1.1),
   PORT: z.coerce.number().positive().default(3000),
+  /**
+   * Theses removed at the author's request. Deleted from Meili at boot, skipped by the
+   * Meili drain and ignored by the projection reconcile; ClickHouse keeps them so the
+   * aggregates stay intact. The web app reads the same variable.
+   */
+  BLOCKED_THESES: z.string().default("").transform(parseBlockedTheses),
 });
 
 export type Config = z.infer<typeof Env>;
@@ -112,7 +119,8 @@ export function loadConfig(env?: NodeJS.ProcessEnv): Config {
     `config redis=${redact(config.REDIS_URL)}` +
       ` meili=${config.MEILI_URL_INTERNAL}` +
       ` clickhouse=${redact(config.CLICKHOUSE_URL)}` +
-      ` concurrency=${config.CRAWLER_CONCURRENCY}`,
+      ` concurrency=${config.CRAWLER_CONCURRENCY}` +
+      ` blocked=${config.BLOCKED_THESES.size}`,
   );
 
   return config;

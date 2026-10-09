@@ -97,6 +97,20 @@ after(async () => {
 });
 
 describe("syncMeili", () => {
+  test("blocked theses are committed out of the outbox but never pushed", async () => {
+    await outbox.push([thesis(1), thesis(2), thesis(3)]);
+    const meili = fakeClient();
+
+    const result = await syncMeili(
+      { client: meili.client, outbox, blocked: new Set([2]) },
+      { batchSize: 10 },
+    );
+
+    assert.equal(result.remaining, 0, "the blocked id does not sit in the outbox forever");
+    const theses = meili.pushes.filter((p) => p.index === "theses");
+    assert.deepEqual(theses.map((p) => p.docs), [2], "only the two allowed theses reached Meili");
+  });
+
   test("drains the whole outbox rather than stopping at a fixed batch count", async () => {
     await outbox.push([...Array(25)].map((_, i) => thesis(i + 1)));
     const meili = fakeClient();

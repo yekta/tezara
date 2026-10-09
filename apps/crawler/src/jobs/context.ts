@@ -22,6 +22,8 @@ export type JobContext = {
   dimensions?: DimensionCache;
   /** Absent when running a crawl-only worker with no projection target. */
   meili?: MeiliSearch;
+  /** Thesis ids that must never reach Meili. */
+  blocked?: ReadonlySet<number>;
   clickhouse?: ClickHouseClient;
   /** Per-year drift tracking. */
   reconcile?: ReconcileStore;

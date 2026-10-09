@@ -1,4 +1,5 @@
 import NavigationSection from "@/app/theses/[id]/_components/NavigationSection";
+import ThesisRemoved from "@/app/theses/[id]/_components/ThesisRemoved";
 import GoBackBar from "@/app/theses/[id]/go-back-bar";
 import { getSimilarTheses } from "@/app/theses/[id]/helpers";
 import { thesesRoute } from "@/app/theses/_components/constants";
@@ -10,6 +11,7 @@ import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
 import { siteTitle } from "@/lib/constants";
 import { getTwitterMeta } from "@/lib/helpers";
+import { isThesisBlocked } from "@/server/blocked-theses";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import { getThesis } from "@/server/meili/repo/thesis";
 import { TThesis } from "@/server/meili/types";
@@ -33,6 +35,9 @@ export default async function Page({ params }: Props) {
 
   if (!isIdValid) {
     return notFound();
+  }
+  if (isThesisBlocked(idNumber)) {
+    return <ThesisRemoved id={idNumber} />;
   }
 
   let thesis: Awaited<ReturnType<typeof getThesis>> | null = null;
@@ -216,6 +221,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isIdValid = !isNaN(idNumber) && idNumber >= 0;
   if (!isIdValid) {
     return notFoundMeta;
+  }
+  if (isThesisBlocked(idNumber)) {
+    const removedTitle = `Tez Kaldırıldı | ${titleSuffix}`;
+    const removedDescription = `${idNumber} numaralı tez yazarın talebi üzerine ${siteTitle} platformundan kaldırıldı.`;
+    return {
+      title: removedTitle,
+      description: removedDescription,
+      robots: { index: false, follow: false },
+      twitter: getTwitterMeta({
+        title: removedTitle,
+        description: removedDescription,
+      }),
+    };
   }
 
   const thesis = await getThesis({ id: idNumber, client: meiliAdmin });

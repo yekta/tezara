@@ -1,4 +1,5 @@
 export * from "./thesis.ts";
+export * from "./blocked-theses.ts";
 export * from "./clean/text.ts";
 export * from "./clean/keywords.ts";
 export * from "./clean/location.ts";

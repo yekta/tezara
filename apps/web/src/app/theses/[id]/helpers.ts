@@ -1,3 +1,4 @@
+import { isThesisBlocked } from "@/server/blocked-theses";
 import { meiliAdmin } from "@/server/meili/constants-server";
 import {
   getThesesByIds,
@@ -27,7 +28,10 @@ export const cachedGetPageData = cache(({ id }: { id: string }) =>
 );
 
 export async function getPageData({ id }: { id: string }) {
-  const thesis = await getThesis({ id: parseInt(id), client: meiliAdmin });
+  const idNumber = parseInt(id);
+  if (isThesisBlocked(idNumber)) return { thesis: null };
+
+  const thesis = await getThesis({ id: idNumber, client: meiliAdmin });
   return {
     thesis,
   };
