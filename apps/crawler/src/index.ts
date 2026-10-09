@@ -5,7 +5,7 @@
  * outbox buffer in Redis, and "what to do next" is derived in-process (see roles/loop).
  */
 import { createClickhouseClient, migrate as migrateClickhouse } from "@tezara/clickhouse";
-import { applySettings, createMeiliClient, verifySettings } from "@tezara/meili";
+import { applySettings, createMeiliClient, deleteTheses, verifySettings } from "@tezara/meili";
 import { loadConfig } from "./config.ts";
 import { error, info, warn } from "./log.ts";
 import { createCompactionPolicy } from "./jobs/compact-meili.ts";
@@ -178,6 +178,17 @@ async function prepareTargets(): Promise<void> {
     warn(`meili: could not verify settings — ${err instanceof Error ? err.message : String(err)}`);
   }
 
+  // Deleting an absent document is a no-op, so this is safe to repeat on every boot.
+  if (config.BLOCKED_THESES.size > 0) {
+    try {
+      const ids = [...config.BLOCKED_THESES];
+      await deleteTheses(meili, ids, { waitForTasks: true, log: info });
+      info(`meili: removed ${ids.length} blocked thesis(es): ${ids.join(", ")}`);
+    } catch (err) {
+      warn(`meili: could not remove blocked theses — ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   // Last, because applying settings drift above triggers a reindex — which is precisely
   // what leaves the file holding freed pages, and it has been waited on by now. Failing
   // here (a full volume, most likely) costs disk, never data, so it only warns.
@@ -226,6 +237,7 @@ async function crawlForever(): Promise<void> {
         {
           session: undefined as never, // each lane supplies its own
           scan, lookups, outbox, dimensions, meili, clickhouse,
+          blocked: config.BLOCKED_THESES,
           reconcile, countHeldForYear,
           log: info,
         },
@@ -263,6 +275,7 @@ async function drainForever(): Promise<void> {
       await runDrainers(
         {
           outbox, scan, meili, dimensions, clickhouse, log: info, compaction,
+          blocked: config.BLOCKED_THESES,
           onEvent: ({ target, detail }) => {
             const line = describeDrain(target, detail);
             if (line !== null) info(line);

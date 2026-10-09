@@ -104,6 +104,19 @@ describe("reconcileProjections", () => {
     assert.deepEqual(await scan.due(10), [2]);
   });
 
+  test("a blocked id missing from meili is neither counted as drift nor re-queued", async () => {
+    await insertState([{ id: 1 }, { id: 2 }, { id: 3 }]);
+    await insertTheses([{ id: 1, year: 2020 }, { id: 2, year: 2020 }, { id: 3, year: 2020 }]);
+    const meili = fakeMeili({ 2020: [1] });
+
+    const result = await reconcileProjections({
+      clickhouse: ch, meili, scan, blocked: new Set([2]),
+    });
+
+    assert.equal(result.missingInMeili, 1, "only the unblocked gap counts");
+    assert.deepEqual(await scan.due(10), [3]);
+  });
+
   test("years whose counts agree are not enumerated", async () => {
     await insertState([{ id: 1 }, { id: 2 }]);
     await insertTheses([{ id: 1, year: 2020 }, { id: 2, year: 2021 }]);

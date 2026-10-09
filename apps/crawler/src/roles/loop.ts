@@ -219,6 +219,7 @@ async function runUnit(
       return reconcileProjections({
         clickhouse: ctx.clickhouse,
         meili: ctx.meili,
+        blocked: ctx.blocked,
         scan: ctx.scan,
         log: ctx.log,
       });
@@ -320,6 +321,7 @@ export type DrainerDeps = {
   outbox: Outbox;
   scan: ChScanStore;
   meili?: JobContext["meili"];
+  blocked?: JobContext["blocked"];
   dimensions?: JobContext["dimensions"];
   clickhouse?: ClickHouseClient;
   log?: (message: string) => void;
@@ -371,7 +373,7 @@ export async function runDrainers(
     drainers.push(
       loop("meili", async () => {
         const result = await syncMeili({
-          client, outbox: deps.outbox, known: deps.dimensions, log: deps.log,
+          client, outbox: deps.outbox, known: deps.dimensions, blocked: deps.blocked, log: deps.log,
         });
         deps.onEvent?.({ target: "meili", detail: result });
         // Between drains, never during one: compaction is a Meili task, so a push

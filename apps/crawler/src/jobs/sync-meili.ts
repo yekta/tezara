@@ -100,6 +100,8 @@ export async function syncMeili(
     outbox: Outbox;
     /** Lets the push skip dimension names Meili already holds; safe to omit. */
     known?: KnownDocs;
+    /** Committed out of the outbox like the rest, but never pushed. */
+    blocked?: ReadonlySet<number>;
     log?: (message: string) => void;
   },
   params: SyncMeiliParams = {},
@@ -184,7 +186,9 @@ export async function syncMeili(
       if (batch.length === 0) break;
 
       const started = Date.now();
-      await syncTheses(deps.client, batch, { waitForTasks: false, onReject, known: deps.known, log });
+      const blocked = deps.blocked;
+      const allowed = blocked ? batch.filter((t) => !blocked.has(t.id)) : batch;
+      await syncTheses(deps.client, allowed, { waitForTasks: false, onReject, known: deps.known, log });
       await deps.outbox.commit("meili", batch.map((t) => t.id));
       pushed += batch.length;
       batches++;
