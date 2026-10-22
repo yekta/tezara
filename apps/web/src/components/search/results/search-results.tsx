@@ -132,7 +132,11 @@ export default function SearchResults({}: Props) {
       className="w-full flex-1 flex flex-col pt-6 group"
     >
       <div className="w-full flex items-start">
-        <KgkPromo variant="bag-only" sizes="5rem" className="size-20 -ml-4 -mt-1" />
+        <KgkPromo
+          variant="bag-only"
+          sizes="6rem"
+          className="size-24 -ml-4 -mr-0.5 -mt-3.5 -mb-3"
+        />
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="w-full flex flex-wrap items-start gap-1.5">
             <Button
