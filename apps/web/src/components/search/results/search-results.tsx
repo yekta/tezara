@@ -2,6 +2,7 @@
 
 import FileExtensionIcon from "@/components/icons/sets/file-extension";
 import PaginationBar from "@/components/navigation/pagination-bar";
+import KgkPromo from "@/components/promo/kgk-promo";
 import { formatForDownload } from "@/components/search/format-for-download";
 import { useSearchResults } from "@/components/search/results/search-results-provider";
 import ResultsSection from "@/components/search/results/thesis-row-list";
@@ -130,131 +131,125 @@ export default function SearchResults({}: Props) {
       data-pending={isPending ? true : undefined}
       className="w-full flex-1 flex flex-col pt-6 group"
     >
-      <div className="w-full flex flex-wrap items-start gap-1.5">
-        <Button
-          onClick={() => downloadCsv()}
-          disabled={
-            !data ||
-            data.hits.length < 1 ||
-            isPendingCsvDownload ||
-            isPendingDownload
-          }
-          size="sm"
-          variant="success"
-          fadeOnDisabled={
-            !data && isError
-              ? true
-              : !data
-              ? false
-              : isPendingCsvDownload
-              ? false
-              : true
-          }
-          className={`${
-            isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
-          }`}
-        >
-          {isPendingCsvDownload && (
-            <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
-          )}
-          <div className="size-5 -ml-1.5 relative">
-            {!isPendingCsvDownload && (
-              <FileExtensionIcon className="size-full" variant="csv" />
-            )}
-            {isPendingCsvDownload && (
-              <LoaderIcon className="size-full animate-spin" />
-            )}
-          </div>
-          <p className="shrink min-w-0 relative">
-            {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
-          </p>
-        </Button>
-        <Button
-          onClick={() => downloadJson()}
-          disabled={
-            !data ||
-            data.hits.length < 1 ||
-            isPendingJsonDownload ||
-            isPendingDownload
-          }
-          size="sm"
-          fadeOnDisabled={
-            !data && isError
-              ? true
-              : !data
-              ? false
-              : isPendingJsonDownload
-              ? false
-              : true
-          }
-          className={`${
-            isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
-          }`}
-        >
-          {isPendingJsonDownload && (
-            <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
-          )}
-          <div className="size-5 -ml-1.5 relative">
-            {!isPendingJsonDownload && (
-              <FileExtensionIcon className="size-full" variant="json" />
-            )}
-            {isPendingJsonDownload && (
-              <LoaderIcon className="size-full animate-spin" />
-            )}
-          </div>
-          <p className="shrink min-w-0 relative">
-            {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
-          </p>
-        </Button>
-      </div>
-      {/* Metrics */}
-      <div className="w-full flex items-center justify-start py-3.5 px-1.5 gap-1.5">
-        <p className="shrink min-w-0 font-semibold text-sm text-muted-foreground text-balance">
-          Eşleşen:{" "}
-          {!data ? (
-            <span className={metricsPendingClassName}>
-              {isHardError ? "0" : "900,000"}
-            </span>
-          ) : (
-            <span className="text-foreground">
-              {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
-            </span>
-          )}
-          <span className="text-foreground/30 px-[0.75ch]">|</span>
-          Gösterilen:{" "}
-          {!data ? (
-            <span className={metricsPendingClassName}>
-              {isHardError ? 0 : 10}
-            </span>
-          ) : (
-            <span className="text-foreground">
-              {data.hits.length.toLocaleString()}
-            </span>
-          )}
-          <span className="text-foreground/30 px-[0.75ch]">|</span>
-          {!data ? (
-            <span
-              className={
-                isHardError ? "text-destructive" : metricsPendingClassName
+      <div className="w-full flex items-start">
+        <KgkPromo variant="bag-only" sizes="5rem" className="size-20 -ml-4 -mt-1" />
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="w-full flex flex-wrap items-start gap-1.5">
+            <Button
+              onClick={() => downloadCsv()}
+              disabled={
+                !data ||
+                data.hits.length < 1 ||
+                isPendingCsvDownload ||
+                isPendingDownload
               }
+              size="sm"
+              variant="success"
+              fadeOnDisabled={
+                !data && isError
+                  ? true
+                  : !data
+                  ? false
+                  : isPendingCsvDownload
+                  ? false
+                  : true
+              }
+              className={`${
+                isPendingCsvDownload ? "bg-success/75 overflow-hidden" : ""
+              }`}
             >
-              {isHardError ? "Hata" : "0.001 sn."}
-            </span>
-          ) : (
-            <span className="text-foreground">
-              {(data.processingTimeMs / 1000).toLocaleString()} sn.
-            </span>
-          )}
-        </p>
-        {isJustFetching ? (
-          <LoaderIcon className="size-4 animate-spin text-muted-foreground" />
-        ) : (
-          <div className="size-4">
-            {!isPending && !isFetching && !isError && data && (
-              <CheckCircleIcon className="text-success size-full" />
+              {isPendingCsvDownload && (
+                <div className="absolute left-0 top-0 origin-left bg-success h-full w-full animate-loading-bar" />
+              )}
+              <div className="size-5 -ml-1.5 relative">
+                {!isPendingCsvDownload && (
+                  <FileExtensionIcon className="size-full" variant="csv" />
+                )}
+                {isPendingCsvDownload && (
+                  <LoaderIcon className="size-full animate-spin" />
+                )}
+              </div>
+              <p className="shrink min-w-0 relative">
+                {isPendingCsvDownload ? "İndiriliyor" : "Tablo İndir"}
+              </p>
+            </Button>
+            <Button
+              onClick={() => downloadJson()}
+              disabled={
+                !data ||
+                data.hits.length < 1 ||
+                isPendingJsonDownload ||
+                isPendingDownload
+              }
+              size="sm"
+              fadeOnDisabled={
+                !data && isError
+                  ? true
+                  : !data
+                  ? false
+                  : isPendingJsonDownload
+                  ? false
+                  : true
+              }
+              className={`${
+                isPendingJsonDownload ? "bg-primary/75 overflow-hidden" : ""
+              }`}
+            >
+              {isPendingJsonDownload && (
+                <div className="absolute left-0 top-0 origin-left bg-primary h-full w-full animate-loading-bar" />
+              )}
+              <div className="size-5 -ml-1.5 relative">
+                {!isPendingJsonDownload && (
+                  <FileExtensionIcon className="size-full" variant="json" />
+                )}
+                {isPendingJsonDownload && (
+                  <LoaderIcon className="size-full animate-spin" />
+                )}
+              </div>
+              <p className="shrink min-w-0 relative">
+                {isPendingJsonDownload ? "İndiriliyor" : "JSON İndir"}
+              </p>
+            </Button>
+          </div>
+          {/* Metrics */}
+          <div className="w-full flex items-center justify-start py-3.5 px-1.5 gap-1.5">
+            <p className="shrink min-w-0 font-semibold text-sm text-muted-foreground text-balance">
+              Eşleşen:{" "}
+              {!data ? (
+                <span className={metricsPendingClassName}>
+                  {isHardError ? "0" : "900,000"}
+                </span>
+              ) : (
+                <span className="text-foreground">
+                  {data.hits.length > 0 ? data.totalHits.toLocaleString() : 0}
+                </span>
+              )}
+              <span className="text-foreground/30 px-[0.75ch]">|</span>
+              {!data ? (
+                <span
+                  className={
+                    isHardError ? "text-destructive" : metricsPendingClassName
+                  }
+                >
+                  {isHardError ? "Hata" : "0.001 sn."}
+                </span>
+              ) : (
+                <span className="text-foreground">
+                  {(data.processingTimeMs / 1000).toLocaleString()} sn.
+                </span>
+              )}
+            </p>
+            {isJustFetching ? (
+              <LoaderIcon className="size-4 animate-spin text-muted-foreground" />
+            ) : (
+              <div className="size-4">
+                {!isPending && !isFetching && !isError && data && (
+                  <CheckCircleIcon className="text-success size-full" />
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
       <div className="w-full flex flex-col flex-1">
         <PaginationBar

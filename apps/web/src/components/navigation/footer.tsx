@@ -1,5 +1,4 @@
 import { metricsRoute } from "@/app/metrics/_components/constants";
-import ThemeButton from "@/components/theme-button";
 import { LinkCustom } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 import { sc, siteTitle } from "@/lib/constants";
@@ -59,7 +58,7 @@ export default async function Footer({
           </div>
         </div>
         <div className="flex items-center justify-end gap-1.75">
-          <ThemeButton />
+          <div className="size-8.5 shrink-0" />
         </div>
       </div>
     </footer>

@@ -1,14 +1,17 @@
 "use client";
 
+import { useUniversitiesPageParam } from "@/app/universities/_components/query-param-provider";
 import { useUniversitiesPage } from "@/app/universities/_components/universities-page-provider";
 import UniversityCard from "@/app/universities/_components/university-card";
 import { SearchIcon } from "@/components/icons/search-icon";
+import KgkSponsorCard from "@/components/promo/kgk-sponsor-card";
 import { TriangleAlertIcon } from "lucide-react";
 
 export default function UniversitiesCardsGrid() {
   const { data, isPending, isError } = useUniversitiesPage();
   const universities = data?.result;
   const isHardError = !isPending && isError;
+  const [query] = useUniversitiesPageParam.q();
 
   return isHardError ? (
     <li className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
@@ -34,12 +37,17 @@ export default function UniversitiesCardsGrid() {
       className="w-full flex flex-wrap content-start justify-start flex-1 px-1 py-1"
     >
       {!isHardError && universities
-        ? universities.map((university, index) => (
-            <UniversityCard
-              key={`${university.name}-${index}`}
-              university={university}
-            />
-          ))
+        ? universities.length > 0 && (
+            <>
+              {!query && <KgkSponsorCard />}
+              {universities.map((university, index) => (
+                <UniversityCard
+                  key={`${university.name}-${index}`}
+                  university={university}
+                />
+              ))}
+            </>
+          )
         : !isHardError &&
           !universities &&
           isPending &&

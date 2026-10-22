@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   // Cloudflare handles response compression at the edge. This also avoids
   // retaining origin-side zlib state when a client disconnects mid-response.
   compress: false,
+  images: { formats: ["image/avif", "image/webp"] },
   serverExternalPackages: ["@takumi-rs/core"],
   // workspace package ships raw TS
   transpilePackages: ["@tezara/core"],

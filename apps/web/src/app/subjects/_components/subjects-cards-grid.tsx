@@ -1,14 +1,17 @@
 "use client";
 
+import { useSubjectsPageParam } from "@/app/subjects/_components/query-param-provider";
 import SubjectCard from "@/app/subjects/_components/subject-card";
 import { useSubjectsPage } from "@/app/subjects/_components/subjects-page-provider";
 import { SearchIcon } from "@/components/icons/search-icon";
+import KgkSponsorCard from "@/components/promo/kgk-sponsor-card";
 import { TriangleAlertIcon } from "lucide-react";
 
 export default function SubjectsCardsGrid() {
   const { data, isPending, isError } = useSubjectsPage();
   const subjects = data?.result;
   const isHardError = !isPending && isError;
+  const [query] = useSubjectsPageParam.q();
 
   return isHardError ? (
     <li className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
@@ -31,9 +34,17 @@ export default function SubjectsCardsGrid() {
       className="w-full flex flex-wrap content-start justify-start flex-1 px-1 py-1"
     >
       {!isHardError && subjects
-        ? subjects.map((subject, index) => (
-            <SubjectCard key={`${subject.name}-${index}`} subject={subject} />
-          ))
+        ? subjects.length > 0 && (
+            <>
+              {!query && <KgkSponsorCard />}
+              {subjects.map((subject, index) => (
+                <SubjectCard
+                  key={`${subject.name}-${index}`}
+                  subject={subject}
+                />
+              ))}
+            </>
+          )
         : !isHardError &&
           !subjects &&
           isPending &&

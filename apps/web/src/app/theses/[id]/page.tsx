@@ -6,6 +6,7 @@ import { thesesRoute } from "@/app/theses/_components/constants";
 import DetailsListItem from "@/app/theses/_components/details-list-item";
 import DetailsListItemSubjects from "@/app/theses/_components/details-list-item-subjects";
 import DetailsListItemUniversity from "@/app/theses/_components/details-list-item-university";
+import KgkPromo from "@/components/promo/kgk-promo";
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -88,7 +89,12 @@ export default async function Page({ params }: Props) {
       >
         {thesis?.title_translated || noTranslatedTitle}
       </h2>
-      <div className="pt-4.5 flex flex-wrap items-start justify-start gap-1.5">
+      <div className="pt-4.5 flex flex-wrap items-center justify-start gap-1.5">
+        <KgkPromo
+          variant="bag-and-box"
+          sizes="5.5rem"
+          className="size-22 -my-6.5 -ml-2 mr-1"
+        />
         {thesis.pdf_url ? (
           <LinkButton
             href={thesis.pdf_url}

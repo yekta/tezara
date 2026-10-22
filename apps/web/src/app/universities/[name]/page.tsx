@@ -7,6 +7,7 @@ import { getPageData } from "@/app/universities/[name]/helpers";
 import { universitiesRoute } from "@/app/universities/_components/constants";
 import Chip from "@/components/chip";
 import Highlighted from "@/components/highlighted";
+import KgkPromo from "@/components/promo/kgk-promo";
 import SearchAllLinkButton from "@/components/search-all-link-button";
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
@@ -106,33 +107,42 @@ export default async function Page({ params }: Props) {
           />
         </div>
       </div>
-      <p className="w-full px-4 mt-7 leading-relaxed text-base md:text-lg">
-        <Highlighted>{parsedName}</Highlighted> bünyesinde,{" "}
-        <Highlighted>{`${minYear}-${maxYear}`}</Highlighted> yılları arasında{" "}
-        <Highlighted>{subjects.size}</Highlighted> farklı konuda toplam{" "}
-        <Highlighted>{thesesCount}</Highlighted> tez yazılmıştır. Yazarlar
-        tarafından <Highlighted>{languages.size}</Highlighted> farklı dil ve{" "}
-        <Highlighted>{universityStats.keyword_count_turkish}</Highlighted>{" "}
-        farklı anahtar kelime kullanılmıştır. En çok tez{" "}
-        <Highlighted>{`${maxThesisYear.year}`}</Highlighted> yılında (
-        <Highlighted>{maxThesisYear.count}</Highlighted> tez), en az tez ise{" "}
-        <Highlighted>{`${minThesisYear.year}`}</Highlighted> yılında yazılmıştır
-        (<Highlighted>{minThesisYear.count}</Highlighted> tez).{" "}
-        {popularSubjectsChartData && popularSubjectsChartData.length > 0 && (
-          <>
-            Yazarlar tarafından en çok tercih edilen konu {'"'}
-            <Highlighted>{popularSubjectsChartData[0].keyword}</Highlighted>
-            {'"'} iken (
-            <Highlighted>{popularSubjectsChartData[0].count}</Highlighted> tez),
-            en çok tercih edilen tez türü ise{" "}
-            <Highlighted>
-              {mostPopularThesisType.thesis_type.toLowerCase()}
-            </Highlighted>{" "}
-            tezidir (<Highlighted>{mostPopularThesisType.count}</Highlighted>{" "}
-            tez).
-          </>
-        )}
-      </p>
+      <div className="w-full flex flex-col sm:flex-row mt-7">
+        <p className="w-full min-w-0 px-4 leading-relaxed text-base md:text-lg sm:flex-1">
+          <Highlighted>{parsedName}</Highlighted> bünyesinde,{" "}
+          <Highlighted>{`${minYear}-${maxYear}`}</Highlighted> yılları arasında{" "}
+          <Highlighted>{subjects.size}</Highlighted> farklı konuda toplam{" "}
+          <Highlighted>{thesesCount}</Highlighted> tez yazılmıştır. Yazarlar
+          tarafından <Highlighted>{languages.size}</Highlighted> farklı dil ve{" "}
+          <Highlighted>{universityStats.keyword_count_turkish}</Highlighted>{" "}
+          farklı anahtar kelime kullanılmıştır. En çok tez{" "}
+          <Highlighted>{`${maxThesisYear.year}`}</Highlighted> yılında (
+          <Highlighted>{maxThesisYear.count}</Highlighted> tez), en az tez ise{" "}
+          <Highlighted>{`${minThesisYear.year}`}</Highlighted> yılında yazılmıştır
+          (<Highlighted>{minThesisYear.count}</Highlighted> tez).{" "}
+          {popularSubjectsChartData && popularSubjectsChartData.length > 0 && (
+            <>
+              Yazarlar tarafından en çok tercih edilen konu {'"'}
+              <Highlighted>{popularSubjectsChartData[0].keyword}</Highlighted>
+              {'"'} iken (
+              <Highlighted>{popularSubjectsChartData[0].count}</Highlighted> tez),
+              en çok tercih edilen tez türü ise{" "}
+              <Highlighted>
+                {mostPopularThesisType.thesis_type.toLowerCase()}
+              </Highlighted>{" "}
+              tezidir (<Highlighted>{mostPopularThesisType.count}</Highlighted>{" "}
+              tez).
+            </>
+          )}
+        </p>
+        <div className="w-3/4 shrink-0 self-center pt-5 sm:w-28 sm:self-start sm:pt-0 sm:-mt-4 sm:mr-4 md:w-36">
+          <KgkPromo
+            variant="bag-and-box"
+            sizes="(min-width: 768px) 12.5rem, (min-width: 640px) 10rem, 75vw"
+            className="block w-full aspect-square -mt-[15.7%] -mb-[20.5%] sm:w-auto sm:-ml-[18.7%] sm:-mr-[19.93%] sm:-mt-[21.81%] sm:-mb-[28.45%]"
+          />
+        </div>
+      </div>
       <ThesesCountsByYearsChart
         name={parsedName}
         className="pt-8"
