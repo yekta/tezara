@@ -31,11 +31,11 @@ export default function KgkPromo({
       rel="sponsored noopener"
       aria-label="kahvegibikahve"
       className={cn(
-        "group shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-primary/50",
+        "group/promo shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-primary/50",
         className
       )}
     >
-      <div className="relative size-full transition-transform duration-200 not-touch:group-hover:scale-105 group-active:scale-100">
+      <div className="relative size-full transition-transform duration-200 not-touch:group-hover/promo:scale-105 group-active/promo:scale-100">
         <Image
           src={`${src}.webp`}
           alt={alts[variant]}

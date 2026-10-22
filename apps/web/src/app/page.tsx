@@ -33,7 +33,7 @@ export default async function Home({ searchParams }: Props) {
               variant="bag-and-box"
               sizes="12.625rem"
               priority
-              className="size-[12.625rem] -mt-8 -mb-[2.875rem]"
+              className="size-[12.625rem] -mt-8 -mb-[2.875rem] -ml-0.5"
             />
           </div>
           <SearchBox

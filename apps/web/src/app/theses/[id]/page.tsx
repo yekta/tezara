@@ -89,12 +89,7 @@ export default async function Page({ params }: Props) {
       >
         {thesis?.title_translated || noTranslatedTitle}
       </h2>
-      <div className="pt-4.5 flex flex-wrap items-center justify-start gap-1.5">
-        <KgkPromo
-          variant="bag-and-box"
-          sizes="5.5rem"
-          className="size-22 -my-6.5 -ml-2 mr-1"
-        />
+      <div className="pt-4.5 flex flex-col items-start gap-5">
         {thesis.pdf_url ? (
           <LinkButton
             href={thesis.pdf_url}
@@ -119,6 +114,11 @@ export default async function Page({ params }: Props) {
           <FileExtensionIcon className="size-5 -ml-1.5" variant="json" />
           <p className="shrink min-w-0">JSON İndir</p>
         </Button> */}
+        <KgkPromo
+          variant="bag-and-box"
+          sizes="9.75rem"
+          className="size-[9.75rem] -mt-[1.53rem] -mb-[2rem] -ml-[1.275rem] -mr-[1.4rem]"
+        />
       </div>
       {/* Details */}
       <ol id="details_section" className="w-full flex flex-col text-sm pt-6">
