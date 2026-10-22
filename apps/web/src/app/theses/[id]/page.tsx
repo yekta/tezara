@@ -89,7 +89,7 @@ export default async function Page({ params }: Props) {
       >
         {thesis?.title_translated || noTranslatedTitle}
       </h2>
-      <div className="pt-4.5 flex flex-col items-start gap-5">
+      <div className="pt-4.5 -mb-2 flex flex-col items-start gap-4">
         {thesis.pdf_url ? (
           <LinkButton
             href={thesis.pdf_url}
