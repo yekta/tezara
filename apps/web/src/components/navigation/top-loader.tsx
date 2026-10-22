@@ -5,7 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import { useEffect, useState } from "react";
 
 export default function TopLoader() {
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, forcedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function TopLoader() {
       showSpinner={false}
       color="hsl(var(--top-loader))"
       shadow={false}
-      height={mounted && resolvedTheme === "dark" ? 2 : 3}
+      height={mounted && (forcedTheme ?? resolvedTheme) === "dark" ? 2 : 3}
     />
   );
 }

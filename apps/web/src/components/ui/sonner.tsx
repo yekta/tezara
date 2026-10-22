@@ -11,11 +11,11 @@ export const toastErrorProps = {
 };
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const { theme = "system", forcedTheme } = useTheme();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={(forcedTheme ?? theme) as ToasterProps["theme"]}
       className="font-sans"
       toastOptions={{
         unstyled: true,

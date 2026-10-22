@@ -1,4 +1,4 @@
-import Logo from "@/components/logo/logo";
+import KgkPromo from "@/components/promo/kgk-promo";
 import { cachedSearchLikePageSearchParams } from "@/components/search/constants";
 import SearchBox from "@/components/search/search-box/search-box";
 import { getSearchLikePageData } from "@/lib/queries/search-like-page-data";
@@ -29,7 +29,12 @@ export default async function Home({ searchParams }: Props) {
       <main className="w-full max-w-7xl px-3 md:px-8 flex-1 flex flex-col justify-center items-center pt-4 pb-[calc(10vh+5rem)] sm:pb-[calc(11vh+6rem)]">
         <div className="w-full flex flex-col items-center">
           <div className="w-full flex items-center justify-center px-4">
-            <Logo variant="full" className="w-32 max-w-full h-auto" />
+            <KgkPromo
+              variant="bag-and-box"
+              sizes="12.625rem"
+              priority
+              className="size-[12.625rem] -mt-8 -mb-[2.875rem]"
+            />
           </div>
           <SearchBox
             languagesData={languagesData.hits}

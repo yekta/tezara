@@ -3,6 +3,7 @@ export const themes = [...availableThemes];
 export type TTheme = (typeof availableThemes)[number];
 export type TThemeWithoutSystem = Exclude<TTheme, "system">;
 export const defaultTheme: TThemeWithoutSystem = "light";
+export const forcedTheme: TThemeWithoutSystem | undefined = "light";
 
 export const metaTheme: Record<TThemeWithoutSystem, string> = {
   dark: "#09080d",
