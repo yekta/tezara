@@ -17,7 +17,7 @@ export default function DetailsListItem({
     <li
       id={id}
       className={cn(
-        "leading-normal py-2 border-t border-foreground/10",
+        "leading-normal py-2 border-t border-foreground/10 break-words",
         className
       )}
     >
