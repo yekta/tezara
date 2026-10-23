@@ -1,6 +1,5 @@
-import { kgkHref } from "@/components/promo/kgk-promo";
+import { kgkAsset, kgkHref } from "@/components/promo/kgk-promo";
 import { LinkButton } from "@/components/ui/button";
-import { staticAssetsRoute } from "@/lib/constants";
 import { HandshakeIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -21,7 +20,7 @@ export default function KgkSponsorCard() {
         </h2>
         <div className="relative w-full flex-1">
           <Image
-            src={`${staticAssetsRoute}/promo/kgk-bag-and-box.webp`}
+            src={kgkAsset("bag-and-box", "webp")}
             alt="kahvegibikahve - Salla Demle filtre kahve kutusu ve paketi"
             width={1920}
             height={1920}

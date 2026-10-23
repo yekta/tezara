@@ -5,6 +5,12 @@ import Image from "next/image";
 export const kgkHref =
   "https://kahvegibikahve.com/?utm_source=tezara.org&utm_medium=referral&utm_campaign=tezara-kgk-1";
 
+const kgkAssetVersion = "v1";
+
+export function kgkAsset(name: string, extension: "webp" | "svg") {
+  return `${staticAssetsRoute}/promo/kgk-${name}-${kgkAssetVersion}.${extension}`;
+}
+
 const alts = {
   "bag-and-box": "kahvegibikahve - Salla Demle filtre kahve kutusu ve paketi",
   "bag-only": "kahvegibikahve - Salla Demle filtre kahve paketi",
@@ -23,7 +29,6 @@ export default function KgkPromo({
   priority,
   className,
 }: Props) {
-  const src = `${staticAssetsRoute}/promo/kgk-${variant}`;
   return (
     <a
       href={kgkHref}
@@ -37,7 +42,7 @@ export default function KgkPromo({
     >
       <div className="relative size-full transition-transform duration-200 not-touch:group-hover/promo:scale-105 group-active/promo:scale-100">
         <Image
-          src={`${src}.webp`}
+          src={kgkAsset(variant, "webp")}
           alt={alts[variant]}
           width={1920}
           height={1920}
@@ -46,7 +51,7 @@ export default function KgkPromo({
           className="size-full"
         />
         <Image
-          src={`${src}-overlay.svg`}
+          src={kgkAsset(`${variant}-overlay`, "svg")}
           alt=""
           width={1920}
           height={1920}
