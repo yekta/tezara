@@ -96,12 +96,13 @@ export default async function Page({ params }: Props) {
             target="_blank"
             size="sm"
             variant="destructive"
+            className="z-[1]"
           >
             <span className="text-xl leading-none -ml-1.5 font-icon icon-pdf" />
             <p className="shrink min-w-0">PDF İndir</p>
           </LinkButton>
         ) : (
-          <Button size="sm" variant="destructive" disabled>
+          <Button size="sm" variant="destructive" disabled className="z-[1]">
             <span className="text-xl leading-none -ml-1.5 font-icon icon-pdf-x" />
             <p className="shrink min-w-0">PDF Yok</p>
           </Button>
@@ -117,11 +118,14 @@ export default async function Page({ params }: Props) {
         <KgkPromo
           variant="bag-and-box"
           sizes="9.75rem"
-          className="size-[9.75rem] -mt-[1.53rem] -mb-[2rem] -ml-[1.275rem] -mr-[1.4rem]"
+          className="relative z-0 size-[9.75rem] -mt-[1.53rem] -mb-[2rem] -ml-[1.275rem] -mr-[1.4rem]"
         />
       </div>
       {/* Details */}
-      <ol id="details_section" className="w-full flex flex-col text-sm pt-6">
+      <ol
+        id="details_section"
+        className="relative z-[1] bg-background w-full flex flex-col text-sm mt-6"
+      >
         <DetailsListItem id="thesis_id_section" title="Tez No">
           {thesis.id}
         </DetailsListItem>
