@@ -1,5 +1,6 @@
 "use client";
 
+import { PAGE_DEFAULT } from "@/app/subjects/_components/constants";
 import { useSubjectsPageParam } from "@/app/subjects/_components/query-param-provider";
 import SubjectCard from "@/app/subjects/_components/subject-card";
 import { useSubjectsPage } from "@/app/subjects/_components/subjects-page-provider";
@@ -12,6 +13,8 @@ export default function SubjectsCardsGrid() {
   const subjects = data?.result;
   const isHardError = !isPending && isError;
   const [query] = useSubjectsPageParam.q();
+  const [page] = useSubjectsPageParam.page();
+  const showSponsor = !query && page === PAGE_DEFAULT;
 
   return isHardError ? (
     <li className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
@@ -36,7 +39,7 @@ export default function SubjectsCardsGrid() {
       {!isHardError && subjects
         ? subjects.length > 0 && (
             <>
-              {!query && <KgkSponsorCard />}
+              {showSponsor && <KgkSponsorCard />}
               {subjects.map((subject, index) => (
                 <SubjectCard
                   key={`${subject.name}-${index}`}

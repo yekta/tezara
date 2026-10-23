@@ -1,5 +1,6 @@
 "use client";
 
+import { PAGE_DEFAULT } from "@/app/universities/_components/constants";
 import { useUniversitiesPageParam } from "@/app/universities/_components/query-param-provider";
 import { useUniversitiesPage } from "@/app/universities/_components/universities-page-provider";
 import UniversityCard from "@/app/universities/_components/university-card";
@@ -12,6 +13,8 @@ export default function UniversitiesCardsGrid() {
   const universities = data?.result;
   const isHardError = !isPending && isError;
   const [query] = useUniversitiesPageParam.q();
+  const [page] = useUniversitiesPageParam.page();
+  const showSponsor = !query && page === PAGE_DEFAULT;
 
   return isHardError ? (
     <li className="w-full py-12 flex-1 flex flex-col items-center justify-center text-destructive text-sm">
@@ -39,7 +42,7 @@ export default function UniversitiesCardsGrid() {
       {!isHardError && universities
         ? universities.length > 0 && (
             <>
-              {!query && <KgkSponsorCard />}
+              {showSponsor && <KgkSponsorCard />}
               {universities.map((university, index) => (
                 <UniversityCard
                   key={`${university.name}-${index}`}
