@@ -400,6 +400,8 @@ async function getStats() {
   return { results, last_refresh: filterRows.last_refresh };
 }
 
+const countryFilter = `AND properties['$geoip_country_code'] = 'TR'`;
+
 // Excludes bot UAs plus the fingerprints of two observed scraper waves
 // (Linux Chrome desktop; viewports exactly 1905x2019 / 1280x1200), anchored
 // on $direct so visitors arriving via any referrer are never filtered out.
@@ -419,6 +421,7 @@ const filtersQuery = `
     count() AS count
   FROM events
   WHERE event = 'Filtered'
+  ${countryFilter}
   ${botFilter}
   GROUP BY key
   ORDER BY count DESC
@@ -451,6 +454,7 @@ function eventStatsQuery(event: string) {
     SELECT ${columns.join(",\n      ")}
     FROM events
     WHERE event = '${event}'
+    ${countryFilter}
     ${botFilter}
   `;
 }
