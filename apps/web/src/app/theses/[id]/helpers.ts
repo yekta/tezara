@@ -41,7 +41,7 @@ export async function getSimilarTheses(thesis: TThesis) {
   const ids = await cacheWithRedis(
     `similarThesisIds:${thesis.id}`,
     () => searchSimilarThesisIds(thesis),
-    "week"
+    "month"
   )();
   return getThesesByIds({
     client: meiliAdmin,

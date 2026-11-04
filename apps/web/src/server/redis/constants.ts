@@ -46,9 +46,9 @@ export const cacheConfig = {
     ttl: 60 * 60 * 24 * 7,
     revalidate: 60 * 60,
   },
-  week: {
-    ttl: 60 * 60 * 24 * 7,
-    revalidate: 60 * 60 * 24 * 7,
+  month: {
+    ttl: 60 * 60 * 24 * 30,
+    revalidate: 60 * 60 * 24 * 30,
   },
   metrics: {
     ttl: 60 * 60 * 24 * 7,
