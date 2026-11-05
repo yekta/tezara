@@ -1,6 +1,7 @@
 import { thesesRoute } from "@/app/theses/_components/constants";
 import { env } from "@/lib/env";
 import { meiliAdmin } from "@/server/meili/constants-server";
+import { sitemapFetch } from "@/server/meili/sitemap-fetch";
 import { MetadataRoute } from "next";
 
 /**
@@ -16,64 +17,11 @@ import { MetadataRoute } from "next";
  */
 const IDS_PER_SITEMAP = 5_000;
 
-/**
- * Meili reads every matching document off disk to project it, even though we ask only
- * for `id` — measured at ~29MB of stored data per 5,000 theses. Next prerenders every
- * sitemap concurrently, so unbounded that is gigabytes of reads in flight at once and
- * the 15s client timeout trips against an instance that is also busy indexing. Sitemaps
- * are not latency-sensitive; a few at a time costs the build seconds and removes the
- * pile-up entirely.
- */
-const MAX_CONCURRENT_FETCHES = 4;
-const RETRIES = 3;
-
 const indexName = "theses";
 const index = () => meiliAdmin.index<{ id: number }>(indexName);
 
-let active = 0;
-const waiting: (() => void)[] = [];
-
-async function withLimit<T>(fn: () => Promise<T>): Promise<T> {
-  // A waiter inherits the finishing call's slot rather than claiming its own. Releasing
-  // the slot and letting the woken waiter re-increment would let a caller arriving in
-  // between take the same slot, putting MAX_CONCURRENT_FETCHES + 1 requests in flight.
-  if (active >= MAX_CONCURRENT_FETCHES) {
-    await new Promise<void>((resolve) => waiting.push(resolve));
-  } else {
-    active++;
-  }
-  try {
-    return await fn();
-  } finally {
-    const next = waiting.shift();
-    if (next) next();
-    else active--;
-  }
-}
-
-/**
- * A timeout here fails the whole build, and the instance being briefly too busy to
- * answer is a transient worth waiting out rather than a reason to ship no sitemaps.
- */
-async function withRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= RETRIES; attempt++) {
-    try {
-      return await withLimit(fn);
-    } catch (error) {
-      lastError = error;
-      if (attempt < RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, attempt * 2_000));
-      }
-    }
-  }
-  throw new Error(`theses sitemap: ${label} failed after ${RETRIES} attempts`, {
-    cause: lastError,
-  });
-}
-
 export async function generateSitemaps() {
-  const { hits } = await withRetry("generateSitemaps", () =>
+  const { hits } = await sitemapFetch("theses index", () =>
     index().search("", {
       sort: ["id:desc"],
       limit: 1,
@@ -102,7 +50,7 @@ export default async function sitemap({
 
   const from = (n - 1) * IDS_PER_SITEMAP;
   const to = n * IDS_PER_SITEMAP;
-  const { results } = await withRetry(`range ${from}-${to}`, () =>
+  const { results } = await sitemapFetch(`theses ${from}-${to}`, () =>
     index().getDocuments({
       filter: `id >= ${from} AND id < ${to}`,
       fields: ["id"],
