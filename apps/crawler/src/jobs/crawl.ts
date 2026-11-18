@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isTrialThesis } from "@tezara/core";
 import type { JobContext } from "./context.ts";
 import type { ScanRecord } from "../state/ch-scan.ts";
 import { fetchThesisById } from "../yok/client.ts";
@@ -28,6 +29,12 @@ async function crawlOne(
   const outcome = await fetchThesisById(ctx.session, id, ctx.lookups);
   switch (outcome.status) {
     case "ok": {
+      // A trial record is held as a gap, so the gap schedule re-checks it like an empty id.
+      if (isTrialThesis(outcome.thesis)) {
+        ctx.scan.record(id, "gap", { previous });
+        counts.gap++;
+        return;
+      }
       const contentHash = hashThesis(outcome.thesis);
       // A re-visit that finds the same content costs zero projection work: the record
       // is re-stamped (pushing next_check_at forward) but nothing enters the outbox.
