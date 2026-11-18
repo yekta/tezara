@@ -6,7 +6,6 @@ import { thesesRoute } from "@/app/theses/_components/constants";
 import DetailsListItem from "@/app/theses/_components/details-list-item";
 import DetailsListItemSubjects from "@/app/theses/_components/details-list-item-subjects";
 import DetailsListItemUniversity from "@/app/theses/_components/details-list-item-university";
-import KgkPromo from "@/components/promo/kgk-promo";
 import { searchRoute } from "@/components/search/constants";
 import ThesisRowList from "@/components/search/results/thesis-row-list";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -89,7 +88,7 @@ export default async function Page({ params }: Props) {
       >
         {thesis?.title_translated || noTranslatedTitle}
       </h2>
-      <div className="pt-4.5 flex">
+      <div className="pt-4.5 flex flex-wrap items-start justify-start gap-1.5">
         {thesis.pdf_url ? (
           <LinkButton
             href={thesis.pdf_url}
@@ -116,77 +115,60 @@ export default async function Page({ params }: Props) {
         </Button> */}
       </div>
       {/* Details */}
-      <div className="relative w-full mt-6">
-        <ol id="details_section" className="w-full flex flex-col text-sm">
-          <DetailsListItem
-            id="thesis_id_section"
-            title="Tez No"
-            className="pr-[7.875rem]"
-          >
-            {thesis.id}
-          </DetailsListItem>
-          <DetailsListItem
-            id="author_section"
-            title="Yazar"
-            className="pr-[7.875rem]"
-          >
-            {thesis.author}
-          </DetailsListItem>
-          <DetailsListItem id="advisor_names_section" title="Danışmanlar">
-            {!thesis.advisors || thesis.advisors.length < 1
-              ? notAvailable
-              : thesis.advisors.map((advisor) => advisor).join(", ")}
-          </DetailsListItem>
-          <DetailsListItem id="thesis_type_section" title="Tez Türü">
-            {thesis.thesis_type || notAvailable}
-          </DetailsListItem>
-          <DetailsListItemSubjects thesis={thesis} />
-          <DetailsListItem id="keywords_section" title="Anahtar Kelimeler">
-            {thesis.keywords && thesis.keywords.length > 1
-              ? thesis.keywords
-                  .sort((a, b) => {
-                    if (a.language === "Turkish" && b.language === "English")
-                      return -1;
-                    if (a.language === "English" && b.language === "Turkish")
-                      return 1;
-                    return 0;
-                  })
-                  .map((i) => i.name)
-                  .join(", ")
-              : notAvailable}
-          </DetailsListItem>
-          <DetailsListItem id="year_section" title="Yıl">
-            {thesis.year}
-          </DetailsListItem>
-          <DetailsListItem id="language_section" title="Dil">
-            {thesis.language}
-          </DetailsListItem>
-          <DetailsListItemUniversity thesis={thesis} />
-          <DetailsListItem id="institute_section" title="Enstitü">
-            {thesis.institute || notAvailable}
-          </DetailsListItem>
-          <DetailsListItem id="department_section" title="Ana Bilim Dalı">
-            {thesis.department || notAvailable}
-          </DetailsListItem>
-          <DetailsListItem id="branch_section" title="Bilim Dalı">
-            {thesis.branch || notAvailable}
-          </DetailsListItem>
-          <DetailsListItem
-            id="page_count_section"
-            title="Sayfa Sayısı"
-            className="border-b"
-          >
-            {thesis.page_count || notAvailable}
-          </DetailsListItem>
-        </ol>
-        <div className="absolute -top-8 right-0 pl-4 pr-2 pt-2 bg-background">
-          <KgkPromo
-            variant="bag-and-box"
-            sizes="8.75rem"
-            className="block size-[8.75rem] ml-[calc(8.75rem*-0.1349)] mt-[calc(8.75rem*-0.1573)] mr-[calc(8.75rem*-0.1438)] mb-[calc(8.75rem*-0.2052)]"
-          />
-        </div>
-      </div>
+      <ol id="details_section" className="w-full flex flex-col text-sm pt-6">
+        <DetailsListItem id="thesis_id_section" title="Tez No">
+          {thesis.id}
+        </DetailsListItem>
+        <DetailsListItem id="author_section" title="Yazar">
+          {thesis.author}
+        </DetailsListItem>
+        <DetailsListItem id="advisor_names_section" title="Danışmanlar">
+          {!thesis.advisors || thesis.advisors.length < 1
+            ? notAvailable
+            : thesis.advisors.map((advisor) => advisor).join(", ")}
+        </DetailsListItem>
+        <DetailsListItem id="thesis_type_section" title="Tez Türü">
+          {thesis.thesis_type || notAvailable}
+        </DetailsListItem>
+        <DetailsListItemSubjects thesis={thesis} />
+        <DetailsListItem id="keywords_section" title="Anahtar Kelimeler">
+          {thesis.keywords && thesis.keywords.length > 1
+            ? thesis.keywords
+                .sort((a, b) => {
+                  if (a.language === "Turkish" && b.language === "English")
+                    return -1;
+                  if (a.language === "English" && b.language === "Turkish")
+                    return 1;
+                  return 0;
+                })
+                .map((i) => i.name)
+                .join(", ")
+            : notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="year_section" title="Yıl">
+          {thesis.year}
+        </DetailsListItem>
+        <DetailsListItem id="language_section" title="Dil">
+          {thesis.language}
+        </DetailsListItem>
+        <DetailsListItemUniversity thesis={thesis} />
+        <DetailsListItem id="institute_section" title="Enstitü">
+          {thesis.institute || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="department_section" title="Ana Bilim Dalı">
+          {thesis.department || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem id="branch_section" title="Bilim Dalı">
+          {thesis.branch || notAvailable}
+        </DetailsListItem>
+        <DetailsListItem
+          id="page_count_section"
+          title="Sayfa Sayısı"
+          className="border-b"
+        >
+          {thesis.page_count || notAvailable}
+        </DetailsListItem>
+      </ol>
       {/* Abstract */}
       <div id="abstract_original_section" className="pt-10">
         <h3 className="font-bold text-xl">Özet</h3>
@@ -277,8 +259,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       thesis.keywords.length > 0
         ? thesis.keywords.map((i) => i.name)
         : thesis.subjects.length > 0
-          ? thesis.subjects.map((subject) => subject.name)
-          : undefined,
+        ? thesis.subjects.map((subject) => subject.name)
+        : undefined,
     authors: {
       name: thesis.author,
     },

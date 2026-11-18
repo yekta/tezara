@@ -2,7 +2,6 @@
 
 import {
   defaultTheme,
-  forcedTheme,
   metaTheme,
   themes,
   TThemeWithoutSystem,
@@ -20,7 +19,6 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       attribute="class"
       themes={themes}
       defaultTheme={defaultTheme}
-      forcedTheme={forcedTheme}
       disableTransitionOnChange
       {...props}
     >
@@ -32,7 +30,6 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 function ThemeProviderInner({ children }: { children: React.ReactNode }) {
   const { theme, systemTheme } = useTheme();
   const finalTheme: TThemeWithoutSystem =
-    forcedTheme ||
     (theme === "system" ? systemTheme : (theme as TThemeWithoutSystem)) ||
     defaultTheme;
 
