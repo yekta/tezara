@@ -68,10 +68,12 @@ function describeDetail(unit: WorkUnit, detail: unknown): string | null {
       const ch = field<number>(detail, "missingInClickhouse") ?? 0;
       const meili = field<number>(detail, "missingInMeili") ?? 0;
       const unscanned = field<number>(detail, "unscanned") ?? 0;
-      if (ch === 0 && meili === 0 && unscanned === 0) return "projections complete";
+      const removed = field<number>(detail, "removed") ?? 0;
+      if (ch === 0 && meili === 0 && unscanned === 0 && removed === 0) return "projections complete";
       return (
         `projection reconcile re-queued: ${n(ch)} missing in clickhouse, ` +
-        `${n(meili)} missing in meili, ${n(unscanned)} never scanned`
+        `${n(meili)} missing in meili, ${n(unscanned)} never scanned; ` +
+        `removed ${n(removed)} held id(s) now recorded as gaps`
       );
     }
   }

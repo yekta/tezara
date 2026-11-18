@@ -1,8 +1,11 @@
 import type { ClickHouseClient } from "@tezara/clickhouse";
 import type { MeiliSearch } from "@tezara/meili";
 import type { ChScanStore } from "../state/ch-scan.ts";
+import { removeTheses } from "./remove-theses.ts";
 
 export type ReconcileProjectionsResult = {
+  /** Ids the projections held that YÖK now serves empty or as a trial record; removed. */
+  removed: number;
   /** Ids marked ok in crawl_state that ClickHouse's theses table does not hold. */
   missingInClickhouse: number;
   /** Ids ClickHouse holds for a drifting year that Meili does not. */
@@ -15,6 +18,12 @@ export type ReconcileProjectionsResult = {
 const MAX_REQUEUE = 20_000;
 
 /**
+ * Lower than the requeue bound: a run of blank YÖK pages reads as gaps too, and those
+ * theses only come back on their next gap check.
+ */
+const MAX_REMOVE = 1_000;
+
+/**
  * Make projection loss self-healing.
  *
  * The scan marks are durable (ClickHouse) but the outbox buffer is not (Redis), so a
@@ -24,8 +33,8 @@ const MAX_REQUEUE = 20_000;
  * content hash, which forces the refresh to push them again.
  *
  * Everything here is a set comparison against what the targets actually hold; the only
- * writes are crawl_state rows. Run it only when the outboxes are drained, or work that
- * is merely in flight would be counted as missing.
+ * writes are crawl_state rows and removing gaps the targets still hold. Run it only when
+ * the outboxes are drained, or work that is merely in flight would be counted as missing.
  */
 export async function reconcileProjections(
   deps: {
@@ -37,12 +46,13 @@ export async function reconcileProjections(
     log?: (message: string) => void;
     now?: () => number;
   },
-  opts: { maxRequeue?: number } = {},
+  opts: { maxRequeue?: number; maxRemove?: number } = {},
 ): Promise<ReconcileProjectionsResult> {
   const now = deps.now?.() ?? Date.now();
   const maxRequeue = opts.maxRequeue ?? MAX_REQUEUE;
   const log = deps.log ?? (() => {});
   const result: ReconcileProjectionsResult = {
+    removed: 0,
     missingInClickhouse: 0,
     missingInMeili: 0,
     unscanned: 0,
@@ -54,6 +64,23 @@ export async function reconcileProjections(
     });
     return Number((await res.json<{ c: string }>())[0]?.c ?? 0);
   };
+
+  // 0. Held, but the last crawl found a gap: YÖK deleted it or it is a trial record.
+  //    First, so the per-year comparison below no longer counts them.
+  const gapsRes = await deps.clickhouse.query({
+    query: `
+      SELECT id FROM theses FINAL
+      WHERE id IN (SELECT id FROM crawl_state FINAL WHERE state = 'gap')
+      LIMIT {limit:UInt32}`,
+    query_params: { limit: opts.maxRemove ?? MAX_REMOVE },
+    format: "JSONEachRow",
+  });
+  const gaps = (await gapsRes.json<{ id: number }>()).map((r) => Number(r.id));
+  if (gaps.length > 0) {
+    log(`projection reconcile: removing ${gaps.length} held id(s) now recorded as gaps`);
+    await removeTheses(deps, gaps);
+    result.removed = gaps.length;
+  }
 
   // 1. Marked ok but absent from ClickHouse. Repaired ClickHouse-side in one statement:
   //    re-inserting the state row with next_check_at = now and no content hash makes the

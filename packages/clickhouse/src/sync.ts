@@ -78,3 +78,17 @@ export async function syncTheses(
     advisors: advisors.size,
   };
 }
+
+/** Remove theses and their link rows. The aggregates only reflect it after the next rebuild. */
+export async function deleteTheses(client: ClickHouseClient, ids: readonly number[]): Promise<number> {
+  if (ids.length === 0) return 0;
+  const query_params = { ids: [...ids] };
+  await client.command({ query: "DELETE FROM theses WHERE id IN {ids:Array(UInt32)}", query_params });
+  for (const table of ["thesis_subjects", "thesis_keywords", "thesis_advisors"]) {
+    await client.command({
+      query: `DELETE FROM ${table} WHERE thesis_id IN {ids:Array(UInt32)}`,
+      query_params,
+    });
+  }
+  return ids.length;
+}

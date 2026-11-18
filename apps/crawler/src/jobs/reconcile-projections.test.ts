@@ -12,10 +12,17 @@ const chUrl = `${chBase.replace(/\/$/, "")}/tezara_test`;
 let ch: ClickHouseClient;
 let scan: ChScanStore;
 
-/** Just enough of Meili: a year facet and paged id listings per year. */
+/** Just enough of Meili: a year facet, paged id listings per year, and deletes. */
 function fakeMeili(idsByYear: Record<number, number[]>) {
   return {
+    getTask: async () => ({ status: "succeeded" }),
     index: () => ({
+      deleteDocuments: async (ids: number[]) => {
+        for (const [year, held] of Object.entries(idsByYear)) {
+          idsByYear[Number(year)] = held.filter((id) => !ids.includes(id));
+        }
+        return { taskUid: 1 };
+      },
       search: async (_q: string, opts: { facets?: string[]; filter?: string }) => {
         if (opts.facets) {
           const year = Object.fromEntries(
@@ -142,6 +149,20 @@ describe("reconcileProjections", () => {
     assert.ok(due.includes(3) && due.includes(5), "3 and 5 were never scanned");
   });
 
+  test("a held id the last crawl found as a gap is removed from both targets", async () => {
+    await insertState([{ id: 1 }, { id: 2, state: "gap" }]);
+    await insertTheses([{ id: 1, year: 2020 }, { id: 2, year: 2020 }]);
+    const idsByYear = { 2020: [1, 2] };
+
+    const result = await reconcileProjections({ clickhouse: ch, meili: fakeMeili(idsByYear), scan });
+
+    assert.equal(result.removed, 1);
+    assert.equal(result.missingInMeili, 0, "removed from both, so no drift");
+    assert.deepEqual(idsByYear, { 2020: [1] });
+    const held = await ch.query({ query: "SELECT id FROM theses FINAL", format: "JSONEachRow" });
+    assert.deepEqual((await held.json<{ id: number }>()).map((r) => Number(r.id)), [1]);
+  });
+
   test("a healthy system reconciles to zero and re-queues nothing", async () => {
     await insertState([{ id: 1 }]);
     await insertTheses([{ id: 1, year: 2020 }]);
@@ -151,7 +172,7 @@ describe("reconcileProjections", () => {
 
     const result = await reconcileProjections({ clickhouse: ch, meili, scan });
 
-    assert.deepEqual(result, { missingInClickhouse: 0, missingInMeili: 0, unscanned: 0 });
+    assert.deepEqual(result, { removed: 0, missingInClickhouse: 0, missingInMeili: 0, unscanned: 0 });
     assert.deepEqual(await scan.due(10), []);
   });
 });

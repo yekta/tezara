@@ -1,4 +1,5 @@
 import type { ClickHouseClient } from "@tezara/clickhouse";
+import { currentYear } from "@tezara/core";
 import { INDEXES } from "@tezara/meili";
 import type { JobContext } from "../jobs/context.ts";
 import type { ChScanStore } from "../state/ch-scan.ts";
@@ -38,8 +39,8 @@ export type LoopPolicy = {
   discoverEveryMs: number;
   /** How often to reconcile ONE year; the corpus cycles through over time. */
   reconcileEveryMs: number;
-  /** Inclusive year range to cycle through. */
-  reconcileYears: { from: number; to: number };
+  /** Inclusive year range to cycle through; `to` defaults to the current year. */
+  reconcileYears: { from: number; to?: number };
   /** How often to compare the projections against the marks and re-queue losses. */
   projectionsEveryMs: number;
   /** Pause backfill/refresh while either projection outbox holds this many theses. */
@@ -55,9 +56,9 @@ export const DEFAULT_POLICY: LoopPolicy = {
   chunkSize: 50,
   // Theses land in batches, not continuously; a wide probe a few times a day keeps up.
   discoverEveryMs: 6 * 60 * 60_000,
-  // One year every 20 minutes cycles the whole 1959-2026 corpus in about a day.
+  // One year every 20 minutes cycles the whole corpus since 1959 in about a day.
   reconcileEveryMs: 20 * 60_000,
-  reconcileYears: { from: 1959, to: 2026 },
+  reconcileYears: { from: 1959 },
   projectionsEveryMs: 24 * 60 * 60_000,
   // The drains are fire-and-forget, so the outbox only backs up when a target is
   // actually unreachable or refusing submissions — this cap is the brake for that
@@ -133,7 +134,8 @@ export class Planner {
       (await this.#elapsed("reconcile:lastRun", p.reconcileEveryMs, now))
     ) {
       this.#busy.add("reconcile-year");
-      const span = p.reconcileYears.to - p.reconcileYears.from + 1;
+      const to = p.reconcileYears.to ?? currentYear(new Date(now));
+      const span = to - p.reconcileYears.from + 1;
       const cursor = (await this.#scan.watermark("reconcile:cursor")) ?? 0;
       const year = p.reconcileYears.from + (cursor % span);
       await this.#scan.raiseWatermark("reconcile:cursor", cursor + 1);

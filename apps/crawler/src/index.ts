@@ -10,6 +10,7 @@ import { loadConfig } from "./config.ts";
 import { error, info, warn } from "./log.ts";
 import { createCompactionPolicy } from "./jobs/compact-meili.ts";
 import { buildLookups } from "./jobs/context.ts";
+import { sweepTrialTheses } from "./jobs/remove-theses.ts";
 import { buildStatus, createApi } from "./roles/api.ts";
 import { DEFAULT_POLICY, Planner, runCrawlLanes, runDrainers } from "./roles/loop.ts";
 import { describeDrain, describeStatus, describeUnit } from "./roles/report.ts";
@@ -187,6 +188,13 @@ async function prepareTargets(): Promise<void> {
     } catch (err) {
       warn(`meili: could not remove blocked theses — ${err instanceof Error ? err.message : String(err)}`);
     }
+  }
+
+  try {
+    const removed = await sweepTrialTheses({ meili, clickhouse, scan });
+    if (removed.length > 0) info(`removed ${removed.length} trial thesis(es): ${removed.join(", ")}`);
+  } catch (err) {
+    warn(`could not sweep trial theses — ${err instanceof Error ? err.message : String(err)}`);
   }
 
   // Last, because applying settings drift above triggers a reindex — which is precisely
