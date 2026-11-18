@@ -1,5 +1,5 @@
 import {
-  canonicalUniversity, cleanText, extractKeywords, foldTr, normalizeDepartment,
+  canonicalUniversity, cleanText, CrawledThesisSchema, extractKeywords, foldTr, normalizeDepartment,
   parseAdvisors, parseLocation, splitAbstractAndKeywords, titleCaseTr,
   type TCrawledThesis,
 } from "@tezara/core";
@@ -15,6 +15,7 @@ export type FetchResult =
   | { status: "gap" }
   | { status: "filter-ignored"; rows: number }
   | { status: "detail-failed" }
+  | { status: "invalid"; issues: string }
   | { status: "maintenance" }
   | { status: "error" };
 
@@ -83,35 +84,36 @@ export async function fetchThesisById(
     if (en) subjects.push({ name: en, language: "English" });
   }
 
-  return {
-    status: "ok",
-    thesis: {
-      id: row.id,
-      title_original: cleanText(row.title_original),
-      title_translated: cleanText(row.title_translated) || null,
-      author: cleanText(row.author),
-      advisors: parseAdvisors(detail.danisman),
-      university: canonicalUniversity(where.university, lookups.universityCanon)!,
-      institute: titleCaseTr(where.institute)!,
-      department: normalizeDepartment(where.department),
-      branch: normalizeDepartment(where.branch),
-      detail_id_1: row.detail_id_1,
-      detail_id_2: row.detail_id_2,
-      year: row.year!,
-      thesis_type: row.thesis_type!,
-      language: row.language!,
-      subjects,
-      keywords: [
-        ...keywords.turkish.map((name) => ({ name, language: "Turkish" as const })),
-        ...keywords.english.map((name) => ({ name, language: "English" as const })),
-      ],
-      abstract_original: cleanText(trAbstract) || null,
-      abstract_translated: cleanText(enAbstract) || null,
-      page_count: null, // YÖK no longer exposes it
-      pdf_url: pdf.pdf_url,
-      restricted: pdf.restricted,
-    },
-  };
+  const parsed = CrawledThesisSchema.safeParse({
+    id: row.id,
+    title_original: cleanText(row.title_original),
+    title_translated: cleanText(row.title_translated) || null,
+    author: cleanText(row.author),
+    advisors: parseAdvisors(detail.danisman),
+    university: canonicalUniversity(where.university, lookups.universityCanon),
+    institute: titleCaseTr(where.institute),
+    department: normalizeDepartment(where.department),
+    branch: normalizeDepartment(where.branch),
+    detail_id_1: row.detail_id_1,
+    detail_id_2: row.detail_id_2,
+    year: row.year,
+    thesis_type: row.thesis_type,
+    language: row.language,
+    subjects,
+    keywords: [
+      ...keywords.turkish.map((name) => ({ name, language: "Turkish" as const })),
+      ...keywords.english.map((name) => ({ name, language: "English" as const })),
+    ],
+    abstract_original: cleanText(trAbstract) || null,
+    abstract_translated: cleanText(enAbstract) || null,
+    page_count: null, // YÖK no longer exposes it
+    pdf_url: pdf.pdf_url,
+    restricted: pdf.restricted,
+  });
+  if (!parsed.success) {
+    return { status: "invalid", issues: parsed.error.issues.map((i) => i.path.join(".")).join(", ") };
+  }
+  return { status: "ok", thesis: parsed.data };
 }
 
 

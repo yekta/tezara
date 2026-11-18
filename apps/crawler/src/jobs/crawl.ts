@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { isTrialThesis } from "@tezara/core";
+import { warn } from "../log.ts";
 import type { JobContext } from "./context.ts";
 import type { ScanRecord } from "../state/ch-scan.ts";
 import { fetchThesisById } from "../yok/client.ts";
@@ -52,6 +53,12 @@ async function crawlOne(
     case "gap": {
       ctx.scan.record(id, "gap", { previous });
       counts.gap++;
+      return;
+    }
+    case "invalid": {
+      warn(`thesis ${id}: invalid record, will retry — ${outcome.issues}`);
+      ctx.scan.record(id, "error", { previous });
+      counts.error++;
       return;
     }
     // A dropped TezNo filter means YÖK returned the whole corpus. Never ingest that;

@@ -1,3 +1,4 @@
+import { stripControlChars } from "@tezara/core";
 import * as cheerio from "cheerio";
 
 export type ListRow = {
@@ -29,9 +30,10 @@ function balancedObject(src: string, start: number): string | null {
 
 /**
  * The per-row metadata lives in a JS object literal on the page.
- * Two traps, both of which silently null out every metadata field:
+ * Three traps, each of which silently nulls out every metadata field:
  *  1. Anchor on the ASSIGNMENT — the identifier appears 13x inside function bodies first.
  *  2. YÖK emits trailing commas: valid JS, invalid JSON. Strip them before parsing.
+ *  3. Titles carry raw control characters (\u0000, \u0002), which JSON rejects in strings.
  */
 export function parseReferenceData(html: string): Record<string, { meta?: RefMeta }> {
   const m = /referenceData\s*=\s*\{/.exec(html);
@@ -39,7 +41,8 @@ export function parseReferenceData(html: string): Record<string, { meta?: RefMet
   const blob = balancedObject(html, html.indexOf("{", m.index));
   if (!blob) return {};
   try {
-    return JSON.parse(blob.replace(/,(\s*[}\]])/g, "$1"));
+    const json = stripControlChars(blob).replace(/[\r\n\t\f\v]/g, " ").replace(/,(\s*[}\]])/g, "$1");
+    return JSON.parse(json);
   } catch {
     return {};
   }

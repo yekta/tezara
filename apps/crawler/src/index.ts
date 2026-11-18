@@ -11,6 +11,7 @@ import { error, info, warn } from "./log.ts";
 import { createCompactionPolicy } from "./jobs/compact-meili.ts";
 import { buildLookups } from "./jobs/context.ts";
 import { sweepTrialTheses } from "./jobs/remove-theses.ts";
+import { requeueIncompleteTheses } from "./jobs/requeue-incomplete.ts";
 import { buildStatus, createApi } from "./roles/api.ts";
 import { DEFAULT_POLICY, Planner, runCrawlLanes, runDrainers } from "./roles/loop.ts";
 import { describeDrain, describeStatus, describeUnit } from "./roles/report.ts";
@@ -195,6 +196,13 @@ async function prepareTargets(): Promise<void> {
     if (removed.length > 0) info(`removed ${removed.length} trial thesis(es): ${removed.join(", ")}`);
   } catch (err) {
     warn(`could not sweep trial theses — ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  try {
+    const requeued = await requeueIncompleteTheses({ meili, scan });
+    if (requeued.length > 0) info(`requeued ${requeued.length} incomplete thesis(es): ${requeued.join(", ")}`);
+  } catch (err) {
+    warn(`could not requeue incomplete theses — ${err instanceof Error ? err.message : String(err)}`);
   }
 
   // Last, because applying settings drift above triggers a reindex — which is precisely

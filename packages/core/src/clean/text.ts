@@ -1,7 +1,12 @@
+/** Remove the non-whitespace control characters YÖK leaks into its text. */
+export function stripControlChars(value: string): string {
+  return value.replace(/[\u0000-\u0008\u000E-\u001F\u007F]/g, "");
+}
+
 /** Collapse whitespace and normalise straight quotes to typographic ones. */
 export function cleanText(value: string | null | undefined): string {
   if (!value) return "";
-  return value
+  return stripControlChars(value)
     .replace(/[\r\n\t\f\v]/g, " ")
     .replace(/\s+/g, " ")
     .replace(/\s?"([^"]*)"\s?/g, "“$1”")
